@@ -822,18 +822,18 @@ mod tests {
             .await
             .expect("read shapes into a result body");
         assert_eq!(read["text"], "\"phobos lives here\"");
-        assert_eq!(read["artifact_size_bytes"], 20);
+        assert_eq!(read["artifact_size_bytes"], 19);
         assert_eq!(read["truncated"], false);
 
         let first_page = run_tool(
             &ctx,
             "artifact.read",
-            serde_json::json!({ "id": id, "max_bytes": 8 }),
+            serde_json::json!({ "id": id, "max_bytes": 7 }),
         )
         .await
         .expect("bounded read returns an exact continuation");
         assert_eq!(first_page["text"], "\"phobos");
-        assert_eq!(first_page["next_offset_bytes"], 8);
+        assert_eq!(first_page["next_offset_bytes"], 7);
         assert_eq!(first_page["truncated"], true);
 
         let listed = run_tool(&ctx, "artifact.list", serde_json::json!({}))
