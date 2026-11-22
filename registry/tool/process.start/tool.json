@@ -5,7 +5,7 @@
     "operation": "start"
   },
   "process": {
-    "bin": "target/debug/octopus-process-room-tool",
+    "bin": "target/debug/phobos-process-room-tool",
     "inherit_env": [
       "PATH"
     ],

@@ -47,7 +47,7 @@ export function activityPresentation(item: MarkActivityItem): ActivityPresentati
     label: sentence(item.name.replaceAll(/[._]+/g, " ")),
     category: "Activity",
     glyph: "activity",
-    description: "Octopus recorded this step while your work ran.",
+    description: "Phobos recorded this step while your work ran.",
   };
 }
 
@@ -71,7 +71,7 @@ export function activitySource(item: MarkActivityItem): string {
   const original = item.workerOriginal || item.worker;
   if (sourcePresentations[original]) return sourcePresentations[original];
   const readable = original.replace(/^(?:lab_)?system_worker_/, "").replace(/_[0-9a-f]{8,}.*$/, "").replaceAll(/[._]+/g, " ").trim();
-  return readable ? sentence(readable) : "Octopus";
+  return readable ? sentence(readable) : "Phobos";
 }
 
 export type ActivityRowGroup = { id: string; lead: MarkActivityItem; items: MarkActivityItem[] };

@@ -11,7 +11,7 @@ const { resolveEeInstancesRoot } = require("./roots.cjs");
 const { absolutePath, isObject, optionalServiceTier, requiredArray, requiredObject, requiredString, requiredTrimmedString, safeSegment, stringValue } = require("./values.cjs");
 
 async function planOperatorChatTopology({
-  octopusHome,
+  phobosHome,
   topologyPlanner,
   registryRoot,
   eeInstancesRoot,
@@ -44,11 +44,11 @@ async function planOperatorChatTopology({
   }
   const request = JSON.stringify({
     registry_root: registryRoot,
-    ee_instances_root: await resolveEeInstancesRoot(octopusHome),
+    ee_instances_root: await resolveEeInstancesRoot(phobosHome),
     ee_policy_root: eeInstancesRoot,
-    run_records_root: await resolveRunRecordsRoot(octopusHome),
+    run_records_root: await resolveRunRecordsRoot(phobosHome),
     write_hash_algorithm: "sha256",
-    interface_private_state_root: path.join(octopusHome, "interfaces"),
+    interface_private_state_root: path.join(phobosHome, "interfaces"),
     chat_id: chatId,
     provider_interface_id: providerInterfaceId,
     model: stringValue(providerModel) || null,
@@ -676,21 +676,21 @@ function safeContractToken(value, field) {
   return token;
 }
 
-function interfaceEndpoint(octopusHome, interfaceId) {
-  return `unix://${interfaceSocketPath(octopusHome, interfaceId)}`;
+function interfaceEndpoint(phobosHome, interfaceId) {
+  return `unix://${interfaceSocketPath(phobosHome, interfaceId)}`;
 }
 
-function interfaceSocketPath(octopusHome, interfaceId) {
+function interfaceSocketPath(phobosHome, interfaceId) {
   return path.join(
-    octopusHome,
+    phobosHome,
     "app-server-control",
     `${crypto.createHash("sha256").update(safeSegment(interfaceId, "interfaceId")).digest("hex").slice(0, 24)}.sock`,
   );
 }
 
-async function interfaceSocketIdentity(octopusHome, interfaceId) {
+async function interfaceSocketIdentity(phobosHome, interfaceId) {
   let stat;
-  try { stat = await fs.lstat(interfaceSocketPath(octopusHome, interfaceId), { bigint: true }); }
+  try { stat = await fs.lstat(interfaceSocketPath(phobosHome, interfaceId), { bigint: true }); }
   catch (error) {
     if (error?.code === "ENOENT") return null;
     throw error;

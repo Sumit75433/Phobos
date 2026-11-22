@@ -31,11 +31,11 @@ function readSelection(file) {
 }
 
 function resolveClientLaunchSelection({ selectionPath, userRoot, env }) {
-  const configuredHome = env.OCTOPUS_HOME?.trim();
+  const configuredHome = env.PHOBOS_HOME?.trim();
   const configuredCodex = env.CODEX_HOME?.trim();
   const saved = configuredHome ? null : readSelection(selectionPath);
   return {
-    home: absolute(configuredHome || saved?.home || path.join(userRoot, ".octopus"), "OCTOPUS_HOME"),
+    home: absolute(configuredHome || saved?.home || path.join(userRoot, ".phobos"), "PHOBOS_HOME"),
     codexHome: configuredCodex ? absolute(configuredCodex, "CODEX_HOME") : saved?.codexHome,
   };
 }

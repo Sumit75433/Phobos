@@ -170,7 +170,7 @@ test("provider authentication recovery stays visible and non-terminal", () => {
 });
 
 test("live compaction batch stays on the active turn", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-native-compaction-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-native-compaction-"));
   const runId = "run_native_compaction";
   const interfaceId = "world_operator_chat_nativecompaction";
   const providerInterfaceId = "world_provider_codex_nativecompaction";
@@ -186,8 +186,8 @@ test("live compaction batch stays on the active turn", async (t) => {
     writeJson(path.join(interfaceRoot, "interface.json"), {
       id: interfaceId, interface_type: "world", role: "user", source_names: ["operator.chat"],
     }),
-    writeJson(path.join(interfaceRoot, "octopus_os.json"), {
-      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "octopus_os",
+    writeJson(path.join(interfaceRoot, "phobos_os.json"), {
+      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "phobos_os",
     }),
     writeJson(path.join(providerInterfaceRoot, "interface.json"), {
       id: providerInterfaceId, interface_type: "world", role: "provider",
@@ -223,7 +223,7 @@ test("live compaction batch stays on the active turn", async (t) => {
   })}\n`);
   t.after(async () => fs.promises.rm(root, { recursive: true, force: true }));
   const batch = await readOperatorChatArtifacts({
-    octopusHome: () => root,
+    phobosHome: () => root,
     readArtifactPayload: async input => {
       assert.equal(input.projection.schema_version, 1);
       assert.equal(input.label, "turn.context.compaction");
@@ -254,7 +254,7 @@ test("live compaction batch stays on the active turn", async (t) => {
   };
   for (const [index, [label, bytes]] of [["plain.note", Buffer.from("plain text")], ["binary.data", Buffer.from([255, 0, 1])],
     ["json.array", Buffer.from("[1,2]")], ["json.scalar", Buffer.from("3")]].entries()) await append(index + 1, label, bytes);
-  const readOptions = { octopusHome: () => root, readArtifactPayload: async input => {
+  const readOptions = { phobosHome: () => root, readArtifactPayload: async input => {
     const mode = Object.hasOwn(input, "projection");
     assert.equal(mode, input.label === "turn.context.compaction");
     const result = await (mode ? projected : raw)({ ...input, blobsRoot }); decoded.set(input.label, result.payload); return result;
@@ -267,7 +267,7 @@ test("live compaction batch stays on the active turn", async (t) => {
 });
 
 test("exact provider failure terminates the live turn with diagnostic evidence", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-provider-turn-failure-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-provider-turn-failure-"));
   const runId = "run_provider_failure";
   const interfaceId = "world_operator_chat_providerfailure";
   const providerInterfaceId = "world_provider_codex_providerfailure";
@@ -283,8 +283,8 @@ test("exact provider failure terminates the live turn with diagnostic evidence",
     writeJson(path.join(interfaceRoot, "interface.json"), {
       id: interfaceId, interface_type: "world", role: "user", source_names: ["operator.chat"],
     }),
-    writeJson(path.join(interfaceRoot, "octopus_os.json"), {
-      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "octopus_os",
+    writeJson(path.join(interfaceRoot, "phobos_os.json"), {
+      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "phobos_os",
     }),
     writeJson(path.join(providerInterfaceRoot, "interface.json"), {
       id: providerInterfaceId, interface_type: "world", role: "provider",
@@ -324,7 +324,7 @@ test("exact provider failure terminates the live turn with diagnostic evidence",
   })}\n`);
   t.after(async () => fs.promises.rm(root, { recursive: true, force: true }));
   const batch = await readOperatorChatArtifacts({
-    octopusHome: () => root,
+    phobosHome: () => root,
     readArtifactPayload: async () => ({ payload: {
       source_movement_seq: 6,
       failure_class: "invalid_provider_context",
@@ -342,7 +342,7 @@ test("exact provider failure terminates the live turn with diagnostic evidence",
 });
 
 test("live turn.stream keeps one bounded cursor budget, wakes on nested append, and reads append tails linearly", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-live-turn-stream-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-live-turn-stream-"));
   t.after(async () => fs.promises.rm(root, { recursive: true, force: true }));
   const runId = "run_live_stream_contract";
   const interfaceId = "world_operator_chat_livestream";
@@ -360,8 +360,8 @@ test("live turn.stream keeps one bounded cursor budget, wakes on nested append, 
     writeJson(path.join(clientRoot, "interface.json"), {
       id: interfaceId, interface_type: "world", role: "user", source_names: ["operator.chat"],
     }),
-    writeJson(path.join(clientRoot, "octopus_os.json"), {
-      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "octopus_os",
+    writeJson(path.join(clientRoot, "phobos_os.json"), {
+      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "phobos_os",
     }),
     writeJson(path.join(providerRoot, "interface.json"), {
       id: providerInterfaceId, interface_type: "world", role: "provider",
@@ -409,7 +409,7 @@ test("live turn.stream keeps one bounded cursor budget, wakes on nested append, 
   await fs.promises.writeFile(bodyPath, `${JSON.stringify(header)}\n${JSON.stringify(eventRow(1))}\n${JSON.stringify(eventRow(2))}\n`);
   await writeJson(manifestPath, { label: "turn.stream", payload_path: bodyPath });
   const options = {
-    octopusHome: () => root,
+    phobosHome: () => root,
     readArtifactPayload: async (input) => {
       if (input.label === "turn.stream") {
         const payloadBytes = await fs.promises.readFile(bodyPath);
@@ -558,7 +558,7 @@ test("live turn.stream keeps one bounded cursor budget, wakes on nested append, 
 });
 
 test("turn control uses the exact operator socket without a projection read", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-turn-control-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-turn-control-"));
   const runId = "run_operator_chat_controltest";
   const interfaceId = "world_operator_chat_controltest";
   const providerInterfaceId = "world_provider_codex_controltest";
@@ -581,8 +581,8 @@ test("turn control uses the exact operator socket without a projection read", as
     writeJson(path.join(interfaceRoot, "interface.json"), {
       id: interfaceId, interface_type: "world", role: "user", source_names: ["operator.chat"],
     }),
-    writeJson(path.join(interfaceRoot, "octopus_os.json"), {
-      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "octopus_os",
+    writeJson(path.join(interfaceRoot, "phobos_os.json"), {
+      interface: interfaceId, owner_interface: interfaceId, component: "client", workspace: "phobos_os",
     }),
     writeJson(path.join(providerInterfaceRoot, "interface.json"), {
       id: providerInterfaceId, interface_type: "world", role: "provider",
@@ -592,11 +592,11 @@ test("turn control uses the exact operator socket without a projection read", as
   const server = await listenForInterface(root, interfaceId);
   t.after(async () => { await closeServer(server); await fs.promises.rm(root, { recursive: true, force: true }); });
   let handed = null;
-  await assert.rejects(submitOperatorTurnControl({ octopusHome: () => root }, {
+  await assert.rejects(submitOperatorTurnControl({ phobosHome: () => root }, {
     interfaceId, runId, action: "pause", controlId: "control_test_00", timeoutMs: 1_000,
   }), /must be 'interrupt', 'resume', or 'stop'/);
   const outcome = await submitOperatorTurnControl({
-    octopusHome: () => root,
+    phobosHome: () => root,
     clientArtifactsRoot: () => path.join(root, "interface-hand-in", interfaceId, "client"),
     handInArtifact: async (input) => {
       handed = input;
@@ -621,7 +621,7 @@ test("turn control uses the exact operator socket without a projection read", as
     } },
   })}\n`);
   const live = await readOperatorChatArtifacts({
-    octopusHome: () => root,
+    phobosHome: () => root,
     readArtifactPayload: async () => ({ payload: {
       call_id: "call_controltest", status: "started", tool: "workspace.read_file__controltest",
     } }),
@@ -639,7 +639,7 @@ function authoredBinding(interfaceId) {
 }
 
 async function installFakeTopologyTransport(installationRoot, handler = 'throw new Error("unsupported fake topology mode");') {
-  const executable = path.join(installationRoot, "target", "debug", "octopus-operator-chat-topology");
+  const executable = path.join(installationRoot, "target", "debug", "phobos-operator-chat-topology");
   await fs.promises.mkdir(path.dirname(executable), { recursive: true });
   await fs.promises.writeFile(executable, `#!/usr/bin/env node
 const assert = require("node:assert/strict"), crypto = require("node:crypto");
@@ -809,7 +809,7 @@ async function createAuthoringFixture(root, eeId = "ee_operator_space") {
     root,
     runsRoot,
     options: {
-      octopusHome: () => root,
+      phobosHome: () => root,
       installationRoot: () => installationRoot,
       registryRoot: () => registryRoot,
       eeInstancesRoot: () => eeInstancesRoot,
@@ -939,8 +939,8 @@ test("interface socket replacement wait refuses a live prior listener until its 
   await wait(root, ACTIVE_CLIENT, 1_000);
 });
 
-test("workspace topology authoring is serialized per Octopus home", async () => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-topology-lock-"));
+test("workspace topology authoring is serialized per Phobos home", async () => {
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-topology-lock-"));
   let releaseFirst;
   const firstMayFinish = new Promise((resolve) => { releaseFirst = resolve; });
   const entered = [];
@@ -966,7 +966,7 @@ function activeRun() {
     id: "cp_active_project_result",
     run: ACTIVE_RUN,
     epoch: 0,
-    interface_binding: authoredBinding("system_project_result_octopus"),
+    interface_binding: authoredBinding("system_project_result_phobos"),
     outbound_interface_bindings: [authoredBinding("system_worker_home")],
     artifact_bindings: [],
   };
@@ -1140,7 +1140,7 @@ test("operator chat fails closed on exact-target runtime drift", () => {
 });
 
 test("operator chat shares one ledger watcher across concurrent waits", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-ledger-watch-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-ledger-watch-"));
   const movementsPath = path.join(root, "movements.jsonl");
   await fs.promises.writeFile(movementsPath, "");
   const waits = Array.from({ length: 12 }, () => watchLedgerChange(movementsPath, 2_000));
@@ -1291,8 +1291,8 @@ async function createProviderLoginFixture(root, scenario = {}) {
   await fs.promises.writeFile(path.join(homeRoot, "interface.json"), JSON.stringify({
     id: ACTIVE_CLIENT, interface_type: "world", role: "user", direction: "bidirectional", source_names: ["operator.chat"],
   }));
-  await fs.promises.writeFile(path.join(homeRoot, "octopus_os.json"), JSON.stringify({
-    interface: ACTIVE_CLIENT, owner_interface: ACTIVE_CLIENT, component: "client", workspace: "octopus_os",
+  await fs.promises.writeFile(path.join(homeRoot, "phobos_os.json"), JSON.stringify({
+    interface: ACTIVE_CLIENT, owner_interface: ACTIVE_CLIENT, component: "client", workspace: "phobos_os",
   }));
   const projectionLabels = [
     "provider.account.snapshot",
@@ -1415,7 +1415,7 @@ async function createProviderLoginFixture(root, scenario = {}) {
     submissions,
     statusPolls: () => statusPoll,
     options: {
-      octopusHome: () => root,
+      phobosHome: () => root,
       submitArtifact,
       openExternalUrl: async (url) => { opened.push(url); },
       readArtifactPayload: async ({ artifactId }) => artifacts.get(artifactId),
@@ -1424,7 +1424,7 @@ async function createProviderLoginFixture(root, scenario = {}) {
 }
 
 test("model refresh observes its generation, waits for rearm, and works without account operations", { timeout: 4_000 }, async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-catalog-recovery-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-catalog-recovery-"));
   t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
   const fixture = await createProviderLoginFixture(root);
   const runPath = path.join(root, "runs", `${ACTIVE_RUN}.json`), ledgerPath = path.join(root, "ledger", "movements.jsonl");
@@ -1487,7 +1487,7 @@ test("model refresh observes its generation, waits for rearm, and works without 
 });
 
 test("provider account proof crosses exact Home, redacts identity, advances its cursor, and revalidates", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-provider-account-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-provider-account-"));
   t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
   const runsRoot = path.join(root, "runs");
   const ledgerPath = path.join(root, "ledger", "movements.jsonl");
@@ -1509,8 +1509,8 @@ test("provider account proof crosses exact Home, redacts identity, advances its 
   await fs.promises.writeFile(path.join(homeRoot, "interface.json"), JSON.stringify({
     id: ACTIVE_CLIENT, interface_type: "world", role: "user", direction: "bidirectional", source_names: ["operator.chat"],
   }));
-  await fs.promises.writeFile(path.join(homeRoot, "octopus_os.json"), JSON.stringify({
-    interface: ACTIVE_CLIENT, owner_interface: ACTIVE_CLIENT, component: "client", workspace: "octopus_os",
+  await fs.promises.writeFile(path.join(homeRoot, "phobos_os.json"), JSON.stringify({
+    interface: ACTIVE_CLIENT, owner_interface: ACTIVE_CLIENT, component: "client", workspace: "phobos_os",
   }));
   await fs.promises.writeFile(path.join(providerRoot, "interface.json"), JSON.stringify({
     id: ACTIVE_PROVIDER,
@@ -1536,7 +1536,7 @@ test("provider account proof crosses exact Home, redacts identity, advances its 
     label, manifestHash, payloadHash: payloadHashes[label], payload: payloads[label],
   });
   const options = {
-    octopusHome: () => root,
+    phobosHome: () => root,
     readArtifactPayload,
     submitArtifact: async (request) => {
       assert.deepEqual(request.payload, { refresh_token: true });
@@ -1600,7 +1600,7 @@ test("provider account proof crosses exact Home, redacts identity, advances its 
 });
 
 test("ordinary provider browser sign-in uses exact Home, safe URL callback, matching status, and final account proof", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-provider-login-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-provider-login-"));
   t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
   const fixture = await createProviderLoginFixture(root, {
     statusOutputs: (poll) => poll === 1
@@ -1737,7 +1737,7 @@ test("provider browser sign-in fails closed on malformed, unsafe, foreign, faile
   ];
   for (const item of cases) {
     await t.test(item.name, async () => {
-      const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-provider-login-refusal-"));
+      const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-provider-login-refusal-"));
       try {
         const fixture = await createProviderLoginFixture(root, item.scenario);
         await assert.rejects(
@@ -1787,7 +1787,7 @@ test("provider account typed failures repair only explicit authentication eviden
 });
 
 test("author-only surface planning returns validated topology without committing or handing in", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-author-only-plan-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-author-only-plan-"));
   t.after(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
@@ -1838,8 +1838,8 @@ test("author-only surface planning returns validated topology without committing
 });
 
 test("new task authoring and Project deletion enforce both topology orderings", async (t) => {
-  const taskFirstRoot = await fs.promises.mkdtemp(path.join("/tmp", "octopus-task-first-topology-"));
-  const deleteFirstRoot = await fs.promises.mkdtemp(path.join("/tmp", "octopus-delete-first-topology-"));
+  const taskFirstRoot = await fs.promises.mkdtemp(path.join("/tmp", "phobos-task-first-topology-"));
+  const deleteFirstRoot = await fs.promises.mkdtemp(path.join("/tmp", "phobos-delete-first-topology-"));
   t.after(async () => {
     await Promise.all([
       fs.promises.rm(taskFirstRoot, { recursive: true, force: true }),
@@ -1905,7 +1905,7 @@ test("new task authoring and Project deletion enforce both topology orderings", 
 });
 
 test("new task remains idle when operator input hand-in is refused", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-new-task-refused-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-new-task-refused-"));
   t.after(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
@@ -1931,7 +1931,7 @@ test("new task remains idle when operator input hand-in is refused", async (t) =
 });
 
 test("new task retry after a lost verdict reuses one exact authored run and admission", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-new-task-admission-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-new-task-admission-"));
   t.after(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
@@ -2013,7 +2013,7 @@ test("new task retry after a lost verdict reuses one exact authored run and admi
 });
 
 test("ordinary existing submission hands into its active client without topology writes", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-existing-run-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-existing-run-"));
   t.after(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
@@ -2062,7 +2062,7 @@ test("ordinary existing submission hands into its active client without topology
   const handed = [];
   const options = {
     clientArtifactsRoot: (interfaceId) => path.join(root, "hand-in", interfaceId, "client"),
-    octopusHome: () => root,
+    phobosHome: () => root,
     installationRoot: () => root,
     registryRoot: () => registryRoot,
     handInArtifact: async (input) => {
@@ -2104,8 +2104,8 @@ test("ordinary existing submission hands into its active client without topology
   await fs.promises.mkdir(ledgerRoot, { recursive: true });
   const clientRegistryRoot = path.join(registryRoot, "interface", ACTIVE_CLIENT);
   await fs.promises.mkdir(clientRegistryRoot, { recursive: true });
-  await fs.promises.writeFile(path.join(clientRegistryRoot, "octopus_os.json"), JSON.stringify({
-    schema_version: 1, workspace: "octopus_os", component: "client", interface: ACTIVE_CLIENT,
+  await fs.promises.writeFile(path.join(clientRegistryRoot, "phobos_os.json"), JSON.stringify({
+    schema_version: 1, workspace: "phobos_os", component: "client", interface: ACTIVE_CLIENT,
     owner_interface: ACTIVE_CLIENT, surface_role: "task",
     provider_choice_interface: "world_provider_codex", worker_choice_interface: "system_worker_coder_max",
     authoring_profile: {
@@ -2254,7 +2254,7 @@ test("ordinary existing submission hands into its active client without topology
   assert.deepEqual(steered.clientWrites, []);
   assert.equal(handed.length, 5);
   assert.equal(await fs.promises.readFile(runPath, "utf8"), progressedBytes);
-  const sidecarPath = path.join(clientRegistryRoot, "octopus_os.json"), sidecar = JSON.parse(await fs.promises.readFile(sidecarPath));
+  const sidecarPath = path.join(clientRegistryRoot, "phobos_os.json"), sidecar = JSON.parse(await fs.promises.readFile(sidecarPath));
   sidecar.authoring_profile.payload_artifact_bindings = [{ id: "fixture.stale", content: Array(32).fill(1) }];
   await fs.promises.writeFile(sidecarPath, JSON.stringify(sidecar));
   await assert.rejects(submitOperatorTurn({ ...options, preparePayloadArtifactBindings: async s => s.payloadArtifactBindings },
@@ -2263,7 +2263,7 @@ test("ordinary existing submission hands into its active client without topology
 });
 
 test("attachment crash before admission resumes only from an exact reattachment", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-attach-cut-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-attach-cut-"));
   t.after(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
@@ -2301,7 +2301,7 @@ test("attachment crash before admission resumes only from an exact reattachment"
   const handed = [];
   const options = {
     clientArtifactsRoot: (interfaceId) => path.join(root, "hand-in", interfaceId, "client"),
-    octopusHome: () => root,
+    phobosHome: () => root,
     installationRoot: () => root,
     registryRoot: () => registryRoot,
     handInArtifact: async (input) => {
@@ -2378,7 +2378,7 @@ test("attachment crash before admission resumes only from an exact reattachment"
 });
 
 test("operator message admission recovers an accepted turn after the delivery verdict is lost", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-message-admission-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-message-admission-"));
   t.after(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
@@ -2426,7 +2426,7 @@ test("operator message admission recovers an accepted turn after the delivery ve
   let handIns = 0;
   const options = {
     clientArtifactsRoot: (interfaceId) => path.join(root, "hand-in", interfaceId, "client"),
-    octopusHome: () => root,
+    phobosHome: () => root,
     installationRoot: () => root,
     registryRoot: () => registryRoot,
     readArtifactPayload: async ({ artifactId, label, manifestHash }) => {
@@ -2586,7 +2586,7 @@ test("operator message admission recovers an accepted turn after the delivery ve
 });
 
 test("task deletion releases its exact worker environment through an allow-only artifact cycle", async (t) => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-task-release-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-task-release-"));
   const runsRoot = path.join(root, "state", "runs");
   const registryRoot = path.join(root, "registry", "interface");
   const controlRoot = path.join(root, "app-server-control");
@@ -2621,9 +2621,9 @@ test("task deletion releases its exact worker environment through an allow-only 
   await fs.promises.writeFile(path.join(ledgerRoot, "movements.jsonl"), "");
   for (const interfaceId of [ACTIVE_CLIENT, ACTIVE_PROVIDER, door]) {
     await fs.promises.writeFile(
-      path.join(registryRoot, interfaceId, "octopus_os.json"),
+      path.join(registryRoot, interfaceId, "phobos_os.json"),
       JSON.stringify({
-        workspace: "octopus_os",
+        workspace: "phobos_os",
         interface: interfaceId,
         owner_interface: ACTIVE_CLIENT,
       }),
@@ -2689,7 +2689,7 @@ test("task deletion releases its exact worker environment through an allow-only 
   const writerFormation = structuredClone(formationRecord);
   Object.assign(writerFormation.formation, { worker_environment_id: writerEnvironmentId, run: writerId, requires_release: false });
   await fs.promises.mkdir(path.dirname(writerFormationPath));
-  const preflightRelease = () => releaseOperatorTaskWorkerEnvironments({ octopusHome: () => root }, {
+  const preflightRelease = () => releaseOperatorTaskWorkerEnvironments({ phobosHome: () => root }, {
     runId: ACTIVE_RUN, expectedDigest: crypto.createHash("sha256").update(runText).digest("hex"),
   });
   writerFormation.formation.run = "unrelated_run";
@@ -2717,7 +2717,7 @@ test("task deletion releases its exact worker environment through an allow-only 
 
   const outcome = await releaseOperatorTaskWorkerEnvironments({
     clientArtifactsRoot: (interfaceId) => path.join(root, "hand-in", interfaceId, "client"),
-    octopusHome: () => root,
+    phobosHome: () => root,
     installationRoot: () => root,
     handInArtifact: async (input) => {
       assert.equal(input.interfaceId, ACTIVE_CLIENT);
@@ -2787,9 +2787,9 @@ test("task deletion releases its exact worker environment through an allow-only 
 
 
 test("rearmed idle payload staging preserves inherited refs, explicit clearing and immutable preparation", async () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-payload-selection-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-payload-selection-"));
   const registryRoot = path.join(root, "registry");
-  const sidecarPath = path.join(registryRoot, "interface", ACTIVE_CLIENT, "octopus_os.json");
+  const sidecarPath = path.join(registryRoot, "interface", ACTIVE_CLIENT, "phobos_os.json");
   fs.mkdirSync(path.dirname(sidecarPath), { recursive: true });
   const config = JSON.parse(fs.readFileSync(path.join(__dirname, "client.json"), "utf8"));
   const run = activeRun();
@@ -2832,7 +2832,7 @@ test("rearmed idle payload staging preserves inherited refs, explicit clearing a
   const first = { id: "fixture.first", content: Array(32).fill(1) };
   const second = { id: "fixture.second", content: Array(32).fill(2) };
   const sidecar = {
-    schema_version: 1, workspace: "octopus_os", component: "client", interface: ACTIVE_CLIENT,
+    schema_version: 1, workspace: "phobos_os", component: "client", interface: ACTIVE_CLIENT,
     owner_interface: ACTIVE_CLIENT, surface_role: "home", authoring_profile: {
       ee_id: run.ee, worker_choice_interface: run.interface_state[ACTIVE_CLIENT].worker_choice_interface,
       door_host_slots: {}, payload_artifact_bindings: [first],
@@ -2903,7 +2903,7 @@ test("rearmed idle payload staging preserves inherited refs, explicit clearing a
 
 
 test("operator ledger pages stop reading at their page while retaining exact replay offsets", async t => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-ledger-page-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-ledger-page-"));
   t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
   const file = path.join(root, "movements.jsonl");
   const rows = Array.from({ length: 2000 }, (_, seq) => movement({ seq, trace: "🎙".repeat(128), artifact: { id: `message:${seq}`, content: "a".repeat(64) } }));
@@ -2933,7 +2933,7 @@ test("operator ledger pages stop reading at their page while retaining exact rep
 
 
 test("empty Project planning stays available while executable Task publication requires host bindings", async t => {
-  const root = await fs.promises.mkdtemp(path.join("/tmp", "octopus-project-host-preflight-"));
+  const root = await fs.promises.mkdtemp(path.join("/tmp", "phobos-project-host-preflight-"));
   t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
   const fixture = await createAuthoringFixture(root), handed = [];
   await writeAuthoringFixtureJson(path.join(root, "host.json"), { host_manifest_version: 1, root_refs: { run_records_root: fixture.runsRoot, host_filesystem_root: "/" } });
@@ -2961,14 +2961,14 @@ test("task host preflight refuses missing required slots before publication and 
   const fs = require("node:fs/promises"), os = require("node:os");
   const { validatePlannedHostBindings } = require("./client/hostBindings.cjs");
   const registryRoot = path.resolve(__dirname, "../..");
-  const transport = await fs.readFile(path.join(registryRoot, "../crates/octopus-interface-transport/src/lib.rs"), "utf8");
+  const transport = await fs.readFile(path.join(registryRoot, "../crates/phobos-interface-transport/src/lib.rs"), "utf8");
   const formation = transport.slice(transport.indexOf("fn life_root_slots("), transport.indexOf("fn prepare_interface_local_ipc_root("));
   const formedSlots = [...formation.matchAll(/slots\.insert\(\s*(?:"([^"]+)"|([A-Z_]+))\.to_string\(\)/g)].map(([, literal, constant]) =>
     literal ?? transport.match(new RegExp(`const ${constant}: &str = "([^"]+)"`))[1]);
   const preflightSource = await fs.readFile(path.join(__dirname, "client/hostBindings.cjs"), "utf8");
   const clientSlots = JSON.parse(`[${preflightSource.match(/const hostFormedSlots = new Set\(\[([\s\S]*?)\]\)/)[1].replace(/,\s*$/, "")}]`);
   assert.deepEqual(clientSlots.sort(), [...new Set(formedSlots)].sort());
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-host-preflight-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-host-preflight-"));
   t.after(() => fs.rm(home, { recursive: true, force: true }));
   const host = roots => fs.writeFile(path.join(home, "host.json"), JSON.stringify({ host_manifest_version: 1, root_refs: roots }));
   const read = async (kind, id, file) => JSON.parse(await fs.readFile(path.join(registryRoot, kind, id, file), "utf8"));
@@ -2982,7 +2982,7 @@ test("task host preflight refuses missing required slots before publication and 
     plan.writes = [write("interface", door, "interface.json", { ...original, id: door, interface_driver_config: { host_slots: overrides } }),
       write("interface", door, "life.json", selectedLife), write("tool", toolId, "tool.json", { ...selectedTool, id: toolId, interface: door })];
   }
-  const check = () => validatePlannedHostBindings({ octopusHome: home, registryRoot, plan });
+  const check = () => validatePlannedHostBindings({ phobosHome: home, registryRoot, plan });
   await host({});
   stage({ host_filesystem_root: { path: "/" } });
   await assert.rejects(check(), /requires unbound host root slot 'workspace_root'/);
@@ -3014,6 +3014,6 @@ test("task host preflight refuses missing required slots before publication and 
   ]) {
     await host(roots);
     const neighbour = { ...plan, requiredToolIds: [toolName], writes: [] };
-    await validatePlannedHostBindings({ octopusHome: home, registryRoot, plan: neighbour });
+    await validatePlannedHostBindings({ phobosHome: home, registryRoot, plan: neighbour });
   }
 });

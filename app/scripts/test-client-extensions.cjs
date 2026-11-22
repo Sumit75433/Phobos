@@ -10,7 +10,7 @@ const {
 } = require("../electron/clientExtensionActions.cjs");
 
 async function main() {
-  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-client-extensions-"));
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-client-extensions-"));
   const root = path.join(temporary, "extensions");
   let store = createClientExtensionStore({ root });
   try {
@@ -21,7 +21,7 @@ async function main() {
     assert.equal(snapshot.lifecycle["builtin.metrics"].desiredState, "installed");
 
     let statuses = await readClientExtensionActionStatuses({
-      octopusHome: temporary,
+      phobosHome: temporary,
       codexHome: temporary,
       installedExtensionIds: verifiedInstalled(snapshot),
     });
@@ -41,7 +41,7 @@ async function main() {
     assert.match(installed.receipt.receiptDigest, /^[a-f0-9]{64}$/);
     snapshot = installed.snapshot;
     statuses = await readClientExtensionActionStatuses({
-      octopusHome: temporary,
+      phobosHome: temporary,
       codexHome: temporary,
       installedExtensionIds: verifiedInstalled(snapshot),
     });
@@ -150,7 +150,7 @@ async function main() {
     const downloadedRoot = path.join(root, "packages", downloadedBuiltinId);
     await fs.mkdir(downloadedRoot, { recursive: true });
     await fs.writeFile(path.join(downloadedRoot, "extension.json"), `${JSON.stringify({
-      schema: "octopus.client_extension",
+      schema: "phobos.client_extension",
       schema_version: 1,
       id: downloadedBuiltinId,
       version: "1.0.0",
@@ -360,7 +360,7 @@ function delay(milliseconds) {
 
 function surfaceExtensionManifest(id, category) {
   return {
-    schema: "octopus.client_extension",
+    schema: "phobos.client_extension",
     schema_version: 1,
     id,
     version: "1.0.0",
@@ -373,7 +373,7 @@ function surfaceExtensionManifest(id, category) {
     contribution: {
       kind: "surface",
       document: {
-        schema: "octopus.client_surface",
+        schema: "phobos.client_surface",
         schema_version: 1,
         release_channel: "stable",
         id: `${id}.surface`,

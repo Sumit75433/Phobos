@@ -7,7 +7,7 @@
     "max_changed_paths": 20000
   },
   "process": {
-    "bin": "target/debug/octopus-coder-fs-tool",
+    "bin": "target/debug/phobos-coder-fs-tool",
     "inherit_env": ["PATH"],
     "authority": {
       "read_root_slots": ["registry_worker_environment_kind_root", "repo_root"],

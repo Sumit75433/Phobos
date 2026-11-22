@@ -23,12 +23,12 @@ module.exports = {
   requestComposerPrediction: (options, request) => require("./composer-predictions.cjs").requestComposerPrediction({
     ...options, withRunLock: withOperatorRunAuthoringLock, withTopologyLock: withOperatorWorkspaceTopologyLock,
     waitForInterface: waitForInterfaceSocket,
-    handIn: (input) => options.handInArtifact({ ...input, endpoint: interfaceEndpoint(options.octopusHome(), input.interfaceId) }),
+    handIn: (input) => options.handInArtifact({ ...input, endpoint: interfaceEndpoint(options.phobosHome(), input.interfaceId) }),
   }, request),
   requestTaskTitle: (options, request) => require("./task-titles.cjs").requestTaskTitle({
     ...options, withRunLock: withOperatorRunAuthoringLock, withTopologyLock: withOperatorWorkspaceTopologyLock,
     waitForInterface: waitForInterfaceSocket,
-    handIn: (input) => options.handInArtifact({ ...input, endpoint: interfaceEndpoint(options.octopusHome(), input.interfaceId) }),
+    handIn: (input) => options.handInArtifact({ ...input, endpoint: interfaceEndpoint(options.phobosHome(), input.interfaceId) }),
   }, request),
   updateOperatorChatPins,
   validateProviderAccountObservation,

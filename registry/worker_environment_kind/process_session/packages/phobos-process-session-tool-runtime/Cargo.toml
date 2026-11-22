@@ -1,0 +1,43 @@
+[package]
+name = "phobos-process-session-tool-runtime"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.89"
+
+[lib]
+name = "phobos_process_session_tool_runtime"
+path = "src/lib.rs"
+doctest = false
+
+[[bin]]
+name = "phobos-process-session-tool-door-life"
+path = "src/bin/tool_door_life.rs"
+
+[features]
+owner-contract-tests = []
+
+[dependencies]
+blake3.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+tokio = { workspace = true, features = ["rt", "sync", "io-std", "io-util", "time", "process"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+notify.workspace = true
+tracing = "0.1.44"
+rusqlite = { version = "0.41", features = ["bundled"] }
+phobos-verifiers = { path = "../../../../../crates/phobos-verifiers" }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-file-storage = { path = "../../../../../crates/phobos-file-storage" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.182"
+
+[dev-dependencies]
+tempfile = "3.23.0"

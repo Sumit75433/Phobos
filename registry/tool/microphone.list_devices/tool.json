@@ -2,7 +2,7 @@
   "id": "microphone.list_devices",
   "interface": "system_microphone",
   "process": {
-    "bin": "target/debug/octopus-audio-device-session-tool",
+    "bin": "target/debug/phobos-audio-device-session-tool",
     "args": [],
     "authority": {
       "read_root_slots": [],

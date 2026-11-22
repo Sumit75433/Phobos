@@ -383,7 +383,7 @@ class ProcessViewerSession {
 
   publish(event) {
     if (!this.sender.isDestroyed()) {
-      this.sender.send("octopus:process-viewer-event", { sessionId: this.sessionId, event });
+      this.sender.send("phobos:process-viewer-event", { sessionId: this.sessionId, event });
     }
   }
 

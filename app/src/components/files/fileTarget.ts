@@ -1,9 +1,9 @@
-import type { OctopusOsFileRoot } from "../../electron";
+import type { PhobosOsFileRoot } from "../../electron";
 import type { FilesOpenTarget } from "./types";
 
 export function resolveFileTarget(
   target: Extract<FilesOpenTarget, { kind: "file" }>,
-  roots: OctopusOsFileRoot[],
+  roots: PhobosOsFileRoot[],
 ): { path: string; rootId: string } | null {
   if (target.rootId && target.path !== undefined) {
     return roots.some((root) => root.id === target.rootId)
@@ -24,7 +24,7 @@ export function resolveFileTarget(
 }
 
 export async function prepareClientFile(path: string) {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport) throw new Error("File viewing is unavailable.");
   const { roots } = await transport.osFileRoots();
   const location = resolveFileTarget({ kind: "file", absolutePath: path }, roots);

@@ -6,7 +6,7 @@ const { test } = require("node:test");
 const { writeJsonFileAtomicallySync } = require("../electron/atomicJsonFile.cjs");
 
 function directory(t) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-atomic-json-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-atomic-json-"));
   t.after(() => { fs.chmodSync(root, 0o700); fs.rmSync(root, { recursive: true, force: true }); });
   return root;
 }

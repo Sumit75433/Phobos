@@ -5,7 +5,7 @@
     {
       "activation_driver_ref": "app_server_transport",
       "config": {
-        "listen_env": "OCTOPUS_MICROPHONE_LISTEN",
+        "listen_env": "PHOBOS_MICROPHONE_LISTEN",
         "bind_interface_socket_when_env_unset": true
       }
     }

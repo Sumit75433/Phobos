@@ -9,7 +9,7 @@ export function useHomeSurfaceDocuments(
   surfaces: AdmittedClientSurfaceDocument[],
   scope: HomeSurfaceScope & { accessProfile: "live" | "lab" },
 ) {
-  const storageKey = `octopus.home.surface-dismissals.v1:${JSON.stringify([scope.accessProfile, scope.runId, scope.interfaceId])}`;
+  const storageKey = `phobos.home.surface-dismissals.v1:${JSON.stringify([scope.accessProfile, scope.runId, scope.interfaceId])}`;
   const [stored, setStored] = useState<{ key: string; ids: Set<string>; error: string }>(() => readDismissals(storageKey));
   const [now, setNow] = useState(Date.now);
   useEffect(() => { setStored(readDismissals(storageKey)); }, [storageKey]);

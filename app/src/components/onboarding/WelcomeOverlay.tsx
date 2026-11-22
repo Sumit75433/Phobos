@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { OctopusDotCloud } from "./OctopusDotCloud";
+import { PhobosDotCloud } from "./PhobosDotCloud";
 import { MorphVideoDotCloud } from "./MorphVideoDotCloud";
 import { Glyph, type GlyphName } from "../IconGlyphs";
 import { readWelcomeProgress, saveWelcomeProgress } from "../../onboarding/onboardingStorage";
@@ -32,7 +32,7 @@ const primitives: Array<{ glyph: GlyphName; name: string; copy: string }> = [
   { glyph: "descriptor", name: "Descriptors", copy: "JSON that declares capabilities and connects them to the system." },
 ];
 
-const HERO_SRC = "./octopus-providers.png";
+const HERO_SRC = "./phobos-providers.png";
 const GITHUB_URL = "https://github.com/miuuyy/Octopus-SI-OS";
 const X_URL = "https://x.com/miuuyy";
 const DOCS_URL = "https://github.com/miuuyy/Octopus-SI-OS#readme";
@@ -46,7 +46,7 @@ const IDEA_THEMES: IdeaTheme[] = [
   {
     heading: "Connected through interfaces",
     body:
-      "System is everything Octopus can act on. World is everything outside it. They meet at declared interfaces: a model provider, a microphone, a chat channel. Each exchanges artifacts through the same boundary. Adding a connection means installing its descriptor and driver code, then granting access to it. The kernel stays the same.",
+      "System is everything Phobos can act on. World is everything outside it. They meet at declared interfaces: a model provider, a microphone, a chat channel. Each exchanges artifacts through the same boundary. Adding a connection means installing its descriptor and driver code, then granting access to it. The kernel stays the same.",
     src: "./onboarding/artifact-protocol.png",
   },
   {
@@ -70,7 +70,7 @@ const IDEA_THEMES: IdeaTheme[] = [
   {
     heading: "Permissions follow the work",
     body:
-      "Each run has a specific grant: the intersection of its worker's maximum permissions, its environment hierarchy, and its authored bindings. Octopus recomputes that grant whenever an artifact arrives. The model sees the tools and context available to it; the runtime and tool rooms enforce the boundaries. Inner environments can only narrow the permissions around them.",
+      "Each run has a specific grant: the intersection of its worker's maximum permissions, its environment hierarchy, and its authored bindings. Phobos recomputes that grant whenever an artifact arrives. The model sees the tools and context available to it; the runtime and tool rooms enforce the boundaries. Inner environments can only narrow the permissions around them.",
     src: "./onboarding/policy-formation.png",
   },
   {
@@ -146,8 +146,8 @@ export function WelcomeOverlay({ visitCount, onComplete }: Props) {
     <main className="welcome" data-visit-count={visitCount} data-step={step.kind} aria-labelledby="welcome-title">
       <header className="welcome-top">
         <div className="welcome-brand">
-          <img className="welcome-brand-mark" src="./octopus-logo.png" alt="" />
-          <span className="welcome-brand-name">Octopus&nbsp;OS</span>
+          <img className="welcome-brand-mark" src="./phobos-logo.png" alt="" />
+          <span className="welcome-brand-name">Phobos&nbsp;OS</span>
         </div>
         {!isLast ? (
           <button className="welcome-skip" type="button" onClick={onComplete}>
@@ -210,13 +210,13 @@ function HeroStage({
   return (
     <div className="welcome-hero-stage">
       <div className="welcome-hero-bg">
-        <OctopusDotCloud src={HERO_SRC} framing="bottom" onAssembled={onAssembled} replayKey={replayKey} skipReveal={skipReveal} />
+        <PhobosDotCloud src={HERO_SRC} framing="bottom" onAssembled={onAssembled} replayKey={replayKey} skipReveal={skipReveal} />
         <div className="welcome-hero-veil" aria-hidden="true" />
       </div>
       <div className={`welcome-hero-copy${assembled ? " is-in" : ""}`}>
         <span className="welcome-tag">Research Preview</span>
         <h1 id="welcome-title" className="welcome-title welcome-title-hero">
-          Welcome to Octopus&nbsp;OS
+          Welcome to Phobos&nbsp;OS
         </h1>
         <p className="welcome-body welcome-hero-body">
           An operating system for agents. Talk to it, give it work, and choose the applications and tools it can use.
@@ -346,7 +346,7 @@ function PreviewStep() {
         This is a research preview
       </h1>
       <p className="welcome-body">
-        Octopus is early and moving fast. Expect rough edges, breaking changes, and ideas still finding their shape. It
+        Phobos is early and moving fast. Expect rough edges, breaking changes, and ideas still finding their shape. It
         runs locally, with your own ChatGPT account.
       </p>
       <div className="welcome-support">

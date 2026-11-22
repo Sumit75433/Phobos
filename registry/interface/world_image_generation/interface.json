@@ -26,7 +26,7 @@
       "max_image_bytes": 33554432,
       "auth": {
         "mode": "chatgpt_account",
-        "auth_file_env": "OCTOPUS_MACHINE_CODEX_AUTH_FILE",
+        "auth_file_env": "PHOBOS_MACHINE_CODEX_AUTH_FILE",
         "account_header": "ChatGPT-Account-ID"
       },
       "account_check": {
@@ -44,14 +44,14 @@
       },
       "client_connection": {
         "schema_version": 1,
-        "module": "interface://world_image_generation/packages/octopus-image-generation-interface/connection.cjs"
+        "module": "interface://world_image_generation/packages/phobos-image-generation-interface/connection.cjs"
       }
     },
     "transport": {
       "base_url": "https://chatgpt.com/backend-api/codex/images/generations",
       "wire": "image_json_http",
       "headers": {
-        "originator": "octopus_desktop"
+        "originator": "phobos_desktop"
       },
       "request_timeout_ms": 300000,
       "max_response_bytes": 50331648

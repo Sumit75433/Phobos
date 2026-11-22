@@ -10,7 +10,7 @@ const { absolutePath, isObject, nonNegativeInteger, readJsonDocumentIfPresent, r
 
 async function updateOperatorChatPins(options, request) {
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const installationRoot = resolveInstallationRoot(options);
   const artifactMaterializer = resolvePackageExecutable(
     config,
@@ -21,7 +21,7 @@ async function updateOperatorChatPins(options, request) {
   const runId = safeSegment(request?.runId, "runId");
   const sourceArtifactId = requiredString(request?.artifactId, "artifactId");
   if (typeof request?.pinned !== "boolean") throw new Error("pinned must be a boolean");
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const chatRunPath = path.join(runsDir, `${runId}.json`);
 
   return withRunAuthoringLock(runId, async () => {
@@ -43,7 +43,7 @@ async function updateOperatorChatPins(options, request) {
     let nextItems = currentItems;
     if (request.pinned) {
       await assertRunOwnsArtifact({
-        octopusHome,
+        phobosHome,
         runId,
         interfaceId: identity.interfaceId,
         artifactId: sourceArtifactId,
@@ -51,7 +51,7 @@ async function updateOperatorChatPins(options, request) {
       if (request.excerpt !== undefined) {
         const excerpt = validatePinnedExcerpt(request.excerpt);
         const materialized = await materializePinnedExcerpt(
-          octopusHome,
+          phobosHome,
           artifactMaterializer,
           runId,
           sourceArtifactId,
@@ -110,8 +110,8 @@ function validatePinnedExcerpt(value) {
   };
 }
 
-async function materializePinnedExcerpt(octopusHome, materializer, runId, sourceArtifactId, excerpt) {
-  const blobsDir = path.join(octopusHome, "ledger", "blobs");
+async function materializePinnedExcerpt(phobosHome, materializer, runId, sourceArtifactId, excerpt) {
+  const blobsDir = path.join(phobosHome, "ledger", "blobs");
   if (!(await fileExists(materializer))) {
     throw new Error(
       `operator chat artifact materializer is absent at its declared package path '${materializer}'`,

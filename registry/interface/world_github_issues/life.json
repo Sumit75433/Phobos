@@ -16,7 +16,7 @@
         "registry/interface/world_github_issues/tunnel.py",
         "registry/interface/world_github_issues/relay.py",
         "registry/interface/world_pyecho/pyecho_life.py",
-        "registry/interface/world_pyecho/octopus_content_hash.py"
+        "registry/interface/world_pyecho/phobos_content_hash.py"
       ],
       "env": {
         "PYTHONDONTWRITEBYTECODE": "1"

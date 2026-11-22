@@ -12,7 +12,7 @@ type ReportAction = { reportId: string; description: string };
 type ReportSource = { kind: "current" | "saved"; name: string };
 declare global {
   interface Window {
-    octopusSupport?: {
+    phobosSupport?: {
       collect(includeDetails: boolean, source?: "choose" | "current"): Promise<{ report: SupportReport; source: ReportSource } | null>;
       copy(request: ReportAction): Promise<{ copied: boolean }>;
       save(request: ReportAction): Promise<{ saved: boolean }>;
@@ -36,8 +36,8 @@ export function SupportWindow() {
     setBusy(true); setError(""); setNotice("");
     if (selectedSource !== "choose") setReport(null);
     try {
-      if (!window.octopusSupport) throw new Error("Problem reports are available in the Octopus desktop app.");
-      const result = await window.octopusSupport.collect(details, selectedSource);
+      if (!window.phobosSupport) throw new Error("Problem reports are available in the Phobos desktop app.");
+      const result = await window.phobosSupport.collect(details, selectedSource);
       if (attempt === generation.current && result) { setReport(result.report); setSource(result.source); }
     } catch (failure) {
       if (attempt === generation.current) setError(failure instanceof Error ? failure.message : String(failure));
@@ -47,10 +47,10 @@ export function SupportWindow() {
   useEffect(() => { void collect(false); return () => { generation.current++; }; }, []);
 
   async function act(action: "copy" | "save" | "openIssue") {
-    if (!report || !window.octopusSupport) return;
+    if (!report || !window.phobosSupport) return;
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await window.octopusSupport[action]({ reportId: report.report_id, description });
+      const result = await window.phobosSupport[action]({ reportId: report.report_id, description });
       setNotice(action === "copy" ? "Report copied." : action === "openIssue" ? "Draft opened in your browser. Review and submit it on GitHub." : "saved" in result && result.saved ? "Report saved. You can attach it to your GitHub issue." : "");
     } catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
     finally { setBusy(false); }
@@ -80,7 +80,7 @@ export function SupportWindow() {
           <p className="text-sm text-token-description-foreground">Build, setup, recent errors and runtime diagnostics. Conversations, tool contents and project files are excluded. Nothing is sent automatically.</p>
           <OcCheckbox checked={includeDetails} disabled={busy || (!includeDetails && report?.access !== "live")} label="Include error text and log excerpts" onCheckedChange={(checked) => { setIncludeDetails(checked); void collect(checked); }} showLabel />
           {includeDetails ? <p className="text-sm text-token-description-foreground">Error text can contain private paths, request content or secrets. Read the preview before sharing.</p> : null}
-          {report && report.access !== "live" ? <p className="text-sm text-token-description-foreground">This report contains application facts only. To include setup and logs, unlock Octopus as Administrator and reopen this window.</p> : null}
+          {report && report.access !== "live" ? <p className="text-sm text-token-description-foreground">This report contains application facts only. To include setup and logs, unlock Phobos as Administrator and reopen this window.</p> : null}
           {report ? <details className="rounded-xl border border-token-border p-3">
             <summary className="cursor-pointer text-sm">Preview diagnostic data</summary>
             <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-xs select-text">{JSON.stringify(report, null, 2)}</pre>

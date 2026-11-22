@@ -6,31 +6,31 @@ const path = require("node:path");
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const MIN_PASSWORD_LENGTH = 8;
 const MIN_LAB_SECRET_LENGTH = 8;
-const DEFAULT_LAB_SECRET = "octopus-test";
+const DEFAULT_LAB_SECRET = "phobos-test";
 const MAX_CREDENTIAL_BYTES = 16 * 1024;
 const UNLOCK_FAILURES_BEFORE_DELAY = 5;
 
 function createClientAccessController(options = {}) {
-  const configuredCredentialPath = String(options.credentialPath || process.env.OCTOPUS_CLIENT_ACCESS_PATH || defaultCredentialPath());
+  const configuredCredentialPath = String(options.credentialPath || process.env.PHOBOS_CLIENT_ACCESS_PATH || defaultCredentialPath());
   if (!path.isAbsolute(configuredCredentialPath)) throw new Error("Client credential path must be absolute");
   const credentialPath = path.resolve(configuredCredentialPath);
-  const configuredLabCredentialPath = String(options.labCredentialPath || process.env.OCTOPUS_CLIENT_LAB_ACCESS_PATH || path.join(path.dirname(credentialPath), "client-lab-access.json"));
+  const configuredLabCredentialPath = String(options.labCredentialPath || process.env.PHOBOS_CLIENT_LAB_ACCESS_PATH || path.join(path.dirname(credentialPath), "client-lab-access.json"));
   if (!path.isAbsolute(configuredLabCredentialPath)) throw new Error("Client test credential path must be absolute");
   const labCredentialPath = path.resolve(configuredLabCredentialPath);
   if (credentialPath === labCredentialPath) throw new Error("Administrator and Test credential paths must be different");
-  const environmentAdministratorSecret = String(options.administratorSecret ?? process.env.OCTOPUS_CLIENT_ADMIN_SECRET ?? "");
-  const environmentLabSecret = String(options.labSecret ?? process.env.OCTOPUS_CLIENT_LAB_SECRET ?? "");
+  const environmentAdministratorSecret = String(options.administratorSecret ?? process.env.PHOBOS_CLIENT_ADMIN_SECRET ?? "");
+  const environmentLabSecret = String(options.labSecret ?? process.env.PHOBOS_CLIENT_LAB_SECRET ?? "");
   const defaultLabSecret = String(options.defaultLabSecret ?? DEFAULT_LAB_SECRET);
   const now = typeof options.now === "function" ? options.now : Date.now;
-  const openAccess = String(options.openAccess ?? process.env.OCTOPUS_CLIENT_ACCESS_OPEN ?? "") === "1";
+  const openAccess = String(options.openAccess ?? process.env.PHOBOS_CLIENT_ACCESS_OPEN ?? "") === "1";
   const sessions = new Map();
   let failedUnlocks = 0;
   let unlockBlockedUntil = 0;
   if (environmentAdministratorSecret && environmentAdministratorSecret.length < MIN_PASSWORD_LENGTH) {
-    throw new Error(`OCTOPUS_CLIENT_ADMIN_SECRET must contain at least ${MIN_PASSWORD_LENGTH} characters`);
+    throw new Error(`PHOBOS_CLIENT_ADMIN_SECRET must contain at least ${MIN_PASSWORD_LENGTH} characters`);
   }
   if (environmentLabSecret && environmentLabSecret.length < MIN_LAB_SECRET_LENGTH) {
-    throw new Error(`OCTOPUS_CLIENT_LAB_SECRET must contain at least ${MIN_LAB_SECRET_LENGTH} characters`);
+    throw new Error(`PHOBOS_CLIENT_LAB_SECRET must contain at least ${MIN_LAB_SECRET_LENGTH} characters`);
   }
   if (defaultLabSecret.length < MIN_LAB_SECRET_LENGTH) throw new Error("Default client test password is invalid");
   if (environmentAdministratorSecret && verifyLabSecret(environmentAdministratorSecret)) {
@@ -50,7 +50,7 @@ function createClientAccessController(options = {}) {
   }
 
   function configure(password) {
-    if (environmentAdministratorSecret) throw new Error("Administrator password is configured by OCTOPUS_CLIENT_ADMIN_SECRET.");
+    if (environmentAdministratorSecret) throw new Error("Administrator password is configured by PHOBOS_CLIENT_ADMIN_SECRET.");
     const value = requiredPassword(password);
     if (fs.existsSync(credentialPath)) throw new Error("A password is already configured on this device.");
     if (verifyLabSecret(value)) throw new Error("Administrator and Test passwords must be different.");
@@ -73,7 +73,7 @@ function createClientAccessController(options = {}) {
     }
     const value = String(candidate ?? "");
     const record = environmentAdministratorSecret ? null : readCredential();
-    if (!environmentAdministratorSecret && !record) throw new Error("Configure the Administrator password before unlocking Octopus.");
+    if (!environmentAdministratorSecret && !record) throw new Error("Configure the Administrator password before unlocking Phobos.");
     if (verifyAdministratorSecret(value, record)) {
       resetUnlockFailures();
       return createSession("live");
@@ -141,7 +141,7 @@ function createClientAccessController(options = {}) {
 
   function updateAdministratorAccess(token, currentPassword, password) {
     requireSession(token, ["live"]);
-    if (environmentAdministratorSecret) throw new Error("Administrator password is managed by OCTOPUS_CLIENT_ADMIN_SECRET.");
+    if (environmentAdministratorSecret) throw new Error("Administrator password is managed by PHOBOS_CLIENT_ADMIN_SECRET.");
     const record = readCredential();
     if (!record || !verify(String(currentPassword ?? ""), record)) {
       throw new Error("Current Administrator password is incorrect.");
@@ -165,7 +165,7 @@ function createClientAccessController(options = {}) {
 
   function updateLabAccess(token, password) {
     requireSession(token, ["live"]);
-    if (environmentLabSecret) throw new Error("Test password is managed by OCTOPUS_CLIENT_LAB_SECRET.");
+    if (environmentLabSecret) throw new Error("Test password is managed by PHOBOS_CLIENT_LAB_SECRET.");
     const value = String(password ?? "");
     if (value.trim().length < MIN_LAB_SECRET_LENGTH) {
       throw new Error(`Use at least ${MIN_LAB_SECRET_LENGTH} characters for the Test password.`);
@@ -198,7 +198,7 @@ function createClientAccessController(options = {}) {
   }
 
   function unlockWithTouchId() {
-    if (!environmentAdministratorSecret && !readCredential()) throw new Error("Configure the Administrator password before unlocking Octopus.");
+    if (!environmentAdministratorSecret && !readCredential()) throw new Error("Configure the Administrator password before unlocking Phobos.");
     resetUnlockFailures();
     return createSession("live");
   }
@@ -278,9 +278,9 @@ function createClientAccessController(options = {}) {
 }
 
 function defaultCredentialPath() {
-  if (process.platform === "darwin") return path.join(os.homedir(), "Library", "Application Support", "Octopus", "client-access.json");
-  if (process.platform === "win32") return path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Octopus", "client-access.json");
-  return path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config"), "Octopus", "client-access.json");
+  if (process.platform === "darwin") return path.join(os.homedir(), "Library", "Application Support", "Phobos", "client-access.json");
+  if (process.platform === "win32") return path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Phobos", "client-access.json");
+  return path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config"), "Phobos", "client-access.json");
 }
 
 function requiredPassword(value) {

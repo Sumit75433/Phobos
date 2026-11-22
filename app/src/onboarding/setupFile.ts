@@ -1,4 +1,4 @@
-import type { OctopusProviderInterface } from "../electron";
+import type { PhobosProviderInterface } from "../electron";
 import { DEFAULT_PROJECT_COLOR, projectColorKey } from "../design-system/projectColors";
 import {
   CAPABILITY_KINDS,
@@ -12,7 +12,7 @@ import {
   type WorkspaceSetupProject,
 } from "./workspaceSetup";
 
-export const SETUP_FILE_SCHEMA = "octopus.setup";
+export const SETUP_FILE_SCHEMA = "phobos.setup";
 export const SETUP_FILE_VERSION = 1;
 export const SETUP_FILE_MAX_BYTES = 256 * 1024;
 
@@ -56,7 +56,7 @@ export type SetupFileCatalogItem = {
 
 export function parseSetupFile(source: string): SetupFile {
   if (new TextEncoder().encode(source).byteLength > SETUP_FILE_MAX_BYTES) {
-    throw new Error("This setup file is larger than Octopus accepts.");
+    throw new Error("This setup file is larger than Phobos accepts.");
   }
   let value: unknown;
   try {
@@ -65,9 +65,9 @@ export function parseSetupFile(source: string): SetupFile {
     throw new Error("This file is not valid JSON.");
   }
   const root = exact(value, ["schema", "schema_version", "space", "projects", "capabilities", "model"], ["model"], "The setup file");
-  if (root.schema !== SETUP_FILE_SCHEMA) throw new Error("This is not an Octopus setup file.");
+  if (root.schema !== SETUP_FILE_SCHEMA) throw new Error("This is not a Phobos setup file.");
   if (root.schema_version !== SETUP_FILE_VERSION) {
-    throw new Error(`This setup file uses format version ${String(root.schema_version)}, which this Octopus cannot read.`);
+    throw new Error(`This setup file uses format version ${String(root.schema_version)}, which this Phobos cannot read.`);
   }
   const space = exact(root.space, ["name", "goal"], [], "The space");
   const projectRows = list(root.projects, "Projects", 24);
@@ -142,14 +142,14 @@ export function draftFromSetupFile(
   file: SetupFile,
   base: WorkspaceSetupDraft,
   catalog: readonly SetupFileCatalogItem[],
-  provider: OctopusProviderInterface | null,
+  provider: PhobosProviderInterface | null,
   idFactory: () => string = () => crypto.randomUUID(),
   timestamp = new Date().toISOString(),
 ): WorkspaceSetupDraft {
   const offered = new Map(catalog.map((item) => [`${item.kind}:${item.id}`, item]));
   const missing = file.capabilities.filter((capability) => !offered.has(`${capability.kind}:${capability.id}`));
   if (missing.length) {
-    throw new Error(`This setup needs ${missing.map((capability) => `'${capability.id}'`).join(", ")}, which this Octopus does not offer.`);
+    throw new Error(`This setup needs ${missing.map((capability) => `'${capability.id}'`).join(", ")}, which this Phobos does not offer.`);
   }
   for (const capability of file.capabilities) {
     const item = required(offered.get(`${capability.kind}:${capability.id}`));
@@ -287,12 +287,12 @@ export function setupFileFromHome(sources: HomeSetupSources): SetupFile {
 
 export function setupFileName(file: SetupFile): string {
   const slug = slugify(file.space.name);
-  return `${slug || "octopus"}.octopus-setup.json`;
+  return `${slug || "phobos"}.phobos-setup.json`;
 }
 
 function chosenModel(
   model: SetupFileModel,
-  provider: OctopusProviderInterface | null,
+  provider: PhobosProviderInterface | null,
 ): Pick<WorkspaceSetupDraft, "providerModel" | "reasoningEffort" | "serviceTier"> {
   const offered = provider?.models.find((candidate) => candidate.model === model.id && candidate.showInPicker);
   if (!offered) throw new Error(`This setup chooses the model '${model.id}', which is not available here.`);
@@ -316,8 +316,8 @@ function parseProject(value: unknown, index: number): SetupFileProject {
   const name = text(row.name, `${label} name`, 80);
   const icon = text(row.icon, `Project '${name}' icon`, 40);
   const color = text(row.color, `Project '${name}' color`, 40);
-  if (!PROJECT_ICONS.has(icon)) throw new Error(`Project '${name}' uses the icon '${icon}', which Octopus does not have.`);
-  if (!PROJECT_COLORS.has(color)) throw new Error(`Project '${name}' uses the color '${color}', which Octopus does not have.`);
+  if (!PROJECT_ICONS.has(icon)) throw new Error(`Project '${name}' uses the icon '${icon}', which Phobos does not have.`);
+  if (!PROJECT_COLORS.has(color)) throw new Error(`Project '${name}' uses the color '${color}', which Phobos does not have.`);
   return {
     id: identifier(row.id, `${label} id`),
     parent: row.parent === null ? null : identifier(row.parent, `Project '${name}' parent`),
@@ -404,7 +404,7 @@ function exact(value: unknown, keys: readonly string[], optional: readonly strin
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be an object.`);
   const row = value as Record<string, unknown>;
   const unknown = Object.keys(row).filter((key) => !keys.includes(key));
-  if (unknown.length) throw new Error(`${label} has fields Octopus does not read: ${unknown.join(", ")}.`);
+  if (unknown.length) throw new Error(`${label} has fields Phobos does not read: ${unknown.join(", ")}.`);
   const absent = keys.filter((key) => !optional.includes(key) && !(key in row));
   if (absent.length) throw new Error(`${label} is missing ${absent.join(", ")}.`);
   return row;

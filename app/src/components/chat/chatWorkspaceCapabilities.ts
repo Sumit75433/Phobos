@@ -1,5 +1,5 @@
 import type { ChatExecutionContext, ChatRun, ChatWorkerChoice } from "../../chatRuns";
-import type { OctopusProviderInterface, OctopusProviderModel } from "../../electron";
+import type { PhobosProviderInterface, PhobosProviderModel } from "../../electron";
 import {
   HOST_FILESYSTEM_ROOT_SLOT,
   type TaskAccessMode,
@@ -14,11 +14,11 @@ export type NewTaskDefaults = {
   serviceTier?: string;
 };
 
-export function providerModels(provider: OctopusProviderInterface): OctopusProviderModel[] {
+export function providerModels(provider: PhobosProviderInterface): PhobosProviderModel[] {
   return (provider.models ?? []).filter((model) => model.showInPicker || model.model === provider.model);
 }
 
-export function providerDefaultModel(provider: OctopusProviderInterface): OctopusProviderModel | null {
+export function providerDefaultModel(provider: PhobosProviderInterface): PhobosProviderModel | null {
   const models = providerModels(provider);
   if (provider.model) return models.find((model) => model.model === provider.model) ?? null;
   return models.find((model) => model.model === provider.model)
@@ -28,16 +28,16 @@ export function providerDefaultModel(provider: OctopusProviderInterface): Octopu
 }
 
 export function providerSelectedModel(
-  provider: OctopusProviderInterface,
+  provider: PhobosProviderInterface,
   model: string,
-): OctopusProviderModel | null {
+): PhobosProviderModel | null {
   const requested = model.trim();
   if (!requested) return providerDefaultModel(provider);
   return providerModels(provider).find((candidate) => candidate.model === requested) ?? null;
 }
 
 export function providerReasoningEfforts(
-  provider: OctopusProviderInterface,
+  provider: PhobosProviderInterface,
   model = provider.model ?? "",
 ): string[] {
   const selected = providerSelectedModel(provider, model);
@@ -50,23 +50,23 @@ export function providerReasoningEfforts(
   return [...new Set(configured)];
 }
 
-export function providerServiceTiers(provider: OctopusProviderInterface, model: string) {
+export function providerServiceTiers(provider: PhobosProviderInterface, model: string) {
   return [
     { id: "default", name: "Standard", description: "Default speed" },
     ...(providerSelectedModel(provider, model)?.serviceTiers ?? []),
   ];
 }
 
-export function providerServiceTierAvailable(provider: OctopusProviderInterface, model: string, tier: string) {
+export function providerServiceTierAvailable(provider: PhobosProviderInterface, model: string, tier: string) {
   return providerServiceTiers(provider, model).some((option) => option.id === providerSelectedServiceTier(provider, model, tier));
 }
 
-export function providerSelectedServiceTier(provider: OctopusProviderInterface, model: string, tier = "") {
+export function providerSelectedServiceTier(provider: PhobosProviderInterface, model: string, tier = "") {
   return tier || provider.serviceTier || providerSelectedModel(provider, model)?.defaultServiceTier || "default";
 }
 
 export function providerDefaultReasoningEffort(
-  provider: OctopusProviderInterface,
+  provider: PhobosProviderInterface,
   model: string,
 ): string {
   const selected = providerSelectedModel(provider, model);
@@ -78,9 +78,9 @@ export function providerDefaultReasoningEffort(
 }
 
 export function providerForExecutionContext(
-  provider: OctopusProviderInterface,
+  provider: PhobosProviderInterface,
   worker: ChatWorkerChoice,
-): OctopusProviderInterface {
+): PhobosProviderInterface {
   const formedModels = worker.interfacePolicy[provider.id]?.models;
   if (!Array.isArray(formedModels) || formedModels.some((model) => typeof model !== "string" || !model)) {
     return { ...provider, model: "", models: [] };
@@ -149,8 +149,8 @@ export function providerInExecutionContext(
   contexts: readonly ChatExecutionContext[],
   eeId: string,
   workerInterfaceId: string,
-  provider: OctopusProviderInterface,
-): OctopusProviderInterface | null {
+  provider: PhobosProviderInterface,
+): PhobosProviderInterface | null {
   const worker = contexts
     .find((context) => context.eeId === eeId)
     ?.workers.find((candidate) => candidate.id === workerInterfaceId);
@@ -160,10 +160,10 @@ export function providerInExecutionContext(
 }
 
 export function providerForExistingRun(
-  provider: OctopusProviderInterface,
+  provider: PhobosProviderInterface,
   run: ChatRun | undefined,
   selection: { runId: string; eeId: string; workerInterfaceId: string },
-): OctopusProviderInterface | null {
+): PhobosProviderInterface | null {
   const workerChoiceInterfaceId = run?.workerChoiceInterfaceId || run?.workerInterfaceId;
   if (!run || !run.writable || run.archived || !run.providerBoundInterfaceId
     || run.runId !== selection.runId || run.eeId !== selection.eeId

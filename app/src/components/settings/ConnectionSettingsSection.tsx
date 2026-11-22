@@ -1,7 +1,7 @@
 import { OcLoadingRows } from "../../design-system/LoadingSkeleton";
 import { useEffect, useState } from "react";
 import { OcButton, OcCard, OcEmptyState, OcGroup, OcStatus, OcTextField } from "../../design-system/components";
-import type { OctopusAppInfo, OctopusTransportDefaults } from "../../electron";
+import type { PhobosAppInfo, PhobosTransportDefaults } from "../../electron";
 import { loadRuntimePrefs, saveRuntimePrefs, validateRuntimeEndpoint } from "../../runtimeClient";
 import { useAppErrorToast } from "../../toasts";
 import { SettingsHeading } from "./SettingsHeading";
@@ -10,8 +10,8 @@ import { FactRow, ProviderCard, useDeclaredProviders } from "./SettingsProviderS
 import { settingsTargetProps } from "./settingsCatalog";
 export function ConnectionsSection() {
   const providerState = useDeclaredProviders();
-  const [info, setInfo] = useState<OctopusAppInfo | null>(null);
-  const [defaults, setDefaults] = useState<OctopusTransportDefaults | null>(null);
+  const [info, setInfo] = useState<PhobosAppInfo | null>(null);
+  const [defaults, setDefaults] = useState<PhobosTransportDefaults | null>(null);
   const [endpoint, setEndpoint] = useState(() => loadRuntimePrefs().baseUrl);
   const [savedEndpoint, setSavedEndpoint] = useState(() => loadRuntimePrefs().baseUrl);
   const [saveState, setSaveState] = useState<"idle" | "checking" | "saved" | "error">("idle");
@@ -22,8 +22,8 @@ export function ConnectionsSection() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      window.octopusTransport?.appInfo?.() ?? Promise.resolve(null),
-      window.octopusTransport?.defaults?.() ?? Promise.resolve(null),
+      window.phobosTransport?.appInfo?.() ?? Promise.resolve(null),
+      window.phobosTransport?.defaults?.() ?? Promise.resolve(null),
     ])
       .then(([nextInfo, nextDefaults]) => {
         if (cancelled) return;
@@ -94,7 +94,7 @@ export function ConnectionsSection() {
           <FactRow label="Application" value={info?.name ?? "Not reported in this environment"} />
           <FactRow label="Version" value={info ? `${info.version}${info.isPackaged ? "" : " · development"}` : "Not reported"} />
           <FactRow label="Platform" value={info?.platform ?? "Not reported"} />
-          <FactRow label="Octopus home" mono value={defaults?.octopusHome || "Not resolved"} />
+          <FactRow label="Phobos home" mono value={defaults?.phobosHome || "Not resolved"} />
           <FactRow label="Active registry" mono value={defaults?.registryRoot || providerState.registryRoot || "Not resolved"} />
           <FactRow label="Runtime state" mono value={defaults?.stateRoot || "Not resolved"} />
           <FactRow label="Movement ledger" mono value={defaults?.ledgerPath || "Not resolved"} />

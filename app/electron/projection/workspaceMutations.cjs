@@ -1,19 +1,19 @@
-module.exports = { mutateOctopusOsWorkspace };
+module.exports = { mutatePhobosOsWorkspace };
 
 const path = require("node:path");
-const { createOctopusOsAgentTemplate, mutateOctopusOsAgentTemplate, requiredAgentName } = require("./agentTemplates.cjs");
-const { configureOctopusOsApplication, configureOctopusOsDriver } = require("./applicationConfiguration.cjs");
+const { createPhobosOsAgentTemplate, mutatePhobosOsAgentTemplate, requiredAgentName } = require("./agentTemplates.cjs");
+const { configurePhobosOsApplication, configurePhobosOsDriver } = require("./applicationConfiguration.cjs");
 const { readRegularJsonDocument } = require("./jsonFiles.cjs");
-const { mutateLocalPackageInventory, requireOctopusOsScope, workspaceProjectMutationScope } = require("./localPackageInventory.cjs");
-const { parseOctopusOsSidecar } = require("./sidecars.cjs");
-const { configureOctopusOsTaskApplication } = require("./taskApplications.cjs");
-const { setOctopusOsTaskArchived } = require("./taskArchive.cjs");
-const { deleteOctopusOsTask } = require("./taskDeletion.cjs");
+const { mutateLocalPackageInventory, requirePhobosOsScope, workspaceProjectMutationScope } = require("./localPackageInventory.cjs");
+const { parsePhobosOsSidecar } = require("./sidecars.cjs");
+const { configurePhobosOsTaskApplication } = require("./taskApplications.cjs");
+const { setPhobosOsTaskArchived } = require("./taskArchive.cjs");
+const { deletePhobosOsTask } = require("./taskDeletion.cjs");
 const { exactObjectKeys, requiredSafeRegistryId, stringValue } = require("./values.cjs");
 
 let osWorkspaceMutationTail = Promise.resolve();
 
-async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, request, hooks = {}) {
+async function mutatePhobosOsWorkspace(registryRoot, phobosHomeRoot, scope, request, hooks = {}) {
   const action = stringValue(request?.action);
   if (![
     "create_project",
@@ -38,7 +38,7 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
     "configure_driver",
     "configure_task_application",
   ].includes(action)) {
-    throw new Error("Octopus OS workspace mutation action is invalid");
+    throw new Error("Phobos OS workspace mutation action is invalid");
   }
   const execute = async () => {
     if ([
@@ -53,15 +53,15 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
     ].includes(action)) {
       return mutateLocalPackageInventory(
         registryRoot,
-        octopusHomeRoot,
+        phobosHomeRoot,
         scope,
         request,
         hooks,
       );
     }
-    const snapshot = requireOctopusOsScope(scope);
+    const snapshot = requirePhobosOsScope(scope);
     if (action === "set_task_archived") {
-      return setOctopusOsTaskArchived(registryRoot, octopusHomeRoot, snapshot, request, hooks);
+      return setPhobosOsTaskArchived(registryRoot, phobosHomeRoot, snapshot, request, hooks);
     }
     if (action === "rename_task") {
       const runId = requiredSafeRegistryId(request.runId, "runId");
@@ -70,17 +70,17 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
       if (!task) throw new Error(`Task '${runId}' is not an editable task in this Home.`);
       if (typeof hooks.commitClientAuthoring !== "function") throw new Error("Client authoring transaction is unavailable.");
       const interfaceId = requiredSafeRegistryId(task.interface_id, "task client interface");
-      const file = path.join(registryRoot, "interface", interfaceId, "octopus_os.json");
+      const file = path.join(registryRoot, "interface", interfaceId, "phobos_os.json");
       const current = await readRegularJsonDocument(file, "task presentation");
-      parseOctopusOsSidecar(current.document, interfaceId, file);
+      parsePhobosOsSidecar(current.document, interfaceId, file);
       if (current.document.component !== "client" || current.document.surface_role !== "task"
         || current.document.owner_interface !== interfaceId) {
         throw new Error("Task presentation no longer belongs to the selected run.");
       }
       const next = { ...current.document, presentation: { name, projects: [] } };
-      parseOctopusOsSidecar(next, interfaceId, file);
+      parsePhobosOsSidecar(next, interfaceId, file);
       await hooks.commitClientAuthoring({
-        label: "rename Octopus task",
+        label: "rename Phobos task",
         writes: [{ file, beforeDigest: current.digest, next }],
         removals: [], publishBarrierPath: file,
       });
@@ -88,10 +88,10 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
     }
     if (action === "add_agent_preset") {
       exactObjectKeys(request, ["action", "operationId", "home", "workspace", "projectEeId", "packId", "expectedPackManifestDigest", "presetId", "providerInterfaceId", "providerModel", "reasoningEffort", "serviceTier"], ["action", "operationId", "home", "workspace", "projectEeId", "packId", "expectedPackManifestDigest", "presetId", "providerInterfaceId", "providerModel", "reasoningEffort"], "Agent preset request");
-      if (request.home !== octopusHomeRoot || typeof hooks.withAgentPreset !== "function") throw new Error("Agent preset authoring is unavailable for this Home");
+      if (request.home !== phobosHomeRoot || typeof hooks.withAgentPreset !== "function") throw new Error("Agent preset authoring is unavailable for this Home");
       return hooks.withAgentPreset(request, async (preset) => {
         await preset.verify();
-        const result = await createOctopusOsAgentTemplate(registryRoot, octopusHomeRoot, snapshot, {
+        const result = await createPhobosOsAgentTemplate(registryRoot, phobosHomeRoot, snapshot, {
           ...request,
           sourceWorkerInterfaceId: preset.sourceInterface.id,
           name: preset.recipe.name,
@@ -101,9 +101,9 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
       });
     }
     if (action === "create_agent_template") {
-      return createOctopusOsAgentTemplate(
+      return createPhobosOsAgentTemplate(
         registryRoot,
-        octopusHomeRoot,
+        phobosHomeRoot,
         snapshot,
         request,
         hooks.commitClientAuthoring,
@@ -111,9 +111,9 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
       );
     }
     if (action === "configure_agent_template" || action === "delete_agent_template") {
-      return mutateOctopusOsAgentTemplate(
+      return mutatePhobosOsAgentTemplate(
         registryRoot,
-        octopusHomeRoot,
+        phobosHomeRoot,
         snapshot,
         request,
         hooks.commitClientAuthoring,
@@ -127,9 +127,9 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
       return hooks.mutateWorkspaceProject(workspaceProjectMutationScope(snapshot), request);
     }
     if (action === "delete_task") {
-      const remove = () => deleteOctopusOsTask(
+      const remove = () => deletePhobosOsTask(
         registryRoot,
-        octopusHomeRoot,
+        phobosHomeRoot,
         snapshot,
         request,
         hooks.releaseTaskWorkerEnvironments,
@@ -139,26 +139,26 @@ async function mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, re
       return hooks.taskLifecycle ? hooks.taskLifecycle.withTaskLifecycleLock(request.runId, remove) : remove();
     }
     if (action === "configure_application") {
-      return configureOctopusOsApplication(
+      return configurePhobosOsApplication(
         registryRoot,
-        octopusHomeRoot,
+        phobosHomeRoot,
         snapshot,
         request,
         hooks.commitClientAuthoring,
       );
     }
     if (action === "configure_driver") {
-      return configureOctopusOsDriver(
+      return configurePhobosOsDriver(
         registryRoot,
-        octopusHomeRoot,
+        phobosHomeRoot,
         snapshot,
         request,
         hooks.commitClientAuthoring,
       );
     }
-    return configureOctopusOsTaskApplication(
+    return configurePhobosOsTaskApplication(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       snapshot,
       request,
       hooks.withTaskAuthoringLock,

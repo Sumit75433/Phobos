@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_image_generation",
   "version": "1.2.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Image Generation",
     "description": "Create images from a prompt while working in a task, with the image generation of your ChatGPT plan.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "plugin",
     "icon": "image"
   },

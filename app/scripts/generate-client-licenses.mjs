@@ -68,7 +68,7 @@ for (const asset of supplemental.assets) {
 }
 const iconRoot = path.join(appRoot, "licenses/icon-assets");
 const icons = JSON.parse(fs.readFileSync(path.join(iconRoot, "notices.json"), "utf8"));
-if (icons.schema !== "octopus.client_icon_notices.v1" || !icons.upstreams || !icons.shapes || !Array.isArray(icons.glyphs)) throw new Error("Invalid icon notice inventory");
+if (icons.schema !== "phobos.client_icon_notices.v1" || !icons.upstreams || !icons.shapes || !Array.isArray(icons.glyphs)) throw new Error("Invalid icon notice inventory");
 const usedIconSources = new Set(icons.glyphs.flatMap((glyph) => glyph.shapes).map((name) => icons.shapes[name].upstream));
 for (const name of usedIconSources) {
   const source = icons.upstreams[name];

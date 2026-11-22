@@ -24,13 +24,13 @@ class OneShotContract(unittest.TestCase):
         self.config = self.document["activations"][0]["config"]
         self.config["schedule"].update(interval_seconds=None, due_at=DUE, fire_on_start=False)
         environment = {
-            "OCTOPUS_INTERFACE_ID": "world_cron",
-            "OCTOPUS_INTERFACE_DIR": str(self.root),
-            "OCTOPUS_VAR_DIR": str(self.var),
-            "OCTOPUS_INTERFACE_DESCRIPTOR_JSON": (OWNER / "interface.json").read_text(),
-            "OCTOPUS_MOVEMENTS_JSONL": str(self.ledger),
-            "OCTOPUS_INTERFACE_HOST_IO_LIMITS": json.dumps({key: 1048576 for key in ("max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes")}),
-            "OCTOPUS_ROOT_SLOTS_JSON": json.dumps({"run_records_root": str(self.runs), "timezone_database_root": str(self.root / "timezone_database_root")}),
+            "PHOBOS_INTERFACE_ID": "world_cron",
+            "PHOBOS_INTERFACE_DIR": str(self.root),
+            "PHOBOS_VAR_DIR": str(self.var),
+            "PHOBOS_INTERFACE_DESCRIPTOR_JSON": (OWNER / "interface.json").read_text(),
+            "PHOBOS_MOVEMENTS_JSONL": str(self.ledger),
+            "PHOBOS_INTERFACE_HOST_IO_LIMITS": json.dumps({key: 1048576 for key in ("max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes")}),
+            "PHOBOS_ROOT_SLOTS_JSON": json.dumps({"run_records_root": str(self.runs), "timezone_database_root": str(self.root / "timezone_database_root")}),
         }
         self.environment = patch.dict(os.environ, environment)
         self.environment.start()

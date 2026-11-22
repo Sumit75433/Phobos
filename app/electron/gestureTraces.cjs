@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const TRACE_FOLDER = "gesture-traces";
-const TRACE_FORMAT = "octopus.gesture-trace";
+const TRACE_FORMAT = "phobos.gesture-trace";
 const TRACE_VERSION = 1;
 const MAX_TRACE_BYTES = 64 * 1024 * 1024;
 

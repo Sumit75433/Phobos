@@ -16,7 +16,7 @@ async function sensorWatchProjection(projection, descriptor, interfaceId) {
     condition = `Email ${watch.match_fields.join(" / ")} contains any of: ${watch.terms.join(", ")}`;
   } else throw new Error("Unsupported sensor watch condition");
   const armed = await read(path.join(directory, "armed.json"));
-  const fired = await read(path.join(projection.octopusHome, "interfaces", interfaceId, "fired.json"));
+  const fired = await read(path.join(projection.phobosHome, "interfaces", interfaceId, "fired.json"));
   if (armed && (armed.armed !== undefined && typeof armed.armed !== "boolean"
     || armed.armed !== false && !Number.isFinite(Date.parse(armed.armed_at)))) throw new Error("Invalid sensor arming state");
   if (fired && (fired.schema_version !== 1 || !["prepared", "admitted", "refused"].includes(fired.status))) throw new Error("Invalid sensor firing state");

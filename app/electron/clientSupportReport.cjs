@@ -19,7 +19,7 @@ function setupProgress(value) {
 
 async function collectSupportReport({ application, profile, clientRoot, home, runtime, progress, includeDetails = false, now = Date.now() }) {
   const report = {
-    schema: "octopus.client_support_report",
+    schema: "phobos.client_support_report",
     schema_version: 2,
     report_id: randomUUID(),
     captured_at: new Date(now).toISOString(),
@@ -63,7 +63,7 @@ async function collectSupportReport({ application, profile, clientRoot, home, ru
   }
   const events = [];
   report.client_logs = { sources: [], events };
-  for (const name of ["octopus-client.jsonl.1", "octopus-client.jsonl"]) {
+  for (const name of ["phobos-client.jsonl.1", "phobos-client.jsonl"]) {
     try {
       const source = await readBounded(clientRoot, path.join("logs", name), MAX_LOG_BYTES, true);
       let malformed = 0;
@@ -96,13 +96,13 @@ async function collectSupportReport({ application, profile, clientRoot, home, ru
 }
 
 function supportReportText(report, description) {
-  return `# Octopus problem report\n\n${String(description ?? "").slice(0, 4000).trim() || "No description provided."}\n\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\`\n`;
+  return `# Phobos problem report\n\n${String(description ?? "").slice(0, 4000).trim() || "No description provided."}\n\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\`\n`;
 }
 
 function supportIssueUrl(report, description) {
   const url = new URL("https://github.com/miuuyy/Octopus-SI-OS/issues/new");
   const text = String(description ?? "").trim();
-  url.searchParams.set("title", text.split("\n")[0].slice(0, 100) || "Octopus problem report");
+  url.searchParams.set("title", text.split("\n")[0].slice(0, 100) || "Phobos problem report");
   url.searchParams.set("body", `${text.slice(0, 1000) || "Describe what happened and what you expected."}${text.length > 1000 ? "\n[Description continues in the saved report.]" : ""}\n\nVersion: ${report.application.version}\nBuild: ${report.application.revision ?? "not recorded"}\nPlatform: ${report.application.platform} ${report.application.arch}\nReport: ${report.report_id}\n\nAttach the saved diagnostic report after reviewing it. Do not include credentials or private conversations.`);
   return url.toString();
 }

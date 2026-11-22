@@ -1,10 +1,10 @@
 import { useId, useRef } from "react";
-import type { OctopusChatgptAccount } from "../../electron";
+import type { PhobosChatgptAccount } from "../../electron";
 import { OcButton, OcDialog, OcIconButton } from "../../design-system/components";
 import "./account.css";
 
 export function AccountLogoutDialog({ account, open, busy, onClose, onConfirm }:
-  { account: OctopusChatgptAccount | null; open: boolean; busy: boolean; onClose: () => void; onConfirm: () => void }) {
+  { account: PhobosChatgptAccount | null; open: boolean; busy: boolean; onClose: () => void; onConfirm: () => void }) {
   const titleId = useId();
   const cancelRef = useRef<HTMLButtonElement>(null);
   return <OcDialog open={open} onClose={onClose} busy={busy} size="narrow" ariaLabelledBy={titleId} initialFocusRef={cancelRef}>
@@ -20,9 +20,9 @@ export function AccountLogoutDialog({ account, open, busy, onClose, onConfirm }:
         <OcIconButton className="account-logout-close" glyph="close" label="Close dialog" onClick={onClose} disabled={busy} variant="ghost" />
       </header>
       <div className="account-logout-description">
-        <p>You’ll need to sign in again to keep using ChatGPT in Octopus.</p>
+        <p>You’ll need to sign in again to keep using ChatGPT in Phobos.</p>
         <p>Applications and Homes using <code>{account?.credentialHome ?? "this native credential location"}</code> share this sign-in. Logging out removes the saved sign-in there; new ChatGPT requests need sign-in again.</p>
-        <p>Your Octopus Home and local Administrator access are kept.</p>
+        <p>Your Phobos Home and local Administrator access are kept.</p>
       </div>
       <footer className="account-logout-actions">
         <OcButton buttonRef={cancelRef} variant="ghost" onClick={onClose} disabled={busy}>Cancel</OcButton>

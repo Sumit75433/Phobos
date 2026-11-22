@@ -295,10 +295,10 @@ test("a recorded gesture trace replays through the engine to the same decisions"
     now += 33;
     return traceFrame(now, 1, frame.hands, engine.process(frame.hands, now, OPTIONS));
   });
-  const trace = parseGestureTrace(JSON.parse(JSON.stringify({ format: "octopus.gesture-trace", version: 1, recordedAt: "", label: "synthetic", options: { mirrorX: true, sensitivity: "balanced" }, camera: { width: 1280, height: 720 }, frames: recorded })));
+  const trace = parseGestureTrace(JSON.parse(JSON.stringify({ format: "phobos.gesture-trace", version: 1, recordedAt: "", label: "synthetic", options: { mirrorX: true, sensitivity: "balanced" }, camera: { width: 1280, height: 720 }, frames: recorded })));
   const replayed = replay(trace).flatMap((result) => result.interactions);
   assert.deepEqual(kinds(replayed), kinds(recorded.flatMap((frame) => frame.decision.interactions)));
-  assert.throws(() => parseGestureTrace({ format: "octopus.gesture-trace", version: 2, frames: [] }), /not octopus.gesture-trace v1/);
+  assert.throws(() => parseGestureTrace({ format: "phobos.gesture-trace", version: 2, frames: [] }), /not phobos.gesture-trace v1/);
 });
 
 test("a point interaction moves focus while the Settings gesture page is mounted", async () => {

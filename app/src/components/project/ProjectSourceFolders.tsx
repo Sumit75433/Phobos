@@ -12,8 +12,8 @@ export function ProjectSourceFolders({ folders, onChange, disabled, onError }: {
   const add = async () => {
     setChoosing(true);
     try {
-      if (!window.octopusTransport?.selectClientDirectory) throw new Error("Folder selection is unavailable.");
-      const result = await window.octopusTransport.selectClientDirectory({ mode: "directory", allowMultiple: true, title: "Choose source folders" });
+      if (!window.phobosTransport?.selectClientDirectory) throw new Error("Folder selection is unavailable.");
+      const result = await window.phobosTransport.selectClientDirectory({ mode: "directory", allowMultiple: true, title: "Choose source folders" });
       if (!result.canceled) onChange([...new Set([...folders, ...result.paths])]);
     } catch (failure) {
       onError(failure instanceof Error ? failure.message : String(failure));
@@ -35,7 +35,7 @@ export function ProjectSourceFolders({ folders, onChange, disabled, onError }: {
       <button type="button" disabled={disabled || choosing} onClick={() => void add()}
         className={`flex w-full items-center gap-2 px-3 text-sm text-token-description-foreground hover:bg-token-foreground/5 disabled:opacity-50 ${folders.length ? "h-12" : "h-24 flex-col justify-center text-center"}`}>
         <Glyph name="plus" size={16} />
-        {folders.length ? "Add folder" : "Add folders Octopus can read and edit"}
+        {folders.length ? "Add folder" : "Add folders Phobos can read and edit"}
       </button>
     </div>
   </div>;

@@ -49,7 +49,7 @@ function harness({ authDocument, linked = true, explicit = null, profiles = { [L
     input: {},
     saveValues: async () => assert.fail("connection must not save values"),
     privateDirectory: directory,
-    launchEnvironment: (name) => (name === "OCTOPUS_MACHINE_CODEX_AUTH_FILE" ? authFile : undefined),
+    launchEnvironment: (name) => (name === "PHOBOS_MACHINE_CODEX_AUTH_FILE" ? authFile : undefined),
     openExternal: async (url) => { state.opened.push(url); },
     progress: (update) => { state.progress.push(update); },
     signal: new AbortController().signal,
@@ -102,7 +102,7 @@ test("probe reads the linked mailbox through the profile tool, names the ChatGPT
     state: "expired",
     account: { label: "ChatGPT account owner@chatgpt.example" },
     manage: MANAGE,
-    message: "ChatGPT sign-in expired — sign in again in Octopus.",
+    message: "ChatGPT sign-in expired — sign in again in Phobos.",
   });
   assert.equal(expired.state.requests.length, 0);
 
@@ -171,7 +171,7 @@ test("Connect publishes the tools and says so when the mailbox can be neither re
   assert.equal(connected.state, "connected");
   assert.equal(connected.account.label, "Gmail linked in ChatGPT");
   assert.equal(state.published.length, 1);
-  assert.match(connected.message, /could not read which mailbox it uses\. 2 tools are available to connected tasks\. Octopus could not keep the Gmail mailbox list/);
+  assert.match(connected.message, /could not read which mailbox it uses\. 2 tools are available to connected tasks\. Phobos could not keep the Gmail mailbox list/);
 });
 
 test("several linked accounts are read through the link choice their tool schema asks for", async () => {

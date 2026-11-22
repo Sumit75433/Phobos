@@ -1,0 +1,18 @@
+[package]
+name = "phobos-worker-env"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-interfaces = { path = "../phobos-interfaces" }
+
+[dev-dependencies]
+tempfile = "3"

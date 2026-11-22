@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { ClientTurnQueue, indexedQueuePersistence, queueHead, queueNamespace, type QueuedChatTurn } from "./clientTurnQueue";
 export type { QueuedChatTurn } from "./clientTurnQueue";
 
@@ -12,14 +12,14 @@ function sharedQueue(profile: string, home: string): ClientTurnQueue {
   const storageUnavailable = async (): Promise<never> => { throw new Error("Durable message storage is unavailable in this client."); };
   const persistence = !key ? { read: unavailable, update: unavailable } : globalThis.indexedDB
     ? indexedQueuePersistence(globalThis.indexedDB) : { read: storageUnavailable, update: storageUnavailable };
-  const channel = key && typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(`octopus:queue:${key}`) : null;
+  const channel = key && typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(`phobos:queue:${key}`) : null;
   const queue = new ClientTurnQueue(key, persistence, () => channel?.postMessage("changed"));
   if (channel) channel.onmessage = () => { void queue.refresh(); };
   queues.set(key, queue);
   return queue;
 }
 
-export function useChatTurnQueue(accessProfile: OctopusClientAccessProfile, runtimeHome: string) {
+export function useChatTurnQueue(accessProfile: PhobosClientAccessProfile, runtimeHome: string) {
   const queueStore = useMemo(() => sharedQueue(accessProfile, runtimeHome), [accessProfile, runtimeHome]);
   const snapshot = useSyncExternalStore(queueStore.subscribe, queueStore.getSnapshot);
   const queueOwner = useMemo(() => ({ id: crypto.randomUUID(), active: false, ready: false }), [queueStore]);
@@ -35,7 +35,7 @@ export function useChatTurnQueue(accessProfile: OctopusClientAccessProfile, runt
       void queueStore.refresh();
       return () => { queueOwner.active = false; };
     }
-    void locks.request(`octopus:queue-owner:${owner}`, async () => {
+    void locks.request(`phobos:queue-owner:${owner}`, async () => {
       while (queueOwner.active && queueOwner.id === owner) {
         try {
           await queueStore.refresh();
@@ -43,7 +43,7 @@ export function useChatTurnQueue(accessProfile: OctopusClientAccessProfile, runt
           const observedOwners = new Set(queueStore.snapshot.turns.flatMap((item) => [item.owner, item.editOwner].filter((owner): owner is string => Boolean(owner))));
           const held = (await locks.query()).held ?? [];
           if (!queueOwner.active || queueOwner.id !== owner) return;
-          await queueStore.recoverOwners(new Set(held.flatMap((lock) => lock.name?.startsWith("octopus:queue-owner:") ? [lock.name.slice("octopus:queue-owner:".length)] : [])), observedOwners);
+          await queueStore.recoverOwners(new Set(held.flatMap((lock) => lock.name?.startsWith("phobos:queue-owner:") ? [lock.name.slice("phobos:queue-owner:".length)] : [])), observedOwners);
           if (!queueOwner.active || queueOwner.id !== owner) return;
           queueOwner.ready = true;
           await queueStore.refresh();

@@ -1,4 +1,4 @@
-import type { OctopusOsFile, OctopusOsFileRoots, OctopusOsFileWriteOutcome, OctopusOsFileWriteRequest } from "../../electron";
+import type { PhobosOsFile, PhobosOsFileRoots, PhobosOsFileWriteOutcome, PhobosOsFileWriteRequest } from "../../electron";
 import type { FilesOpenTarget } from "./types";
 import { filesRootMatches, filesSnapshotDirty, normalizeFilesPaneSnapshot, type FilesPaneSnapshot } from "./filesPaneSnapshot";
 
@@ -11,8 +11,8 @@ export type FilesPaneState = {
   error: string;
 };
 type SaveTransport = {
-  osFileRoots(): Promise<OctopusOsFileRoots>;
-  writeOsFile(request: OctopusOsFileWriteRequest): Promise<OctopusOsFileWriteOutcome>;
+  osFileRoots(): Promise<PhobosOsFileRoots>;
+  writeOsFile(request: PhobosOsFileWriteRequest): Promise<PhobosOsFileWriteOutcome>;
 };
 type Pane = { state: FilesPaneState; listeners: Set<() => void>; closePromise?: Promise<boolean>; resolveClose?: (allow: boolean) => void; flush?: () => void };
 const panes = new Map<string, Pane>();
@@ -190,10 +190,10 @@ export async function saveFilesPane(key: string, transport?: SaveTransport): Pro
   try {
     if (!filesRootMatches(sent, (await transport.osFileRoots()).roots)) throw new Error("The admitted Files root changed. The unsaved draft has been retained.");
     const saved = await transport.writeOsFile({ rootId: file.rootId, path: file.path, text: sent.draft, expectedDigest: file.digest, expectedModifiedAt: file.modifiedAt, expectedSize: file.size });
-    if (!saved.outsideOctopusEvidence || saved.rootId !== file.rootId || saved.path !== file.path || saved.kind !== "text" || saved.truncated || saved.text !== sent.draft || !/^[a-f0-9]{64}$/.test(saved.digest)) throw new Error("OS Files returned an invalid manual-edit receipt.");
+    if (!saved.outsidePhobosEvidence || saved.rootId !== file.rootId || saved.path !== file.path || saved.kind !== "text" || saved.truncated || saved.text !== sent.draft || !/^[a-f0-9]{64}$/.test(saved.digest)) throw new Error("OS Files returned an invalid manual-edit receipt.");
     if (pane.state.snapshot.file !== file) throw new Error("The file changed during save; its current draft has been retained.");
-    const { outsideOctopusEvidence: _, ...savedFile } = saved;
-    updateFilesPane(key, (current) => ({ ...current, file: savedFile as OctopusOsFile, draft: current.draft === sent.draft ? saved.text : current.draft }));
+    const { outsidePhobosEvidence: _, ...savedFile } = saved;
+    updateFilesPane(key, (current) => ({ ...current, file: savedFile as PhobosOsFile, draft: current.draft === sent.draft ? saved.text : current.draft }));
     return !filesSnapshotDirty(pane.state.snapshot);
   } catch (error) {
     publish(pane, { error: error instanceof Error ? error.message : String(error) });

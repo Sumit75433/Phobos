@@ -1,0 +1,15 @@
+[package]
+name = "phobos-mcp-stdio-session-tool-runtime"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[[bin]]
+name = "phobos-mcp-stdio-session-tool-door-life"
+path = "src/bin/tool_door_life.rs"
+
+[dependencies]
+tokio = { workspace = true, features = ["rt", "sync", "io-std", "io-util", "time", "process"] }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }

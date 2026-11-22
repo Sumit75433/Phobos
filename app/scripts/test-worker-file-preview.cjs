@@ -24,10 +24,10 @@ test('file preview owns a compact header and routes each action to its exact roo
     plugins: [{name: 'native-boundaries', setup(b) {
       b.onResolve({filter: /(?:^|\/)appearance$/}, () => ({path: 'appearance', namespace: 'test'}));
       b.onResolve({filter: /^@pierre\/diffs\/react$/}, () => ({path: 'diffs', namespace: 'test'}));
-      b.onResolve({filter: /octopusDiffThemes$/}, () => ({path: 'themes', namespace: 'test'}));
+      b.onResolve({filter: /phobosDiffThemes$/}, () => ({path: 'themes', namespace: 'test'}));
       b.onLoad({filter: /.*/, namespace: 'test'}, ({path: name}) => ({contents: name === 'appearance'
         ? 'export function useAppearance(){return {themeMode:"dark"}}; export function useShouldReduceMotion(){return true}'
-        : name === 'themes' ? 'export function registerOctopusDiffThemes(){}; export function octopusDiffThemeName(){return "test"}'
+        : name === 'themes' ? 'export function registerPhobosDiffThemes(){}; export function phobosDiffThemeName(){return "test"}'
         : 'import React from "react"; export function File({file}){return React.createElement("pre",null,file.contents)}', loader: 'js'}));
     }}], logLevel: 'silent',
   });
@@ -42,7 +42,7 @@ test('file preview owns a compact header and routes each action to its exact roo
   const calls = [];
   const text = '{"exact":true}';
   const identity = {workerEnvironmentId: 'room-a', surfaceId: 'files-a', path: 'state/ee_instances/example.json'};
-  w.octopusTransport = {
+  w.phobosTransport = {
     readWorkerEnvironmentFile: async request => {
       assert.deepEqual(request, identity);
       return {...identity, kind: 'text', text, size: text.length, modifiedAt: 'now', digest: 'a'.repeat(64), truncated: false};
@@ -72,7 +72,7 @@ test('file preview owns a compact header and routes each action to its exact roo
     assert.equal(w.document.querySelector('button[aria-label="Edit file manually"]'), null);
   } finally {
     await React.act(async () => root.unmount());
-    delete w.octopusTransport;
+    delete w.phobosTransport;
     channels.forEach(channel => channel.close());
     globalThis.BroadcastChannel = NativeBroadcastChannel;
     dom.window.close();

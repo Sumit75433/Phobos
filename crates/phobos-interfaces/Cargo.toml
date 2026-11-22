@@ -1,0 +1,21 @@
+[package]
+name = "phobos-interfaces"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phobos-file-storage = { path = "../phobos-file-storage" }
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+async-trait.workspace = true
+libc = "0.2.182"
+tempfile = "3.23.0"
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-marks = { path = "../phobos-marks" }
+phobos-policy = { path = "../phobos-policy" }

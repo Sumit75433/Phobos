@@ -17,7 +17,7 @@ import { runClientExtensionAction } from "./transport";
 import type { ClientExtensionActionRegistration } from "./types";
 
 const PROVIDER_CREDENTIAL_REPAIR_ACTION = "provider.credentials.refresh";
-const OCTOPUS_DIALOG_OUTLINE_ACTION = "!border-token-border !bg-token-bg-fog !text-token-button-tertiary-foreground enabled:hover:!bg-token-list-hover-background";
+const PHOBOS_DIALOG_OUTLINE_ACTION = "!border-token-border !bg-token-bg-fog !text-token-button-tertiary-foreground enabled:hover:!bg-token-list-hover-background";
 
 export function hasBuiltinClientExtensionAction(actionId: string): boolean {
   return actionId === PROVIDER_CREDENTIAL_REPAIR_ACTION;
@@ -98,12 +98,12 @@ function ProviderCredentialRepairDialog({
         ? "Checking Codex sign-in"
         : "Check Codex sign-in?";
   const description = succeeded
-    ? "Octopus now uses the current Codex sign-in on this Mac. You can send the draft again or resume the stopped task."
+    ? "Phobos now uses the current Codex sign-in on this Mac. You can send the draft again or resume the stopped task."
     : failed
       ? operation.message
       : running
-        ? "Checking the machine-wide Codex sign-in. Your draft and the running Octopus runtime stay unchanged."
-        : "Octopus uses the same Codex sign-in as the Codex app and CLI on this Mac. Sign in there first, then check it here. Your draft stays unchanged.";
+        ? "Checking the machine-wide Codex sign-in. Your draft and the running Phobos runtime stay unchanged."
+        : "Phobos uses the same Codex sign-in as the Codex app and CLI on this Mac. Sign in there first, then check it here. Your draft stays unchanged.";
 
   return (
     <OcDialog
@@ -144,7 +144,7 @@ function ProviderCredentialRepairDialog({
           ) : failed ? (
             <>
               <OcButton
-                className={`${OCTOPUS_DIALOG_OUTLINE_ACTION}${operation.retryable ? "" : " w-full justify-center"}`}
+                className={`${PHOBOS_DIALOG_OUTLINE_ACTION}${operation.retryable ? "" : " w-full justify-center"}`}
                 onClick={close}
                 variant="secondary"
               >
@@ -154,7 +154,7 @@ function ProviderCredentialRepairDialog({
             </>
           ) : (
             <>
-              <OcButton className={OCTOPUS_DIALOG_OUTLINE_ACTION} disabled={running} onClick={close} variant="secondary">Cancel</OcButton>
+              <OcButton className={PHOBOS_DIALOG_OUTLINE_ACTION} disabled={running} onClick={close} variant="secondary">Cancel</OcButton>
               <OcButton disabled={running} onClick={repair} variant="primary">
                 {running ? "Checking…" : "Check sign-in"}
               </OcButton>

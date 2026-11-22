@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/client_setup_operation.schema.json",
-  "title": "Octopus Client Setup Operation",
+  "$id": "https://phobos.local/schemas/client_setup_operation.schema.json",
+  "title": "Phobos Client Setup Operation",
   "type": "object",
   "required": [
     "schema",
@@ -13,7 +13,7 @@
     "updated_at"
   ],
   "properties": {
-    "schema": { "const": "octopus.client_setup_operation" },
+    "schema": { "const": "phobos.client_setup_operation" },
     "schema_version": { "const": 1 },
     "operation_id": { "$ref": "#/$defs/operationId" },
     "plan_digest": { "$ref": "#/$defs/digest" },

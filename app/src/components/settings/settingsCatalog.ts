@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { GlyphName } from "../IconGlyphs";
 
 export type SettingsSectionId =
@@ -19,7 +19,7 @@ export type SettingsSectionId =
   | "about"
   | "test-lab";
 
-export type SettingsSectionGroup = "Personal" | "Interaction" | "Octopus" | "Test";
+export type SettingsSectionGroup = "Personal" | "Interaction" | "Phobos" | "Test";
 export type SettingsDestinationKind = "setting" | "action" | "destination";
 
 export type SettingsDestination = {
@@ -29,7 +29,7 @@ export type SettingsDestination = {
   description: string;
   kind: SettingsDestinationKind;
   terms?: readonly string[];
-  profile?: OctopusClientAccessProfile;
+  profile?: PhobosClientAccessProfile;
   targetId?: string;
 };
 
@@ -38,7 +38,7 @@ export type SettingsSectionDefinition = {
   label: string;
   glyph: GlyphName;
   group: SettingsSectionGroup;
-  profile?: OctopusClientAccessProfile;
+  profile?: PhobosClientAccessProfile;
 };
 
 export type SettingsSearchResult = {
@@ -51,7 +51,7 @@ export type SettingsTargetAttributes = HTMLAttributes<HTMLElement> & {
   "data-settings-target": string;
 };
 
-export const SETTINGS_SECTION_GROUPS: readonly SettingsSectionGroup[] = ["Personal", "Interaction", "Octopus", "Test"];
+export const SETTINGS_SECTION_GROUPS: readonly SettingsSectionGroup[] = ["Personal", "Interaction", "Phobos", "Test"];
 
 export const SETTINGS_SECTIONS: readonly SettingsSectionDefinition[] = [
   { id: "general", label: "General", glyph: "settings", group: "Personal" },
@@ -61,22 +61,22 @@ export const SETTINGS_SECTIONS: readonly SettingsSectionDefinition[] = [
   { id: "computer-use", label: "Computer use", glyph: "desktop", group: "Interaction", profile: "live" },
   { id: "gestures", label: "Gestures", glyph: "hand", group: "Interaction" },
   { id: "shortcuts", label: "Keyboard shortcuts", glyph: "keyboard", group: "Interaction" },
-  { id: "access", label: "Access & Privacy", glyph: "dataControls", group: "Octopus" },
-  { id: "extensions", label: "Extensions", glyph: "widgets", group: "Octopus" },
-  { id: "experiments", label: "Experiments", glyph: "flask", group: "Octopus" },
-  { id: "connections", label: "Connections", glyph: "interfaces", group: "Octopus", profile: "live" },
-  { id: "surfaces", label: "Surfaces", glyph: "descriptor", group: "Octopus" },
-  { id: "worker-environments", label: "Worker Environments", glyph: "ee", group: "Octopus" },
-  { id: "about", label: "About & Diagnostics", glyph: "bug", group: "Octopus" },
+  { id: "access", label: "Access & Privacy", glyph: "dataControls", group: "Phobos" },
+  { id: "extensions", label: "Extensions", glyph: "widgets", group: "Phobos" },
+  { id: "experiments", label: "Experiments", glyph: "flask", group: "Phobos" },
+  { id: "connections", label: "Connections", glyph: "interfaces", group: "Phobos", profile: "live" },
+  { id: "surfaces", label: "Surfaces", glyph: "descriptor", group: "Phobos" },
+  { id: "worker-environments", label: "Worker Environments", glyph: "ee", group: "Phobos" },
+  { id: "about", label: "About & Diagnostics", glyph: "bug", group: "Phobos" },
   { id: "test-lab", label: "Test Lab", glyph: "flask", group: "Test", profile: "lab" },
 ];
 
 export const SETTINGS_DESTINATIONS: readonly SettingsDestination[] = [
   destination("account.identity", "account", "ChatGPT account", "Review the native account email and subscription plan.", "destination", ["identity", "email", "subscription", "plan"], "live"),
-  destination("account.workspace", "account", "ChatGPT workspace", "Choose the ChatGPT workspace that Octopus and your Codex CLI use.", "setting", ["workspace", "switch account", "team", "business", "enterprise"], "live"),
+  destination("account.workspace", "account", "ChatGPT workspace", "Choose the ChatGPT workspace that Phobos and your Codex CLI use.", "setting", ["workspace", "switch account", "team", "business", "enterprise"], "live"),
   destination("account.usage", "account", "Usage limits", "Review remaining account limits, credits, and reset times.", "destination", ["rate limits", "weekly", "5-hour", "credits"], "live"),
   destination("account.logout", "account", "Log out of ChatGPT", "Sign out of the shared native account and require sign-in to continue.", "action", ["sign out", "sign in", "login", "add account"], "live"),
-  destination("general.first-surface", "general", "First surface", "Choose the launch destination in Octopus.", "setting", ["launch", "startup", "open"]),
+  destination("general.first-surface", "general", "First surface", "Choose the launch destination in Phobos.", "setting", ["launch", "startup", "open"]),
   destination("general.internal-runs", "general", "Internal runs", "Include read-only runs that have no exact client interface.", "setting", ["show internal runs"]),
   destination("general.task-pane-width", "general", "Task pane width", "Set the default width of the secondary task pane.", "setting", ["split", "resize"]),
   destination("general.send-shortcut", "general", "Send shortcut", "Choose when Enter sends a prompt or inserts a new line.", "setting", ["composer", "enter"]),
@@ -85,9 +85,9 @@ export const SETTINGS_DESTINATIONS: readonly SettingsDestination[] = [
   destination("general.work-mode", "general", "Work mode", "Choose detailed or concise projected activity in task chats.", "setting", ["technical detail", "reasoning", "tools"]),
   destination("general.provider", "general", "Provider", "Choose the default declared provider interface for new tasks.", "setting", ["model", "codex", "interface"]),
   destination("general.on-launch", "general", "On launch", "Restore the last active surface when the client opens.", "destination", ["startup"]),
-  destination("general.open-at-login", "general", "Open at login", "Launch the packaged Octopus client after operating-system sign-in.", "setting", ["startup", "macos"]),
+  destination("general.open-at-login", "general", "Open at login", "Launch the packaged Phobos client after operating-system sign-in.", "setting", ["startup", "macos"]),
   destination("general.keep-awake", "general", "Keep awake", "Prevent the device from sleeping while a run is executing.", "setting", ["sleep", "run"]),
-  destination("general.export-setup", "general", "Export setup", "Save this Home's space, projects and capabilities as a setup file another Octopus can import.", "action", ["setup file", "import", "template", "share", "backup"], "live"),
+  destination("general.export-setup", "general", "Export setup", "Save this Home's space, projects and capabilities as a setup file another Phobos can import.", "action", ["setup file", "import", "template", "share", "backup"], "live"),
   destination("notifications.mark-activity", "general", "Inbox notifications", "Notify about new messages, requests, and marks selected in Inbox.", "setting", ["notifications", "messages", "requests", "marks", "worker", "unfocused"]),
   destination("notifications.sound", "general", "Notification sound", "Choose the sound played with desktop notifications.", "setting", ["system", "silent", "activity"]),
 
@@ -161,11 +161,11 @@ export const SETTINGS_DESTINATIONS: readonly SettingsDestination[] = [
 const SECTION_BY_ID = new Map(SETTINGS_SECTIONS.map((section) => [section.id, section]));
 const DESTINATION_BY_ID = new Map(SETTINGS_DESTINATIONS.map((destination) => [destination.id, destination]));
 
-export function availableSettingsSections(profile: OctopusClientAccessProfile): SettingsSectionDefinition[] {
+export function availableSettingsSections(profile: PhobosClientAccessProfile): SettingsSectionDefinition[] {
   return SETTINGS_SECTIONS.filter((section) => section.profile === undefined || section.profile === profile);
 }
 
-export function searchSettings(query: string, profile: OctopusClientAccessProfile): SettingsSearchResult[] {
+export function searchSettings(query: string, profile: PhobosClientAccessProfile): SettingsSearchResult[] {
   const normalizedQuery = normalize(query);
   if (!normalizedQuery) return [];
   const tokens = normalizedQuery.split(" ").filter(Boolean);
@@ -214,7 +214,7 @@ function destination(
   description: string,
   kind: SettingsDestinationKind,
   terms?: readonly string[],
-  profile?: OctopusClientAccessProfile,
+  profile?: PhobosClientAccessProfile,
   targetId?: string,
 ): SettingsDestination {
   return { id, sectionId, label, description, kind, terms, profile, targetId };

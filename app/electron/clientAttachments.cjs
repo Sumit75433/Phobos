@@ -85,7 +85,7 @@ async function packageDirectory(selected) {
   let embeddedBytes = 0;
   await walkDirectory(root, "", entries, () => embeddedBytes, (value) => { embeddedBytes = value; });
   const payload = Buffer.from(JSON.stringify({
-    schema: "octopus.client.directory_attachment",
+    schema: "phobos.client.directory_attachment",
     schema_version: 1,
     name: path.basename(root),
     entries,

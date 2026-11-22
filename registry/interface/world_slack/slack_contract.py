@@ -4,7 +4,7 @@ import json
 import os
 import re
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 
 CHANNEL_RE = re.compile(r"^[CDG][A-Z0-9]{8,32}$")
@@ -365,4 +365,4 @@ def embed_image(media, row, path, content, limits):
     if mime_type is None or len(content) > image_room(media, limits):
         return
     row["image"] = len(media)
-    media.append({"mime_type": mime_type, "artifact": {"label": limits["file_label"], "payload_path": path, "payload_content_hash": octopus_content_hash(content)}, "payload_base64": base64.b64encode(content).decode("ascii")})
+    media.append({"mime_type": mime_type, "artifact": {"label": limits["file_label"], "payload_path": path, "payload_content_hash": phobos_content_hash(content)}, "payload_base64": base64.b64encode(content).decode("ascii")})

@@ -1,18 +1,18 @@
 import { adoptFilesStyles } from "./filesPierreSetup";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAppearance } from "../../appearance";
-import { Editor } from "@octopus/files-diffs/edit";
-import { CodeView, type CodeViewOptions } from "@octopus/files-diffs";
+import { Editor } from "@phobos/files-diffs/edit";
+import { CodeView, type CodeViewOptions } from "@phobos/files-diffs";
 import { fileLanguage, fileContentHash } from "./fileSupport";
 import { filesCodeSurfaceCss } from "./filesCodeStyles";
-import { octopusDiffThemeName } from "../settings/octopusDiffThemes";
+import { phobosDiffThemeName } from "../settings/phobosDiffThemes";
 import type { FilesEditorViewState } from "./filesPaneSnapshot";
 
 const editorCss = `${filesCodeSurfaceCss}
 [data-file] {
   --diffs-line-height: round(nearest, calc(var(--diffs-font-size, 12px) * 1.8), 1px);
   line-height: var(--diffs-line-height);
-  --diffs-editor-line-highlight-bg: var(--color-octopus-editor-line-highlight);
+  --diffs-editor-line-highlight-bg: var(--color-phobos-editor-line-highlight);
   --diffs-editor-line-number-active-bg: var(--diffs-editor-line-highlight-bg);
   --diffs-editor-line-highlight-border: transparent;
 }
@@ -41,7 +41,7 @@ export default function FilesPierreEditor({ documentId, filename, initialViewSta
   const viewChangeRef = useRef(onViewStateChange);
   viewChangeRef.current = onViewStateChange;
   const [history, setHistory] = useState({ canUndo: false, canRedo: false });
-  const theme = useMemo(() => ({ dark: octopusDiffThemeName("dark", appearance.darkCodeTheme), light: octopusDiffThemeName("light", appearance.lightCodeTheme) }), [appearance.darkCodeTheme, appearance.lightCodeTheme]);
+  const theme = useMemo(() => ({ dark: phobosDiffThemeName("dark", appearance.darkCodeTheme), light: phobosDiffThemeName("light", appearance.lightCodeTheme) }), [appearance.darkCodeTheme, appearance.lightCodeTheme]);
 
   function options(owner: NonNullable<typeof instanceRef.current>): CodeViewOptions<undefined, undefined> {
     return {

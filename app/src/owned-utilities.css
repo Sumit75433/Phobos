@@ -1,8 +1,8 @@
 @import "tailwindcss" source(none);
 @source "./**/*.{ts,tsx}";
 
-@custom-variant electron (&:where(:is([data-octopus-window-type="browser"], [data-octopus-window-type="chrome-extension"], [data-octopus-window-type="electron"]) *));
-@custom-variant extension (&:where([data-octopus-window-type="extension"] *));
+@custom-variant electron (&:where(:is([data-phobos-window-type="browser"], [data-phobos-window-type="chrome-extension"], [data-phobos-window-type="electron"]) *));
+@custom-variant extension (&:where([data-phobos-window-type="extension"] *));
 
 @theme reference inline {
   --color-surface: var(--color-surface);
@@ -17,11 +17,11 @@
   --color-danger: var(--color-text-danger);
   --color-text-danger: var(--color-text-danger);
   --color-text-description: var(--color-text-description);
-  --color-octopus-editor-line-highlight: var(--color-octopus-editor-line-highlight);
-  --color-octopus-git-added: var(--color-octopus-git-added);
-  --color-octopus-git-deleted: var(--color-octopus-git-deleted);
-  --color-octopus-git-modified: var(--color-octopus-git-modified);
-  --color-octopus-git-ignored: var(--color-octopus-git-ignored);
+  --color-phobos-editor-line-highlight: var(--color-phobos-editor-line-highlight);
+  --color-phobos-git-added: var(--color-phobos-git-added);
+  --color-phobos-git-deleted: var(--color-phobos-git-deleted);
+  --color-phobos-git-modified: var(--color-phobos-git-modified);
+  --color-phobos-git-ignored: var(--color-phobos-git-ignored);
   --color-border: var(--color-border);
   --color-ring: var(--color-ring);
   --color-info-soft: var(--color-background-info-soft);
@@ -73,18 +73,18 @@
 
 @utility sidebar-item {
   --corner-radius-scale: 1;
-  --octopus-corner-shape: round;
+  --phobos-corner-shape: round;
   --radius-lg: calc(var(--radius-lg-base) * var(--corner-radius-scale));
   border-radius: var(--radius-lg);
-  corner-shape: var(--octopus-corner-shape);
+  corner-shape: var(--phobos-corner-shape);
 
   @supports (corner-shape: superellipse(1.5)) {
     --corner-radius-scale: 1.25;
-    --octopus-corner-shape: superellipse(1.5);
+    --phobos-corner-shape: superellipse(1.5);
 
-    &:where([data-octopus-window-type="browser"] *) {
+    &:where([data-phobos-window-type="browser"] *) {
       --corner-radius-scale: 1;
-      --octopus-corner-shape: round;
+      --phobos-corner-shape: round;
     }
   }
 }
@@ -101,7 +101,7 @@
   --text-2xl: var(--text-2xl);
   --text-3xl: var(--text-3xl);
   --text-4xl: var(--text-4xl);
-  --text-size-chat: var(--octopus-chat-font-size);
+  --text-size-chat: var(--phobos-chat-font-size);
   --text-form-title: 1rem;
   --text-form-title--line-height: 1.625rem;
   --text-form-title--letter-spacing: -0.02em;

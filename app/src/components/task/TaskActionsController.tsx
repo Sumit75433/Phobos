@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import type { OctopusClientContextMenuItem } from "../../electron";
+import type { PhobosClientContextMenuItem } from "../../electron";
 import type { ChatRun } from "../../chatRuns";
 import {
   clearClientTaskAlias,
@@ -20,7 +20,7 @@ import {
 } from "../../shell/taskActionsMenu";
 import { useKeyboardShortcuts } from "../../keyboardShortcuts";
 import { TaskActionsPopover, type TaskAction } from "./TaskActionsPopover";
-import type { OctopusOsProjectWorkspace } from "../../shell/useOctopusOsProjects";
+import type { PhobosOsProjectWorkspace } from "../../shell/usePhobosOsProjects";
 import { copyText } from "../../runtimeFormat";
 import { appToast } from "../../toasts";
 import {
@@ -38,7 +38,7 @@ function taskIdentity(run: ChatRun): string {
   return JSON.stringify([run.runId, run.chatInterfaceId, run.eeId, run.osRootEeId, run.createdAtMs, run.writable, run.archived]);
 }
 
-function nativeTaskItems(actions: TaskAction[]): OctopusClientContextMenuItem[] {
+function nativeTaskItems(actions: TaskAction[]): PhobosClientContextMenuItem[] {
   return actions.map((action) => action.type === "separator" ? action : {
     id: action.id, label: nativeTaskMenuLabel(action.description ? `${action.label} (${action.description})` : action.label), enabled: action.enabled !== false,
     ...(action.type ? { type: action.type } : {}),
@@ -81,7 +81,7 @@ export function TaskActionsController({
   chatRuns: ChatRun[];
   homeRunId: string;
   pinnedChatIds: string[];
-  projectWorkspace: OctopusOsProjectWorkspace;
+  projectWorkspace: PhobosOsProjectWorkspace;
   onChatOrderIdsChange: (runIds: string[]) => void;
   onOpenChatInNewWindow: (runId: string) => void;
   onPinnedChatIdsChange: (runIds: string[]) => void;
@@ -171,7 +171,7 @@ export function TaskActionsController({
     const unsubscribeMenu = subscribeOpenClientTaskActionsMenu((request) => {
       const current = latest.current.readMenu(request.runId);
       if (!current) return;
-      if (request.pointer && window.octopusTransport) { setMenu(null); session.open(request, window.octopusTransport); return; }
+      if (request.pointer && window.phobosTransport) { setMenu(null); session.open(request, window.phobosTransport); return; }
       session.cancel();
       const captured = latest.current.targetFor(request.runId);
       if (!captured) return;
@@ -248,14 +248,14 @@ function TaskNameDialog({
     if (!busy && name.trim()) onSubmit(name.trim());
   };
   return (
-    <OcDialog ariaLabelledBy="octopus-task-name-title" initialFocusRef={inputRef} onClose={onCancel} open={open} size="compact">
+    <OcDialog ariaLabelledBy="phobos-task-name-title" initialFocusRef={inputRef} onClose={onCancel} open={open} size="compact">
       <form className="flex flex-col gap-4 p-5" onSubmit={submit}>
         <OcDialogHeader
           className="p-0"
-          description="The run remains unchanged. This name belongs to the local Octopus OS projection."
+          description="The run remains unchanged. This name belongs to the local Phobos OS projection."
           onClose={onCancel}
           title="Rename task"
-          titleId="octopus-task-name-title"
+          titleId="phobos-task-name-title"
         />
         <OcTextField label="Task name" maxLength={180} onChange={(event) => setName(event.currentTarget.value)} inputRef={inputRef} value={name} />
         <OcDialogFooter className="min-h-0 border-0 p-0">
@@ -285,8 +285,8 @@ function TaskDeleteDialog({
   const cancelRef = useRef<HTMLButtonElement>(null);
   if (!open || !run) return null;
   return (
-    <OcDialog ariaLabelledBy="octopus-task-delete-title" initialFocusRef={cancelRef} onClose={onCancel} open={open} panelClassName="p-5" size="compact">
-      <OcDialogHeader className="p-0" title="Delete task?" titleId="octopus-task-delete-title" />
+    <OcDialog ariaLabelledBy="phobos-task-delete-title" initialFocusRef={cancelRef} onClose={onCancel} open={open} panelClassName="p-5" size="compact">
+      <OcDialogHeader className="p-0" title="Delete task?" titleId="phobos-task-delete-title" />
       <p className="mt-2 text-base text-token-description-foreground">
         {`Delete “${title}”? This cannot be undone. Archive it instead if you want to keep the conversation for later.`}
       </p>

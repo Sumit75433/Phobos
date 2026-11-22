@@ -1,10 +1,10 @@
 import { useRef } from "react";
-import type { OctopusWorkerEnvironmentOperatorAction } from "../../electron";
+import type { PhobosWorkerEnvironmentOperatorAction } from "../../electron";
 import { OcButton, OcDialog, OcDialogFooter, OcDialogHeader } from "../../design-system/components";
 import { Glyph } from "../IconGlyphs";
 
 export type WorktreeOperatorConfirmation = {
-  action: Extract<OctopusWorkerEnvironmentOperatorAction, "apply" | "revert">;
+  action: Extract<PhobosWorkerEnvironmentOperatorAction, "apply" | "revert">;
   paths: string[];
 };
 
@@ -35,7 +35,7 @@ export function WorktreeOperatorConfirm({ confirmation, pending, onCancel, onCon
           titleId="we-operator-confirm-title"
         />
         <div className="we-operator-confirm-body">
-          <p><Glyph name="warning" size={13} />This is a manual operator action. It is not an Octopus artifact, movement, mark, or model tool call.</p>
+          <p><Glyph name="warning" size={13} />This is a manual operator action. It is not a Phobos artifact, movement, mark, or model tool call.</p>
           <div className="we-operator-confirm-paths">
             {confirmation.paths.slice(0, 8).map((filePath) => <span key={filePath}>{filePath}</span>)}
             {confirmation.paths.length > 8 ? <em>+{confirmation.paths.length - 8} more files</em> : null}

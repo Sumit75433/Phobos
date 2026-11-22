@@ -2,7 +2,7 @@
   "id": "remote.process_interrupt",
   "interface": "system_remote_exec",
   "process": {
-    "bin": "target/debug/octopus-remote-exec-room-tool",
+    "bin": "target/debug/phobos-remote-exec-room-tool",
     "private_read_subpaths": [{"path": "secrets/remote-exec.auth"}],
     "authority": {
       "read_root_slots": [], "write_root_slots": [], "executable_root_slots": [],

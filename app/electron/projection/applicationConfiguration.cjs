@@ -1,4 +1,4 @@
-module.exports = { assertApplicationToolCapability, assertCapabilityValuesWithinCeiling, configureOctopusOsApplication, configureOctopusOsDriver, installedDescriptorIds, parseDriverHostSlots, prepareProjectCapabilityState, projectConfiguredApplication };
+module.exports = { assertApplicationToolCapability, assertCapabilityValuesWithinCeiling, configurePhobosOsApplication, configurePhobosOsDriver, installedDescriptorIds, parseDriverHostSlots, prepareProjectCapabilityState, projectConfiguredApplication };
 
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -10,9 +10,9 @@ const { readInstalledApplicationManifestDocuments } = require("./taskApplication
 const { scopedRecordPath } = require("./taskDeletion.cjs");
 const { arrayValue, isPlainRecord, objectOrEmpty, requiredDigest, requiredSafeRegistryId, safeInterfacePathSegment, stringValue } = require("./values.cjs");
 
-async function configureOctopusOsApplication(
+async function configurePhobosOsApplication(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   request,
   commitClientAuthoring,
@@ -69,7 +69,7 @@ async function configureOctopusOsApplication(
   const prepared = [];
   for (const project of projects) {
     const environment = scope.byId.get(project.eeId);
-    if (!environment) throw new Error(`project EE '${project.eeId}' is outside the Octopus OS scope`);
+    if (!environment) throw new Error(`project EE '${project.eeId}' is outside the Phobos OS scope`);
     const retainedApplications = applicationDocuments.filter((candidate) => (
       candidate.manifest.id !== applicationId
       && projectConfiguredApplication(environment, candidate.manifest)
@@ -85,7 +85,7 @@ async function configureOctopusOsApplication(
       candidate.manifest.task_capabilities.tools.map((capability) => capability.worker_environment_kind)
     )));
     prepared.push(await prepareProjectCapabilityState({
-      octopusHomeRoot,
+      phobosHomeRoot,
       environment,
       eeId: project.eeId,
       expectedDigest: project.expectedDigest,
@@ -165,9 +165,9 @@ function projectConfiguredApplication(environment, manifest) {
     ));
 }
 
-async function configureOctopusOsDriver(
+async function configurePhobosOsDriver(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   request,
   commitClientAuthoring,
@@ -227,9 +227,9 @@ async function configureOctopusOsDriver(
   const prepared = [];
   for (const project of projects) {
     const environment = scope.byId.get(project.eeId);
-    if (!environment) throw new Error(`project EE '${project.eeId}' is outside the Octopus OS scope`);
+    if (!environment) throw new Error(`project EE '${project.eeId}' is outside the Phobos OS scope`);
     prepared.push(await prepareProjectCapabilityState({
-      octopusHomeRoot,
+      phobosHomeRoot,
       environment,
       eeId: project.eeId,
       expectedDigest: project.expectedDigest,
@@ -273,7 +273,7 @@ async function configureOctopusOsDriver(
 }
 
 async function prepareProjectCapabilityState({
-  octopusHomeRoot,
+  phobosHomeRoot,
   environment,
   eeId,
   expectedDigest,
@@ -286,7 +286,7 @@ async function prepareProjectCapabilityState({
 }) {
   const digest = requiredDigest(expectedDigest, "expectedDigest");
   const eePath = await scopedRecordPath(
-    octopusHomeRoot,
+    phobosHomeRoot,
     environment.record_path,
     path.join("state", "ee_instances"),
     `${eeId}.json`,
@@ -321,26 +321,26 @@ async function prepareProjectCapabilityState({
   }
   next.policy_narrowing = narrowing;
   const config = isPlainRecord(next.config) ? next.config : {};
-  if (config.octopus_os !== undefined && !isPlainRecord(config.octopus_os)) {
-    throw new Error(`project EE '${eeId}' has malformed Octopus OS client config`);
+  if (config.phobos_os !== undefined && !isPlainRecord(config.phobos_os)) {
+    throw new Error(`project EE '${eeId}' has malformed Phobos OS client config`);
   }
-  const octopusOs = isPlainRecord(config.octopus_os) ? config.octopus_os : {};
-  const defaults = new Set(arrayValue(octopusOs[defaultField]).map(stringValue).filter(Boolean));
+  const phobosOs = isPlainRecord(config.phobos_os) ? config.phobos_os : {};
+  const defaults = new Set(arrayValue(phobosOs[defaultField]).map(stringValue).filter(Boolean));
   if (selectedByDefault) defaults.add(capabilityId);
   else defaults.delete(capabilityId);
-  octopusOs[defaultField] = [...defaults].sort();
+  phobosOs[defaultField] = [...defaults].sort();
   if (driverHostSlots !== undefined) {
-    if (octopusOs.driver_host_slots !== undefined && !isPlainRecord(octopusOs.driver_host_slots)) {
+    if (phobosOs.driver_host_slots !== undefined && !isPlainRecord(phobosOs.driver_host_slots)) {
       throw new Error(`project EE '${eeId}' has malformed driver host-slot config`);
     }
-    const driverSlots = isPlainRecord(octopusOs.driver_host_slots)
-      ? octopusOs.driver_host_slots
+    const driverSlots = isPlainRecord(phobosOs.driver_host_slots)
+      ? phobosOs.driver_host_slots
       : {};
     if (available) driverSlots[capabilityId] = driverHostSlots;
     else delete driverSlots[capabilityId];
-    octopusOs.driver_host_slots = driverSlots;
+    phobosOs.driver_host_slots = driverSlots;
   }
-  config.octopus_os = octopusOs;
+  config.phobos_os = phobosOs;
   next.config = config;
   return {
     write: {

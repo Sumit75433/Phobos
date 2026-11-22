@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { OcButton, OcIconButton, OcMenuItem, OcMenuSectionLabel, OcSearchField, OcSegmented } from "../design-system/components";
 import { OcDropdown } from "../design-system/OcDropdown";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import { formatKeyboardShortcut, useKeyboardShortcuts } from "../keyboardShortcuts";
 import {
   enabledFilterCount,
@@ -15,7 +15,7 @@ import {
 
 type Props = {
   className?: string;
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   inspectorOpen?: boolean;
   title: string;
   query: string;

@@ -84,7 +84,7 @@ export function HomeTurnActivity({ activities, blockingReason = "", startedAtMs,
   blockingReason?: string;
 }) {
   const hasActivity = activities.some((message) => conversationTraceAdmission(message, toolPresentations) === "visible");
-  if (!hasActivity && turnInProgress && !blockingReason) return <span role="status"><CadencedShimmerText active>Octopus is working</CadencedShimmerText></span>;
+  if (!hasActivity && turnInProgress && !blockingReason) return <span role="status"><CadencedShimmerText active>Phobos is working</CadencedShimmerText></span>;
   return (
     <section aria-label="Current run activity" className="home-live-activity">
       {hasActivity || blockingReason ? <TurnActivity
@@ -130,7 +130,7 @@ function HomeActivityDetail({ message, toolPresentations, turnInProgress }: {
   return (
     <ul className="home-live-activity__actions">
       {actions.map((action) => (
-        <li className="octopus-inline-activity min-w-0" key={action.id}>
+        <li className="phobos-inline-activity min-w-0" key={action.id}>
           {action.glyph ? <Glyph aria-hidden="true" className="icon-xs shrink-0" name={action.glyph} /> : null}
           <CadencedShimmerText active={turnInProgress && homeActivityIsActive(message)}>{action.label}</CadencedShimmerText>
         </li>

@@ -30,7 +30,7 @@ test("CLI projection readers leave publication recovery to its owning mutation",
       assert.equal(await fs.readFile(target, "utf8"), content);
       await assert.rejects(fs.access(path.join(registry, "interface/world_operator_chat/client.cjs")), { code: "ENOENT" });
       const transactions = path.join(environment.home, "client-state/workspace/transactions");
-      const pending = (await fs.readdir(transactions)).filter(name => name !== ".octopus-publication");
+      const pending = (await fs.readdir(transactions)).filter(name => name !== ".phobos-publication");
       assert.equal(pending.length, 1);
       const journal = JSON.parse(await fs.readFile(path.join(transactions, pending[0], "journal.json")));
       const calls = [], source = environment.packageRoots.publication;
@@ -44,15 +44,15 @@ test("CLI projection readers leave publication recovery to its owning mutation",
           : await reader.read("projection.operator.os.workspace_setup");
         assert.equal(result.status, "not_configured", JSON.stringify(result));
         assert.deepEqual(calls, []);
-        assert.deepEqual((await fs.readdir(transactions)).filter(name => name !== ".octopus-publication"), pending);
+        assert.deepEqual((await fs.readdir(transactions)).filter(name => name !== ".phobos-publication"), pending);
         await require("../electron/workspaceSetup.cjs").recoverWorkspaceTransactions({
-          octopusHomeRoot: environment.home, registryRoot: registry, publication: environment.packageRoots.publication,
+          phobosHomeRoot: environment.home, registryRoot: registry, publication: environment.packageRoots.publication,
         });
         const cleanup = JSON.parse(await fs.readFile(path.join(environment.home, "client-state/workspace/directory-cleanup", `${journal.operation_id}.json`)));
         assert.equal(cleanup.publication.reclaimed, true);
         assert.equal(cleanup.journal.writes[0].publication.receipt.operation_id, journal.writes[0].publication.operation_id);
         assert.equal(cleanup.journal.writes[0].publication.receipt.before_hash, null);
-        assert.deepEqual((await fs.readdir(transactions)).filter(name => name !== ".octopus-publication"), []);
+        assert.deepEqual((await fs.readdir(transactions)).filter(name => name !== ".phobos-publication"), []);
         for (const method of ["publishFiles", "snapshotDirectory", "publishDirectoryMoves", "reclaimDirectory"]) assert.ok(calls.includes(method), `${kind} omitted ${method}`);
       } finally { await reader.close(); environment.close(); }
     }

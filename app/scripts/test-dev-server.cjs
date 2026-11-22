@@ -10,7 +10,7 @@ const { buildSync } = require("esbuild");
 const appRoot = path.resolve(__dirname, "..");
 const configFile = path.join(appRoot, "vite.config.ts");
 const realRequire = createRequire(configFile);
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-dev-server-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-dev-server-"));
 after(() => fs.rmSync(root, { recursive: true, force: true }));
 const home = path.join(root, "home");
 const blobs = path.join(home, "ledger", "blobs");
@@ -67,22 +67,22 @@ function loadDevServer() {
   const routes = new Map();
   const server = { middlewares: { use: (route, handler) => routes.set(route, handler) }, watcher: { add: () => {}, on: () => {} }, httpServer: { once: () => {} } };
   const saved = { ...process.env };
-  for (const key of Object.keys(process.env)) if (key.startsWith("OCTOPUS_")) delete process.env[key];
+  for (const key of Object.keys(process.env)) if (key.startsWith("PHOBOS_")) delete process.env[key];
   Object.assign(process.env, {
-    OCTOPUS_HOME: home,
-    OCTOPUS_CLIENT_ACCESS_PATH: path.join(home, "client-access.json"),
-    OCTOPUS_INSTALLATION_ROOT: path.join(root, "install"),
-    OCTOPUS_LOCAL_PACKAGE_REGISTRY: path.join(root, "registry"),
-    OCTOPUS_LOCAL_PACKAGE_LIBRARY: path.join(root, "library"),
+    PHOBOS_HOME: home,
+    PHOBOS_CLIENT_ACCESS_PATH: path.join(home, "client-access.json"),
+    PHOBOS_INSTALLATION_ROOT: path.join(root, "install"),
+    PHOBOS_LOCAL_PACKAGE_REGISTRY: path.join(root, "registry"),
+    PHOBOS_LOCAL_PACKAGE_LIBRARY: path.join(root, "library"),
   });
-  try { config.plugins.find((plugin) => plugin.name === "octopus-client-server").configureServer(server); }
+  try { config.plugins.find((plugin) => plugin.name === "phobos-client-server").configureServer(server); }
   finally {
     for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key];
     Object.assign(process.env, saved);
   }
   const call = (route, { method = "POST", url = "/", token = "", body } = {}) => new Promise((resolve) => {
     const req = Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]);
-    Object.assign(req, { method, url, headers: token ? { cookie: `octopus_client_access=${encodeURIComponent(token)}` } : {} });
+    Object.assign(req, { method, url, headers: token ? { cookie: `phobos_client_access=${encodeURIComponent(token)}` } : {} });
     const headers = {};
     const res = {
       statusCode: 200, headersSent: false,
@@ -98,10 +98,10 @@ const loadsOf = (world) => world.events.filter(([name]) => name === "chat-client
 async function signIn(call) {
   const body = { password: "fixture-administrator" };
   const response = fs.existsSync(path.join(home, "client-access.json"))
-    ? await call("/__octopus/access", { url: "/unlock", body })
-    : await call("/__octopus/access", { url: "/configure", body });
+    ? await call("/__phobos/access", { url: "/unlock", body })
+    : await call("/__phobos/access", { url: "/configure", body });
   assert.equal(response.status, 200);
-  return decodeURIComponent(/octopus_client_access=([^;]+)/.exec(response.headers["set-cookie"])[1]);
+  return decodeURIComponent(/phobos_client_access=([^;]+)/.exec(response.headers["set-cookie"])[1]);
 }
 
 test("the dev server bundles ES workers and loads the chat client only through the verified package loader", async () => {
@@ -117,12 +117,12 @@ test("the dev server bundles ES workers and loads the chat client only through t
   const token = await signIn(call);
   world.chatBatch = () => ({ artifacts: [], cursor: { offset: 0, seq: null } });
   for (const [route, body, expected] of [
-    ["/__octopus/operator-chat-artifacts", { runId: "run-1" }, { artifacts: [], cursor: { offset: 0, seq: null } }],
-    ["/__octopus/operator-turn-control", { interfaceId: "world_operator_chat_home", action: "pause" }, { controlled: "pause" }],
-    ["/__octopus/submit", { runId: "run-1", messageId: "m-1", text: "hello", attachments: [] }, undefined],
-    ["/__octopus/chat-steer", { runId: "run-1", messageId: "m-2", text: "steer" }, undefined],
-    ["/__octopus/chat-pins", { runIds: ["run-1"] }, { pinned: ["run-1"] }],
-    ["/__octopus/interface-artifact", { interfaceId: "world_operator_chat_home", label: "note" }, { submitted: true }],
+    ["/__phobos/operator-chat-artifacts", { runId: "run-1" }, { artifacts: [], cursor: { offset: 0, seq: null } }],
+    ["/__phobos/operator-turn-control", { interfaceId: "world_operator_chat_home", action: "pause" }, { controlled: "pause" }],
+    ["/__phobos/submit", { runId: "run-1", messageId: "m-1", text: "hello", attachments: [] }, undefined],
+    ["/__phobos/chat-steer", { runId: "run-1", messageId: "m-2", text: "steer" }, undefined],
+    ["/__phobos/chat-pins", { runIds: ["run-1"] }, { pinned: ["run-1"] }],
+    ["/__phobos/interface-artifact", { interfaceId: "world_operator_chat_home", label: "note" }, { submitted: true }],
   ]) {
     const before = loadsOf(world);
     const response = await call(route, { token, body });
@@ -132,21 +132,21 @@ test("the dev server bundles ES workers and loads the chat client only through t
   }
   assert.deepEqual(world.events.filter(([name]) => name === "read-payload").map(([, input]) => input.blobsRoot), [blobs, blobs, blobs]);
   assert.equal(world.required.some((id) => String(id).includes("world_operator_chat")), false, "no route requires the installed chat client directly");
-  assert.equal((await call("/__octopus/chat-pins", { token: "stale", body: {} })).status, 401);
+  assert.equal((await call("/__phobos/chat-pins", { token: "stale", body: {} })).status, 401);
 });
 
 test("dev interface artifacts consult the chat client only for chat interfaces, and invalid chat artifact batches fail closed", async () => {
   const { world, call } = loadDevServer();
   const token = await signIn(call);
   world.events.length = 0;
-  assert.equal((await call("/__octopus/interface-artifact", { token, body: { interfaceId: "world_telegram", label: "note" } })).status, 200);
+  assert.equal((await call("/__phobos/interface-artifact", { token, body: { interfaceId: "world_telegram", label: "note" } })).status, 200);
   assert.deepEqual(world.events.map(([name]) => name), ["artifact-submitted"]);
   world.events.length = 0;
-  const refused = await call("/__octopus/interface-artifact", { token, body: { interfaceId: "world_operator_chat_home", label: "forbidden" } });
+  const refused = await call("/__phobos/interface-artifact", { token, body: { interfaceId: "world_operator_chat_home", label: "forbidden" } });
   assert.deepEqual([refused.status, refused.body], [400, { error: "operator chat refuses this artifact" }]);
   assert.deepEqual(world.events.map(([name]) => name), ["chat-client-load", "chat-artifact-check"]);
   world.chatBatch = () => ({ artifacts: [{ from_interface_id: "world_provider_codex", from_interface_role: "" }], cursor: { offset: 0, seq: null } });
-  const invalid = await call("/__octopus/operator-chat-artifacts", { token, body: { runId: "run-1" } });
+  const invalid = await call("/__phobos/operator-chat-artifacts", { token, body: { runId: "run-1" } });
   assert.equal(invalid.status, 400);
   assert.match(invalid.body.error, /from_interface_role/);
 });

@@ -5,7 +5,7 @@
     "code_mode_env"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-code-mode-room-tool"
+    "target/debug/phobos-code-mode-room-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "instance_config_files": [

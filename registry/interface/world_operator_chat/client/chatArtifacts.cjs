@@ -136,7 +136,7 @@ async function readCompleteLedgerTail(movementsPath, startOffset) {
 
 async function readOperatorChatArtifacts(options, request) {
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const interfaceId = safeSegment(request?.interfaceId, "interfaceId");
   const runId = safeSegment(request?.runId, "runId");
   const afterSeq = integerAtLeast(request?.afterSeq, -1, "afterSeq");
@@ -146,14 +146,14 @@ async function readOperatorChatArtifacts(options, request) {
     options.readArtifactPayload,
     "readArtifactPayload",
   );
-  await assertExactOperatorClientInterface(octopusHome, interfaceId);
+  await assertExactOperatorClientInterface(phobosHome, interfaceId);
   const liveContext = await operatorChatLiveContext(
     config,
-    octopusHome,
+    phobosHome,
     runId,
     interfaceId,
   );
-  const movementsPath = path.join(octopusHome, "ledger", "movements.jsonl");
+  const movementsPath = path.join(phobosHome, "ledger", "movements.jsonl");
   let cursor = normalizeLiveCursor(request?.cursor) ?? { offset: 0, seq: null };
   const deadline = Date.now() + waitMs;
   const streamRunRoot = path.join(
@@ -177,7 +177,7 @@ async function readOperatorChatArtifacts(options, request) {
           interfaceId,
           limit: ledgerLimit,
           movementsPath,
-          octopusHome,
+          phobosHome,
           runId,
         }),
         readOpenOperatorTurnStream({
@@ -200,7 +200,7 @@ async function readOperatorChatArtifacts(options, request) {
           interfaceId,
           limit,
           movementsPath,
-          octopusHome,
+          phobosHome,
           runId,
         });
       }
@@ -226,7 +226,7 @@ async function readOperatorChatArtifacts(options, request) {
       cancelChanges(openStreamBatch.changes);
       const sourceRoles = new Map(await Promise.all(
         [...new Set(ledgerBatch.rows.map((row) => endpointInterfaceId(row.from)))].map(async (sourceInterfaceId) => (
-          [sourceInterfaceId, await readExactInterfaceRole(octopusHome, sourceInterfaceId)]
+          [sourceInterfaceId, await readExactInterfaceRole(phobosHome, sourceInterfaceId)]
         )),
       ));
       const movementArtifacts = [];

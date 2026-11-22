@@ -66,7 +66,7 @@ function showToast(level: AppToastLevel, title: string, duration = 5, options: A
   }, ...toasts].slice(0, MAX_VISIBLE_TOASTS);
   publish();
   if ((level === "warning" || level === "danger") && typeof window !== "undefined") {
-    void window.octopusTransport?.logClientEvent({
+    void window.phobosTransport?.logClientEvent({
       level: level === "danger" ? "error" : "warning",
       event: "renderer.toast",
       message: title,

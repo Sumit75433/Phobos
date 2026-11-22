@@ -9,7 +9,7 @@
     "max_line_bytes": 1048576
   },
   "process": {
-    "bin": "target/debug/octopus-coder-fs-tool",
+    "bin": "target/debug/phobos-coder-fs-tool",
     "inherit_env": ["PATH"],
     "authority": {
       "read_root_slots": ["registry_worker_environment_kind_root", "repo_root"],

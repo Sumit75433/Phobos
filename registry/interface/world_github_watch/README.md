@@ -8,7 +8,7 @@ installing the folder starts nothing. It never posts comments or changes GitHub.
 
 Install the GitHub watch package from Applications. The package is
 self-contained: `github_watch_boundary.py` holds its private-file, ledger lookup
-and stdin/stdout arrival protocol helpers, and `octopus_content_hash.py` its
+and stdin/stdout arrival protocol helpers, and `phobos_content_hash.py` its
 content hash; it depends on no other interface. No kernel changes, webhooks, public listener, or notifications
 permission are needed.
 
@@ -31,7 +31,7 @@ This is deliberately not named `watch.json`: that filename belongs to the
 legacy watch's client condition editor. The ordinary World/sensor/inbound
 classification and receiving run binding make this sensor visible in Triggers.
 
-Write a token privately to `$OCTOPUS_VAR_DIR/github.token` (mode 0600, owner
+Write a token privately to `$PHOBOS_VAR_DIR/github.token` (mode 0600, owner
 only; directory 0700). An operator may capture `gh auth token` directly into
 that private file without printing it. No credential belongs in the descriptor,
 source, diagnostic output, or a tool-result artifact. The life reads the token
@@ -82,7 +82,7 @@ snapshot change, not a claim about every intermediate GitHub event.
 
 ## Durability and health
 
-Private state lives only in `OCTOPUS_VAR_DIR`, normally
+Private state lives only in `PHOBOS_VAR_DIR`, normally
 `<Home>/interfaces/world_github_watch/`:
 - `watch.sqlite3`: committed resource fingerprints/watermarks, pending proposed
   state and immutable notice identities, admission receipts and health;

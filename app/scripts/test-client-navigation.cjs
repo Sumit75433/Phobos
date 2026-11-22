@@ -344,7 +344,7 @@ test("Settings is one history entry: sections replace it and closing returns to 
 test("Files opens in its calling workspace without changing the primary destination", () => {
   const calls = [];
   const open = callback("openFilesTab", {
-    activeClientSurfaceIdentity: { workspaceKey: "octopus-os" },
+    activeClientSurfaceIdentity: { workspaceKey: "phobos-os" },
     workspacePaneTabForTarget: windows.workspacePaneTabForTarget,
     openSecondaryTab: (tab) => calls.push(tab),
     selectSurface: () => assert.fail("Files must not navigate the primary surface"),
@@ -353,14 +353,14 @@ test("Files opens in its calling workspace without changing the primary destinat
   open(target, "dashboard");
   assert.deepEqual(calls[0].target, { kind: "files", workspaceKey: "dashboard", openTarget: target });
   open();
-  assert.equal(calls[1].target.workspaceKey, "octopus-os");
+  assert.equal(calls[1].target.workspaceKey, "phobos-os");
 });
 
 test("each New tab retains its task context across selection and restore without becoming a transferable surface", () => {
   const tabs = [], data = new Map(), previousWindow = globalThis.window;
   const source = { kind: "worker_environment", target: { schemaVersion: 1, workerEnvironmentId: "room-a", surfaceId: "files-b", panelKind: "files" } };
   const open = callback("openLauncherTab", {
-    activeClientSurfaceIdentity: { ready: true, pane: "secondary", workspaceKey: "octopus-os" },
+    activeClientSurfaceIdentity: { ready: true, pane: "secondary", workspaceKey: "phobos-os" },
     activeSecondaryTab: { target: source },
     workerEnvironmentActionRunIds: ["task-a"],
     openSecondaryTab: tab => tabs.push(tab),
@@ -368,8 +368,8 @@ test("each New tab retains its task context across selection and restore without
   open(); open();
   assert.notEqual(tabs[0].id, tabs[1].id);
   const target = tabs[1].target;
-  assert.deepEqual(target, { kind: "launcher", runId: "task-a", workspaceKey: "octopus-os", source });
-  const identity = windows.deriveActiveClientSurfaceIdentity({ activePane: "secondary", primary: { target: { surfaceId: "chat", runId: "task-b", workspaceKey: "octopus-os" }, workspaceActiveRunId: "task-b" }, secondary: { open: true, target, workspaceActiveRunId: "task-c" } });
+  assert.deepEqual(target, { kind: "launcher", runId: "task-a", workspaceKey: "phobos-os", source });
+  const identity = windows.deriveActiveClientSurfaceIdentity({ activePane: "secondary", primary: { target: { surfaceId: "chat", runId: "task-b", workspaceKey: "phobos-os" }, workspaceActiveRunId: "task-b" }, secondary: { open: true, target, workspaceActiveRunId: "task-c" } });
   assert.equal(identity.runId, "task-a");
   assert.equal(windows.transferableWorkspacePaneTarget(target), null);
   const { terminalLaunchCwd } = load("src/shell/terminalLaunchContext.ts");
@@ -393,7 +393,7 @@ test("each New tab retains its task context across selection and restore without
 test("a detached pane opens with its declared context instead of always restoring Home", () => {
   assert.deepEqual(state.clientWindowInitialDestination({ kind: "files", workspaceKey: "dashboard" }), { surfaceId: "dashboard" });
   assert.deepEqual(state.clientWindowInitialDestination({ kind: "surface", surfaceId: "registry", runId: "", workspaceKey: "dashboard" }), { surfaceId: "registry" });
-  assert.deepEqual(state.clientWindowInitialDestination({ kind: "surface", surfaceId: "chat", runId: "task-a", workspaceKey: "octopus-os" }), { surfaceId: "chat", runId: "task-a" });
+  assert.deepEqual(state.clientWindowInitialDestination({ kind: "surface", surfaceId: "chat", runId: "task-a", workspaceKey: "phobos-os" }), { surfaceId: "chat", runId: "task-a" });
 });
 
 test("Dashboard expansion restores an inspector that was already closed", () => {

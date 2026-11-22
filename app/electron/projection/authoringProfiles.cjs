@@ -1,22 +1,22 @@
-module.exports = { parseOctopusOsAuthoringProfile, parseOctopusOsContextArtifactBindings, parseOctopusOsExternalInputs, parseOctopusOsExternalRelays, parseOctopusOsModelOutputs, parseOctopusOsPresentation, parseOctopusOsRequiredVerifiedArtifacts, parseOctopusOsSelectedTools, parseOctopusOsSelectedWorkerEnvironmentKinds, parseOctopusOsTaskAuthoringProfiles, projectOctopusOsRequiredVerifiedArtifacts };
+module.exports = { parsePhobosOsAuthoringProfile, parsePhobosOsContextArtifactBindings, parsePhobosOsExternalInputs, parsePhobosOsExternalRelays, parsePhobosOsModelOutputs, parsePhobosOsPresentation, parsePhobosOsRequiredVerifiedArtifacts, parsePhobosOsSelectedTools, parsePhobosOsSelectedWorkerEnvironmentKinds, parsePhobosOsTaskAuthoringProfiles, projectPhobosOsRequiredVerifiedArtifacts };
 
 const { payloadArtifactBindings } = require("../contentAddressedArtifact.cjs");
 const path = require("node:path");
 const { arrayValue, exactObjectKeys, isPlainRecord, objectOrEmpty, requiredContractToken, requiredSafeRegistryId, stringValue } = require("./values.cjs");
 
-function parseOctopusOsPresentation(value, file) {
+function parsePhobosOsPresentation(value, file) {
   exactObjectKeys(
     value,
     ["name", "projects"],
     ["projects"],
-    "Octopus OS presentation",
+    "Phobos OS presentation",
   );
   if (!Array.isArray(value.projects)) {
-    throw new Error(`Octopus OS presentation projects must be an array: ${file}`);
+    throw new Error(`Phobos OS presentation projects must be an array: ${file}`);
   }
   const name = stringValue(value.name);
   if (value.name !== undefined && (!name || [...name].length > 80 || name !== value.name)) {
-    throw new Error(`Octopus OS presentation name is invalid: ${file}`);
+    throw new Error(`Phobos OS presentation name is invalid: ${file}`);
   }
   const seenEeIds = new Set();
   const projects = value.projects.map((project, index) => {
@@ -24,11 +24,11 @@ function parseOctopusOsPresentation(value, file) {
       project,
       ["ee_id", "name", "icon", "color"],
       ["ee_id", "name"],
-      `Octopus OS presentation project ${index}`,
+      `Phobos OS presentation project ${index}`,
     );
     const eeId = requiredSafeRegistryId(
       project.ee_id,
-      `Octopus OS presentation project ${index} EE`,
+      `Phobos OS presentation project ${index} EE`,
     );
     const name = stringValue(project.name);
     const icon = stringValue(project.icon);
@@ -40,7 +40,7 @@ function parseOctopusOsPresentation(value, file) {
       || icon.length > 64
       || color.length > 64
     ) {
-      throw new Error(`Octopus OS presentation project ${index} is invalid: ${file}`);
+      throw new Error(`Phobos OS presentation project ${index} is invalid: ${file}`);
     }
     seenEeIds.add(eeId);
     return { ee_id: eeId, name, icon, color };
@@ -48,7 +48,7 @@ function parseOctopusOsPresentation(value, file) {
   return { name, projects };
 }
 
-function parseOctopusOsAuthoringProfile(value, workerChoice, file) {
+function parsePhobosOsAuthoringProfile(value, workerChoice, file) {
   exactObjectKeys(
     value,
     [
@@ -57,63 +57,63 @@ function parseOctopusOsAuthoringProfile(value, workerChoice, file) {
       "selected_tools", "publication_evidence",
     ],
     ["ee_id", "worker_choice_interface", "door_host_slots"],
-    "Octopus OS authoring profile",
+    "Phobos OS authoring profile",
   );
-  const eeId = requiredSafeRegistryId(value.ee_id, "Octopus OS authoring profile EE");
+  const eeId = requiredSafeRegistryId(value.ee_id, "Phobos OS authoring profile EE");
   const worker = requiredSafeRegistryId(
     value.worker_choice_interface,
-    "Octopus OS authoring profile worker",
+    "Phobos OS authoring profile worker",
   );
   if (workerChoice && worker !== workerChoice) {
-    throw new Error(`Octopus OS authoring profile worker conflicts with client choice: ${file}`);
+    throw new Error(`Phobos OS authoring profile worker conflicts with client choice: ${file}`);
   }
   if (!isPlainRecord(value.door_host_slots)) {
-    throw new Error(`Octopus OS authoring profile door_host_slots is not an object: ${file}`);
+    throw new Error(`Phobos OS authoring profile door_host_slots is not an object: ${file}`);
   }
   const doorHostSlots = {};
   for (const [interfaceId, slots] of Object.entries(value.door_host_slots)) {
-    const door = requiredSafeRegistryId(interfaceId, "Octopus OS authoring profile door");
+    const door = requiredSafeRegistryId(interfaceId, "Phobos OS authoring profile door");
     if (!isPlainRecord(slots) || Object.keys(slots).length === 0) {
-      throw new Error(`Octopus OS authoring profile door '${door}' has no host slots: ${file}`);
+      throw new Error(`Phobos OS authoring profile door '${door}' has no host slots: ${file}`);
     }
     const normalized = {};
     for (const [slotName, root] of Object.entries(slots)) {
-      const slot = requiredSafeRegistryId(slotName, "Octopus OS authoring profile root slot");
+      const slot = requiredSafeRegistryId(slotName, "Phobos OS authoring profile root slot");
       const rootPath = stringValue(root);
       if (!path.isAbsolute(rootPath)) {
-        throw new Error(`Octopus OS authoring profile root '${door}.${slot}' is not absolute: ${file}`);
+        throw new Error(`Phobos OS authoring profile root '${door}.${slot}' is not absolute: ${file}`);
       }
       normalized[slot] = rootPath;
     }
     doorHostSlots[door] = normalized;
   }
-  const externalInputs = parseOctopusOsExternalInputs(value.external_inputs, file);
-  const externalRelays = parseOctopusOsExternalRelays(value.external_relays, file);
-  const modelOutputs = parseOctopusOsModelOutputs(value.model_outputs, file);
-  const contextArtifactBindings = parseOctopusOsContextArtifactBindings(
+  const externalInputs = parsePhobosOsExternalInputs(value.external_inputs, file);
+  const externalRelays = parsePhobosOsExternalRelays(value.external_relays, file);
+  const modelOutputs = parsePhobosOsModelOutputs(value.model_outputs, file);
+  const contextArtifactBindings = parsePhobosOsContextArtifactBindings(
     value.context_artifact_bindings,
     file,
   );
   const selectedPayloads = payloadArtifactBindings(value.payload_artifact_bindings);
   if (selectedPayloads.some(reference => contextArtifactBindings.some(context => context.id === reference.id))) throw new Error("Payload and JSON context selections overlap");
-  const selectedWorkerEnvironmentKinds = parseOctopusOsSelectedWorkerEnvironmentKinds(
+  const selectedWorkerEnvironmentKinds = parsePhobosOsSelectedWorkerEnvironmentKinds(
     value.selected_worker_environment_kinds,
     file,
   );
-  const selectedTools = parseOctopusOsSelectedTools(value.selected_tools, file);
+  const selectedTools = parsePhobosOsSelectedTools(value.selected_tools, file);
   const publicationEvidence = parsePublicationSelectionEvidence(value.publication_evidence);
   const routeCheckpoints = new Set(externalInputs.map((input) => input.checkpoint_id));
   const routeSources = new Set(externalInputs.map((input) => input.interface_id));
   for (const relay of externalRelays) {
     if (routeCheckpoints.has(relay.checkpoint_id) || routeSources.has(relay.interface_id)) {
-      throw new Error(`Octopus OS authoring profile repeats an external route: ${file}`);
+      throw new Error(`Phobos OS authoring profile repeats an external route: ${file}`);
     }
     routeCheckpoints.add(relay.checkpoint_id);
     routeSources.add(relay.interface_id);
   }
   for (const output of modelOutputs) {
     if (routeCheckpoints.has(output.checkpoint_id)) {
-      throw new Error(`Octopus OS authoring profile repeats an external checkpoint: ${file}`);
+      throw new Error(`Phobos OS authoring profile repeats an external checkpoint: ${file}`);
     }
     routeCheckpoints.add(output.checkpoint_id);
   }
@@ -151,25 +151,25 @@ function parsePublicationSelectionEvidence(value) {
   });
 }
 
-function parseOctopusOsTaskAuthoringProfiles(value, file) {
+function parsePhobosOsTaskAuthoringProfiles(value, file) {
   if (!Array.isArray(value)) {
-    throw new Error(`Octopus OS task authoring profiles must be an array: ${file}`);
+    throw new Error(`Phobos OS task authoring profiles must be an array: ${file}`);
   }
   const seen = new Set();
   return value.map((candidate, index) => {
-    const profile = parseOctopusOsAuthoringProfile(candidate, "", file);
+    const profile = parsePhobosOsAuthoringProfile(candidate, "", file);
     const key = `${profile.ee_id}\u0000${profile.worker_choice_interface}`;
     if (seen.has(key)) {
-      throw new Error(`Octopus OS task authoring profile ${index} repeats EE and worker: ${file}`);
+      throw new Error(`Phobos OS task authoring profile ${index} repeats EE and worker: ${file}`);
     }
     seen.add(key);
     return profile;
   });
 }
 
-function parseOctopusOsExternalInputs(value, file) {
+function parsePhobosOsExternalInputs(value, file) {
   if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`Octopus OS external_inputs must be an array: ${file}`);
+  if (!Array.isArray(value)) throw new Error(`Phobos OS external_inputs must be an array: ${file}`);
   const checkpoints = new Set();
   const interfaces = new Set();
   return value.map((candidate, index) => {
@@ -177,19 +177,19 @@ function parseOctopusOsExternalInputs(value, file) {
       candidate,
       ["checkpoint_id", "interface_id", "artifact_names", "required_verified_artifacts"],
       ["checkpoint_id", "interface_id"],
-      `Octopus OS external input ${index}`,
+      `Phobos OS external input ${index}`,
     );
-    const checkpointId = requiredSafeRegistryId(candidate.checkpoint_id, `Octopus OS external input ${index} checkpoint`);
-    const interfaceId = requiredSafeRegistryId(candidate.interface_id, `Octopus OS external input ${index} interface`);
-    const artifactNames = parseOctopusOsArtifactNames(candidate.artifact_names, `Octopus OS external input ${index}`, file);
+    const checkpointId = requiredSafeRegistryId(candidate.checkpoint_id, `Phobos OS external input ${index} checkpoint`);
+    const interfaceId = requiredSafeRegistryId(candidate.interface_id, `Phobos OS external input ${index} interface`);
+    const artifactNames = parsePhobosOsArtifactNames(candidate.artifact_names, `Phobos OS external input ${index}`, file);
     if (checkpoints.has(checkpointId) || interfaces.has(interfaceId)) {
-      throw new Error(`Octopus OS external input ${index} is duplicated: ${file}`);
+      throw new Error(`Phobos OS external input ${index} is duplicated: ${file}`);
     }
     checkpoints.add(checkpointId);
     interfaces.add(interfaceId);
-    const requirements = parseOctopusOsRequiredVerifiedArtifacts(
+    const requirements = parsePhobosOsRequiredVerifiedArtifacts(
       candidate.required_verified_artifacts,
-      `Octopus OS external input ${index}`,
+      `Phobos OS external input ${index}`,
       file,
     );
     return {
@@ -201,7 +201,7 @@ function parseOctopusOsExternalInputs(value, file) {
   });
 }
 
-function parseOctopusOsArtifactNames(value, owner, file) {
+function parsePhobosOsArtifactNames(value, owner, file) {
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error(`${owner} artifact_names must be a non-empty array: ${file}`);
@@ -211,9 +211,9 @@ function parseOctopusOsArtifactNames(value, owner, file) {
   return names;
 }
 
-function parseOctopusOsExternalRelays(value, file) {
+function parsePhobosOsExternalRelays(value, file) {
   if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`Octopus OS external_relays must be an array: ${file}`);
+  if (!Array.isArray(value)) throw new Error(`Phobos OS external_relays must be an array: ${file}`);
   const checkpoints = new Set();
   const interfaces = new Set();
   return value.map((candidate, index) => {
@@ -221,28 +221,28 @@ function parseOctopusOsExternalRelays(value, file) {
       candidate,
       ["checkpoint_id", "interface_id", "outbound_interface_ids", "required_verified_artifacts"],
       ["checkpoint_id", "interface_id", "outbound_interface_ids"],
-      `Octopus OS external relay ${index}`,
+      `Phobos OS external relay ${index}`,
     );
-    const checkpointId = requiredSafeRegistryId(candidate.checkpoint_id, `Octopus OS external relay ${index} checkpoint`);
-    const interfaceId = requiredSafeRegistryId(candidate.interface_id, `Octopus OS external relay ${index} interface`);
+    const checkpointId = requiredSafeRegistryId(candidate.checkpoint_id, `Phobos OS external relay ${index} checkpoint`);
+    const interfaceId = requiredSafeRegistryId(candidate.interface_id, `Phobos OS external relay ${index} interface`);
     if (!Array.isArray(candidate.outbound_interface_ids) || candidate.outbound_interface_ids.length === 0) {
-      throw new Error(`Octopus OS external relay ${index} has no outbound interfaces: ${file}`);
+      throw new Error(`Phobos OS external relay ${index} has no outbound interfaces: ${file}`);
     }
     const outboundInterfaceIds = candidate.outbound_interface_ids.map((target, targetIndex) => (
-      requiredSafeRegistryId(target, `Octopus OS external relay ${index} outbound interface ${targetIndex}`)
+      requiredSafeRegistryId(target, `Phobos OS external relay ${index} outbound interface ${targetIndex}`)
     ));
     if (
       checkpoints.has(checkpointId)
       || interfaces.has(interfaceId)
       || new Set(outboundInterfaceIds).size !== outboundInterfaceIds.length
     ) {
-      throw new Error(`Octopus OS external relay ${index} is duplicated: ${file}`);
+      throw new Error(`Phobos OS external relay ${index} is duplicated: ${file}`);
     }
     checkpoints.add(checkpointId);
     interfaces.add(interfaceId);
-    const requirements = parseOctopusOsRequiredVerifiedArtifacts(
+    const requirements = parsePhobosOsRequiredVerifiedArtifacts(
       candidate.required_verified_artifacts,
-      `Octopus OS external relay ${index}`,
+      `Phobos OS external relay ${index}`,
       file,
     );
     return {
@@ -254,7 +254,7 @@ function parseOctopusOsExternalRelays(value, file) {
   });
 }
 
-function parseOctopusOsRequiredVerifiedArtifacts(value, owner, file) {
+function parsePhobosOsRequiredVerifiedArtifacts(value, owner, file) {
   if (value === undefined) return [];
   if (!Array.isArray(value)) {
     throw new Error(`${owner} required_verified_artifacts must be an array: ${file}`);
@@ -290,7 +290,7 @@ function parseOctopusOsRequiredVerifiedArtifacts(value, owner, file) {
   });
 }
 
-function projectOctopusOsRequiredVerifiedArtifacts(value) {
+function projectPhobosOsRequiredVerifiedArtifacts(value) {
   return arrayValue(value).map((requirement) => ({
     mark: stringValue(requirement?.mark),
     artifactLabel: stringValue(requirement?.artifact_label),
@@ -299,9 +299,9 @@ function projectOctopusOsRequiredVerifiedArtifacts(value) {
   }));
 }
 
-function parseOctopusOsModelOutputs(value, file) {
+function parsePhobosOsModelOutputs(value, file) {
   if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`Octopus OS model_outputs must be an array: ${file}`);
+  if (!Array.isArray(value)) throw new Error(`Phobos OS model_outputs must be an array: ${file}`);
   const checkpoints = new Set();
   const interfaces = new Set();
   return value.map((candidate, index) => {
@@ -309,12 +309,12 @@ function parseOctopusOsModelOutputs(value, file) {
       candidate,
       ["checkpoint_id", "interface_id", "required_verified_artifact"],
       ["checkpoint_id", "interface_id", "required_verified_artifact"],
-      `Octopus OS model output ${index}`,
+      `Phobos OS model output ${index}`,
     );
-    const checkpointId = requiredSafeRegistryId(candidate.checkpoint_id, `Octopus OS model output ${index} checkpoint`);
-    const interfaceId = requiredSafeRegistryId(candidate.interface_id, `Octopus OS model output ${index} interface`);
+    const checkpointId = requiredSafeRegistryId(candidate.checkpoint_id, `Phobos OS model output ${index} checkpoint`);
+    const interfaceId = requiredSafeRegistryId(candidate.interface_id, `Phobos OS model output ${index} interface`);
     if (checkpoints.has(checkpointId) || interfaces.has(interfaceId)) {
-      throw new Error(`Octopus OS model output ${index} is duplicated: ${file}`);
+      throw new Error(`Phobos OS model output ${index} is duplicated: ${file}`);
     }
     checkpoints.add(checkpointId);
     interfaces.add(interfaceId);
@@ -323,73 +323,73 @@ function parseOctopusOsModelOutputs(value, file) {
       requirement,
       ["mark", "artifact_label", "verifier", "params"],
       ["mark", "artifact_label", "verifier", "params"],
-      `Octopus OS model output ${index} requirement`,
+      `Phobos OS model output ${index} requirement`,
     );
     if (!isPlainRecord(requirement.params)) {
-      throw new Error(`Octopus OS model output ${index} requirement params are not an object: ${file}`);
+      throw new Error(`Phobos OS model output ${index} requirement params are not an object: ${file}`);
     }
     return {
       checkpoint_id: checkpointId,
       interface_id: interfaceId,
       required_verified_artifact: {
-        mark: requiredContractToken(requirement.mark, `Octopus OS model output ${index} mark`),
+        mark: requiredContractToken(requirement.mark, `Phobos OS model output ${index} mark`),
         artifact_label: requiredContractToken(
           requirement.artifact_label,
-          `Octopus OS model output ${index} artifact label`,
+          `Phobos OS model output ${index} artifact label`,
         ),
-        verifier: requiredSafeRegistryId(requirement.verifier, `Octopus OS model output ${index} verifier`),
+        verifier: requiredSafeRegistryId(requirement.verifier, `Phobos OS model output ${index} verifier`),
         params: requirement.params,
       },
     };
   });
 }
 
-function parseOctopusOsContextArtifactBindings(value, file) {
+function parsePhobosOsContextArtifactBindings(value, file) {
   if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`Octopus OS context_artifact_bindings must be an array: ${file}`);
+  if (!Array.isArray(value)) throw new Error(`Phobos OS context_artifact_bindings must be an array: ${file}`);
   const ids = new Set();
   return value.map((candidate, index) => {
-    exactObjectKeys(candidate, ["id"], ["id"], `Octopus OS context artifact binding ${index}`);
-    const id = requiredSafeRegistryId(candidate.id, `Octopus OS context artifact binding ${index}`);
-    if (ids.has(id)) throw new Error(`Octopus OS context artifact binding '${id}' is duplicated: ${file}`);
+    exactObjectKeys(candidate, ["id"], ["id"], `Phobos OS context artifact binding ${index}`);
+    const id = requiredSafeRegistryId(candidate.id, `Phobos OS context artifact binding ${index}`);
+    if (ids.has(id)) throw new Error(`Phobos OS context artifact binding '${id}' is duplicated: ${file}`);
     ids.add(id);
     return { id };
   });
 }
 
-function parseOctopusOsSelectedWorkerEnvironmentKinds(value, file) {
+function parsePhobosOsSelectedWorkerEnvironmentKinds(value, file) {
   if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`Octopus OS selected_worker_environment_kinds must be an array: ${file}`);
+  if (!Array.isArray(value)) throw new Error(`Phobos OS selected_worker_environment_kinds must be an array: ${file}`);
   const kinds = value.map((candidate, index) => (
-    requiredSafeRegistryId(candidate, `Octopus OS selected worker environment kind ${index}`)
+    requiredSafeRegistryId(candidate, `Phobos OS selected worker environment kind ${index}`)
   ));
   if (new Set(kinds).size !== kinds.length) {
-    throw new Error(`Octopus OS selected_worker_environment_kinds contains duplicates: ${file}`);
+    throw new Error(`Phobos OS selected_worker_environment_kinds contains duplicates: ${file}`);
   }
   return kinds;
 }
 
-function parseOctopusOsSelectedTools(value, file) {
+function parsePhobosOsSelectedTools(value, file) {
   if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`Octopus OS selected_tools must be an array: ${file}`);
+  if (!Array.isArray(value)) throw new Error(`Phobos OS selected_tools must be an array: ${file}`);
   const tools = value.map((candidate, index) => {
     exactObjectKeys(
       candidate,
       ["tool", "interface", "worker_environment_kind"],
       ["tool", "interface", "worker_environment_kind"],
-      `Octopus OS selected tool ${index}`,
+      `Phobos OS selected tool ${index}`,
     );
     return {
-      tool: requiredContractToken(candidate.tool, `Octopus OS selected tool ${index}`),
-      interface: requiredSafeRegistryId(candidate.interface, `Octopus OS selected tool ${index} interface`),
+      tool: requiredContractToken(candidate.tool, `Phobos OS selected tool ${index}`),
+      interface: requiredSafeRegistryId(candidate.interface, `Phobos OS selected tool ${index} interface`),
       worker_environment_kind: requiredSafeRegistryId(
         candidate.worker_environment_kind,
-        `Octopus OS selected tool ${index} worker environment kind`,
+        `Phobos OS selected tool ${index} worker environment kind`,
       ),
     };
   });
   if (new Set(tools.map((selection) => selection.tool)).size !== tools.length) {
-    throw new Error(`Octopus OS selected_tools contains duplicates: ${file}`);
+    throw new Error(`Phobos OS selected_tools contains duplicates: ${file}`);
   }
   return tools;
 }

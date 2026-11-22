@@ -1,5 +1,5 @@
 name: Bug report
-description: Report one reproducible Octopus failure with privacy-safe evidence.
+description: Report one reproducible Phobos failure with privacy-safe evidence.
 title: "[Bug] "
 labels:
   - bug
@@ -13,7 +13,7 @@ body:
   - type: input
     id: revision
     attributes:
-      label: Octopus revision
+      label: Phobos revision
       description: The commit you built, from `git rev-parse --short HEAD`.
       placeholder: 1540d11
     validations:
@@ -71,7 +71,7 @@ body:
       label: Steps to reproduce
       description: The shortest sequence that reproduces it on a fresh Home if possible.
       placeholder: |
-        1. Launch with OCTOPUS_HOME=~/.octopus-preview
+        1. Launch with PHOBOS_HOME=~/.phobos-preview
         2. ...
     validations:
       required: true

@@ -8,7 +8,7 @@ const projectionReadContractSchema = require("../schemas/projection_read_contrac
 const publicationSchema = require("../schemas/client_extension_publication.schema.json");
 const {
   assertDisjointPaths,
-  assertOutsideDetectedOctopusHome,
+  assertOutsideDetectedPhobosHome,
   assertOutsidePrivateRoots,
   createAtomicPublication,
   errorMessage,
@@ -46,7 +46,7 @@ async function main() {
     assertOutsidePrivateRoots(requiredAbsoluteOption(options, "source"), "client Extension source", privateRoots),
     "client Extension source",
   );
-  await assertOutsideDetectedOctopusHome(sourceRoot, "client Extension source");
+  await assertOutsideDetectedPhobosHome(sourceRoot, "client Extension source");
   const outRoot = requiredAbsoluteOption(options, "out");
   await assertDisjointPaths(outRoot, "publication output", sourceRoot, "client Extension source");
   const entries = await fs.readdir(sourceRoot, { withFileTypes: true });
@@ -65,7 +65,7 @@ async function main() {
   }
   if (!validateManifest(manifest)) throw schemaError("client Extension manifest", validateManifest.errors);
   if (manifest.contribution.kind !== "surface") {
-    throw new Error("only declared client surface Extensions are downloadable; built-in client code is published with the Octopus source repository");
+    throw new Error("only declared client surface Extensions are downloadable; built-in client code is published with the Phobos source repository");
   }
   const { clientExtensionManifestSemanticIssues } = await import("../electron/clientExtensionManifestSemantics.mjs");
   const { clientSurfaceDocumentSemanticInspection } = await import("../electron/clientSurfaceDocumentSemantics.mjs");
@@ -84,16 +84,16 @@ async function main() {
   }
   const license = await readPublicationLicense(options, privateRoots);
   const sourceDigest = `sha256:${sha256(manifestBody)}`;
-  const bundleName = `${manifest.id}-${manifest.version}-${sourceDigest.slice(7, 19)}.octopus-client-extension`;
+  const bundleName = `${manifest.id}-${manifest.version}-${sourceDigest.slice(7, 19)}.phobos-client-extension`;
   const result = await createAtomicPublication(outRoot, bundleName, async (stageRoot) => {
     const files = [];
     files.push(await writePublicationFile(stageRoot, license.path, license.body, 0o644));
     const manifestPath = path.posix.join("packages", manifest.id, "extension.json");
     files.push(await writePublicationFile(stageRoot, manifestPath, manifestBody, 0o644));
     const publicationCore = {
-      schema: "octopus.client_extension_publication",
+      schema: "phobos.client_extension_publication",
       schema_version: 1,
-      layout: "octopus.client_extension_library.v1",
+      layout: "phobos.client_extension_library.v1",
       extension_id: manifest.id,
       extension_version: manifest.version,
       manifest_path: manifestPath,

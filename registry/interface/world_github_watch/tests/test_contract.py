@@ -40,10 +40,10 @@ class Contract(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        env = dict(OCTOPUS_INTERFACE_ID="world_github_watch", OCTOPUS_VAR_DIR=str(self.root),
-                   OCTOPUS_INTERFACE_DIR=str(HERE), OCTOPUS_MOVEMENTS_JSONL=str(self.root / "movements"),
-                   OCTOPUS_BLOBS_DIR=str(self.root / "blobs"),
-                   OCTOPUS_INTERFACE_HOST_IO_LIMITS=json.dumps(LIMITS))
+        env = dict(PHOBOS_INTERFACE_ID="world_github_watch", PHOBOS_VAR_DIR=str(self.root),
+                   PHOBOS_INTERFACE_DIR=str(HERE), PHOBOS_MOVEMENTS_JSONL=str(self.root / "movements"),
+                   PHOBOS_BLOBS_DIR=str(self.root / "blobs"),
+                   PHOBOS_INTERFACE_HOST_IO_LIMITS=json.dumps(LIMITS))
         with patch.dict(os.environ, env):
             self.b = load_boundary(HERE / "github_watch_boundary.py")
         self.w = Watcher(CONFIG, self.b)
@@ -56,7 +56,7 @@ class Contract(unittest.TestCase):
 
     def admit(self, path, evidence):
         manifest = Path(path).read_bytes()
-        artifact_id = "github.activity.notice:" + self.b.octopus_content_hash(manifest)
+        artifact_id = "github.activity.notice:" + self.b.phobos_content_hash(manifest)
         ledger = self.root / "movements"
         seq = len(ledger.read_text().splitlines()) if ledger.exists() else 0
         with ledger.open("a") as f:

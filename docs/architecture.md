@@ -1,12 +1,12 @@
 # Architecture
 
-Octopus is a self-evolving agentic operating system. It is built on
+Phobos is a self-evolving agentic operating system. It is built on
 operating-system principles, with an architecture that lets agents reshape
 their execution environment and influence the trajectory of their future work.
 
 The usual agent is a loop around a model: act, observe, accumulate context,
 repeat. Memory, skills, sub-agents, and schedules are then bolted onto that
-loop, and everything the agent can do has to fit inside it. Octopus is built the other
+loop, and everything the agent can do has to fit inside it. Phobos is built the other
 way around. Neither the model nor the loop is at the center. There is a
 small kernel and a set of primitives, and the loop is one of the things those
 primitives express.
@@ -49,7 +49,7 @@ later work without building it again.
 That is the architectural meaning of "what it cannot do, it can write": the
 system can acquire software through its own ordinary work. Model capability,
 the device or API, permissions, and verification determine whether a particular
-attempt succeeds. [Extending Octopus](contracts/EXTENSION_SURFACES.md) describes
+attempt succeeds. [Extending Phobos](contracts/EXTENSION_SURFACES.md) describes
 the package boundaries; the [client guide](client.md#where-packages-come-from)
 explains today's local distribution path.
 
@@ -58,11 +58,11 @@ explains today's local distribution path.
 There are two sides, and they are defined by control, not by location.
 
 **System** is the set of all environments and capabilities the system can act
-on. This is where Octopus organizes goals, runs, and tool execution. Runs can
+on. This is where Phobos organizes goals, runs, and tool execution. Runs can
 exchange artifacts through System interfaces: one worker's result can become
 another worker's input, within their bindings and policy.
 
-**World** is everything outside that controllable framework. Octopus can send
+**World** is everything outside that controllable framework. Phobos can send
 artifacts to it and receive artifacts from it through declared interfaces. It
 cannot place its own runs inside an external service or coordinate that
 service's internal execution as though it were part of System.
@@ -73,11 +73,11 @@ service's internal execution as though it were part of System.
 | **System → System** | Work is coordinated through internal interfaces. | A research worker passes findings to a coding worker. |
 | **System → World** | An artifact crosses an interface to request an action or deliver output. | A message sent through a service, or audio delivered to a speaker. |
 
-There is no second Octopus execution graph inside World. To use a calendar
+There is no second Phobos execution graph inside World. To use a calendar
 event to send a message, the system receives the event, processes it in a run,
 and emits an artifact through the messaging interface. The coordination is
 **World → System → World**; the calendar and messaging service do not become
-Octopus workers.
+Phobos workers.
 
 An interface can expose an API, a device, a human channel, a model, or an
 internal worker. Its implementation determines what it can receive and do;
@@ -151,7 +151,7 @@ the interface that emitted it, and the kernel never reads it. Per movement the
 kernel sees three things: the route, the caller, and the movement itself.
 
 Think of data travelling through a network: useful content travels with the
-information needed to deliver and account for it. In Octopus, the manifest
+information needed to deliver and account for it. In Phobos, the manifest
 identifies the payload; the movement and invocation metadata say which exact
 interfaces, run, checkpoint, and formed grant this delivery belongs to. The
 receiving interface interprets the content. These are distinct records, not a
@@ -255,7 +255,7 @@ artifact.
 
 ## The agent loop
 
-The agent loop still exists in Octopus. It is not a mechanism in the
+The agent loop still exists in Phobos. It is not a mechanism in the
 runtime; it follows from artifacts.
 
 A run sends a request artifact to a provider interface. The model's reply
@@ -284,7 +284,7 @@ privileged in code; authority comes from policy.
 
 ## One turn, end to end
 
-You type a message in Home and Octopus reads a file to answer it. This is what
+You type a message in Home and Phobos reads a file to answer it. This is what
 moves. The interface ids are the kind a fresh install authors; the artifact
 names are each interface's own vocabulary.
 
@@ -432,10 +432,10 @@ is nothing to hang.
 ## Restart and recovery
 
 Goals, completed work, and pending waits are data on disk, not process state.
-An Octopus Home is a directory:
+A Phobos Home is a directory:
 
 ```text
-~/.octopus/
+~/.phobos/
   registry/                  the active descriptors
   state/runs/<run>.json      run records and their checkpoints
   state/ee_instances/        EE records and their place in the tree
@@ -495,8 +495,8 @@ stopped stays stopped. The runtime also outlives the terminal that launched it,
 so relaunching the client never stops it.
 
 Stopping and restarting the runtime is a path, not a signal. A running runtime
-listens on `state/runtime-instance/control.sock` in its Home; `octopus down`
-asks it to stop and `octopus restart` asks it to stop cleanly and start again
+listens on `state/runtime-instance/control.sock` in its Home; `phobos down`
+asks it to stop and `phobos restart` asks it to stop cleanly and start again
 as itself. Whoever can reach that path may stop or restart the runtime: the
 operator's terminal, or a run whose room grants it. A room cannot signal the
 runtime's processes, and a command started from a room cannot launch a second
@@ -555,7 +555,7 @@ into the runtime, so the kernel does not know the difference. The registry
 ships interfaces written in Rust and in Python.
 
 → [Registry descriptors](contracts/REGISTRY_DESCRIPTORS.md),
-[Extending Octopus](contracts/EXTENSION_SURFACES.md)
+[Extending Phobos](contracts/EXTENSION_SURFACES.md)
 
 ## Memory, skills, persona
 
@@ -659,7 +659,7 @@ return-after-a-pause examples.
 ## Read next
 
 - [Contracts](contracts/README.md) - the detail behind every section above.
-- [Extending Octopus](contracts/EXTENSION_SURFACES.md) - the cookbook.
+- [Extending Phobos](contracts/EXTENSION_SURFACES.md) - the cookbook.
 - [Security model](security-model.md) - what stands between a model and an
   effect.
 - [Development](development.md) - where each piece lives in the source.

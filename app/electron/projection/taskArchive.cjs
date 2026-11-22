@@ -1,4 +1,4 @@
-module.exports = { readClientTaskArchive, setOctopusOsTaskArchived };
+module.exports = { readClientTaskArchive, setPhobosOsTaskArchived };
 
 const crypto = require("node:crypto");
 const path = require("node:path");
@@ -39,12 +39,12 @@ function readClientTaskArchive(run, clientInterfaceId) {
   return archive;
 }
 
-async function setOctopusOsTaskArchived(registryRoot, octopusHomeRoot, scope, request, hooks) {
+async function setPhobosOsTaskArchived(registryRoot, phobosHomeRoot, scope, request, hooks) {
   exactObjectKeys(request, ["action", "home", "workspace", "runId", "expectedDigest", "archived"],
     ["action", "home", "workspace", "runId", "expectedDigest", "archived"], "Task archive request");
   exactObjectKeys(request.workspace, ["rootEeId", "homeRunId", "homeInterfaceId"],
     ["rootEeId", "homeRunId", "homeInterfaceId"], "Task archive workspace");
-  if (request.home !== octopusHomeRoot || request.workspace.rootEeId !== scope.rootEeId
+  if (request.home !== phobosHomeRoot || request.workspace.rootEeId !== scope.rootEeId
     || request.workspace.homeRunId !== scope.homeRunId || request.workspace.homeInterfaceId !== scope.homeInterfaceId) {
     throw new Error("Task archive request does not match the current Home and workspace");
   }
@@ -52,14 +52,14 @@ async function setOctopusOsTaskArchived(registryRoot, octopusHomeRoot, scope, re
   const archived = requiredBoolean(request.archived, "archived");
   const expectedDigest = requiredDigest(request.expectedDigest, "expectedDigest");
   const projected = scope.clientRuns.find((row) => row.run_id === runId && row.surface_role === "task");
-  if (!projected || runId === scope.homeRunId) throw new Error(`task '${runId}' is not an archivable Octopus OS task`);
-  if (!scope.byId.has(projected.ee_id)) throw new Error(`task '${runId}' is outside the Octopus OS scope`);
+  if (!projected || runId === scope.homeRunId) throw new Error(`task '${runId}' is not an archivable Phobos OS task`);
+  if (!scope.byId.has(projected.ee_id)) throw new Error(`task '${runId}' is outside the Phobos OS scope`);
   if (typeof hooks.withTaskAuthoringLock !== "function" || typeof hooks.readTaskStatus !== "function"
     || typeof hooks.commitClientAuthoring !== "function") {
     throw new Error("task archive authoring is unavailable");
   }
   return hooks.withTaskAuthoringLock(runId, async () => {
-    const runPath = await scopedRecordPath(octopusHomeRoot, projected.record_path, path.join("state", "runs"), `${runId}.json`);
+    const runPath = await scopedRecordPath(phobosHomeRoot, projected.record_path, path.join("state", "runs"), `${runId}.json`);
     const current = await readRegularJsonDocument(runPath, `task run ${runId}`);
     if (current.digest !== expectedDigest || projected.record_digest !== expectedDigest) {
       throw new Error(`task '${runId}' changed before its archive state could be edited`);
@@ -108,7 +108,7 @@ async function setOctopusOsTaskArchived(registryRoot, octopusHomeRoot, scope, re
       delete clientState.client_archive;
     }
     await hooks.commitClientAuthoring({
-      label: archived ? "archive Octopus OS task" : "restore Octopus OS task",
+      label: archived ? "archive Phobos OS task" : "restore Phobos OS task",
       writes: [{ file: runPath, beforeDigest: expectedDigest, next }], removals: [], publishBarrierPath: runPath,
     });
     return { action: "set_task_archived", runId, archived, changed: true };

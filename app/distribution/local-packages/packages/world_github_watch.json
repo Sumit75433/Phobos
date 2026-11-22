@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_github_watch",
   "version": "1.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "GitHub watch",
     "description": "A trigger template: new activity in one GitHub repository (issues, pull requests, reviews, discussions and failed workflow runs on a branch) wakes the tasks bound to it. It only reads.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "github"
   },

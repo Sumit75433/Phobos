@@ -74,7 +74,7 @@ async function verify() {
 }
 
 function verifyAssets() {
-  assert.equal(notices.schema, 'octopus.client_icon_notices.v1');
+  assert.equal(notices.schema, 'phobos.client_icon_notices.v1');
   for (const [id, upstream] of Object.entries(notices.upstreams)) {
     assert.match(upstream.commit, /^[a-f0-9]{40}$/);
     assert.equal(hash(read('licenses/icon-assets/' + upstream.notice)), upstream.notice_sha256, id + ': notice bytes');

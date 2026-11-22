@@ -320,8 +320,8 @@ function interfaceArtifactsProjection(store) {
     }
     const { runId: rowRunId, interfaceId: rowInterfaceId } = artifactMovementCoordinates(row);
     const payload = await store.resolveLedgerArtifactPayload(row);
-    if (!payload || payload.schema !== "octopus.voice_audio" || payload.schema_version !== 1) {
-      throw new Error("The realtime audio artifact does not satisfy octopus.voice_audio@1.");
+    if (!payload || payload.schema !== "phobos.voice_audio" || payload.schema_version !== 1) {
+      throw new Error("The realtime audio artifact does not satisfy phobos.voice_audio@1.");
     }
     const media = objectOrEmpty(payload.media);
     const mediaPath = requiredString(media.path, "media.path");
@@ -455,7 +455,7 @@ function interfaceArtifactsProjection(store) {
   }
 
   async function attachInterfaceArtifactTransferProjection(row, readinessCache) {
-    const transfer = await interfaceArtifactTransferProjection(store.octopusHome(), row, readinessCache);
+    const transfer = await interfaceArtifactTransferProjection(store.phobosHome(), row, readinessCache);
     return {
       ...row,
       artifact_transfer: transfer,

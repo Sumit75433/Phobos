@@ -60,7 +60,7 @@ final class AppModel: ObservableObject {
     private let detector = HandPoseDetector()
     private let engine = GestureEngine()
     private let mouse = MouseDriver()
-    private let interfaceBridge = OctopusInterfaceBridge()
+    private let interfaceBridge = PhobosInterfaceBridge()
     private let magneticTargeting = MagneticTargeting()
     private let hud = HudOverlayController()
     private let processingQueue = DispatchQueue(label: "airhand.vision.processing", qos: .userInteractive)

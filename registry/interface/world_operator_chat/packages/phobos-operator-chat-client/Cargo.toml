@@ -1,0 +1,56 @@
+[package]
+name = "phobos-operator-chat-client"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "phobos-operator-chat-topology"
+path = "src/bin/phobos-operator-chat-topology.rs"
+
+[[bin]]
+name = "phobos-operator-chat-artifact"
+path = "src/bin/phobos-operator-chat-artifact.rs"
+
+[dependencies]
+blake3.workspace = true
+json-patch.workspace = true
+phobos-app-server = { path = "../../../../../crates/phobos-app-server" }
+phobos-context-collections = { path = "../../../system_context/packages/phobos-context-collections" }
+phobos-context-projection = { path = "../../../system_context/packages/phobos-context-projection" }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-ee = { path = "../../../../../crates/phobos-ee" }
+phobos-file-storage = { path = "../../../../../crates/phobos-file-storage" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-marks = { path = "../../../../../crates/phobos-marks" }
+phobos-policy = { path = "../../../../../crates/phobos-policy" }
+phobos-run-authoring = { path = "../../../system_interface_authoring/packages/phobos-run-authoring" }
+phobos-process-session-tool-runtime = { path = "../../../../worker_environment_kind/process_session/packages/phobos-process-session-tool-runtime" }
+phobos-runtime = { path = "../../../../../crates/phobos-runtime" }
+phobos-run-record = { path = "../../../../../crates/phobos-run-record" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+phobos-verifiers = { path = "../../../../../crates/phobos-verifiers" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+object = { version = "0.37.3", default-features = false, features = ["read", "std"] }
+futures = "0.3"
+phobos-provider-codex = { path = "../../../world_provider_codex/packages/phobos-provider-codex" }
+tokio-tungstenite = "0.28.0"
+phobos-system-room-env = { path = "../../../../worker_environment_kind/system_room/packages/phobos-system-room-env" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-world-pyecho-life-runtime = { path = "../../../world_pyecho/packages/phobos-world-pyecho-life-runtime" }
+phobos-app-server-interface = { path = "../phobos-app-server-interface" }
+tokio = { version = "1", features = ["macros", "rt"] }
+tempfile = "3"

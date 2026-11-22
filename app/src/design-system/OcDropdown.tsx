@@ -148,7 +148,7 @@ export function OcDropdown({ open, onOpenChange, anchorRef, align = "start", sid
     restoreFocusRef.current = true;
     const update = () => {
       const bounds = anchor.getBoundingClientRect();
-      const offset = sideOffset ?? (5 - (window.octopusTransport ? window.octopusTransport.windowZoomFactor() : 1));
+      const offset = sideOffset ?? (5 - (window.phobosTransport ? window.phobosTransport.windowZoomFactor() : 1));
       const next = dropdownPlacement(bounds, content.getBoundingClientRect().width, content.scrollHeight, window.innerWidth, window.innerHeight, align, offset, alignOffset, side);
       if (contentWidth !== "menu") next.maxWidth = Math.min(next.maxWidth, contentWidth === "menuBounded" ? 320 : contentWidth === "modelPicker" ? 254 : 240);
       setPlacement((current) => current && Object.keys(next).every((key) => current[key as keyof Placement] === next[key as keyof Placement]) ? current : next);

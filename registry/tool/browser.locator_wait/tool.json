@@ -5,7 +5,7 @@
     "operation": "locator_wait"
   },
   "process": {
-    "bin": "target/debug/octopus-browser-session-tool",
+    "bin": "target/debug/phobos-browser-session-tool",
     "private_read_subpaths": [
       {
         "path": "secrets/browser-native-host.auth"

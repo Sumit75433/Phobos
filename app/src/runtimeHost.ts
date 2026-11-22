@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import type { OctopusHomeStorageHealth, OctopusInterfaceFailure, OctopusRuntimeHostState } from "./electron";
+import type { PhobosHomeStorageHealth, PhobosInterfaceFailure, PhobosRuntimeHostState } from "./electron";
 
-export type RuntimeClientState = OctopusRuntimeHostState & {
+export type RuntimeClientState = PhobosRuntimeHostState & {
   available: boolean;
 };
 
@@ -28,12 +28,12 @@ const EMPTY_STATE: RuntimeClientState = {
 export function useRuntimeHost() {
   const [state, setState] = useState<RuntimeClientState>(EMPTY_STATE);
 
-  const applyHostState = useCallback((next: OctopusRuntimeHostState) => {
+  const applyHostState = useCallback((next: PhobosRuntimeHostState) => {
     setState((current) => ({ ...current, ...next, available: true }));
   }, []);
 
   const refreshObservation = useCallback(async () => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.bootStatus) {
       setState({
         ...EMPTY_STATE,
@@ -47,7 +47,7 @@ export function useRuntimeHost() {
       applyHostState(await bridge.bootStatus());
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      const accessRequired = /locked or expired|profile lab|primary Octopus window/i.test(message);
+      const accessRequired = /locked or expired|profile lab|primary Phobos window/i.test(message);
       setState((current) => ({
         ...current,
         phase: accessRequired ? "access_required" : "degraded",
@@ -60,7 +60,7 @@ export function useRuntimeHost() {
   }, [applyHostState]);
 
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.bootStatus) {
       setState({ ...EMPTY_STATE, phase: "external_preview", ready: true, available: false });
       return;
@@ -75,16 +75,16 @@ export function useRuntimeHost() {
 
 export type RuntimeHostView = ReturnType<typeof useRuntimeHost>;
 
-const EMPTY_HOME_HEALTH = { storageHealth: null, interfaceFailures: [] as OctopusInterfaceFailure[] };
+const EMPTY_HOME_HEALTH = { storageHealth: null, interfaceFailures: [] as PhobosInterfaceFailure[] };
 
-export function useRuntimeHomeHealth(home: string, enabled: boolean): Pick<OctopusRuntimeHostState, "storageHealth" | "interfaceFailures"> {
-  const [observation, setObservation] = useState<{ home: string; storageHealth: OctopusHomeStorageHealth | null; interfaceFailures: OctopusInterfaceFailure[] } | null>(null);
+export function useRuntimeHomeHealth(home: string, enabled: boolean): Pick<PhobosRuntimeHostState, "storageHealth" | "interfaceFailures"> {
+  const [observation, setObservation] = useState<{ home: string; storageHealth: PhobosHomeStorageHealth | null; interfaceFailures: PhobosInterfaceFailure[] } | null>(null);
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!enabled || !home || !bridge?.bootStatus) return;
     let active = true;
     let observedEvent = false;
-    const apply = (state: OctopusRuntimeHostState) => {
+    const apply = (state: PhobosRuntimeHostState) => {
       if (active && state.home === home) setObservation({ home, storageHealth: state.storageHealth, interfaceFailures: state.interfaceFailures });
     };
     const unsubscribe = bridge.onRuntimeHostState?.((state) => { observedEvent = true; apply(state); });

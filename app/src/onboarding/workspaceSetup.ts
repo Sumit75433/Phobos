@@ -1,4 +1,4 @@
-export const WORKSPACE_SETUP_STORAGE_KEY = "octopus.workspace-setup.v1";
+export const WORKSPACE_SETUP_STORAGE_KEY = "phobos.workspace-setup.v1";
 
 export type WorkspaceSetupPreset = "life" | "work" | "founder" | "custom";
 export type WorkspaceSetupStep = "space" | "projects" | "capabilities" | "review" | "applying";

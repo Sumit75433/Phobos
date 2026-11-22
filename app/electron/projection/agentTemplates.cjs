@@ -1,4 +1,4 @@
-module.exports = { clientAgentTemplateFromRequest, createOctopusOsAgentTemplate, mutateOctopusOsAgentTemplate, planAgentWorkerAdmission, requiredAgentIcon, requiredAgentId, requiredAgentModel, requiredAgentName, sourceProfileForWorker };
+module.exports = { clientAgentTemplateFromRequest, createPhobosOsAgentTemplate, mutatePhobosOsAgentTemplate, planAgentWorkerAdmission, requiredAgentIcon, requiredAgentId, requiredAgentModel, requiredAgentName, sourceProfileForWorker };
 
 const fs = require("node:fs/promises");
 const crypto = require("node:crypto");
@@ -6,20 +6,20 @@ const path = require("node:path");
 const { clientAgentCatalogDigest, clientAgentCatalogPath, parseClientAgentCatalog, readClientAgentCatalog, requiredClientAgentIcon, requiredClientAgentId, requiredClientAgentName, planClientAgentTemplate, requireAgentSourceAdmission } = require("../clientAgentCatalog.cjs");
 const { jsonDocumentDigest, readOptionalRegularJsonDocument, readRegularJsonDocument, requirePlainDirectory, requireUnchangedJsonDigest, stableJson } = require("./jsonFiles.cjs");
 const { applicationWithinWorkerCeiling } = require("./operatorChatContext.cjs");
-const { parseClientWorkerTemplate, parseOctopusOsSidecar, parseUniqueRegistryIds } = require("./sidecars.cjs");
+const { parseClientWorkerTemplate, parsePhobosOsSidecar, parseUniqueRegistryIds } = require("./sidecars.cjs");
 const { scopeEnvironmentChain, scopedRecordPath } = require("./taskDeletion.cjs");
 const { arrayValue, isPlainRecord, objectOrEmpty, requiredAbsolutePath, requiredApplicationOperationId, requiredDigest, requiredSafeRegistryId, requiredString, stringValue } = require("./values.cjs");
 
-async function createOctopusOsAgentTemplate(
+async function createPhobosOsAgentTemplate(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   request,
   commitClientAuthoring,
   chatContexts,
   preset = null,
 ) {
-  if (scope.status !== "ready") throw new Error("Agent creation requires a ready Octopus OS Home surface");
+  if (scope.status !== "ready") throw new Error("Agent creation requires a ready Phobos OS Home surface");
   if (typeof commitClientAuthoring !== "function") {
     throw new Error("client authoring transaction is unavailable");
   }
@@ -38,7 +38,7 @@ async function createOctopusOsAgentTemplate(
     || requiredSafeRegistryId(requestedWorkspace.homeRunId, "Agent workspace Home run") !== scope.homeRunId
     || requiredSafeRegistryId(requestedWorkspace.homeInterfaceId, "Agent workspace Home interface") !== scope.homeInterfaceId
   ) {
-    throw new Error("Agent creation does not match the projected Octopus OS workspace");
+    throw new Error("Agent creation does not match the projected Phobos OS workspace");
   }
   const expectedHomeSidecarDigest = requiredDigest(
     requestedWorkspace.expectedHomeSidecarDigest,
@@ -51,7 +51,7 @@ async function createOctopusOsAgentTemplate(
   if (
     expectedAgentCatalogDigest !== scope.agentCatalogDigest
     || requiredAbsolutePath(scope.agentCatalogPath, "Agent workspace catalog path")
-      !== clientAgentCatalogPath(octopusHomeRoot)
+      !== clientAgentCatalogPath(phobosHomeRoot)
   ) {
     throw new Error("Agent creation does not match the projected Client Agent catalog");
   }
@@ -83,9 +83,9 @@ async function createOctopusOsAgentTemplate(
   if (path.dirname(interfaceRoot) !== registryHome || path.basename(interfaceRoot) !== "interface") {
     throw new Error("active interface registry is outside the active Registry");
   }
-  const homeSidecarPath = path.join(interfaceRoot, scope.homeInterfaceId, "octopus_os.json");
-  const homeSidecar = await readRegularJsonDocument(homeSidecarPath, "Octopus OS Home sidecar");
-  const parsedHomeSidecar = parseOctopusOsSidecar(
+  const homeSidecarPath = path.join(interfaceRoot, scope.homeInterfaceId, "phobos_os.json");
+  const homeSidecar = await readRegularJsonDocument(homeSidecarPath, "Phobos OS Home sidecar");
+  const parsedHomeSidecar = parsePhobosOsSidecar(
     homeSidecar.document,
     scope.homeInterfaceId,
     homeSidecarPath,
@@ -97,7 +97,7 @@ async function createOctopusOsAgentTemplate(
   if (sourceProfile.length !== 1) {
     throw new Error(`Home sidecar no longer exposes one source profile for '${sourceWorkerInterfaceId}' in '${projectEeId}'`);
   }
-  const agentCatalog = await readClientAgentCatalog(octopusHomeRoot);
+  const agentCatalog = await readClientAgentCatalog(phobosHomeRoot);
   if (
     !agentCatalog.exists
     || agentCatalog.digest !== expectedAgentCatalogDigest
@@ -184,7 +184,7 @@ async function createOctopusOsAgentTemplate(
     homeSidecar.digest !== expectedHomeSidecarDigest
     || homeSidecar.digest !== scope.homeSidecarDigest
   ) {
-    throw new Error("Octopus OS Home changed before the Agent template could be created");
+    throw new Error("Phobos OS Home changed before the Agent template could be created");
   }
   const nextInterface = { ...structuredClone(sourceInterface.document), id: workerInterfaceId, copy_of: sourceInterface.document.copy_of ?? sourceInterface.document.id };
   const nextPolicy = { ...structuredClone(sourcePolicy.document), id: workerInterfaceId };
@@ -196,13 +196,13 @@ async function createOctopusOsAgentTemplate(
   const nextProfile = materialized.profile;
   const nextHomeSidecar = structuredClone(homeSidecar.document);
   nextHomeSidecar.task_authoring_profiles.push(nextProfile);
-  parseOctopusOsSidecar(nextHomeSidecar, scope.homeInterfaceId, homeSidecarPath);
+  parsePhobosOsSidecar(nextHomeSidecar, scope.homeInterfaceId, homeSidecarPath);
   const nextAgentCatalog = structuredClone(agentCatalog.document);
   nextAgentCatalog.agents.push(materialized.presentation);
   parseClientAgentCatalog(nextAgentCatalog, agentCatalog.file);
   const admissionWrites = await planAgentWorkerAdmission(
     registryRoot,
-    octopusHomeRoot,
+    phobosHomeRoot,
     scope,
     projectEeId,
     sourceWorkerInterfaceId,
@@ -235,15 +235,15 @@ async function createOctopusOsAgentTemplate(
   };
 }
 
-async function mutateOctopusOsAgentTemplate(
+async function mutatePhobosOsAgentTemplate(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   request,
   commitClientAuthoring,
   chatContexts,
 ) {
-  if (scope.status !== "ready") throw new Error("Agent editing requires a ready Octopus OS Home surface");
+  if (scope.status !== "ready") throw new Error("Agent editing requires a ready Phobos OS Home surface");
   if (typeof commitClientAuthoring !== "function") {
     throw new Error("client authoring transaction is unavailable");
   }
@@ -268,7 +268,7 @@ async function mutateOctopusOsAgentTemplate(
   if (expectedAgentCatalogDigest !== scope.agentCatalogDigest) {
     throw new Error("Client Agent catalog changed before the Agent could be edited");
   }
-  const agentCatalog = await readClientAgentCatalog(octopusHomeRoot);
+  const agentCatalog = await readClientAgentCatalog(phobosHomeRoot);
   if (
     !agentCatalog.exists
     || agentCatalog.digest !== expectedAgentCatalogDigest
@@ -510,7 +510,7 @@ function requiredAgentIcon(value) {
 
 async function planAgentWorkerAdmission(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   projectEeId,
   sourceWorkerInterfaceId,
@@ -543,7 +543,7 @@ async function planAgentWorkerAdmission(
       templatePlans.set(templateName, { file, current, next });
     }
     const recordPath = await scopedRecordPath(
-      octopusHomeRoot,
+      phobosHomeRoot,
       environment.record_path,
       path.join("state", "ee_instances"),
       `${eeId}.json`,

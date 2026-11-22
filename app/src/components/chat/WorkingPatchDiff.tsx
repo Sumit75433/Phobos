@@ -6,25 +6,25 @@ import { useAppearance } from "../../appearance";
 import { copyText } from "../../runtimeFormat";
 import { Glyph } from "../IconGlyphs";
 import { ShellTooltip } from "../shell/ShellTooltip";
-import { octopusDiffRawUnsafeCss } from "../settings/octopusDiffUnsafeCss";
-import { octopusDiffThemeName, registerOctopusDiffThemes } from "../settings/octopusDiffThemes";
+import { phobosDiffRawUnsafeCss } from "../settings/phobosDiffUnsafeCss";
+import { phobosDiffThemeName, registerPhobosDiffThemes } from "../settings/phobosDiffThemes";
 
-const registrationKey = Symbol.for("octopus.diff-themes.registered");
+const registrationKey = Symbol.for("phobos.diff-themes.registered");
 const registry = globalThis as typeof globalThis & { [registrationKey]?: boolean };
 if (!registry[registrationKey]) {
-  registerOctopusDiffThemes();
+  registerPhobosDiffThemes();
   registry[registrationKey] = true;
 }
 
-const workingPatchUnsafeCss = `${octopusDiffRawUnsafeCss}
+const workingPatchUnsafeCss = `${phobosDiffRawUnsafeCss}
 [data-diff] {
-  --octopus-diffs-surface: var(--color-token-main-surface-primary);
+  --phobos-diffs-surface: var(--color-token-main-surface-primary);
   --diffs-addition-color-override: var(--color-token-git-decoration-added-resource-foreground);
   --diffs-deletion-color-override: var(--color-token-git-decoration-deleted-resource-foreground);
   --diffs-gap-block: 0;
   --diffs-min-number-column-width: 1ch;
   --diffs-font-family: var(--font-mono);
-  --diffs-font-size: var(--octopus-chat-code-font-size, 12px);
+  --diffs-font-size: var(--phobos-chat-code-font-size, 12px);
   --diffs-line-height: round(nearest, calc(var(--diffs-font-size, 12px) * 1.8), 1px);
   line-height: var(--diffs-line-height);
 }`;
@@ -55,8 +55,8 @@ export default function WorkingPatchDiff({ added, changeKind, deleted, patch, pa
   path: string;
 }) {
   const appearance = useAppearance();
-  const darkTheme = octopusDiffThemeName("dark", appearance.darkCodeTheme);
-  const lightTheme = octopusDiffThemeName("light", appearance.lightCodeTheme);
+  const darkTheme = phobosDiffThemeName("dark", appearance.darkCodeTheme);
+  const lightTheme = phobosDiffThemeName("light", appearance.lightCodeTheme);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);

@@ -5,8 +5,8 @@
     "system_browser"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-browser-session-tool",
-    "target/debug/octopus-browser-wait-completion-tool"
+    "target/debug/phobos-browser-session-tool",
+    "target/debug/phobos-browser-wait-completion-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": [

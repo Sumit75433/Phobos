@@ -5,10 +5,10 @@ import PierreDiffWorker from "@pierre/diffs/worker/worker.js?worker";
 import { App } from "./App";
 import { RendererFailureBoundary } from "./RendererFailureBoundary";
 import { applyAppearance, useAppearance } from "./appearance";
-import { octopusDiffThemeName, registerOctopusDiffThemes } from "./components/settings/octopusDiffThemes";
+import { phobosDiffThemeName, registerPhobosDiffThemes } from "./components/settings/phobosDiffThemes";
 import "./foundation.css";
 import "./owned-utilities.css";
-import "./octopus-owned-components.css";
+import "./phobos-owned-components.css";
 import "katex/dist/katex.min.css";
 import "./styles.css";
 import "./theme.css";
@@ -17,10 +17,10 @@ import "@xterm/xterm/css/xterm.css";
 
 applyAppearance();
 
-const pierreThemeRegistrationKey = Symbol.for("octopus.diff-themes.registered");
+const pierreThemeRegistrationKey = Symbol.for("phobos.diff-themes.registered");
 const pierreThemeRegistry = globalThis as typeof globalThis & { [pierreThemeRegistrationKey]?: boolean };
 if (!pierreThemeRegistry[pierreThemeRegistrationKey]) {
-  registerOctopusDiffThemes();
+  registerPhobosDiffThemes();
   pierreThemeRegistry[pierreThemeRegistrationKey] = true;
 }
 
@@ -28,7 +28,7 @@ const pierreWorkerPoolOptions = {
   workerFactory: () => new PierreDiffWorker(),
 };
 
-const windowTransport = window.octopusTransport;
+const windowTransport = window.phobosTransport;
 if (windowTransport) {
   const applyWindowState = (state: { opaqueSurface: boolean; resizing: boolean }) => {
     document.documentElement.classList.toggle("electron-opaque", state.opaqueSurface);
@@ -51,8 +51,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 function PierreDiffWorkerProvider({ children }: { children: React.ReactNode }) {
   const appearance = useAppearance();
   const theme = React.useMemo(() => ({
-    dark: octopusDiffThemeName("dark", appearance.darkCodeTheme),
-    light: octopusDiffThemeName("light", appearance.lightCodeTheme),
+    dark: phobosDiffThemeName("dark", appearance.darkCodeTheme),
+    light: phobosDiffThemeName("light", appearance.lightCodeTheme),
   }), [appearance.darkCodeTheme, appearance.lightCodeTheme]);
   const highlighterOptions = React.useMemo(() => ({ theme }), [theme]);
   return (

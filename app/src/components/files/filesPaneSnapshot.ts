@@ -1,5 +1,5 @@
 import { normalizeArtifactFilesTarget } from "./artifactFilesTarget";
-import type { OctopusOsFile } from "../../electron";
+import type { PhobosOsFile } from "../../electron";
 import type { FilesOpenTarget } from "./types";
 
 export type FilesEditorViewState = { scrollTop: number; scrollLeft: number };
@@ -11,7 +11,7 @@ export type FilesPaneSnapshot = {
   target?: FilesOpenTarget;
   rootId: string;
   rootPath: string;
-  file: OctopusOsFile | null;
+  file: PhobosOsFile | null;
   draft: string;
   view: FilesEditorViewState;
 };
@@ -26,7 +26,7 @@ export function normalizeFilesPaneSnapshot(value: unknown): FilesPaneSnapshot | 
   if (!record(view, ["scrollTop", "scrollLeft"]) || !offset(view.scrollTop) || !offset(view.scrollLeft)) return null;
   const target = value.target === undefined ? undefined : normalizeTarget(value.target);
   if (value.target !== undefined && !target) return null;
-  let file: OctopusOsFile | null = null;
+  let file: PhobosOsFile | null = null;
   if (value.file !== null) {
     const row = value.file;
     if (!record(row, ["rootId", "path", "name", "size", "modifiedAt", "kind", "text", "truncated", "digest"])) return null;

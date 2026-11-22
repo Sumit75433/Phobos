@@ -15,7 +15,7 @@ async function predictionFixture(home, runId, provider, role = "prediction") {
   await fs.writeFile(file, JSON.stringify(descriptor));
   let request, record;
   const requestMaintenance = role === "title" ? require("../../../registry/interface/world_operator_chat/task-titles.cjs").requestTaskTitle : requestComposerPrediction;
-  await requestMaintenance({ octopusHome: () => home,
+  await requestMaintenance({ phobosHome: () => home,
     withRunLock: (_id, fn) => fn(), withTopologyLock: (_home, fn) => fn(), assertCurrent() {}, waitForInterface: async () => {},
     readSource: async () => role === "title" && request ? null : ({ input: { artifact_id: "input", content_hash: "01".repeat(32), movement_seq: 1 }, chat: { provider_bound_interface_id: provider, os_root_ee_id: "ee_existence" },
       terminal: { artifact_id: "answer", content_hash: "01".repeat(32), movement_seq: 1 } }),

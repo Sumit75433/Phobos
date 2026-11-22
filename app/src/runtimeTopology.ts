@@ -19,7 +19,7 @@ import {
 } from "./data/topology";
 import { hasProjectionBridge, projectionTargetLabel, readProjection } from "./projectionClient";
 import { currentProjectionStructureGeneration, useProjectionGeneration } from "./projectionLive";
-import type { OctopusRuntimeHostState, OctopusRuntimeTopologyProjection } from "./electron";
+import type { PhobosRuntimeHostState, PhobosRuntimeTopologyProjection } from "./electron";
 
 type RuntimePayload = {
   generation: number | null;
@@ -93,7 +93,7 @@ export function useRuntimeTopology(
 
   useEffect(() => {
     if (!enabled) return;
-    return window.octopusTransport?.onRuntimeHostState?.((state) => {
+    return window.phobosTransport?.onRuntimeHostState?.((state) => {
       const observation = clientRuntimeHostObservation(state);
       const wasReady = runtimeObservationRef.current?.socket_connected === true;
       runtimeObservationRef.current = observation;
@@ -180,7 +180,7 @@ export function useRuntimeTopology(
         // failure with nothing loaded yet leaves the world empty.
         appliedGeneration = null;
         failedRef.current = true;
-        void window.octopusTransport?.logClientEvent?.({
+        void window.phobosTransport?.logClientEvent?.({
           level: "error", event: "renderer.topology.read_failed", message: failure.detail,
         }).catch(() => undefined);
         setReadState({ loading: false, error: failure.detail });
@@ -290,13 +290,13 @@ async function refreshProjection(
   runtimeObservation: ClientRuntimeObservation | null,
 ): Promise<RuntimePayload> {
   const [projection, runtimeStatusRaw] = await Promise.all([
-    readProjection<OctopusRuntimeTopologyProjection>("projection.runtime.topology", {
+    readProjection<PhobosRuntimeTopologyProjection>("projection.runtime.topology", {
       include_ledger: includeLedger,
       focused_run_ids: [...focusedRunIds],
     }),
     runtimeObservation
       ? Promise.resolve(null)
-      : window.octopusTransport?.runtimeStatus?.().catch(() => null) ?? Promise.resolve(null),
+      : window.phobosTransport?.runtimeStatus?.().catch(() => null) ?? Promise.resolve(null),
   ]);
 
   return {
@@ -326,31 +326,31 @@ function liveProjectionStatus(payload: RuntimePayload): ProjectionStatus {
   const runtimeUp = observation.socket_connected;
   const runtimePhase = observation.phase;
   const runtimeError = observation.host_error;
-  const endpoint = stringValue(projection.octopus_home) || projectionTargetLabel();
+  const endpoint = stringValue(projection.phobos_home) || projectionTargetLabel();
   const latestMovementAt = formatTime(Number(projection.latest_movement_recorded_at_unix_ms) || 0) || "none";
-  const source = stringValue(projection.octopus_home) || stringValue(projection.durable_root) || "unknown source";
+  const source = stringValue(projection.phobos_home) || stringValue(projection.durable_root) || "unknown source";
   const ledgerRows = Number.isFinite(Number(projection.ledger_rows)) ? Number(projection.ledger_rows) : 0;
   if (isLab) {
     return {
       mode: "offline",
       endpoint,
       label: "Client Lab projection",
-      detail: `${ledgerRows} fixture movements · isolated from live Octopus`,
+      detail: `${ledgerRows} fixture movements · isolated from live Phobos`,
     };
   }
   if (!runtimeUp && runtimePhase === "degraded") {
     return {
       mode: "error",
       endpoint,
-      label: "Octopus could not start",
+      label: "Phobos could not start",
       detail: runtimeError || "Runtime host entered a degraded state",
     };
   }
   if (!runtimeUp && runtimePhase && !["idle", "stopped", "unmanaged"].includes(runtimePhase)) {
     const phaseLabels: Record<string, string> = {
-      preparing_home: "Preparing Octopus Home",
-      starting_runtime: "Starting Octopus",
-      waiting_runtime: "Starting Octopus",
+      preparing_home: "Preparing Phobos Home",
+      starting_runtime: "Starting Phobos",
+      waiting_runtime: "Starting Phobos",
       registry_install: "Installing capabilities",
       registry_ready: "Registry ready",
       state_ready: "Runtime state ready",
@@ -359,7 +359,7 @@ function liveProjectionStatus(payload: RuntimePayload): ProjectionStatus {
     return {
       mode: "connecting",
       endpoint,
-      label: phaseLabels[runtimePhase] || "Starting Octopus",
+      label: phaseLabels[runtimePhase] || "Starting Phobos",
       detail: [
         `Home ${source}`,
         observation.ownership,
@@ -397,7 +397,7 @@ function clientRuntimeObservation(value: unknown): ClientRuntimeObservation {
   };
 }
 
-function clientRuntimeHostObservation(value: OctopusRuntimeHostState): ClientRuntimeObservation {
+function clientRuntimeHostObservation(value: PhobosRuntimeHostState): ClientRuntimeObservation {
   return {
     authoritative: false,
     host_error: stringValue(value.error),

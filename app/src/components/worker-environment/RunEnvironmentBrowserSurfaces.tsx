@@ -1,20 +1,20 @@
 import { createElement, useEffect, useMemo, useRef, useState, type ButtonHTMLAttributes, type ReactNode, type PointerEvent as ReactPointerEvent } from "react";
 import type { WorkerEnvironmentProjection, WorkerEnvironmentSurfaceProjection } from "../../data/topology";
 import type {
-  OctopusClientContextMenuItem,
-  OctopusCdpViewerActionAccepted,
-  OctopusCdpViewerActionRequest,
-  OctopusCdpViewerFrameMetadata,
-  OctopusCdpViewerState,
-  OctopusNativeBrowserViewerActionRequest,
-  OctopusNativeBrowserViewerIdentity,
-  OctopusNativeBrowserViewerSyncRequest,
-  OctopusNativeBrowserViewerState,
+  PhobosClientContextMenuItem,
+  PhobosCdpViewerActionAccepted,
+  PhobosCdpViewerActionRequest,
+  PhobosCdpViewerFrameMetadata,
+  PhobosCdpViewerState,
+  PhobosNativeBrowserViewerActionRequest,
+  PhobosNativeBrowserViewerIdentity,
+  PhobosNativeBrowserViewerSyncRequest,
+  PhobosNativeBrowserViewerState,
 } from "../../electron";
 import { formatProjectionError } from "../../projectionClient";
 import { OcButton, OcIconButton, OcMenuItem, OcMenuSurface } from "../../design-system/components";
 import { Glyph, type GlyphName } from "../IconGlyphs";
-import { OctopusEmptyState } from "../OctopusSurface";
+import { PhobosEmptyState } from "../PhobosSurface";
 import { MessageTooltip } from "../chat/MessageTooltip";
 import "../shell/shellTooltip.css";
 import {
@@ -29,7 +29,7 @@ import { createBrowserCursor } from "./browser-cursor";
 import browserCursorAsset from "../../assets/browser-cursor.png";
 import { BrowserDownloads } from "./BrowserDownloads";
 
-type CdpBrowserFrame = { data: string; metadata: OctopusCdpViewerFrameMetadata; mimeType: "image/jpeg" };
+type CdpBrowserFrame = { data: string; metadata: PhobosCdpViewerFrameMetadata; mimeType: "image/jpeg" };
 
 export function BrowserSurface({ active, environment, surface }: { active: boolean; environment: WorkerEnvironmentProjection; surface?: WorkerEnvironmentSurfaceProjection }) {
   if (surface?.mode === "direct" && surface.protocol === "browser.native.downloads.v1") {
@@ -95,8 +95,8 @@ function UnavailableNativeBrowserSurface({ environment, surface }: { environment
     <div className="we-browser-body">
       <BrowserConnectionState title={previousSession ? "Browser session disconnected" : "Browser unavailable"}
         description={previousSession
-          ? "This page belonged to a previous browser session that is no longer connected. Ask Octopus to open a new browser page in this task to continue."
-          : "This browser page is unavailable. Ask Octopus to open a new browser page in this task to continue."}>
+          ? "This page belonged to a previous browser session that is no longer connected. Ask Phobos to open a new browser page in this task to continue."
+          : "This browser page is unavailable. Ask Phobos to open a new browser page in this task to continue."}>
         <dl>
           {lastTitle ? <><dt>Last page</dt><dd>{lastTitle}</dd></> : null}
           {lastAddress ? <><dt>Last address</dt><dd>{lastAddress}</dd></> : null}
@@ -116,7 +116,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
   const [reloadKey, setReloadKey] = useState(0);
   const [fixtureLoading, setFixtureLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [attachedCdpState, setCdpState] = useState<OctopusCdpViewerState | null>(null);
+  const [attachedCdpState, setCdpState] = useState<PhobosCdpViewerState | null>(null);
   const [cdpFrame, setCdpFrame] = useState<CdpBrowserFrame | null>(null);
   const [framePainted, setFramePainted] = useState(false);
   const [cdpError, setCdpError] = useState("");
@@ -136,7 +136,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
   activeRef.current = active;
   const addressEditingRef = useRef(false);
   const manualControlEnabledRef = useRef(false);
-  const pendingManualActionRef = useRef<OctopusCdpViewerActionRequest | null>(null);
+  const pendingManualActionRef = useRef<PhobosCdpViewerActionRequest | null>(null);
   const pendingDirectReloadRef = useRef(false);
   const fixtureInteractive = surface?.mode === "fixture";
   const evidencePage = surface?.mode === "evidence" ? browserPageFromSurface(surface) : null;
@@ -144,10 +144,10 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
   const protocol = surface?.protocol.trim().toLowerCase() ?? "";
   const requiresNativeAttach = surface?.mode === "direct" && protocol === "cdp";
   const cdpTransportAvailable = requiresNativeAttach
-    && Boolean(window.octopusTransport?.openCdpViewer)
-    && Boolean(window.octopusTransport?.cdpViewerAction)
-    && Boolean(window.octopusTransport?.closeCdpViewer)
-    && Boolean(window.octopusTransport?.onCdpViewerEvent);
+    && Boolean(window.phobosTransport?.openCdpViewer)
+    && Boolean(window.phobosTransport?.cdpViewerAction)
+    && Boolean(window.phobosTransport?.closeCdpViewer)
+    && Boolean(window.phobosTransport?.onCdpViewerEvent);
   const projectedPageUrl = surface ? dataText(surface.data, "url") : "";
   const projectedTargetId = surface ? dataText(surface.data, "target_id") : "";
   const cdpState = requiresNativeAttach
@@ -230,9 +230,9 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
       setCdpError("This browser room is no longer active.");
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!cdpTransportAvailable || !transport) {
-      setCdpError("Native CDP viewing is available only in the Octopus desktop client.");
+      setCdpError("Native CDP viewing is available only in the Phobos desktop client.");
       return;
     }
     if (!projectedTargetId) {
@@ -243,7 +243,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
     let released = false;
     cdpSessionIdRef.current = attachmentId;
     setCdpOpening(true);
-    const acceptState = (state: OctopusCdpViewerState) => {
+    const acceptState = (state: PhobosCdpViewerState) => {
       if (released || cdpSessionIdRef.current !== attachmentId || state.sessionId !== attachmentId) return;
       setCdpState(state);
       manualControlEnabledRef.current = state.manualControl && activeRef.current;
@@ -320,7 +320,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
   function navigateBrowser() {
     if (!fixtureInteractive) {
       const sessionId = cdpSessionIdRef.current;
-      if (!sessionId || !window.octopusTransport?.cdpViewerAction) return;
+      if (!sessionId || !window.phobosTransport?.cdpViewerAction) return;
       const requested = addressDraft.trim();
       if (!requested) return;
       void runManualCdpAction(requested === cdpState?.url
@@ -345,7 +345,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
   function moveBrowserHistory(delta: number) {
     if (!fixtureInteractive) {
       const sessionId = cdpSessionIdRef.current;
-      if (!sessionId || !window.octopusTransport?.cdpViewerAction) return;
+      if (!sessionId || !window.phobosTransport?.cdpViewerAction) return;
       void runManualCdpAction({ sessionId, action: delta < 0 ? "back" : "forward" });
       return;
     }
@@ -370,7 +370,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
   function reloadBrowser() {
     if (requiresNativeAttach) {
       const sessionId = cdpSessionIdRef.current;
-      if (sessionId && cdpState?.connected && window.octopusTransport?.cdpViewerAction) {
+      if (sessionId && cdpState?.connected && window.phobosTransport?.cdpViewerAction) {
         void runManualCdpAction({ sessionId, action: "reload" });
       } else {
         setCdpGeneration((current) => current + 1);
@@ -387,8 +387,8 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
     beginFixtureLoad();
   }
 
-  async function runCdpAction(request: OctopusCdpViewerActionRequest): Promise<OctopusCdpViewerState | OctopusCdpViewerActionAccepted | null> {
-    const transport = window.octopusTransport;
+  async function runCdpAction(request: PhobosCdpViewerActionRequest): Promise<PhobosCdpViewerState | PhobosCdpViewerActionAccepted | null> {
+    const transport = window.phobosTransport;
     if (!transport?.cdpViewerAction) return null;
     try {
       const result = await transport.cdpViewerAction(request);
@@ -409,7 +409,7 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
     }
   }
 
-  async function runManualCdpAction(request: OctopusCdpViewerActionRequest): Promise<OctopusCdpViewerState | OctopusCdpViewerActionAccepted | null> {
+  async function runManualCdpAction(request: PhobosCdpViewerActionRequest): Promise<PhobosCdpViewerState | PhobosCdpViewerActionAccepted | null> {
     if (readOnly || !active) return null;
     if (!manualControlEnabledRef.current) {
       if (!(request.action === "mouse" && request.eventType === "mouseMoved")) {
@@ -709,8 +709,8 @@ function ProjectedBrowserSurface({ active, environment, surface }: { active: boo
 }
 
 
-type WithoutAttachment<T> = T extends unknown ? Omit<T, keyof OctopusNativeBrowserViewerIdentity> : never;
-type NativeBrowserAction = WithoutAttachment<OctopusNativeBrowserViewerActionRequest>;
+type WithoutAttachment<T> = T extends unknown ? Omit<T, keyof PhobosNativeBrowserViewerIdentity> : never;
+type NativeBrowserAction = WithoutAttachment<PhobosNativeBrowserViewerActionRequest>;
 
 function normalizeNativeBrowserAddress(value: string) {
   const input = value.trim();
@@ -735,7 +735,7 @@ type OwnedBrowserElement = HTMLElement & {
   releaseOwnedGuest(): void;
 };
 
-function nativeBrowserGeometry(element: HTMLElement, model: OctopusNativeBrowserViewerState["modelViewport"], scaledPresentation: boolean) {
+function nativeBrowserGeometry(element: HTMLElement, model: PhobosNativeBrowserViewerState["modelViewport"], scaledPresentation: boolean) {
   const rect = element.getBoundingClientRect();
   let visible = !element.closest("[inert], [aria-hidden='true'], [hidden]");
   for (let ancestor: HTMLElement | null = element; ancestor; ancestor = ancestor.parentElement) {
@@ -756,7 +756,7 @@ function layoutNativeBrowserGuest(guest: OwnedBrowserElement, geometry: ReturnTy
   for (const key of Object.keys(styles) as Array<keyof typeof styles>) if (guest.style[key] !== styles[key]) guest.style[key] = styles[key];
 }
 
-function nativeBrowserStageFits(element: HTMLElement, bounds: OctopusNativeBrowserViewerSyncRequest["stageBounds"]) {
+function nativeBrowserStageFits(element: HTMLElement, bounds: PhobosNativeBrowserViewerSyncRequest["stageBounds"]) {
   const viewport = window.visualViewport;
   const pixelRatio = window.devicePixelRatio;
   if (!viewport || !Number.isFinite(pixelRatio) || pixelRatio <= 0 || bounds.width <= 0 || bounds.height <= 0) return false;
@@ -780,7 +780,7 @@ function nativeBrowserStageFits(element: HTMLElement, bounds: OctopusNativeBrows
 }
 
 function NativeBrowserSurface({ active, environment, surface }: { active: boolean; environment: WorkerEnvironmentProjection; surface: WorkerEnvironmentSurfaceProjection }) {
-  const [state, setState] = useState<OctopusNativeBrowserViewerState | null>(null);
+  const [state, setState] = useState<PhobosNativeBrowserViewerState | null>(null);
   const [error, setError] = useState("");
   const [errorCode, setErrorCode] = useState("");
   const [pageClosed, setPageClosed] = useState(false);
@@ -800,13 +800,13 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
   const cursorFingerprint = useRef("");
   const address = useRef<HTMLInputElement>(null);
   const findInput = useRef<HTMLInputElement>(null);
-  const nativeMenu = useRef<{ requestId: string; signature: string; transport: NonNullable<Window["octopusTransport"]> } | null>(null);
+  const nativeMenu = useRef<{ requestId: string; signature: string; transport: NonNullable<Window["phobosTransport"]> } | null>(null);
   const editing = useRef(false);
   const attachment = useRef("");
-  const lease = useRef<OctopusNativeBrowserViewerIdentity | null>(null);
+  const lease = useRef<PhobosNativeBrowserViewerIdentity | null>(null);
   const viewportSequence = useRef(0);
   const adopted = useRef(false);
-  const presentationProtocol = useRef<OctopusNativeBrowserViewerState["presentationProtocol"] | null>(null);
+  const presentationProtocol = useRef<PhobosNativeBrowserViewerState["presentationProtocol"] | null>(null);
   const acknowledged = useRef(false);
   const layoutVisible = useRef(false);
   const layoutMetricsRevision = useRef(-1);
@@ -815,7 +815,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
   const release = useRef<Promise<void>>(Promise.resolve());
   const activeRef = useRef(active);
   activeRef.current = active;
-  const available = Boolean(window.octopusTransport);
+  const available = Boolean(window.phobosTransport);
   const targetId = dataText(surface.data, "target_id");
   const activity = browserActivity(surface);
   const readOnly = surface.readOnly === true || state?.readOnly === true;
@@ -846,7 +846,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
       if (layer.style.visibility !== visibility) layer.style.visibility = visibility;
     } else if (layer && layer.style.visibility !== "hidden") layer.style.visibility = "hidden";
   }
-  function accept(next: OctopusNativeBrowserViewerState) {
+  function accept(next: PhobosNativeBrowserViewerState) {
     const owner = lease.current;
     if (!owner || next.attachmentId !== owner.attachmentId || next.hostGeneration !== owner.hostGeneration || next.mountGeneration !== owner.mountGeneration
       || next.viewportSequence < (current.current?.viewportSequence ?? 0) || next.modelViewport?.revision < (current.current?.modelViewport.revision ?? 0)) return false;
@@ -866,7 +866,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
     const controller = createBrowserCursor(layer, browserCursorAsset, moveSequence => {
       const owner = lease.current, next = current.current;
       if (!owner || !next || !activeRef.current || document.hidden || !next.visible || !next.modelActive || next.presentationPhase !== "ready" || next.cursor?.moveSequence !== moveSequence) return;
-      void window.octopusTransport?.nativeBrowserCursorArrived({ ...owner, moveSequence, metricsRevision: next.cursor.metricsRevision }).catch(failure => {
+      void window.phobosTransport?.nativeBrowserCursorArrived({ ...owner, moveSequence, metricsRevision: next.cursor.metricsRevision }).catch(failure => {
         if (lease.current === owner) setError(`Cursor presentation: ${formatProjectionError(failure)}`);
       });
     });
@@ -878,16 +878,16 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
     setError(""); setErrorCode(""); setPageClosed(false); setState(null); current.current = null; adopted.current = false; presentationProtocol.current = null; acknowledged.current = false; layoutVisible.current = false; layoutMetricsRevision.current = -1;
     present();
     if (!active || environment.lifecycle !== "active") return;
-    if (!available) { setError("Native browser viewing requires the Octopus desktop client."); return; }
+    if (!available) { setError("Native browser viewing requires the Phobos desktop client."); return; }
     if (!targetId) { setError("This room has not projected an exact browser target."); return; }
     const element = page.current;
     if (!element) { setError("The browser presentation stage is unavailable."); return; }
     const ownedGuestAvailable = typeof element.getOwnedGuestFrameToken === "function"
       && typeof element.adoptOwnedGuest === "function" && typeof element.releaseOwnedGuest === "function";
-    const transport = window.octopusTransport!;
+    const transport = window.phobosTransport!;
     const id = crypto.randomUUID();
     let disposed = false, released = false, ownedPresentation = false;
-    let prepared: OctopusNativeBrowserViewerIdentity | null = null;
+    let prepared: PhobosNativeBrowserViewerIdentity | null = null;
     attachment.current = id; lease.current = null; viewportSequence.current = 0; setOpening(true);
     const close = async () => {
       if (!prepared || released) return;
@@ -955,7 +955,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
   }, [active, available, environment.lifecycle, retry]);
 
   useEffect(() => {
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     const element = viewport.current, guest = page.current;
     if (!available || !transport || !element || !guest) return;
     let disposed = false, animation = 0, syncing = false, dirty = false, last = "";
@@ -995,7 +995,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
         if (!nativeView) await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
         if (disposed || lease.current !== owner || !adopted.current) return;
         if (current.current?.modelViewport.revision !== model.revision) { dirty = true; return; }
-        const packet: OctopusNativeBrowserViewerSyncRequest = { ...owner, ...geometry, metricsRevision: model.revision, viewportSequence: ++viewportSequence.current };
+        const packet: PhobosNativeBrowserViewerSyncRequest = { ...owner, ...geometry, metricsRevision: model.revision, viewportSequence: ++viewportSequence.current };
         const next = await (acknowledged.current ? transport.syncNativeBrowserViewer(packet) : transport.acknowledgeNativeBrowserViewer(packet));
         if (disposed || lease.current !== owner) return;
         if (next.modelViewport.revision < (current.current?.modelViewport.revision ?? 0)) { dirty = true; return; }
@@ -1038,7 +1038,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
     const owner = lease.current, id = attachment.current;
     if (!owner || !id || current.current?.presentationPhase !== "ready" || !activeRef.current || (readOnly && request.action !== "find")) return null;
     try {
-      const next = await window.octopusTransport!.nativeBrowserViewerAction({ ...owner, ...request } as OctopusNativeBrowserViewerActionRequest);
+      const next = await window.phobosTransport!.nativeBrowserViewerAction({ ...owner, ...request } as PhobosNativeBrowserViewerActionRequest);
       if (attachment.current !== id) return null;
       accept(next); setError("");
       if (request.action === "focus" && next.engine.capabilities.ownedGuestEmbedding) page.current?.focus();
@@ -1060,7 +1060,7 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
   async function toggleBrowserMenu(anchor: HTMLButtonElement) {
     if (nativeMenu.current) { cancelNativeMenu(); setMenu(false); return; }
     if (!activeRef.current) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.showClientContextMenu || !transport.cancelClientContextMenu) { setError("Native browser actions are unavailable."); return; }
     const next = current.current, connected = next?.connected === true && next.presentationPhase === "ready";
     const writable = connected && !readOnlyRef.current, zoomFactor = next?.zoomFactor ?? 1;
@@ -1074,8 +1074,8 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
       { id: "zoom-reset", label: "Reset zoom", enabled: writable, select: () => { void action({ action: "zoom", params: { zoomFactor: 1 } }); } },
       { id: "details", label: "Browser details", enabled: true, select: () => setDetails(value => !value) },
     ];
-    const itemsFor = (ids: string[]): OctopusClientContextMenuItem[] => choices.filter(choice => ids.includes(choice.id)).map(({ select: _select, ...item }) => item);
-    const items: OctopusClientContextMenuItem[] = [
+    const itemsFor = (ids: string[]): PhobosClientContextMenuItem[] => choices.filter(choice => ids.includes(choice.id)).map(({ select: _select, ...item }) => item);
+    const items: PhobosClientContextMenuItem[] = [
       ...itemsFor(downloadsEnabled ? ["downloads", "find", "external"] : ["find", "external"]),
       { type: "separator" },
       { id: "zoom", label: `Zoom (${Math.round(zoomFactor * 100)}%)`, submenu: itemsFor(["zoom-out", "zoom-in", "zoom-reset"]) },
@@ -1195,10 +1195,10 @@ function NativeBrowserSurface({ active, environment, surface }: { active: boolea
           title={pageClosed ? "Browser page closed" : opening ? "Connecting to browser…" : errorCode === "host_unavailable" ? "Browser session disconnected" : state?.connected ? "Preparing browser…" : "Browser unavailable"}
           description={opening || state?.connected ? "The page will appear here when the connection is ready."
             : pageClosed ? "This browser page was closed and can no longer be used."
-            : errorCode === "host_unavailable" ? "The previous browser session is no longer connected. Ask Octopus to open a new browser page in this task to continue."
-            : environment.lifecycle !== "active" ? "This task’s browser is no longer active. Ask Octopus to open a new browser page to continue."
-            : !available ? "Open this task in the Octopus desktop app to view its browser."
-            : "This page couldn’t connect. Try again, or ask Octopus to open a new browser page in this task."}
+            : errorCode === "host_unavailable" ? "The previous browser session is no longer connected. Ask Phobos to open a new browser page in this task to continue."
+            : environment.lifecycle !== "active" ? "This task’s browser is no longer active. Ask Phobos to open a new browser page to continue."
+            : !available ? "Open this task in the Phobos desktop app to view its browser."
+            : "This page couldn’t connect. Try again, or ask Phobos to open a new browser page in this task."}
           onRetry={!pageClosed && !opening && !state?.connected && errorCode !== "host_unavailable" && available && !!targetId && environment.lifecycle === "active" ? () => setRetry(value => value + 1) : undefined}>
           {error ? <p>{error}</p> : null}
         </BrowserConnectionState> : null}
@@ -1226,13 +1226,13 @@ function BrowserLoadError({ detail, onReload, url }: { detail: string; onReload:
 function CdpBrowserViewer({ frame, interactionEnabled, onAction, onPainted, sessionId }: {
   frame: CdpBrowserFrame | null;
   interactionEnabled: boolean;
-  onAction: (request: OctopusCdpViewerActionRequest) => Promise<unknown>;
+  onAction: (request: PhobosCdpViewerActionRequest) => Promise<unknown>;
   onPainted: (painted: boolean) => void;
   sessionId: string;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const paintedMetadataRef = useRef<OctopusCdpViewerFrameMetadata | null>(null);
+  const paintedMetadataRef = useRef<PhobosCdpViewerFrameMetadata | null>(null);
   const receiveFrameRef = useRef<((next: CdpBrowserFrame | null) => void) | null>(null);
   const [painted, setPainted] = useState(false);
   const [paintError, setPaintError] = useState("");
@@ -1462,7 +1462,7 @@ export type BrowserFixturePage = {
 export function FixtureBrowserDocument({ page }: { page: BrowserFixturePage }) {
   return (
     <article className="we-browser-fixture">
-      <OctopusEmptyState
+      <PhobosEmptyState
         className="h-full min-h-0 flex-1 select-none"
         description={page.body}
         icon={<Glyph name="browser" size={32} />}

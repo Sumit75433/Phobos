@@ -4,7 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 
 const FORBIDDEN_PRIVATE_BASENAMES = new Set([
-  ".octopus-source-manifest.json",
+  ".phobos-source-manifest.json",
   ".env",
   ".netrc",
   ".npmrc",
@@ -17,7 +17,7 @@ const FORBIDDEN_PRIVATE_BASENAMES = new Set([
   "environment.json",
   "host.json",
   "movements.jsonl",
-  "octopus_os.json",
+  "phobos_os.json",
   "token.json",
 ]);
 const FORBIDDEN_PRIVATE_KEY_NAMES = new Set([
@@ -58,10 +58,10 @@ function requiredAbsoluteOption(options, name) {
 }
 
 function publicationPrivateRoots() {
-  const configured = typeof process.env.OCTOPUS_HOME === "string" ? process.env.OCTOPUS_HOME.trim() : "";
-  if (configured && !path.isAbsolute(configured)) throw new Error("OCTOPUS_HOME must be absolute when publishing");
+  const configured = typeof process.env.PHOBOS_HOME === "string" ? process.env.PHOBOS_HOME.trim() : "";
+  if (configured && !path.isAbsolute(configured)) throw new Error("PHOBOS_HOME must be absolute when publishing");
   return [...new Set([
-    path.resolve(configured || path.join(os.homedir(), ".octopus")),
+    path.resolve(configured || path.join(os.homedir(), ".phobos")),
   ])];
 }
 
@@ -74,7 +74,7 @@ function assertOutsidePrivateRoots(candidate, label, roots = publicationPrivateR
   const resolved = path.resolve(candidate);
   for (const root of roots) {
     if (pathContains(root, resolved)) {
-      throw new Error(`${label} is inside OCTOPUS_HOME; copy reviewed source into a clean source directory before publication`);
+      throw new Error(`${label} is inside PHOBOS_HOME; copy reviewed source into a clean source directory before publication`);
     }
   }
   return resolved;
@@ -135,14 +135,14 @@ async function readJsonRegular(file, label, maximumBytes) {
 }
 
 async function readSourceRegistryIdentity(sourceRegistryRoot) {
-  const activeMarker = path.join(sourceRegistryRoot, ".octopus-source-manifest.json");
+  const activeMarker = path.join(sourceRegistryRoot, ".phobos-source-manifest.json");
   try {
     await fs.lstat(activeMarker);
     throw new Error(`source registry is an Active Registry, not a publication source: ${sourceRegistryRoot}`);
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }
-  const file = path.join(sourceRegistryRoot, ".octopus-source.json");
+  const file = path.join(sourceRegistryRoot, ".phobos-source.json");
   const { value } = await readJsonRegular(file, "source registry identity", 64 * 1024);
   if (
     value.schema_version !== 1
@@ -156,7 +156,7 @@ async function readPublicationLicense(options, privateRoots) {
   const spdx = requiredOption(options, "license");
   if (!SAFE_SPDX.test(spdx)) throw new Error("--license must be one SPDX identifier without an expression");
   const source = assertOutsidePrivateRoots(requiredAbsoluteOption(options, "license-file"), "license file", privateRoots);
-  await assertOutsideDetectedOctopusHome(source, "license file");
+  await assertOutsideDetectedPhobosHome(source, "license file");
   const { body } = await requireRegularFile(source, "license file", 1024 * 1024);
   if (body.byteLength === 0) throw new Error("license file must not be empty");
   const publicationPath = path.basename(source);
@@ -194,7 +194,7 @@ function validatePublicPayload(relativePath, body, options = {}) {
   }
   for (const privateRoot of options.privateRoots ?? publicationPrivateRoots()) {
     if (text.includes(privateRoot) || text.includes(privateRoot.split(path.sep).join("/"))) {
-      throw new Error(`publication payload contains an OCTOPUS_HOME path at '${normalized}'`);
+      throw new Error(`publication payload contains a PHOBOS_HOME path at '${normalized}'`);
     }
   }
   if (options.rejectDevelopmentExecutables && lower.endsWith(".json")) {
@@ -226,7 +226,7 @@ function containsUnapprovedPrivateKey(text, relativePath) {
 
 async function createAtomicPublication(outRootValue, bundleName, writer, privateRoots) {
   const outRoot = assertOutsidePrivateRoots(path.resolve(outRootValue), "publication output", privateRoots);
-  await assertOutsideDetectedOctopusHome(outRoot, "publication output");
+  await assertOutsideDetectedPhobosHome(outRoot, "publication output");
   await fs.mkdir(outRoot, { recursive: true, mode: 0o755 });
   const realOutRoot = await requirePlainDirectory(outRoot, "publication output");
   const finalRoot = path.join(realOutRoot, bundleName);
@@ -251,7 +251,7 @@ async function createAtomicPublication(outRootValue, bundleName, writer, private
   }
 }
 
-async function assertOutsideDetectedOctopusHome(candidate, label) {
+async function assertOutsideDetectedPhobosHome(candidate, label) {
   let current = path.resolve(candidate);
   try {
     const stat = await fs.lstat(current);
@@ -260,8 +260,8 @@ async function assertOutsideDetectedOctopusHome(candidate, label) {
     if (error?.code !== "ENOENT") throw error;
   }
   for (;;) {
-    if (await looksLikeOctopusHome(current)) {
-      throw new Error(`${label} is inside a detected Octopus Home; copy reviewed source into a clean source directory before publication`);
+    if (await looksLikePhobosHome(current)) {
+      throw new Error(`${label} is inside a detected Phobos Home; copy reviewed source into a clean source directory before publication`);
     }
     const parent = path.dirname(current);
     if (parent === current) break;
@@ -270,7 +270,7 @@ async function assertOutsideDetectedOctopusHome(candidate, label) {
   return path.resolve(candidate);
 }
 
-async function looksLikeOctopusHome(directory) {
+async function looksLikePhobosHome(directory) {
   const checks = await Promise.all([
     pathType(path.join(directory, "host.json"), "file"),
     pathType(path.join(directory, "registry"), "directory"),
@@ -390,7 +390,7 @@ function errorMessage(error) {
 
 module.exports = {
   assertDisjointPaths,
-  assertOutsideDetectedOctopusHome,
+  assertOutsideDetectedPhobosHome,
   assertOutsidePrivateRoots,
   copyPublicationFile,
   createAtomicPublication,

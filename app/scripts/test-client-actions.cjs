@@ -16,7 +16,7 @@ Object.defineProperty(globalThis, 'navigator', { configurable: true, value: dom.
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { createRoot } = require('react-dom/client');
 after(() => dom.window.close());
-const action = surface_id => ({ schema: 'octopus.client_action', schema_version: 1, action: 'open_surface', surface_id });
+const action = surface_id => ({ schema: 'phobos.client_action', schema_version: 1, action: 'open_surface', surface_id });
 const identity = (seq, overrides = {}) => ({ artifact_id: `client.action:${seq.toString(16).padStart(64, '0')}`, run_id: 'home-run', seq, movement_kind: 'InterfaceOutbound', from: { Interface: 'room' }, to: { Interface: 'home-client' }, action: action('dashboard'), ...overrides });
 const response = (params, actions) => ({ home: params.home, run_id: params.run_id, interface_id: params.interface_id, actions });
 const scope = { home: '/selected-home', runId: 'home-run', interfaceId: 'home-client' };
@@ -47,9 +47,9 @@ test('client action contract and fixture stay read-only and typed', async () => 
 });
 
 test('actions require exact admitted outbound evidence and immutable manifest/payload bytes', async t => {
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-client-actions-')), blobs = path.join(home, 'ledger/blobs'), rows = [];
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-client-actions-')), blobs = path.join(home, 'ledger/blobs'), rows = [];
   await fs.mkdir(blobs, { recursive: true });
-  const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), octopusHome: () => home, sourceRegistry: () => path.join(home, 'registry'), projectEePolicies: () => new Promise(() => {}) });
+  const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), phobosHome: () => home, sourceRegistry: () => path.join(home, 'registry'), projectEePolicies: () => new Promise(() => {}) });
   t.after(async () => { store.close(); await fs.rm(home, { recursive: true, force: true }); });
   const blob = async value => { const bytes = Buffer.from(JSON.stringify(value)), hash = Buffer.from(blake3(bytes)).toString('hex'); await fs.writeFile(path.join(blobs, hash), bytes); return hash; };
   const original = path.join(home, 'original.json'); await fs.writeFile(original, JSON.stringify(action('foreign')));
@@ -75,10 +75,10 @@ test('actions require exact admitted outbound evidence and immutable manifest/pa
   assert.match(projected.actions[1].error, /exact/); assert.match(projected.actions[2].error, /identity/);
   assert.deepEqual((await read({ after_seq: 6, limit: 1 })).actions.map(row => row.seq), [7]);
   const tool = { id: 'tool.call:' + 'a'.repeat(64), content: Array(32).fill(10) };
-  const request = { schema: 'octopus.client_action', schema_version: 1, action: 'list_widgets', request_id: 'recorded' };
+  const request = { schema: 'phobos.client_action', schema_version: 1, action: 'list_widgets', request_id: 'recorded' };
   const requestSeq = rows.length;
-  const admitted = await admit({ schema: 'octopus.client_action_request', schema_version: 1, action: request, tool_call: tool });
-  const resultPayload = { schema: 'octopus.client_action_result', schema_version: 1, phase: 'completed', ok: true, widgets: [],
+  const admitted = await admit({ schema: 'phobos.client_action_request', schema_version: 1, action: request, tool_call: tool });
+  const resultPayload = { schema: 'phobos.client_action_result', schema_version: 1, phase: 'completed', ok: true, widgets: [],
     tool_call: tool, request_artifact: `client.action:${admitted.hash}`, request_seq: requestSeq, request_id: 'recorded', action: 'list_widgets' };
   const resultHash = await blob({ label: 'client.action.result', payload_path: original, payload_content_hash: await blob(resultPayload) });
   const resultSeq = rows.length;
@@ -107,7 +107,7 @@ async function harness(read, props = {}) {
     submitInterfaceArtifact: async request => { results.push(request); if (props.deliver) await props.deliver(request); },
   } : { useProjectionGeneration: () => generation });
   function Consumer(options) { module.exports.useAdmittedClientActions(options); return null; }
-  const options = { ...scope, enabled: true, surfaces: [{ id: 'dashboard' }, { id: 'scheduled' }], openSurface: surface => { const cursor = JSON.parse(window.localStorage.getItem(`octopus.client-actions.cursor.v1:${JSON.stringify([options.home, options.runId, options.interfaceId])}`)); assert.ok(cursor.last_consumed.seq >= 0); opens.push(surface.id); }, onRefusal: reason => refusals.push(reason), ...props };
+  const options = { ...scope, enabled: true, surfaces: [{ id: 'dashboard' }, { id: 'scheduled' }], openSurface: surface => { const cursor = JSON.parse(window.localStorage.getItem(`phobos.client-actions.cursor.v1:${JSON.stringify([options.home, options.runId, options.interfaceId])}`)); assert.ok(cursor.last_consumed.seq >= 0); opens.push(surface.id); }, onRefusal: reason => refusals.push(reason), ...props };
   let root, container;
   const render = async (changes = {}, bump = false) => { Object.assign(options, changes); if (bump) generation++; if (!root) { container = document.createElement('div'); document.body.append(container); root = createRoot(container); } await React.act(async () => root.render(React.createElement(Consumer, { ...options }))); };
   const close = async () => { if (!root) return; await React.act(async () => root.unmount()); container.remove(); root = null; };
@@ -117,7 +117,7 @@ async function harness(read, props = {}) {
 
 test('widget results resume after lost admission without repeating the saved action', async () => {
   window.localStorage.clear(); let calls = 0, fail = true;
-  const request = { schema: 'octopus.client_action', schema_version: 1, action: 'list_widgets', request_id: 'inventory' };
+  const request = { schema: 'phobos.client_action', schema_version: 1, action: 'list_widgets', request_id: 'inventory' };
   const view = await harness(params => response(params, params.after_seq < 3 ? [identity(3, { action: request, tool_call: { id: 'tool.call:' + 'a'.repeat(64), content: Array(32).fill(10) }, expires_at_ms: Date.now() + 10000, turn_closure: 'completed' })] : []), {
     widgets: async () => { calls++; return [{ widget_id: 'clock', state: 'hidden' }]; },
     deliver: async () => { if (fail) throw new Error('receipt admission unavailable'); },
@@ -130,7 +130,7 @@ test('widget results resume after lost admission without repeating the saved act
     assert.equal(view.results[1].payload.request_seq, 3); assert.equal(view.results[1].payload.ok, true);
     await view.close(); await view.render(); assert.equal(calls, 1); assert.equal(view.results.length, 2);
     await view.close(); window.localStorage.clear();
-    const pendingKey = `octopus.client-widget-result.v1:${JSON.stringify([scope.home, scope.runId, scope.interfaceId])}`;
+    const pendingKey = `phobos.client-widget-result.v1:${JSON.stringify([scope.home, scope.runId, scope.interfaceId])}`;
     const { ok, widgets, ...prepared } = view.results[0].payload;
     window.localStorage.setItem(pendingKey, JSON.stringify({ ...prepared, phase: 'prepared' }));
     await view.render(); assert.equal(calls, 1); assert.equal(view.results.at(-1).payload.ok, false);
@@ -139,16 +139,16 @@ test('widget results resume after lost admission without repeating the saved act
 });
 
 test('file controls use admitted roots and retain their result without reopening', { timeout: 10000 }, async t => {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-open-file-'));
-  const root = await fs.realpath(directory), previous = window.octopusTransport;
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-open-file-'));
+  const root = await fs.realpath(directory), previous = window.phobosTransport;
   const files = require('../electron/osFiles.cjs').createOsFileStore({ resolveRoots: async () => [{ id: 'documents', label: 'Documents', root }] });
-  window.octopusTransport = { osFileRoots: files.roots, readOsFile: files.read };
-  t.after(async () => { window.octopusTransport = previous; await fs.rm(root, { recursive: true, force: true }); });
+  window.phobosTransport = { osFileRoots: files.roots, readOsFile: files.read };
+  t.after(async () => { window.phobosTransport = previous; await fs.rm(root, { recursive: true, force: true }); });
   await fs.writeFile(path.join(root, 'Trip plan.md'), '# Trip plan\n\nDetails for the trip.');
   await fs.writeFile(path.join(root, 'binary'), Buffer.from([0, 255]));
   await fs.symlink('/etc/hosts', path.join(root, 'escape'));
   const semantics = await import('../electron/clientActionSemantics.mjs');
-  const makeAction = file => ({ schema: 'octopus.client_action', schema_version: 1, action: 'open_file', request_id: 'document', path: file });
+  const makeAction = file => ({ schema: 'phobos.client_action', schema_version: 1, action: 'open_file', request_id: 'document', path: file });
   for (const invalid of ['relative.md', `${root}/../other.md`, 'https://example.org/page', `${root}/a\0b`]) {
     assert.throws(() => semantics.parseClientAction(makeAction(invalid)), /exact/);
   }
@@ -177,7 +177,7 @@ test('a tool-correlated client control returns during the open turn, once, and e
   for (const state of ['open', 'expired', 'stopped']) {
     window.localStorage.clear(); let calls = 0;
     const tool = { id: 'tool.call:' + 'a'.repeat(64), content: Array(32).fill(10) };
-    const request = { schema: 'octopus.client_action', schema_version: 1, action: 'list_widgets', request_id: state };
+    const request = { schema: 'phobos.client_action', schema_version: 1, action: 'list_widgets', request_id: state };
     const view = await harness(params => response(params, params.after_seq < 8 ? [identity(8, {
       action: request, tool_call: tool, expires_at_ms: Date.now() + (state === 'expired' ? -1000 : 10000),
       turn_closure: state === 'stopped' ? 'stopped' : null,
@@ -194,7 +194,7 @@ test('a tool-correlated client control returns during the open turn, once, and e
 
 test('projection activity cannot cancel an admitted client control or its result', async () => {
   window.localStorage.clear(); let resolveRead, resolveEffect, calls = 0;
-  const request = { schema: 'octopus.client_action', schema_version: 1, action: 'list_widgets', request_id: 'during-activity' };
+  const request = { schema: 'phobos.client_action', schema_version: 1, action: 'list_widgets', request_id: 'during-activity' };
   const view = await harness(params => params.after_seq < 8 ? new Promise(done => { resolveRead = () => done(response(params, [identity(8, {
     action: request, tool_call: { id: 'tool.call:' + 'a'.repeat(64), content: Array(32).fill(10) },
     expires_at_ms: Date.now() + 10000, turn_closure: null,
@@ -215,7 +215,7 @@ test('projection activity cannot cancel an admitted client control or its result
 test('an admitted client result prevents effects after local cursor loss', async () => {
   window.localStorage.clear(); let calls = 0;
   const view = await harness(params => response(params, params.after_seq < 8 ? [identity(8, {
-    action: { schema: 'octopus.client_action', schema_version: 1, action: 'list_widgets', request_id: 'recorded' },
+    action: { schema: 'phobos.client_action', schema_version: 1, action: 'list_widgets', request_id: 'recorded' },
     tool_call: { id: 'tool.call:' + 'a'.repeat(64), content: Array(32).fill(10) },
     completed_result: { artifact_id: 'client.action.result:' + 'b'.repeat(64), seq: 10 },
     expires_at_ms: Date.now() + 10000,
@@ -229,9 +229,9 @@ test('an admitted client result prevents effects after local cursor loss', async
 
 test('widget controls use actual extension receipts, exact document revisions and saved visibility', async t => {
   window.localStorage.clear();
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-widget-controls-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-widget-controls-'));
   const store = require('../electron/clientExtensions.cjs').createClientExtensionStore({ root });
-  t.after(async () => { await store.close(); delete window.octopusTransport; await fs.rm(root, { recursive: true, force: true }); });
+  t.after(async () => { await store.close(); delete window.phobosTransport; await fs.rm(root, { recursive: true, force: true }); });
   const bundled = require('esbuild').buildSync({ stdin: { contents: 'export * from "./src/client-surfaces/homeWidgetControls"; export {materializeClientExtensions} from "./src/extensions/useClientExtensions";', resolveDir: path.resolve(__dirname, '..') }, bundle: true, platform: 'node', format: 'cjs', write: false, external: ['react'], loader: { '.css': 'empty' }, define: { 'import.meta.env.DEV': 'false' } });
   const module = { exports: {} }; Function('module', 'exports', 'require', bundled.outputFiles[0].text)(module, module.exports, require);
   const { applyHomeWidgetAction, materializeClientExtensions, homeWidgetHiddenKey } = module.exports;
@@ -244,14 +244,14 @@ test('widget controls use actual extension receipts, exact document revisions an
       runId, interfaceId: scope.interfaceId, sequence: revision, modifiedAt: new Date().toISOString() };
   };
   let snapshot = { generation: 1, root: 'artifact://ledger', errors: [], documents: [published(1), published(1, 'foreign', 'foreign')] };
-  window.octopusTransport = { clientExtensions: () => store.snapshot(), projectionRead: async request => {
+  window.phobosTransport = { clientExtensions: () => store.snapshot(), projectionRead: async request => {
     assert.equal(request.method, 'projection.client_surfaces.list'); return snapshot;
   } };
   const lifecycle = async (id, operationId, action) => store.applyLifecycle({ id, operationId, action, expectedGeneration: (await store.snapshot()).generation, expectedRevision: store.builtinRevision(id) });
   const extensionState = async () => ({ ...materializeClientExtensions(await store.snapshot(), 'live', ''), hydrated: true,
     install: (id, op) => lifecycle(id, op, 'install'), uninstall: (id, op) => lifecycle(id, op, 'remove') });
   const options = { ...scope, accessProfile: 'live', surfaces: [], extensions: await extensionState() };
-  const query = { schema: 'octopus.client_action', schema_version: 1, action: 'list_widgets', request_id: 'list' };
+  const query = { schema: 'phobos.client_action', schema_version: 1, action: 'list_widgets', request_id: 'list' };
   const list = () => applyHomeWidgetAction(options, query, 'widget_inventory');
   const change = (widget, state) => applyHomeWidgetAction(options, { ...query, action: 'set_widget', changes: [{ widget_id: widget.widget_id, source_digest: widget.source_digest, state }] }, `widget_${state}_fixture`);
   let rows = await list(); assert.ok(!rows.some(row => row.widget_id === 'foreign'));

@@ -25,7 +25,7 @@ w.HTMLElement.prototype.getBoundingClientRect = function () {
     return rect(Number.parseFloat(this.style.left) + x, Number.parseFloat(this.style.top) + y, Number.parseFloat(this.style.width), Number.parseFloat(this.style.height));
   }
   if (this.classList.contains("sidebar-sortable-item")) return rect(0, [...document.querySelectorAll(".sidebar-sortable-item")].indexOf(this) * 32, 240, 30);
-  if (this.querySelector?.(".sidebar-sortable-item") && !this.classList.contains("octopus-sidebar")) return rect(0, 5000, 0, 0);
+  if (this.querySelector?.(".sidebar-sortable-item") && !this.classList.contains("phobos-sidebar")) return rect(0, 5000, 0, 0);
   return rect(0, 0, 240, 900);
 };
 const errors = [];
@@ -116,19 +116,19 @@ async function show(patch = {}, organization = {}) {
 }
 const sectionToggle = (label) => [...document.querySelectorAll("button[aria-expanded]")].find((toggle) => toggle.textContent === label) ?? null;
 const agentRows = () => [...document.querySelectorAll("button[aria-label]")].map((row) => row.getAttribute("aria-label")).filter((label) => /, \d+ tasks?$/.test(label));
-const taskTitles = () => [...document.querySelectorAll(".octopus-task-row")].map((row) => row.getAttribute("aria-label").split(",")[0]);
+const taskTitles = () => [...document.querySelectorAll(".phobos-task-row")].map((row) => row.getAttribute("aria-label").split(",")[0]);
 
 test("chat order stays fixed across clicks, reads and status changes; only data updates change recency", async () => {
   const { recordClientTaskRead, recordClientDestination } = await compiled;
   const { state, rerender } = await show({}, { readBaselineAtMs: 100 });
   const initial = ["Task run-a", "Task run-b", "Task run-c"];
   assert.deepEqual(taskTitles(), initial);
-  document.querySelector('.octopus-task-row[aria-label^="Task run-b"]').click();
+  document.querySelector('.phobos-task-row[aria-label^="Task run-b"]').click();
   await settle();
   assert.equal(state.activeChatRunId, "run-b");
   assert.deepEqual(taskTitles(), initial);
   const read = recordClientTaskRead("live", "run-b", 2_000);
-  const visited = recordClientDestination("live", { workspaceKey: "octopus-os", surfaceId: "chat", runId: "run-b" });
+  const visited = recordClientDestination("live", { workspaceKey: "phobos-os", surfaceId: "chat", runId: "run-b" });
   await settle();
   assert.equal(read.readMarks["run-b"], 2_000);
   assert.equal(visited.recentRunIds[0], "run-b");
@@ -149,7 +149,7 @@ test("manual order, pins and project groups survive clicks, reads and task updat
   const calls = await show({ agentPinnedChatIds: ["run-b"], agentChatOrderIds: ["run-c", "run-a"] }, { sortMode: "manual", readBaselineAtMs: 100 });
   const initial = ["Task run-b", "Task run-c", "Task run-a"];
   assert.deepEqual(taskTitles(), initial);
-  document.querySelector('.octopus-task-row[aria-label^="Task run-c"]').click();
+  document.querySelector('.phobos-task-row[aria-label^="Task run-c"]').click();
   recordClientTaskRead("live", "run-c", 1_000);
   calls.rerender({ chatRuns: calls.state.chatRuns.map((chat) => ({ ...chat, updatedAtMs: chat.runId === "run-a" ? 9_000 : 4_000 })) });
   await settle();
@@ -179,8 +179,8 @@ test("the Agents section lists agents of known projects and the OS root with the
   const calls = await show();
   assert.deepEqual(agentRows(), ["Analyst, 2 tasks", "Writer, 1 task"], "an agent outside every known project is hidden; a task counts by its chosen worker");
   document.querySelector('button[aria-label="Analyst, 2 tasks"]').click();
-  await until(() => document.getElementById("octopus-agent-preset-title"), "the agent never opened");
-  assert.equal(document.getElementById("octopus-agent-preset-title").textContent, "Edit Analyst");
+  await until(() => document.getElementById("phobos-agent-preset-title"), "the agent never opened");
+  assert.equal(document.getElementById("phobos-agent-preset-title").textContent, "Edit Analyst");
   assert.deepEqual(calls.newChat, [], "opening an agent never starts a task");
   document.querySelector('[role="dialog"] button[aria-label="Close"]')?.click();
   await settle();
@@ -188,7 +188,7 @@ test("the Agents section lists agents of known projects and the OS root with the
   assert.ok(create && create.closest("button[aria-expanded]") === null, "Create agent sits beside the Agents toggle, not inside it");
   assert.ok(create.closest(".opacity-0") === null, "section actions are visible without hovering");
   create.click();
-  await until(() => document.getElementById("octopus-agent-preset-title")?.textContent === "Create agent", "Create agent never opened the creation dialog");
+  await until(() => document.getElementById("phobos-agent-preset-title")?.textContent === "Create agent", "Create agent never opened the creation dialog");
 });
 
 test("section titles are toggles that collapse and restore their rows", { timeout: 20_000 }, async () => {
@@ -205,7 +205,7 @@ test("section titles are toggles that collapse and restore their rows", { timeou
 test("dragging a task within the task list reorders it manually without touching projects, over a body-level overlay", { timeout: 20_000 }, async () => {
   const calls = await show();
   assert.deepEqual(taskTitles(), ["Task run-a", "Task run-b", "Task run-c"]);
-  const item = (title) => [...document.querySelectorAll(".sidebar-sortable-item")].find((element) => element.querySelector(".octopus-task-row")?.getAttribute("aria-label").startsWith(title));
+  const item = (title) => [...document.querySelectorAll(".sidebar-sortable-item")].find((element) => element.querySelector(".phobos-task-row")?.getAttribute("aria-label").startsWith(title));
   const pointer = (target, type, x, y) => {
     const event = new w.MouseEvent(type, { button: 0, clientX: x, clientY: y, bubbles: true, cancelable: true });
     Object.defineProperties(event, { pointerId: { value: 1 }, isPrimary: { value: true } });
@@ -259,7 +259,7 @@ test("source folders use the native picker, deduplicate additions, and preserve 
   let folders = [];
   const requests = [];
   let pickerResult = { canceled: false, paths: ["/workspace/one", "/workspace/two"] };
-  window.octopusTransport = { selectClientDirectory: async (request) => { requests.push(request); return pickerResult; } };
+  window.phobosTransport = { selectClientDirectory: async (request) => { requests.push(request); return pickerResult; } };
   const render = () => root.render(React.createElement(ProjectSourceFolders, { folders, disabled: false,
     onChange: (next) => { folders = next; render(); }, onError: (error) => assert.fail(error) }));
   const click = async (label) => {
@@ -270,7 +270,7 @@ test("source folders use the native picker, deduplicate additions, and preserve 
   };
   render();
   await settle();
-  await click("Add folders Octopus can read and edit");
+  await click("Add folders Phobos can read and edit");
   assert.equal(requests[0].allowMultiple, true);
   assert.deepEqual(folders, ["/workspace/one", "/workspace/two"]);
   await click("Make primary");
@@ -283,5 +283,5 @@ test("source folders use the native picker, deduplicate additions, and preserve 
   pickerResult = { canceled: true, paths: [] };
   await click("Add folder");
   assert.deepEqual(folders, ["/workspace/one", "/workspace/three"]);
-  delete window.octopusTransport;
+  delete window.phobosTransport;
 });

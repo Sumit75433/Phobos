@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-desktop-session-tool-door-life",
+      "bin": "target/debug/phobos-desktop-session-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -22,7 +22,7 @@
         "read_paths": [],
         "write_paths": [],
         "executable_paths": [
-          "target/debug/octopus-gui-session-tool"
+          "target/debug/phobos-gui-session-tool"
         ],
         "executable_commands": [],
         "read_env_paths": [],
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "bin": "target/debug/octopus-desktop-host",
+      "bin": "target/debug/phobos-desktop-host",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -76,7 +76,7 @@
         "executable_root_subpaths": [
           {
             "root_slot": "registry_worker_environment_kind_root",
-            "relative_path": "desktop_session/packages/octopus-system-gui-env/native/bin/octopus-desktop-native"
+            "relative_path": "desktop_session/packages/phobos-system-gui-env/native/bin/phobos-desktop-native"
           }
         ],
         "executable_commands": [],

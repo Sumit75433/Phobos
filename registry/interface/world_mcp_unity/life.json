@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-mcp-client-life",
+      "bin": "target/debug/phobos-mcp-client-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -26,7 +26,7 @@
       "read_handles": []
     },
     {
-      "bin": "target/debug/octopus-mcp-operation-life",
+      "bin": "target/debug/phobos-mcp-operation-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,

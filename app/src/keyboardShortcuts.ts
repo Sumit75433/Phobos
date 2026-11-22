@@ -1,10 +1,10 @@
 import { useCallback, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { clientCommands, type ClientCommandId } from "./clientActions";
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 
 export type KeyboardShortcutMap = Readonly<Partial<Record<ClientCommandId, readonly string[]>>>;
 
-const STORAGE_KEY = "octopus.keyboard-shortcuts.v1";
+const STORAGE_KEY = "phobos.keyboard-shortcuts.v1";
 
 export const defaultKeyboardShortcuts: KeyboardShortcutMap = Object.freeze({
   new_chat: Object.freeze(["Mod+KeyN"]),
@@ -30,14 +30,14 @@ export const defaultKeyboardShortcuts: KeyboardShortcutMap = Object.freeze({
 
 type KeyboardShortcutStore = {
   current: KeyboardShortcutMap;
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
   subscribers: Set<() => void>;
 };
 
-const stores = new Map<OctopusClientAccessProfile, KeyboardShortcutStore>();
+const stores = new Map<PhobosClientAccessProfile, KeyboardShortcutStore>();
 const commandIds = new Set(clientCommands.map((command) => command.id));
 
-export function useKeyboardShortcuts(profile: OctopusClientAccessProfile): KeyboardShortcutMap {
+export function useKeyboardShortcuts(profile: PhobosClientAccessProfile): KeyboardShortcutMap {
   const store = keyboardShortcutStore(profile);
   return useSyncExternalStore(
     (subscriber) => subscribeStore(store, subscriber),
@@ -46,7 +46,7 @@ export function useKeyboardShortcuts(profile: OctopusClientAccessProfile): Keybo
   );
 }
 
-export function useSetKeyboardShortcuts(profile: OctopusClientAccessProfile) {
+export function useSetKeyboardShortcuts(profile: PhobosClientAccessProfile) {
   const store = keyboardShortcutStore(profile);
   return useCallback((command: ClientCommandId, shortcuts: readonly string[]) => {
     const normalized = normalizeShortcutList(shortcuts);
@@ -55,12 +55,12 @@ export function useSetKeyboardShortcuts(profile: OctopusClientAccessProfile) {
   }, [store]);
 }
 
-export function useResetKeyboardShortcuts(profile: OctopusClientAccessProfile) {
+export function useResetKeyboardShortcuts(profile: PhobosClientAccessProfile) {
   const store = keyboardShortcutStore(profile);
   return useCallback(() => writeStore(store, defaultKeyboardShortcuts), [store]);
 }
 
-export function useReplaceKeyboardShortcuts(profile: OctopusClientAccessProfile) {
+export function useReplaceKeyboardShortcuts(profile: PhobosClientAccessProfile) {
   const store = keyboardShortcutStore(profile);
   return useCallback((shortcuts: KeyboardShortcutMap) => writeStore(store, shortcuts), [store]);
 }
@@ -173,7 +173,7 @@ function keyboardEventMatchesShortcut(event: KeyboardEvent, shortcut: string): b
     && event.shiftKey === requiresShift;
 }
 
-function keyboardShortcutStore(profile: OctopusClientAccessProfile): KeyboardShortcutStore {
+function keyboardShortcutStore(profile: PhobosClientAccessProfile): KeyboardShortcutStore {
   const existing = stores.get(profile);
   if (existing) return existing;
   const created = { current: readShortcuts(profile), profile, subscribers: new Set<() => void>() };
@@ -192,7 +192,7 @@ function writeStore(store: KeyboardShortcutStore, shortcuts: KeyboardShortcutMap
   for (const subscriber of [...store.subscribers]) subscriber();
 }
 
-function readShortcuts(profile: OctopusClientAccessProfile): KeyboardShortcutMap {
+function readShortcuts(profile: PhobosClientAccessProfile): KeyboardShortcutMap {
   try {
     const raw = window.localStorage.getItem(storageKey(profile));
     if (!raw) return defaultKeyboardShortcuts;
@@ -211,7 +211,7 @@ function readShortcuts(profile: OctopusClientAccessProfile): KeyboardShortcutMap
   }
 }
 
-function storageKey(profile: OctopusClientAccessProfile): string {
+function storageKey(profile: PhobosClientAccessProfile): string {
   return profile === "live" ? STORAGE_KEY : `${STORAGE_KEY}.test`;
 }
 

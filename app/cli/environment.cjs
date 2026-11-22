@@ -40,47 +40,47 @@ function resolveEnvironment(options = {}) {
   const ambient = { ...(options.env ?? process.env) };
   const userRoot = absolute(options.userHome ?? os.homedir(), "user home");
   const requestedHome = options.home === undefined ? null : argumentPath(options.home, options.cwd, userRoot, "--home");
-  const initialHome = requestedHome ?? absolute(ambient.OCTOPUS_HOME || path.join(userRoot, ".octopus"), "OCTOPUS_HOME");
+  const initialHome = requestedHome ?? absolute(ambient.PHOBOS_HOME || path.join(userRoot, ".phobos"), "PHOBOS_HOME");
   const fileEnvironment = readEnvironmentFile(path.join(initialHome, ".env"));
   const merged = { ...fileEnvironment, ...ambient };
-  const home = requestedHome ?? absolute(merged.OCTOPUS_HOME || initialHome, "OCTOPUS_HOME");
-  const repoRoot = absolute(options.repoRoot ?? merged.OCTOPUS_REPO_ROOT ?? path.resolve(__dirname, "../.."), "repository root");
+  const home = requestedHome ?? absolute(merged.PHOBOS_HOME || initialHome, "PHOBOS_HOME");
+  const repoRoot = absolute(options.repoRoot ?? merged.PHOBOS_REPO_ROOT ?? path.resolve(__dirname, "../.."), "repository root");
   if (options.bundle && options.installationRoot) throw new Error("Choose either --bundle or installationRoot.");
   const installationRoot = options.bundle
     ? bundleRoot(argumentPath(options.bundle, options.cwd, userRoot, "--bundle"))
-    : absolute(options.installationRoot ?? merged.OCTOPUS_INSTALLATION_ROOT ?? path.join(repoRoot, "app", "build", "cli", "runtime"), "installation root");
-  const sourceRegistry = absolute(options.sourceRegistry ?? merged.OCTOPUS_SOURCE_REGISTRY ?? path.join(installationRoot, "registry"), "source registry");
+    : absolute(options.installationRoot ?? merged.PHOBOS_INSTALLATION_ROOT ?? path.join(repoRoot, "app", "build", "cli", "runtime"), "installation root");
+  const sourceRegistry = absolute(options.sourceRegistry ?? merged.PHOBOS_SOURCE_REGISTRY ?? path.join(installationRoot, "registry"), "source registry");
   const repoInstallation = installationRoot === repoRoot;
-  const runtimeBinary = absolute(options.runtimeBinary ?? merged.OCTOPUS_RUNTIME_BIN
-    ?? path.join(installationRoot, ...(repoInstallation ? ["target", "release"] : ["bin"]), "octopus"), "runtime binary");
+  const runtimeBinary = absolute(options.runtimeBinary ?? merged.PHOBOS_RUNTIME_BIN
+    ?? path.join(installationRoot, ...(repoInstallation ? ["target", "release"] : ["bin"]), "phobos"), "runtime binary");
   if (runtimeBinary.split(path.sep).some((part, index, parts) => part === "debug" && parts[index - 1] === "target")) {
     throw new Error("The terminal client requires a release runtime; target/debug is not supported.");
   }
   const codexHome = absolute(options.codexHome ?? merged.CODEX_HOME ?? path.join(userRoot, ".codex"), "CODEX_HOME");
   if (options.codexBinary && options.codexBundle) throw new Error("Choose either codexBinary or codexBundle.");
-  const codexBinary = absolute(options.codexBinary ?? merged.OCTOPUS_CODEX_BIN
+  const codexBinary = absolute(options.codexBinary ?? merged.PHOBOS_CODEX_BIN
     ?? (options.codexBundle ? path.join(bundleRoot(argumentPath(options.codexBundle, options.cwd, userRoot, "Codex bundle")), "bin", "codex")
       : repoInstallation ? path.join(sourceRegistry, "interface", "world_provider_codex", "packages", "bin", "codex")
         : path.join(installationRoot, "bin", "codex")), "Codex binary");
   const packageRoots = {
-    sourceRegistryRoot: absolute(options.localPackageRegistry ?? merged.OCTOPUS_LOCAL_PACKAGE_REGISTRY
+    sourceRegistryRoot: absolute(options.localPackageRegistry ?? merged.PHOBOS_LOCAL_PACKAGE_REGISTRY
       ?? (repoInstallation ? sourceRegistry : path.join(installationRoot, "local-packages", "registry")), "local package registry"),
     activeRegistryRoot: path.join(home, "registry"),
-    libraryRoot: absolute(options.localPackageLibrary ?? merged.OCTOPUS_LOCAL_PACKAGE_LIBRARY
+    libraryRoot: absolute(options.localPackageLibrary ?? merged.PHOBOS_LOCAL_PACKAGE_LIBRARY
       ?? (repoInstallation ? path.join(repoRoot, "app", "distribution", "local-packages") : path.join(installationRoot, "local-packages")), "local package library"),
     stateRoot: path.join(home, "client", "package-state"),
   };
   packageRoots.publication = require("../electron/packageStorage.cjs").createPackageStoragePublisher(packageRoots.sourceRegistryRoot, installationRoot);
   const launchEnv = {
-    OCTOPUS_HOME: home,
-    OCTOPUS_SOURCE_REGISTRY: sourceRegistry,
-    OCTOPUS_INSTALLATION_ROOT: installationRoot,
-    OCTOPUS_RUNTIME_BIN: runtimeBinary,
-    OCTOPUS_MACHINE_CODEX_AUTH_FILE: path.join(codexHome, "auth.json"),
-    OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE: path.join(codexHome, "auth.lock"),
+    PHOBOS_HOME: home,
+    PHOBOS_SOURCE_REGISTRY: sourceRegistry,
+    PHOBOS_INSTALLATION_ROOT: installationRoot,
+    PHOBOS_RUNTIME_BIN: runtimeBinary,
+    PHOBOS_MACHINE_CODEX_AUTH_FILE: path.join(codexHome, "auth.json"),
+    PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE: path.join(codexHome, "auth.lock"),
     PATH: [path.dirname(runtimeBinary), path.join(installationRoot, "bin"), merged.PATH ?? ""].join(path.delimiter),
   };
-  const endpoint = normalizedEndpoint(options.endpoint ?? merged.OCTOPUS_APP_LISTEN ?? "", home, "world_operator_chat");
+  const endpoint = normalizedEndpoint(options.endpoint ?? merged.PHOBOS_APP_LISTEN ?? "", home, "world_operator_chat");
   if (!endpoint.startsWith("unix://")) throw new Error("The local macOS terminal client requires a Unix runtime endpoint.");
   requireSocketLength(endpoint.slice(7));
   const result = {
@@ -89,11 +89,11 @@ function resolveEnvironment(options = {}) {
     launchCwd: repoInstallation ? repoRoot : userRoot,
   };
   const childEnv = { ...merged, ...launchEnv, CODEX_HOME: codexHome };
-  delete childEnv.OCTOPUS_CLIENT_ADMIN_SECRET;
-  delete childEnv.OCTOPUS_CLIENT_LAB_SECRET;
-  delete childEnv.OCTOPUS_APP_LISTEN;
-  if (options.endpoint || merged.OCTOPUS_APP_LISTEN) childEnv.OCTOPUS_APP_LISTEN = endpoint;
-  privateEnvironments.set(result, { childEnv, configuredEndpoint: Boolean(options.endpoint || merged.OCTOPUS_APP_LISTEN) });
+  delete childEnv.PHOBOS_CLIENT_ADMIN_SECRET;
+  delete childEnv.PHOBOS_CLIENT_LAB_SECRET;
+  delete childEnv.PHOBOS_APP_LISTEN;
+  if (options.endpoint || merged.PHOBOS_APP_LISTEN) childEnv.PHOBOS_APP_LISTEN = endpoint;
+  privateEnvironments.set(result, { childEnv, configuredEndpoint: Boolean(options.endpoint || merged.PHOBOS_APP_LISTEN) });
   return result;
 }
 
@@ -143,7 +143,7 @@ async function status(environment, options = {}, currentProjection) {
     endpoint: environment.endpoint, logPath: environment.logPath,
     storageHealth: observed.storageHealth,
     interfaceFailures: observed.interfaceFailures,
-    reason: observed.error ?? (observed.ready ? "Home setup has not been verified." : "Octopus runtime is not ready."),
+    reason: observed.error ?? (observed.ready ? "Home setup has not been verified." : "Phobos runtime is not ready."),
   };
   if (!observed.ready) return result;
   let interfaceId = options.interfaceId;
@@ -222,14 +222,14 @@ async function launchRuntime(environment, options) {
         assertNotAborted(options.signal);
         const current = await host.probe();
         if (current.phase !== "unmanaged" || current.ready || current.ownership !== "none" || current.pid !== null || current.error) {
-          throw runtimeError("Close the running Octopus runtime before recovering its interrupted workspace transactions.", environment);
+          throw runtimeError("Close the running Phobos runtime before recovering its interrupted workspace transactions.", environment);
         }
       };
     const releaseGuard = registerLocalPackageMutationGuard({ stateRoot: environment.packageRoots.stateRoot, guard: assertStopped });
     try {
       await recoverLocalPackageTransactions(environment.packageRoots);
       await assertStopped();
-      await recoverWorkspaceTransactions({ octopusHomeRoot: environment.home, registryRoot: environment.packageRoots.activeRegistryRoot,
+      await recoverWorkspaceTransactions({ phobosHomeRoot: environment.home, registryRoot: environment.packageRoots.activeRegistryRoot,
         publication: environment.packageRoots.publication, retirementBarrier: taskRetirementBarrier(environment) });
     } finally { releaseGuard(); }
     assertNotAborted(options.signal);
@@ -268,12 +268,12 @@ async function launchRuntime(environment, options) {
     if (exit && exitedAt == null) exitedAt = Date.now();
     if (exit && observed.pid == null && Date.now() - exitedAt >= 500) {
       const detail = exit.error?.message ?? `exit ${exit.code ?? exit.signal ?? "unknown"}`;
-      throw runtimeError(`Octopus runtime stopped before readiness (${detail}).`, environment);
+      throw runtimeError(`Phobos runtime stopped before readiness (${detail}).`, environment);
     }
     if (sawPid && observed.pid == null && !child) throw runtimeError("The runtime being joined exited before readiness.", environment);
     await delay(100, undefined, { signal: options.signal });
   }
-  throw runtimeError(`Octopus runtime did not become ready in ${Math.round(options.timeoutMs / 1000)} seconds. Last phase: ${observed.phase}.`, environment);
+  throw runtimeError(`Phobos runtime did not become ready in ${Math.round(options.timeoutMs / 1000)} seconds. Last phase: ${observed.phase}.`, environment);
 }
 
 async function waitForClient(environment, options) {
@@ -303,7 +303,7 @@ function projectionStore(environment) {
     resolveRepoRoot: () => environment.repoRoot, sourceRegistry: () => environment.sourceRegistry,
     localPackageRegistry: () => environment.packageRoots.sourceRegistryRoot,
     localPackageLibrary: () => environment.packageRoots.libraryRoot,
-    octopusHome: () => environment.home, runtimeLaunchEnvironment: () => environment.launchEnv,
+    phobosHome: () => environment.home, runtimeLaunchEnvironment: () => environment.launchEnv,
     projectEePolicies: async () => {
       const { stdout } = await execute(environment.runtimeBinary, ["project-ee-policies"], {
         cwd: environment.installationRoot,
@@ -326,7 +326,7 @@ function readEnvironmentFile(file) {
 
 function requireDistribution(environment) {
   for (const root of [environment.sourceRegistry, environment.packageRoots.sourceRegistryRoot]) {
-    if (!fs.existsSync(path.join(root, ".octopus-source.json")) || !fs.existsSync(path.join(root, "interface"))) throw new Error(`Terminal distribution is incomplete at '${root}'. Build it with: ${PACKAGE_COMMAND}`);
+    if (!fs.existsSync(path.join(root, ".phobos-source.json")) || !fs.existsSync(path.join(root, "interface"))) throw new Error(`Terminal distribution is incomplete at '${root}'. Build it with: ${PACKAGE_COMMAND}`);
   }
   for (const name of ["packages", "packs"]) {
     if (!fs.existsSync(path.join(environment.packageRoots.libraryRoot, name))) throw new Error(`Terminal package library is incomplete. Build it with: ${PACKAGE_COMMAND}`);
@@ -352,7 +352,7 @@ function argumentPath(value, cwd = process.cwd(), userRoot = os.homedir(), label
 }
 function requireSocketLength(file) {
   const limit = process.platform === "darwin" ? 103 : 107;
-  if (Buffer.byteLength(file) > limit) throw new Error(`Octopus Home is too long for a Unix socket (${limit} bytes maximum). Choose a shorter --home.`);
+  if (Buffer.byteLength(file) > limit) throw new Error(`Phobos Home is too long for a Unix socket (${limit} bytes maximum). Choose a shorter --home.`);
 }
 function socketAccepts(file, timeoutMs) {
   return new Promise((resolve) => {

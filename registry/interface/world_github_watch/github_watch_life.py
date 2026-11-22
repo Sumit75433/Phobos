@@ -33,7 +33,7 @@ def main():
                    os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     c = validate_config(json.loads(b.stable_read(
-        Path(os.environ["OCTOPUS_INTERFACE_DIR"]) / "github-watch.json", 65536, "github watch config")))
+        Path(os.environ["PHOBOS_INTERFACE_DIR"]) / "github-watch.json", 65536, "github watch config")))
     watcher = Watcher(c, b)
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):

@@ -1,7 +1,7 @@
 import type { DiffLineAnnotation, SelectedLineRange } from "@pierre/diffs";
 import { useEffect, useMemo, useState } from "react";
 import { Glyph } from "../IconGlyphs";
-import { OCTOPUS_OPERATOR_DIFF_REVIEW_SEND_EVENT, type OperatorDiffReviewSendDetail } from "../../clientEvents";
+import { PHOBOS_OPERATOR_DIFF_REVIEW_SEND_EVENT, type OperatorDiffReviewSendDetail } from "../../clientEvents";
 import type { ProjectedAssistantCodeComment } from "../chat/assistantDirectives";
 
 export type OperatorDiffReviewScope = {
@@ -292,7 +292,7 @@ export function AssistantCodeReviewBar({ comments, expanded, onExpandedChange, o
       ) : null}
       <div className="we-diff-review-strip">
         <button aria-expanded={expanded} className="we-diff-review-text-action" onClick={() => onExpandedChange(!expanded)} type="button">
-          <Glyph name="octopus" size={13} />
+          <Glyph name="phobos" size={13} />
           {comments.length} assistant {comments.length === 1 ? "comment" : "comments"}
           <Glyph className={expanded ? "-rotate-180" : ""} name="chevronDown" size={12} />
         </button>
@@ -350,7 +350,7 @@ export function OperatorDiffReviewBar({ comments, expanded, onBeginComment, onCl
 export function dispatchOperatorDiffReview(scope: OperatorDiffReviewScope, comments: OperatorDiffReviewComment[]) {
   if (!scope.runId || !scope.workerEnvironmentId || !scope.surfaceId || comments.length === 0) return;
   const detail = operatorDiffReviewSendDetail(scope, comments);
-  window.dispatchEvent(new CustomEvent<OperatorDiffReviewSendDetail>(OCTOPUS_OPERATOR_DIFF_REVIEW_SEND_EVENT, {
+  window.dispatchEvent(new CustomEvent<OperatorDiffReviewSendDetail>(PHOBOS_OPERATOR_DIFF_REVIEW_SEND_EVENT, {
     cancelable: true,
     detail,
   }));
@@ -366,7 +366,7 @@ function AssistantCodeReviewComment({ comment, onReveal, variant }: {
   return (
     <article className={`we-diff-review-comment is-${variant}`}>
       <header>
-        <span className="we-diff-review-avatar"><Glyph name="octopus" size={13} /></span>
+        <span className="we-diff-review-avatar"><Glyph name="phobos" size={13} /></span>
         <span><strong>{priority}{comment.title}</strong><small>{comment.path} · {range}</small></span>
       </header>
       <p>{comment.body}</p>
@@ -487,7 +487,7 @@ function operatorReviewStorageKey(scope: OperatorDiffReviewScope): string {
   const identity = [scope.runId, scope.workerEnvironmentId, scope.surfaceId]
     .map((value) => encodeURIComponent(value))
     .join(":");
-  return `octopus.operator-diff-review.v1:${identity}`;
+  return `phobos.operator-diff-review.v1:${identity}`;
 }
 
 function loadStoredReview(scope: OperatorDiffReviewScope, storageKey: string): StoredDraftState {

@@ -4,8 +4,8 @@
     "minor_version": 1
   },
   "display_information": {
-    "name": "Octopus",
-    "description": "Talk to Octopus tasks from Slack.",
+    "name": "Phobos",
+    "description": "Talk to Phobos tasks from Slack.",
     "background_color": "#111111"
   },
   "features": {
@@ -15,16 +15,16 @@
       "messages_tab_read_only_enabled": false
     },
     "bot_user": {
-      "display_name": "Octopus",
+      "display_name": "Phobos",
       "always_online": true
     },
     "assistant_view": {
-      "assistant_description": "Send Octopus a message; the task connected to Slack answers in the thread."
+      "assistant_description": "Send Phobos a message; the task connected to Slack answers in the thread."
     },
     "slash_commands": [
       {
-        "command": "/octopus",
-        "description": "Send a message to the Octopus task connected to Slack",
+        "command": "/phobos",
+        "description": "Send a message to the Phobos task connected to Slack",
         "usage_hint": "help",
         "should_escape": false
       }

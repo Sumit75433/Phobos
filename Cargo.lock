@@ -4577,1631 +4577,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "octopus-app"
-version = "0.1.0"
-dependencies = [
- "fs2",
- "notify",
- "octopus-app-server",
- "octopus-descriptors",
- "octopus-ee",
- "octopus-file-storage",
- "octopus-interface-projection",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-marks",
- "octopus-policy",
- "octopus-run-record",
- "octopus-runtime",
- "octopus-tool-registry",
- "octopus-verifiers",
- "octopus-worker-env",
- "rustix 1.1.6",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-util",
- "uuid",
-]
-
-[[package]]
-name = "octopus-app-server"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-ee",
- "octopus-file-storage",
- "octopus-interface-projection",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-marks",
- "octopus-policy",
- "octopus-run-record",
- "octopus-runtime",
- "octopus-tool-registry",
- "octopus-verifiers",
- "octopus-worker-env",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tokio-stream",
-]
-
-[[package]]
-name = "octopus-app-server-interface"
-version = "0.1.0"
-dependencies = [
- "async-stream",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "thiserror 1.0.69",
- "tokio",
- "tokio-stream",
- "url",
-]
-
-[[package]]
-name = "octopus-applypatch"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_matches",
- "octopus-file-system",
- "octopus-util-abspath",
- "octopus-util-pathuri",
- "pretty_assertions",
- "similar",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tree-sitter",
- "tree-sitter-bash",
-]
-
-[[package]]
-name = "octopus-appserver-proto"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "inventory",
- "octopus-experimental-api-macros",
- "octopus-protocol",
- "octopus-shell-command",
- "octopus-util-abspath",
- "octopus-util-pathuri",
- "pretty_assertions",
- "rmcp",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "serde_with",
- "similar",
- "strum_macros",
- "tempfile",
- "thiserror 1.0.69",
- "tracing",
- "ts-rs",
- "uuid",
-]
-
-[[package]]
-name = "octopus-async-utils"
-version = "0.1.0"
-dependencies = [
- "pretty_assertions",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "octopus-audio-device-session-env"
-version = "0.1.0"
-dependencies = [
- "cpal",
- "fs2",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "rodio",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-audio-device-session-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tokio",
-]
-
-[[package]]
-name = "octopus-browser-session-env"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "futures-util",
- "getrandom 0.3.4",
- "hmac",
- "libc",
- "octopus-app-server-interface",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-util-image",
- "octopus-worker-env",
- "reqwest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.28.0",
-]
-
-[[package]]
-name = "octopus-browser-session-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-browser-session-env",
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tokio",
-]
-
-[[package]]
-name = "octopus-client"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "eventsource-stream",
- "futures",
- "http",
- "opentelemetry",
- "opentelemetry_sdk",
- "pretty_assertions",
- "rand 0.9.4",
- "reqwest",
- "rustls",
- "rustls-native-certs",
- "rustls-pki-types",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "zstd 0.13.4",
-]
-
-[[package]]
-name = "octopus-code-mode-engine"
-version = "0.1.0"
-dependencies = [
- "deno_core_icudata",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "tracing",
- "v8",
-]
-
-[[package]]
-name = "octopus-code-mode-room"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "fs2",
- "futures",
- "image",
- "json-patch",
- "libc",
- "octopus-app-server",
- "octopus-app-server-interface",
- "octopus-code-mode-engine",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-file-write-contract",
- "octopus-interface-activation-app-server-transport",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-marks",
- "octopus-policy",
- "octopus-process-session-tool-runtime",
- "octopus-run-authoring",
- "octopus-run-record",
- "octopus-runtime",
- "octopus-system-gui-env",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-verifiers",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
-]
-
-[[package]]
-name = "octopus-code-mode-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-code-mode-room",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-run-authoring",
- "octopus-run-record",
- "octopus-tool-handlers",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "octopus-container-room"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-container-session-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tokio",
-]
-
-[[package]]
-name = "octopus-context-collections"
-version = "0.1.0"
-dependencies = [
- "libc",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-ledger",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-context-projection"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-run-authoring",
- "octopus-util-string",
- "octopus-world-pyecho-life-runtime",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-descriptors"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-desktop-session-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "octopus-system-gui-env",
- "tokio",
-]
-
-[[package]]
-name = "octopus-ee"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-policy",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-exec-substrate"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "arc-swap",
- "axum",
- "base64 0.22.1",
- "blake3",
- "bytes",
- "clatter",
- "futures",
- "hmac",
- "http",
- "libc",
- "octopus-file-system",
- "octopus-sandbox-substrate",
- "octopus-substrate-contract",
- "octopus-util-abspath",
- "octopus-util-pathuri",
- "octopus-util-pty",
- "pretty_assertions",
- "prost 0.14.4",
- "reqwest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
- "toml 0.9.12+spec-1.1.0",
- "tracing",
- "uuid",
- "wiremock",
- "zeroize",
-]
-
-[[package]]
-name = "octopus-execpolicy"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "multimap",
- "octopus-util-abspath",
- "pretty_assertions",
- "serde",
- "serde_json",
- "shlex 1.3.0",
- "starlark",
- "tempfile",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-experimental-api-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.118",
-]
-
-[[package]]
-name = "octopus-file-search"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "crossbeam-channel",
- "ignore",
- "nucleo",
- "pretty_assertions",
- "serde",
- "tempfile",
-]
-
-[[package]]
-name = "octopus-file-storage"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "fs2",
- "libc",
- "rustix 1.1.6",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
-]
-
-[[package]]
-name = "octopus-file-system"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "libc",
- "octopus-substrate-contract",
- "octopus-util-abspath",
- "octopus-util-pathuri",
- "pretty_assertions",
- "rustix 1.1.6",
- "serde",
- "tempfile",
- "tokio",
- "tokio-util",
- "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "octopus-file-write-contract"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "flate2",
- "octopus-descriptors",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-git-sandbox-substrate"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "libc",
- "octopus-descriptors",
- "octopus-worker-env",
- "octopus-workspace-substrate",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "octopus-git-worktree-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-image-generation-interface"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-world-pyecho-life-runtime",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "octopus-interface-activation-app-server-transport"
-version = "0.1.0"
-dependencies = [
- "futures",
- "json-patch",
- "octopus-app-server-interface",
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-policy",
- "octopus-run-authoring",
- "octopus-run-record",
- "octopus-tool-handlers",
- "octopus-util-abspath",
- "octopus-world-pyecho-life-runtime",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "octopus-interface-activation-stdin-json-lines"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-world-pyecho-life-runtime",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "octopus-interface-projection"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-policy",
- "pretty_assertions",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "octopus-interface-transport"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "fs2",
- "libc",
- "notify",
- "object",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-interface-projection",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-policy",
- "octopus-run-record",
- "octopus-util-pty",
- "octopus-verifiers",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "octopus-interfaces"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "blake3",
- "libc",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-ledger",
- "octopus-marks",
- "octopus-policy",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-ledger"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "octopus-descriptors",
- "octopus-policy",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "octopus-ledger-index"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "rusqlite",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-ledger-store"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-ledger",
- "rustix 1.1.6",
- "serde",
- "serde_json",
- "tempfile",
-]
-
-[[package]]
-name = "octopus-linux-process-authority"
-version = "0.1.0"
-dependencies = [
- "libc",
- "octopus-verifiers",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-login"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "chrono",
- "octopus-client",
- "octopus-protocol",
- "os_info",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "octopus-marks"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-ledger",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-mcp-client"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "jsonschema",
- "libc",
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-world-pyecho-life-runtime",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "octopus-mcp-stdio-room"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "futures-util",
- "libc",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "octopus-mcp-stdio-session-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tokio",
-]
-
-[[package]]
-name = "octopus-model-context-render"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-marks",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-network-proxy"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "chrono",
- "clap",
- "dirs",
- "globset",
- "octopus-util-abspath",
- "pretty_assertions",
- "rama-core",
- "rama-http",
- "rama-http-backend",
- "rama-net",
- "rama-socks5",
- "rama-tcp",
- "rama-tls-rustls",
- "rama-unix",
- "rustls",
- "rustls-native-certs",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 1.0.69",
- "time",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "octopus-operator-chat-client"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "futures",
- "json-patch",
- "libc",
- "object",
- "octopus-app-server",
- "octopus-app-server-interface",
- "octopus-context-collections",
- "octopus-context-projection",
- "octopus-descriptors",
- "octopus-ee",
- "octopus-file-storage",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-marks",
- "octopus-policy",
- "octopus-process-session-tool-runtime",
- "octopus-provider-codex",
- "octopus-run-authoring",
- "octopus-run-record",
- "octopus-runtime",
- "octopus-system-room-env",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-verifiers",
- "octopus-worker-env",
- "octopus-world-pyecho-life-runtime",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tokio-tungstenite 0.28.0",
-]
-
-[[package]]
-name = "octopus-policy"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "octopus-descriptors",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-process-session-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "libc",
- "notify",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-verifiers",
- "octopus-worker-env",
- "rusqlite",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "octopus-protocol"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chardetng",
- "chrono",
- "encoding_rs",
- "globset",
- "http",
- "icu_decimal",
- "icu_locale_core",
- "icu_provider",
- "landlock",
- "octopus-async-utils",
- "octopus-execpolicy",
- "octopus-substrate-contract",
- "octopus-util-abspath",
- "octopus-util-image",
- "octopus-util-pathuri",
- "octopus-util-string",
- "pretty_assertions",
- "quick-xml",
- "reqwest",
- "schemars 0.8.22",
- "seccompiler",
- "serde",
- "serde_json",
- "serde_with",
- "strum",
- "strum_macros",
- "sys-locale",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "ts-rs",
- "uuid",
- "wildmatch",
-]
-
-[[package]]
-name = "octopus-provider-codex"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "futures",
- "json-patch",
- "notify",
- "octopus-app-server",
- "octopus-app-server-interface",
- "octopus-appserver-proto",
- "octopus-descriptors",
- "octopus-interface-activation-app-server-transport",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-login",
- "octopus-model-context-render",
- "octopus-operator-chat-client",
- "octopus-protocol",
- "octopus-run-authoring",
- "octopus-run-record",
- "octopus-runtime",
- "octopus-secrets",
- "octopus-system-room-env",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-util-abspath",
- "octopus-util-image",
- "octopus-util-string",
- "octopus-world-pyecho-life-runtime",
- "regex",
- "rustls",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
- "toml 0.9.12+spec-1.1.0",
- "tracing",
- "tracing-subscriber",
- "url",
- "zeroize",
-]
-
-[[package]]
-name = "octopus-realtime-signaling"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "futures-util",
- "json-patch",
- "octopus-app-server-interface",
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-login",
- "octopus-policy",
- "octopus-run-authoring",
- "octopus-system-room-env",
- "octopus-tool-handlers",
- "octopus-world-pyecho-life-runtime",
- "reqwest",
- "rustls",
- "rustls-native-certs",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "octopus-realtime-webrtc"
-version = "0.1.0"
-dependencies = [
- "libwebrtc",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "octopus-remote-exec-room"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "libc",
- "octopus-descriptors",
- "octopus-exec-substrate",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-substrate-contract",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-util-pathuri",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "octopus-remote-exec-server-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tokio",
-]
-
-[[package]]
-name = "octopus-run-authoring"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "futures",
- "json-patch",
- "octopus-app-server-interface",
- "octopus-descriptors",
- "octopus-file-write-contract",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "octopus-policy",
- "octopus-run-record",
- "octopus-system-room-env",
- "octopus-tool-handlers",
- "octopus-world-pyecho-life-runtime",
- "proptest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tokio-util",
- "url",
-]
-
-[[package]]
-name = "octopus-run-record"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-ledger",
- "octopus-policy",
- "schemars 0.8.22",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-runtime"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-marks",
- "octopus-policy",
- "octopus-run-record",
- "proptest",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "octopus-sandbox-substrate"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "dirs",
- "dunce",
- "libc",
- "octopus-network-proxy",
- "octopus-substrate-contract",
- "octopus-util-abspath",
- "octopus-util-pathuri",
- "octopus-worker-env",
- "octopus-worker-env-floor",
- "pretty_assertions",
- "regex-lite",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "url",
- "which 8.0.4",
-]
-
-[[package]]
-name = "octopus-schemas"
-version = "0.1.0"
-dependencies = [
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-marks",
- "octopus-run-record",
- "octopus-verifiers",
- "schemars 0.8.22",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-secrets"
-version = "0.1.0"
-dependencies = [
- "age",
- "anyhow",
- "base64 0.22.1",
- "keyring",
- "pretty_assertions",
- "rand 0.9.4",
- "regex",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tracing",
-]
-
-[[package]]
-name = "octopus-shell-command"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "libc",
- "octopus-substrate-contract",
- "octopus-util-abspath",
- "pretty_assertions",
- "serde",
- "serde_json",
- "shlex 1.3.0",
- "tree-sitter",
- "tree-sitter-bash",
- "which 8.0.4",
-]
-
-[[package]]
-name = "octopus-substrate-contract"
-version = "0.1.0"
-dependencies = [
- "chardetng",
- "encoding_rs",
- "globset",
- "octopus-util-abspath",
- "octopus-util-pathuri",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "strum_macros",
- "tempfile",
- "tracing",
- "ts-rs",
- "wildmatch",
-]
-
-[[package]]
-name = "octopus-system-coder-env"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-git-sandbox-substrate",
- "octopus-process-session-tool-runtime",
- "octopus-system-workspace-env",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-system-exec-env"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "octopus-descriptors",
- "octopus-exec-substrate",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-util-pathuri",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "octopus-system-gui-env"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "getrandom 0.3.4",
- "image",
- "libc",
- "octopus-app-server-interface",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-worker-env",
- "reqwest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "octopus-system-room-env"
-version = "0.1.0"
-dependencies = [
- "fs2",
- "json-patch",
- "libc",
- "octopus-context-collections",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-file-write-contract",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-store",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-system-room-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "octopus-system-workspace-env"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "ignore",
- "octopus-applypatch",
- "octopus-descriptors",
- "octopus-file-search",
- "octopus-file-system",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-util-pathuri",
- "octopus-verifiers",
- "octopus-worker-env",
- "octopus-workspace-substrate",
- "regex",
- "serde",
- "serde_json",
- "similar",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "octopus-tool-handlers"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-ledger",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "octopus-tool-registry"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "jsonschema",
- "octopus-descriptors",
- "schemars 0.8.22",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-util-abspath"
-version = "0.1.0"
-dependencies = [
- "dirs",
- "dunce",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "ts-rs",
-]
-
-[[package]]
-name = "octopus-util-image"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "divan",
- "image",
- "lru",
- "mime_guess",
- "sha1",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "octopus-util-pathuri"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "octopus-util-abspath",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "ts-rs",
- "url",
- "urlencoding",
-]
-
-[[package]]
-name = "octopus-util-pty"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "filedescriptor",
- "lazy_static",
- "libc",
- "log",
- "portable-pty",
- "pretty_assertions",
- "shared_library",
- "tokio",
- "winapi",
-]
-
-[[package]]
-name = "octopus-util-string"
-version = "0.1.0"
-dependencies = [
- "pretty_assertions",
- "regex-lite",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-verifiers"
-version = "0.1.0"
-dependencies = [
- "libc",
- "object",
- "octopus-descriptors",
- "octopus-file-storage",
- "octopus-ledger",
- "octopus-marks",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
-]
-
-[[package]]
-name = "octopus-web-search-env"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "octopus-browser-session-env",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-process-session-tool-runtime",
- "octopus-tool-handlers",
- "octopus-tool-registry",
- "octopus-worker-env",
- "percent-encoding",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-web-search-tool-runtime"
-version = "0.1.0"
-dependencies = [
- "octopus-descriptors",
- "octopus-process-session-tool-runtime",
- "tokio",
-]
-
-[[package]]
-name = "octopus-worker-env"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "octopus-descriptors",
- "octopus-interfaces",
- "octopus-ledger",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "octopus-worker-env-floor"
-version = "0.1.0"
-dependencies = [
- "octopus-substrate-contract",
- "octopus-util-abspath",
- "octopus-worker-env",
- "serde_json",
-]
-
-[[package]]
-name = "octopus-workspace-substrate"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blake3",
- "fs2",
- "libc",
- "octopus-applypatch",
- "octopus-descriptors",
- "octopus-exec-substrate",
- "octopus-file-system",
- "octopus-sandbox-substrate",
- "octopus-util-pathuri",
- "octopus-util-pty",
- "octopus-verifiers",
- "octopus-worker-env",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "octopus-world-cron-interface"
-version = "0.1.0"
-dependencies = [
- "octopus-app-server",
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-store",
- "octopus-run-record",
- "octopus-runtime",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "octopus-world-pyecho-interface"
-version = "0.1.0"
-dependencies = [
- "octopus-app-server",
- "octopus-descriptors",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-store",
- "octopus-run-record",
- "octopus-runtime",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "octopus-world-pyecho-life-runtime"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "libc",
- "notify",
- "octopus-descriptors",
- "octopus-interface-projection",
- "octopus-interface-transport",
- "octopus-interfaces",
- "octopus-ledger",
- "octopus-ledger-index",
- "octopus-ledger-store",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
 name = "oid-registry"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6522,6 +4897,1631 @@ checksum = "b4c5cc86750666a3ed20bdaf5ca2a0344f9c67674cae0515bec2da16fbaa47db"
 dependencies = [
  "fixedbitset",
  "indexmap 2.14.0",
+]
+
+[[package]]
+name = "phobos-app"
+version = "0.1.0"
+dependencies = [
+ "fs2",
+ "notify",
+ "phobos-app-server",
+ "phobos-descriptors",
+ "phobos-ee",
+ "phobos-file-storage",
+ "phobos-interface-projection",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-marks",
+ "phobos-policy",
+ "phobos-run-record",
+ "phobos-runtime",
+ "phobos-tool-registry",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "rustix 1.1.6",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "uuid",
+]
+
+[[package]]
+name = "phobos-app-server"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-ee",
+ "phobos-file-storage",
+ "phobos-interface-projection",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-marks",
+ "phobos-policy",
+ "phobos-run-record",
+ "phobos-runtime",
+ "phobos-tool-registry",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
+name = "phobos-app-server-interface"
+version = "0.1.0"
+dependencies = [
+ "async-stream",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-stream",
+ "url",
+]
+
+[[package]]
+name = "phobos-applypatch"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_matches",
+ "phobos-file-system",
+ "phobos-util-abspath",
+ "phobos-util-pathuri",
+ "pretty_assertions",
+ "similar",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tree-sitter",
+ "tree-sitter-bash",
+]
+
+[[package]]
+name = "phobos-appserver-proto"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "inventory",
+ "phobos-experimental-api-macros",
+ "phobos-protocol",
+ "phobos-shell-command",
+ "phobos-util-abspath",
+ "phobos-util-pathuri",
+ "pretty_assertions",
+ "rmcp",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "similar",
+ "strum_macros",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tracing",
+ "ts-rs",
+ "uuid",
+]
+
+[[package]]
+name = "phobos-async-utils"
+version = "0.1.0"
+dependencies = [
+ "pretty_assertions",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "phobos-audio-device-session-env"
+version = "0.1.0"
+dependencies = [
+ "cpal",
+ "fs2",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "rodio",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-audio-device-session-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-browser-session-env"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "futures-util",
+ "getrandom 0.3.4",
+ "hmac",
+ "libc",
+ "phobos-app-server-interface",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-util-image",
+ "phobos-worker-env",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+]
+
+[[package]]
+name = "phobos-browser-session-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-browser-session-env",
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-client"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "eventsource-stream",
+ "futures",
+ "http",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "rand 0.9.4",
+ "reqwest",
+ "rustls",
+ "rustls-native-certs",
+ "rustls-pki-types",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "zstd 0.13.4",
+]
+
+[[package]]
+name = "phobos-code-mode-engine"
+version = "0.1.0"
+dependencies = [
+ "deno_core_icudata",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "v8",
+]
+
+[[package]]
+name = "phobos-code-mode-room"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "fs2",
+ "futures",
+ "image",
+ "json-patch",
+ "libc",
+ "phobos-app-server",
+ "phobos-app-server-interface",
+ "phobos-code-mode-engine",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-file-write-contract",
+ "phobos-interface-activation-app-server-transport",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-marks",
+ "phobos-policy",
+ "phobos-process-session-tool-runtime",
+ "phobos-run-authoring",
+ "phobos-run-record",
+ "phobos-runtime",
+ "phobos-system-gui-env",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+]
+
+[[package]]
+name = "phobos-code-mode-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-code-mode-room",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-run-authoring",
+ "phobos-run-record",
+ "phobos-tool-handlers",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-container-room"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-container-session-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-context-collections"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-ledger",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-context-projection"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-run-authoring",
+ "phobos-util-string",
+ "phobos-world-pyecho-life-runtime",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-descriptors"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-desktop-session-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "phobos-system-gui-env",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-ee"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-policy",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-exec-substrate"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "arc-swap",
+ "axum",
+ "base64 0.22.1",
+ "blake3",
+ "bytes",
+ "clatter",
+ "futures",
+ "hmac",
+ "http",
+ "libc",
+ "phobos-file-system",
+ "phobos-sandbox-substrate",
+ "phobos-substrate-contract",
+ "phobos-util-abspath",
+ "phobos-util-pathuri",
+ "phobos-util-pty",
+ "pretty_assertions",
+ "prost 0.14.4",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+ "toml 0.9.12+spec-1.1.0",
+ "tracing",
+ "uuid",
+ "wiremock",
+ "zeroize",
+]
+
+[[package]]
+name = "phobos-execpolicy"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "multimap",
+ "phobos-util-abspath",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "shlex 1.3.0",
+ "starlark",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-experimental-api-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.118",
+]
+
+[[package]]
+name = "phobos-file-search"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "crossbeam-channel",
+ "ignore",
+ "nucleo",
+ "pretty_assertions",
+ "serde",
+ "tempfile",
+]
+
+[[package]]
+name = "phobos-file-storage"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "fs2",
+ "libc",
+ "rustix 1.1.6",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+]
+
+[[package]]
+name = "phobos-file-system"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "libc",
+ "phobos-substrate-contract",
+ "phobos-util-abspath",
+ "phobos-util-pathuri",
+ "pretty_assertions",
+ "rustix 1.1.6",
+ "serde",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "phobos-file-write-contract"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "flate2",
+ "phobos-descriptors",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-git-sandbox-substrate"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "libc",
+ "phobos-descriptors",
+ "phobos-worker-env",
+ "phobos-workspace-substrate",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-git-worktree-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-image-generation-interface"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-world-pyecho-life-runtime",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-interface-activation-app-server-transport"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "json-patch",
+ "phobos-app-server-interface",
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-policy",
+ "phobos-run-authoring",
+ "phobos-run-record",
+ "phobos-tool-handlers",
+ "phobos-util-abspath",
+ "phobos-world-pyecho-life-runtime",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "phobos-interface-activation-stdin-json-lines"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-world-pyecho-life-runtime",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-interface-projection"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-policy",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-interface-transport"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "fs2",
+ "libc",
+ "notify",
+ "object",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-interface-projection",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-policy",
+ "phobos-run-record",
+ "phobos-util-pty",
+ "phobos-verifiers",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-interfaces"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "blake3",
+ "libc",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-ledger",
+ "phobos-marks",
+ "phobos-policy",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-ledger"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "phobos-descriptors",
+ "phobos-policy",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-ledger-index"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-ledger-store"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-ledger",
+ "rustix 1.1.6",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "phobos-linux-process-authority"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "phobos-verifiers",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-login"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "chrono",
+ "os_info",
+ "phobos-client",
+ "phobos-protocol",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-marks"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-ledger",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-mcp-client"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "jsonschema",
+ "libc",
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-world-pyecho-life-runtime",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-mcp-stdio-room"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "futures-util",
+ "libc",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "phobos-mcp-stdio-session-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-model-context-render"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-marks",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-network-proxy"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "clap",
+ "dirs",
+ "globset",
+ "phobos-util-abspath",
+ "pretty_assertions",
+ "rama-core",
+ "rama-http",
+ "rama-http-backend",
+ "rama-net",
+ "rama-socks5",
+ "rama-tcp",
+ "rama-tls-rustls",
+ "rama-unix",
+ "rustls",
+ "rustls-native-certs",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 1.0.69",
+ "time",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "phobos-operator-chat-client"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "futures",
+ "json-patch",
+ "libc",
+ "object",
+ "phobos-app-server",
+ "phobos-app-server-interface",
+ "phobos-context-collections",
+ "phobos-context-projection",
+ "phobos-descriptors",
+ "phobos-ee",
+ "phobos-file-storage",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-marks",
+ "phobos-policy",
+ "phobos-process-session-tool-runtime",
+ "phobos-provider-codex",
+ "phobos-run-authoring",
+ "phobos-run-record",
+ "phobos-runtime",
+ "phobos-system-room-env",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "phobos-world-pyecho-life-runtime",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+]
+
+[[package]]
+name = "phobos-policy"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "phobos-descriptors",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-process-session-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "libc",
+ "notify",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-protocol"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chardetng",
+ "chrono",
+ "encoding_rs",
+ "globset",
+ "http",
+ "icu_decimal",
+ "icu_locale_core",
+ "icu_provider",
+ "landlock",
+ "phobos-async-utils",
+ "phobos-execpolicy",
+ "phobos-substrate-contract",
+ "phobos-util-abspath",
+ "phobos-util-image",
+ "phobos-util-pathuri",
+ "phobos-util-string",
+ "pretty_assertions",
+ "quick-xml",
+ "reqwest",
+ "schemars 0.8.22",
+ "seccompiler",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "strum",
+ "strum_macros",
+ "sys-locale",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "ts-rs",
+ "uuid",
+ "wildmatch",
+]
+
+[[package]]
+name = "phobos-provider-codex"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "futures",
+ "json-patch",
+ "notify",
+ "phobos-app-server",
+ "phobos-app-server-interface",
+ "phobos-appserver-proto",
+ "phobos-descriptors",
+ "phobos-interface-activation-app-server-transport",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-login",
+ "phobos-model-context-render",
+ "phobos-operator-chat-client",
+ "phobos-protocol",
+ "phobos-run-authoring",
+ "phobos-run-record",
+ "phobos-runtime",
+ "phobos-secrets",
+ "phobos-system-room-env",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-util-abspath",
+ "phobos-util-image",
+ "phobos-util-string",
+ "phobos-world-pyecho-life-runtime",
+ "regex",
+ "rustls",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+ "toml 0.9.12+spec-1.1.0",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "zeroize",
+]
+
+[[package]]
+name = "phobos-realtime-signaling"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "futures-util",
+ "json-patch",
+ "phobos-app-server-interface",
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-login",
+ "phobos-policy",
+ "phobos-run-authoring",
+ "phobos-system-room-env",
+ "phobos-tool-handlers",
+ "phobos-world-pyecho-life-runtime",
+ "reqwest",
+ "rustls",
+ "rustls-native-certs",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-realtime-webrtc"
+version = "0.1.0"
+dependencies = [
+ "libwebrtc",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-remote-exec-room"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "libc",
+ "phobos-descriptors",
+ "phobos-exec-substrate",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-substrate-contract",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-util-pathuri",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "phobos-remote-exec-server-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-run-authoring"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "futures",
+ "json-patch",
+ "phobos-app-server-interface",
+ "phobos-descriptors",
+ "phobos-file-write-contract",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "phobos-policy",
+ "phobos-run-record",
+ "phobos-system-room-env",
+ "phobos-tool-handlers",
+ "phobos-world-pyecho-life-runtime",
+ "proptest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tokio-util",
+ "url",
+]
+
+[[package]]
+name = "phobos-run-record"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-ledger",
+ "phobos-policy",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-runtime"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-marks",
+ "phobos-policy",
+ "phobos-run-record",
+ "proptest",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "phobos-sandbox-substrate"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "dirs",
+ "dunce",
+ "libc",
+ "phobos-network-proxy",
+ "phobos-substrate-contract",
+ "phobos-util-abspath",
+ "phobos-util-pathuri",
+ "phobos-worker-env",
+ "phobos-worker-env-floor",
+ "pretty_assertions",
+ "regex-lite",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+ "which 8.0.4",
+]
+
+[[package]]
+name = "phobos-schemas"
+version = "0.1.0"
+dependencies = [
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-marks",
+ "phobos-run-record",
+ "phobos-verifiers",
+ "schemars 0.8.22",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-secrets"
+version = "0.1.0"
+dependencies = [
+ "age",
+ "anyhow",
+ "base64 0.22.1",
+ "keyring",
+ "pretty_assertions",
+ "rand 0.9.4",
+ "regex",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-shell-command"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "libc",
+ "phobos-substrate-contract",
+ "phobos-util-abspath",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "shlex 1.3.0",
+ "tree-sitter",
+ "tree-sitter-bash",
+ "which 8.0.4",
+]
+
+[[package]]
+name = "phobos-substrate-contract"
+version = "0.1.0"
+dependencies = [
+ "chardetng",
+ "encoding_rs",
+ "globset",
+ "phobos-util-abspath",
+ "phobos-util-pathuri",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "strum_macros",
+ "tempfile",
+ "tracing",
+ "ts-rs",
+ "wildmatch",
+]
+
+[[package]]
+name = "phobos-system-coder-env"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-git-sandbox-substrate",
+ "phobos-process-session-tool-runtime",
+ "phobos-system-workspace-env",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-system-exec-env"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "phobos-descriptors",
+ "phobos-exec-substrate",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-util-pathuri",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-system-gui-env"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "getrandom 0.3.4",
+ "image",
+ "libc",
+ "phobos-app-server-interface",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-worker-env",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "phobos-system-room-env"
+version = "0.1.0"
+dependencies = [
+ "fs2",
+ "json-patch",
+ "libc",
+ "phobos-context-collections",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-file-write-contract",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-store",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-system-room-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-system-workspace-env"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "ignore",
+ "phobos-applypatch",
+ "phobos-descriptors",
+ "phobos-file-search",
+ "phobos-file-system",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-util-pathuri",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "phobos-workspace-substrate",
+ "regex",
+ "serde",
+ "serde_json",
+ "similar",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "phobos-tool-handlers"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-ledger",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-tool-registry"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "jsonschema",
+ "phobos-descriptors",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-util-abspath"
+version = "0.1.0"
+dependencies = [
+ "dirs",
+ "dunce",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "ts-rs",
+]
+
+[[package]]
+name = "phobos-util-image"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "divan",
+ "image",
+ "lru",
+ "mime_guess",
+ "sha1",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-util-pathuri"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "phobos-util-abspath",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "ts-rs",
+ "url",
+ "urlencoding",
+]
+
+[[package]]
+name = "phobos-util-pty"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "filedescriptor",
+ "lazy_static",
+ "libc",
+ "log",
+ "portable-pty",
+ "pretty_assertions",
+ "shared_library",
+ "tokio",
+ "winapi",
+]
+
+[[package]]
+name = "phobos-util-string"
+version = "0.1.0"
+dependencies = [
+ "pretty_assertions",
+ "regex-lite",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-verifiers"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "object",
+ "phobos-descriptors",
+ "phobos-file-storage",
+ "phobos-ledger",
+ "phobos-marks",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "phobos-web-search-env"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "percent-encoding",
+ "phobos-browser-session-env",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-process-session-tool-runtime",
+ "phobos-tool-handlers",
+ "phobos-tool-registry",
+ "phobos-worker-env",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-web-search-tool-runtime"
+version = "0.1.0"
+dependencies = [
+ "phobos-descriptors",
+ "phobos-process-session-tool-runtime",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-worker-env"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "phobos-descriptors",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "phobos-worker-env-floor"
+version = "0.1.0"
+dependencies = [
+ "phobos-substrate-contract",
+ "phobos-util-abspath",
+ "phobos-worker-env",
+ "serde_json",
+]
+
+[[package]]
+name = "phobos-workspace-substrate"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blake3",
+ "fs2",
+ "libc",
+ "phobos-applypatch",
+ "phobos-descriptors",
+ "phobos-exec-substrate",
+ "phobos-file-system",
+ "phobos-sandbox-substrate",
+ "phobos-util-pathuri",
+ "phobos-util-pty",
+ "phobos-verifiers",
+ "phobos-worker-env",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "phobos-world-cron-interface"
+version = "0.1.0"
+dependencies = [
+ "phobos-app-server",
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-store",
+ "phobos-run-record",
+ "phobos-runtime",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "phobos-world-pyecho-interface"
+version = "0.1.0"
+dependencies = [
+ "phobos-app-server",
+ "phobos-descriptors",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-store",
+ "phobos-run-record",
+ "phobos-runtime",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "phobos-world-pyecho-life-runtime"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "libc",
+ "notify",
+ "phobos-descriptors",
+ "phobos-interface-projection",
+ "phobos-interface-transport",
+ "phobos-interfaces",
+ "phobos-ledger",
+ "phobos-ledger-index",
+ "phobos-ledger-store",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]

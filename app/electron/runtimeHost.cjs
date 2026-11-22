@@ -131,11 +131,11 @@ class RuntimeHost extends EventEmitter {
         && this.state.pid == null
         && !this.state.error
       ) {
-        throw new Error("Octopus runtime exited before becoming ready");
+        throw new Error("Phobos runtime exited before becoming ready");
       }
       await delay(100);
     }
-    throw new Error(`Octopus runtime did not become ready within ${Math.round(timeoutMs / 1000)} seconds after terminal submission`);
+    throw new Error(`Phobos runtime did not become ready within ${Math.round(timeoutMs / 1000)} seconds after terminal submission`);
   }
 
   probe() {
@@ -410,7 +410,7 @@ function requireUnixSocketPath(value, field) {
   const maximum = process.platform === "darwin" ? 103 : 107;
   const bytes = Buffer.byteLength(value);
   if (bytes > maximum) {
-    throw new Error(`${field} is ${bytes} bytes but ${process.platform} allows at most ${maximum}; choose a shorter OCTOPUS_HOME`);
+    throw new Error(`${field} is ${bytes} bytes but ${process.platform} allows at most ${maximum}; choose a shorter PHOBOS_HOME`);
   }
 }
 

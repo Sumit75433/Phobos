@@ -67,7 +67,7 @@ is a non-event.
   "mark": "ocr.text.contains",
   "artifact_label": "screen.captured",
   "verifier": "ocr_text_contains",
-  "params": {"expected_text": "OCTOPUS"}
+  "params": {"expected_text": "PHOBOS"}
 }]
 ```
 

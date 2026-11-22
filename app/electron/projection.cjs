@@ -6,7 +6,7 @@ const { readProviderInterfaceDescriptors } = require("./projection/providerDescr
 const { armSetupTriggers, mutateScheduledInterface, setupTriggerEntries, setupTriggerProof, setupTriggerTaskPlanner } = require("./projection/scheduled.cjs");
 const { parseApplicationManifest } = require("./projection/sidecars.cjs");
 const { arrayValue, numberValue, objectOrEmpty, requiredString, stringValue, topologyArtifactRow } = require("./projection/values.cjs");
-const { mutateOctopusOsWorkspace } = require("./projection/workspaceMutations.cjs");
+const { mutatePhobosOsWorkspace } = require("./projection/workspaceMutations.cjs");
 const { invalidationProjection } = require("./projection/invalidation.cjs");
 const { queryRouterProjection } = require("./projection/queryRouter.cjs");
 const { movementPagesProjection } = require("./projection/movementPages.cjs");
@@ -37,7 +37,7 @@ function createProjectionContext(options) {
   const resolveLocalPackageLibrary = typeof options.localPackageLibrary === "function"
     ? options.localPackageLibrary
     : () => path.join(resolveRepoRoot(), "app", "distribution", "local-packages");
-  const octopusHome = options.octopusHome;
+  const phobosHome = options.phobosHome;
   const onChange = typeof options.onChange === "function" ? options.onChange : () => {};
   const beforeRead = typeof options.beforeRead === "function" ? options.beforeRead : async () => {};
   const nativeBrowserTargetsForProjection = typeof options.nativeBrowserTargetsForProjection === "function"
@@ -58,7 +58,7 @@ function createProjectionContext(options) {
     resolveSourceRegistry,
     resolveLocalPackageRegistry,
     resolveLocalPackageLibrary,
-    octopusHome,
+    phobosHome,
     onChange,
     beforeRead,
     nativeBrowserTargetsForProjection,
@@ -94,7 +94,7 @@ module.exports = {
   topologyArtifactRow,
   createProjectionStore,
   mutateApplicationPrivateConfiguration,
-  mutateOctopusOsWorkspace,
+  mutatePhobosOsWorkspace,
   mutateScheduledInterface,
   setupTriggerEntries,
   setupTriggerProof,

@@ -113,7 +113,7 @@ There is no periodic scan of GitHub issues.
 
 ## Private state and tunnel lifecycle
 
-All state is under OCTOPUS_VAR_DIR, directory mode 0700, files 0600:
+All state is under PHOBOS_VAR_DIR, directory mode 0700, files 0600:
 
 - webhook.secret: generated once (64 random hex characters), or pre-provisioned
   as 32..256 printable ASCII bytes without newline. Never put it in descriptors.

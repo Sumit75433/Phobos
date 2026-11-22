@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-image-generation-interface-life",
+      "bin": "target/debug/phobos-image-generation-interface-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -10,7 +10,7 @@
       },
       "args": [],
       "inherit_env": [
-        "OCTOPUS_MACHINE_CODEX_AUTH_FILE"
+        "PHOBOS_MACHINE_CODEX_AUTH_FILE"
       ],
       "authority": {
         "read_root_slots": [],
@@ -21,7 +21,7 @@
         "executable_paths": [],
         "executable_commands": [],
         "read_env_paths": [
-          "OCTOPUS_MACHINE_CODEX_AUTH_FILE"
+          "PHOBOS_MACHINE_CODEX_AUTH_FILE"
         ],
         "write_env_paths": [],
         "executable_env_paths": [],

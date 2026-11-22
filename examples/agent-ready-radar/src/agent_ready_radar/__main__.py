@@ -17,7 +17,7 @@ def main():
     s.add_argument("--timeout", type=float, default=8)
     s.add_argument("--max-bytes", type=int, default=65536)
     s.add_argument("-o", "--output", type=Path)
-    for name in ("report", "octopus-card", "summarize"):
+    for name in ("report", "phobos-card", "summarize"):
         p = sub.add_parser(name)
         p.add_argument("input", type=Path)
         p.add_argument("-o", "--output", type=Path)

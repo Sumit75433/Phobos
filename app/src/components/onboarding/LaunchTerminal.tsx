@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useShouldReduceMotion } from "../../appearance";
-import { OctopusTerminal } from "../terminal/OctopusTerminal";
+import { PhobosTerminal } from "../terminal/PhobosTerminal";
 import { createLaunchShellSession } from "../terminal/shellSession";
-import { OctopusLoadingLogo } from "../OctopusLoadingLogo";
+import { PhobosLoadingLogo } from "../PhobosLoadingLogo";
 
 export function LaunchTerminal({
   greeting,
@@ -32,13 +32,13 @@ export function LaunchTerminal({
   const exitVisible = leaving && phase !== "greeting";
 
   return (
-    <main aria-label="Octopus launch" className="launch-scene" data-leaving={exitVisible || undefined} data-phase={phase}>
+    <main aria-label="Phobos launch" className="launch-scene" data-leaving={exitVisible || undefined} data-phase={phase}>
       <div className="launch-scene-terminal">
-        <OctopusTerminal id="terminal-panel-launch" session={session} />
+        <PhobosTerminal id="terminal-panel-launch" session={session} />
       </div>
       {greeting ? (
         <div aria-hidden={phase !== "greeting"} className="launch-scene-greeting">
-          <OctopusLoadingLogo />
+          <PhobosLoadingLogo />
         </div>
       ) : null}
       <div className="launch-scene-drag" />

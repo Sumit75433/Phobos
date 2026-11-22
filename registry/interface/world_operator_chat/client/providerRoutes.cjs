@@ -98,7 +98,7 @@ function providerAccountLoginRequest(request) {
 }
 
 async function resolveProviderAccountContext(
-  octopusHome,
+  phobosHome,
   runId,
   interfaceId,
   providerInterfaceId,
@@ -106,8 +106,8 @@ async function resolveProviderAccountContext(
   requireLogin = false,
 ) {
   const config = await readConfig();
-  await assertExactOperatorClientInterface(octopusHome, interfaceId);
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  await assertExactOperatorClientInterface(phobosHome, interfaceId);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const runDocument = await readJsonDocumentIfPresent(path.join(runsDir, `${runId}.json`));
   if (!runDocument) throw new Error(`provider account Home run '${runId}' does not exist`);
   const run = runDocument.value;
@@ -134,7 +134,7 @@ async function resolveProviderAccountContext(
     `provider account runtime state '${runtimeProviderInterfaceId}'`,
   );
   const descriptor = await readJsonIfPresent(path.join(
-    octopusHome,
+    phobosHome,
     "registry",
     "interface",
     runtimeProviderInterfaceId,
@@ -250,14 +250,14 @@ async function resolveProviderAccountContext(
 }
 
 async function resolveProviderModelCatalogContext(
-  octopusHome,
+  phobosHome,
   runId,
   interfaceId,
   providerInterfaceId,
 ) {
   const config = await readConfig();
-  await assertExactOperatorClientInterface(octopusHome, interfaceId);
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  await assertExactOperatorClientInterface(phobosHome, interfaceId);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const runDocument = await readJsonDocumentIfPresent(path.join(runsDir, `${runId}.json`));
   if (!runDocument) throw new Error(`provider model catalog run '${runId}' does not exist`);
   const run = runDocument.value;
@@ -281,7 +281,7 @@ async function resolveProviderModelCatalogContext(
     `provider model catalog runtime state '${runtimeProviderInterfaceId}'`,
   );
   const descriptor = await readJsonIfPresent(path.join(
-    octopusHome,
+    phobosHome,
     "registry",
     "interface",
     runtimeProviderInterfaceId,

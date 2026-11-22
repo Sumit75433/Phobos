@@ -24,11 +24,11 @@ function invalidationProjection(store) {
   let projectionFallbackError = "";
 
   function projectionWatchRoots() {
-    return [store.octopusHome()];
+    return [store.phobosHome()];
   }
 
   function projectionLedgerFiles() {
-    return [path.join(store.octopusHome(), "ledger", "movements.jsonl")];
+    return [path.join(store.phobosHome(), "ledger", "movements.jsonl")];
   }
 
   function ensureProjectionWatchers() {
@@ -133,7 +133,7 @@ function invalidationProjection(store) {
   }
 
   async function readProjectionTruthFingerprint() {
-    const root = store.octopusHome();
+    const root = store.phobosHome();
     const pending = [
       path.join(root, "registry"),
       path.join(root, "state", "runs"),
@@ -218,7 +218,7 @@ function invalidationProjection(store) {
   }
 
   function fileProjectionScope(repoRoot) {
-    return JSON.stringify([repoRoot, store.octopusHome(), store.resolveSourceRegistry(), store.resolveLocalPackageRegistry(), store.resolveLocalPackageLibrary()]);
+    return JSON.stringify([repoRoot, store.phobosHome(), store.resolveSourceRegistry(), store.resolveLocalPackageRegistry(), store.resolveLocalPackageLibrary()]);
   }
 
   async function cachedFileProjection(repoRoot, includeLedger) {

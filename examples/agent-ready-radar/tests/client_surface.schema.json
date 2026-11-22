@@ -135,7 +135,7 @@
     },
     "glyph": {
       "enum": [
-        "octopus",
+        "phobos",
         "dashboard",
         "registry",
         "metrics",
@@ -537,7 +537,7 @@
           "const": "projection"
         },
         "method": {
-          "$ref": "https://octopus.local/schemas/projection_read_contract.schema.json#/$defs/clientSurfaceProjectionReadMethod"
+          "$ref": "https://phobos.local/schemas/projection_read_contract.schema.json#/$defs/clientSurfaceProjectionReadMethod"
         },
         "params": {
           "additionalProperties": true,
@@ -1135,7 +1135,7 @@
       "type": "object"
     }
   },
-  "$id": "https://octopus.local/schemas/client_surface_document.schema.json",
+  "$id": "https://phobos.local/schemas/client_surface_document.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -1181,7 +1181,7 @@
       "type": "integer"
     },
     "schema": {
-      "const": "octopus.client_surface"
+      "const": "phobos.client_surface"
     },
     "schema_version": {
       "const": 1
@@ -1226,6 +1226,6 @@
     "target",
     "render"
   ],
-  "title": "Octopus Client Surface Document",
+  "title": "Phobos Client Surface Document",
   "type": "object"
 }

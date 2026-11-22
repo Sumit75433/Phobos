@@ -29,7 +29,7 @@ import { OcButton, OcIconButton, OcDialog, OcDialogFooter, OcDialogHeader, OcMen
 import { TasksViewSwitcher } from "./task/TasksViewSwitcher";
 import { ScheduledSidebar } from "./scheduled/ScheduledSidebar";
 import { Glyph } from "./IconGlyphs";
-import { OctopusAgentRow, OctopusNavItem, OctopusNavSection, OctopusProjectRow, OctopusTaskRow } from "./navigation/OctopusNav";
+import { PhobosAgentRow, PhobosNavItem, PhobosNavSection, PhobosProjectRow, PhobosTaskRow } from "./navigation/PhobosNav";
 import { projectWorkingTaskCounts } from "./navigation/sidebarActivity";
 import { taskHoverCardDetails } from "./navigation/TaskHoverCard";
 import {
@@ -41,11 +41,11 @@ import {
   type SidebarDragData,
 } from "./navigation/SidebarDnd";
 import type { RuntimeHostView } from "../runtimeHost";
-import type { OctopusOsProjectWorkspace } from "../shell/useOctopusOsProjects";
+import type { PhobosOsProjectWorkspace } from "../shell/usePhobosOsProjects";
 import { ProjectionResourceIssue, type ProjectionResourcePhase } from "./projectionResource";
 import { ProjectSourceFolders } from "./project/ProjectSourceFolders";
 import { ProjectAppearancePicker } from "./navigation/ProjectAppearancePicker";
-import type { OctopusProviderInterface } from "../electron";
+import type { PhobosProviderInterface } from "../electron";
 import { AgentPresetDialog } from "./agent/AgentPresetDialog";
 import { AgentPresetLogo } from "./agent/AgentPresetLogo";
 import { PROJECT_ICON_OPTIONS, ProjectLogo } from "./project/ProjectLogo";
@@ -72,10 +72,10 @@ type Props = {
   agentPinnedChatIds: string[];
   agentChatOrderIds: string[];
   agentProjectFilterEeId: string;
-  agentProjectWorkspace: OctopusOsProjectWorkspace;
+  agentProjectWorkspace: PhobosOsProjectWorkspace;
   agentExecutionContexts: ChatExecutionContext[];
   agentDefinitions: readonly ClientAgentDefinition[];
-  agentProviderInterfaces: OctopusProviderInterface[];
+  agentProviderInterfaces: PhobosProviderInterface[];
   agentModelsLoading: boolean;
   agentModelError: string;
   onRefreshAgentModels: () => Promise<void>;
@@ -169,7 +169,7 @@ export function Sidebar({
   useAppErrorToast(surfaceErrors.join("\n"));
 
   return (
-    <aside className="octopus-sidebar app-shell-left-panel sidebar-page" data-app-shell-left-panel-appearance="content-surface">
+    <aside className="phobos-sidebar app-shell-left-panel sidebar-page" data-app-shell-left-panel-appearance="content-surface">
       <nav className="sidebar-foreground-muted flex min-h-0 flex-1 flex-col" aria-label={`${inbox ? "Inbox" : "Tasks"} navigation`} onKeyDown={moveSidebarFocus}>
         {!inbox ? <TasksViewSwitcher
           value={archivedView ? "archived" : activeSurfaceId === "scheduled" ? "scheduled" : "tasks"}
@@ -183,7 +183,7 @@ export function Sidebar({
         {inbox ? (
           <div className="sidebar-page-heading"><h1>Inbox</h1></div>
         ) : null}
-        {scheduledView ? <ScheduledSidebar onSelectChat={onSelectChat} /> : <div className="octopus-sidebar-scroll sidebar-page-scroll vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto px-0 pb-row-x" data-activity={inbox}>
+        {scheduledView ? <ScheduledSidebar onSelectChat={onSelectChat} /> : <div className="phobos-sidebar-scroll sidebar-page-scroll vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto px-0 pb-row-x" data-activity={inbox}>
           {inbox ? activityContent : (
             <TaskNavigation
               accessProfile={accessProfile}
@@ -263,12 +263,12 @@ function TaskNavigation({
   onRetryChatRuns: () => Promise<void>;
   homeRunId: string;
   pinnedChatIds: string[];
-  projectWorkspace: OctopusOsProjectWorkspace;
+  projectWorkspace: PhobosOsProjectWorkspace;
   projectFilterEeId: string;
   executionContexts: ChatExecutionContext[];
   agentDefinitions: readonly ClientAgentDefinition[];
   runtimeHome: string;
-  providerInterfaces: OctopusProviderInterface[];
+  providerInterfaces: PhobosProviderInterface[];
   modelsLoading: boolean;
   modelError: string;
   onRefreshModels: () => Promise<void>;
@@ -574,7 +574,7 @@ function TaskNavigation({
         if (data.entity === "project") {
           const project = projectById.get(data.itemId);
           return project ? (
-            <OctopusProjectRow
+            <PhobosProjectRow
               label={project.name}
               logo={<ProjectLogo color={project.color} icon={project.icon} />}
               onClick={() => {}}
@@ -584,7 +584,7 @@ function TaskNavigation({
         }
         const chat = data.entity === "chat" ? chatById.get(data.itemId) : undefined;
         return chat ? (
-          <OctopusTaskRow
+          <PhobosTaskRow
             active={false}
             failed={chat.turnState === "failed"}
             meta={relativeTime(chat.updatedAtMs, now)}
@@ -598,8 +598,8 @@ function TaskNavigation({
       }}
     >
       {archivedView ? (
-        <OctopusNavSection className="px-row-x" title="Archived" titleTrailing={archivedChats.length || undefined}>
-          {archivedChats.map((chat) => <OctopusTaskRow
+        <PhobosNavSection className="px-row-x" title="Archived" titleTrailing={archivedChats.length || undefined}>
+          {archivedChats.map((chat) => <PhobosTaskRow
             action={{ glyph: "retry", label: "Restore task", disabled: projectWorkspace.pending, onClick: () => dispatchRestoreClientTask(chat.runId) }}
             active={chatActive && chat.runId === activeChatRunId}
             key={chat.runId}
@@ -618,10 +618,10 @@ function TaskNavigation({
             onRetry={onRetryChatRuns}
             phase={chatRunsPhase}
           />
-        </OctopusNavSection>
+        </PhobosNavSection>
       ) : <>
       <div className="shrink-0 px-row-x">
-        <OctopusNavSection
+        <PhobosNavSection
           collapsed={projectsCollapsed}
           title={<SidebarSectionTitle collapsed={projectsCollapsed} label="Projects" onClick={() => toggleSection("projects", projectsCollapsed)} />}
         >
@@ -635,7 +635,7 @@ function TaskNavigation({
                     key={project.id}
                   >
                     {(dragHandle) => (
-                      <OctopusProjectRow
+                      <PhobosProjectRow
                         action={{ glyph: "more", label: `Project actions for ${project.name}`, onClick: (event) => openProjectMenu(project.id, event) }}
                         active={project.id === selectedProjectId}
                         depth={depth}
@@ -650,7 +650,7 @@ function TaskNavigation({
                 ))}
               </SidebarSortableList>
               <button
-                className="octopus-nav-row group relative flex h-[var(--height-token-row)] w-full cursor-interaction items-center overflow-x-hidden rounded-[var(--radius-token-row)] text-left text-base font-medium text-token-input-placeholder-foreground hover:bg-token-list-hover-background hover:text-token-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-token-border"
+                className="phobos-nav-row group relative flex h-[var(--height-token-row)] w-full cursor-interaction items-center overflow-x-hidden rounded-[var(--radius-token-row)] text-left text-base font-medium text-token-input-placeholder-foreground hover:bg-token-list-hover-background hover:text-token-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-token-border"
                 data-sidebar-nav-item=""
                 disabled={!canCreateRootProject || projectWorkspace.pending}
                 onClick={() => {
@@ -678,11 +678,11 @@ function TaskNavigation({
               </button>
             </div>
           </SidebarDropContainer>
-        </OctopusNavSection>
+        </PhobosNavSection>
       </div>
 
       <div className="shrink-0 px-row-x">
-        <OctopusNavSection
+        <PhobosNavSection
           collapsed={agentsCollapsed}
           titleActions={(
             <OcIconButton
@@ -702,7 +702,7 @@ function TaskNavigation({
           )}
         >
           {visibleAgentPresets.map((preset) => (
-            <OctopusAgentRow
+            <PhobosAgentRow
               active={agentDialog?.mode === "edit" && agentDialog.presetId === preset.id}
               key={preset.id}
               label={preset.name}
@@ -722,7 +722,7 @@ function TaskNavigation({
               {selectedProject ? "No agents in this project" : "No agents yet"}
             </div>
           ) : null}
-        </OctopusNavSection>
+        </PhobosNavSection>
       </div>
 
       <SidebarDropContainer
@@ -732,7 +732,7 @@ function TaskNavigation({
         id="sidebar-drop-agent-pinned"
       >
         {pinnedChats.length > 0 ? (
-          <OctopusNavSection
+          <PhobosNavSection
             collapsed={pinnedCollapsed}
             title={<SidebarSectionTitle collapsed={pinnedCollapsed} label="Pinned" onClick={() => toggleSection("pinned", pinnedCollapsed)} />}
           >
@@ -743,7 +743,7 @@ function TaskNavigation({
                   id={sidebarItemDndId("chat", chat.runId)}
                   key={chat.runId}
                 >
-                  <OctopusTaskRow
+                  <PhobosTaskRow
                     action={{ glyph: "more", label: `Task actions for ${clientTaskTitle(chat.runId, chat.title, organization)}`, onClick: (event) => openTaskMenu(chat.runId, event) }}
                     active={chatActive && chat.runId === activeChatRunId}
                     failed={chat.turnState === "failed"}
@@ -764,12 +764,12 @@ function TaskNavigation({
                 </SidebarSortableItem>
               ))}
             </SidebarSortableList>
-          </OctopusNavSection>
+          </PhobosNavSection>
         ) : draggingSidebarItem ? <div className="h-4" /> : null}
       </SidebarDropContainer>
 
       <SidebarDropContainer className="min-w-0" containerId={TASKS_CONTAINER} entity="chat" id="sidebar-drop-tasks">
-        <OctopusNavSection
+        <PhobosNavSection
           className="px-row-x"
           collapsed={tasksCollapsed}
           titleActions={(
@@ -801,7 +801,7 @@ function TaskNavigation({
                 id={sidebarItemDndId("chat", chat.runId)}
                 key={chat.runId}
               >
-                <OctopusTaskRow
+                <PhobosTaskRow
                   action={{ glyph: "more", label: `Task actions for ${clientTaskTitle(chat.runId, chat.title, organization)}`, onClick: (event) => openTaskMenu(chat.runId, event) }}
                   active={chatActive && chat.runId === activeChatRunId}
                   failed={chat.turnState === "failed"}
@@ -832,12 +832,12 @@ function TaskNavigation({
             onRetry={onRetryChatRuns}
             phase={chatRunsPhase}
           />
-        </OctopusNavSection>
+        </PhobosNavSection>
       </SidebarDropContainer>
       <div className="shrink-0 px-row-x">
         <div className="flex flex-col gap-px">
           {agentSurfaceRows.map((surface) => (
-            <OctopusNavItem
+            <PhobosNavItem
               active={activeSurfaceId === surface.id}
               glyph={surfaceGlyph(surface)}
               key={surface.id}
@@ -1038,14 +1038,14 @@ function ProjectDeleteDialog({
   if (!open || !project) return null;
   return (
     <OcDialog
-      ariaLabelledBy="octopus-project-delete-title"
+      ariaLabelledBy="phobos-project-delete-title"
       initialFocusRef={cancelRef}
       onClose={onCancel}
       open={open}
       panelClassName="p-5"
       size="compact"
     >
-        <OcDialogHeader className="p-0" title="Delete project?" titleId="octopus-project-delete-title" />
+        <OcDialogHeader className="p-0" title="Delete project?" titleId="phobos-project-delete-title" />
         <p className="mt-2 text-base text-token-description-foreground">
           {runtimeBacked
             ? `“${project.name}” is a real execution environment. Deleting the project removes that EE record; its ledger history remains.`
@@ -1133,7 +1133,7 @@ function ProjectDialog({
   };
   return (
     <OcDialog
-      ariaLabelledBy="octopus-project-name-title"
+      ariaLabelledBy="phobos-project-name-title"
       busy={busy}
       initialFocusRef={inputRef}
       onClose={onCancel}
@@ -1141,7 +1141,7 @@ function ProjectDialog({
       size="default"
     >
           <form className="flex flex-col gap-0 px-5 py-5 text-base leading-normal tracking-normal" onSubmit={submit}>
-            <OcDialogHeader className="p-0 pb-3" closeDisabled={busy} onClose={onCancel} title={title} titleId="octopus-project-name-title" />
+            <OcDialogHeader className="p-0 pb-3" closeDisabled={busy} onClose={onCancel} title={title} titleId="phobos-project-name-title" />
             {runtimeBacked && creating ? (
               <div className="flex w-full flex-col gap-2 pt-3 first:pt-0">
                 <span className="text-base text-token-foreground">Parent project</span>
@@ -1159,7 +1159,7 @@ function ProjectDialog({
               </div>
             ) : null}
             <div className="flex w-full flex-col gap-2 pt-3 first:pt-0">
-              <label className="text-base text-token-foreground" htmlFor="octopus-project-name">Project name</label>
+              <label className="text-base text-token-foreground" htmlFor="phobos-project-name">Project name</label>
               <div className="flex items-center gap-2">
                 <ProjectAppearancePicker
                   disabled={busy}
@@ -1173,7 +1173,7 @@ function ProjectDialog({
                 />
                 <OcTextField
                   className="min-w-0 flex-1"
-                  id="octopus-project-name"
+                  id="phobos-project-name"
                   inputRef={inputRef}
                   label="Project name"
                   onChange={(event) => setName(event.currentTarget.value)}
@@ -1186,7 +1186,7 @@ function ProjectDialog({
             {runtimeBacked && creating ? (
               <div className="flex w-full flex-col gap-2 pt-3 first:pt-0">
                 <OcSelect
-                  id="octopus-project-template"
+                  id="phobos-project-template"
                   label="Project policy"
                   onChange={setTemplateName}
                   options={templateOptions.map((option) => ({

@@ -9,7 +9,7 @@ const { EditorState, Plugin } = require("prosemirror-state");
 const { EditorView } = require("prosemirror-view");
 const { schema } = require("prosemirror-markdown");
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-composer-suggestion-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-composer-suggestion-"));
 const bundle = path.join(root, "suggestion.cjs");
 buildSync({ stdin: { contents: 'export * from "./composerSuggestion"; export * from "./useComposerSuggestion"; export * from "./RichComposerEditor";', resolveDir: path.join(__dirname, "../src/components/chat"), loader: "ts" }, outfile: bundle,
   bundle: true, platform: "node", format: "cjs", packages: "external" });
@@ -103,7 +103,7 @@ test("suggestions survive temporary composer modes and refresh only for a new co
   for (const name of ["Node", "Element", "HTMLElement", "MutationObserver"]) global[name] = dom.window[name];
   t.mock.timers.enable({ apis: ["setTimeout"] });
   let calls = 0, finish, visible;
-  window.octopusTransport = { requestComposerPrediction: () => { calls++; return new Promise(resolve => { finish = resolve; }); } };
+  window.phobosTransport = { requestComposerPrediction: () => { calls++; return new Promise(resolve => { finish = resolve; }); } };
   function Probe({ source, enabled = true, text = "", home = "/home-a" }) {
     visible = useComposerSuggestion("home", source, enabled, home);
     return React.createElement(RichComposerEditor, { text, suggestion: visible, placeholder: "Message Home", onTextChange() {}, onKeyDown() {}, onFilesPicked() {} });

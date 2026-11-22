@@ -23,7 +23,7 @@ const compiled = build({
     contents: [
       'export { readRuntimeProviderInterfaces, refreshProviderModels } from "./src/projectionClient";',
       'export { useChatCapabilityCatalog } from "./src/components/chat/useChatCapabilityCatalog";',
-      'export { useOctopusOsProjects } from "./src/shell/useOctopusOsProjects";',
+      'export { usePhobosOsProjects } from "./src/shell/usePhobosOsProjects";',
       'export { chatProductError } from "./src/components/chat/chatProductError";',
       'export { ProviderModelPicker } from "./src/components/chat/ProviderModelPicker";',
     ].join("\n"),
@@ -56,24 +56,24 @@ test("the provider catalog is the bridge's declared interfaces, read without boo
   const { readRuntimeProviderInterfaces, refreshProviderModels } = await compiled;
   const calls = [];
   const declared = { repoRoot: "/repo", providers: [providerFixture("provider.a", [model("model-a")])] };
-  w.octopusTransport = { providerInterfaces: async () => { calls.push("providerInterfaces"); return declared; }, bootStatus: async () => { calls.push("bootStatus"); return {}; } };
+  w.phobosTransport = { providerInterfaces: async () => { calls.push("providerInterfaces"); return declared; }, bootStatus: async () => { calls.push("bootStatus"); return {}; } };
   assert.equal(await readRuntimeProviderInterfaces(), declared);
   assert.deepEqual(calls, ["providerInterfaces"]);
-  w.octopusTransport = {};
+  w.phobosTransport = {};
   assert.deepEqual(await readRuntimeProviderInterfaces(), { repoRoot: null, providers: [], error: "no projection reader is available" });
   const request = { providerInterfaceId: "provider.a" };
   const refreshed = { providerInterfaceId: "provider.a", models: [model("model-b")] };
-  w.octopusTransport = { refreshProviderModels: async (received) => { calls.push(received); return refreshed; } };
+  w.phobosTransport = { refreshProviderModels: async (received) => { calls.push(received); return refreshed; } };
   assert.equal(await refreshProviderModels(request), refreshed);
   assert.deepEqual(calls.at(-1), request);
-  w.octopusTransport = {};
+  w.phobosTransport = {};
   await assert.rejects(refreshProviderModels(request), /only in the live desktop client/);
 });
 
 test("a disabled surface holds no provider catalog and reads none", async () => {
   const { useChatCapabilityCatalog } = await compiled;
   let catalogReads = 0;
-  w.octopusTransport = {
+  w.phobosTransport = {
     onProjectionChanged: () => () => {},
     projectionRead: async () => ({}),
     providerInterfaces: async () => { catalogReads += 1; return { repoRoot: "/repo", providers: [providerFixture("provider.a", [model("model-a")])] }; },
@@ -93,14 +93,14 @@ test("a disabled surface holds no provider catalog and reads none", async () => 
 });
 
 test("ongoing run changes do not starve Home discovery and another Home rejects the old read", async () => {
-  const { useOctopusOsProjects } = await compiled;
+  const { usePhobosOsProjects } = await compiled;
   const reads = [];
   let changed, current;
-  w.octopusTransport = {
+  w.phobosTransport = {
     onProjectionChanged: listener => { changed = listener; return () => { changed = null; }; },
     projectionRead: () => new Promise(resolve => reads.push(resolve)),
   };
-  function Harness({ home }) { current = useOctopusOsProjects("lab", home); return null; }
+  function Harness({ home }) { current = usePhobosOsProjects("lab", home); return null; }
   root.render(React.createElement(Harness, { home: "/first" }));
   await until(() => reads.length === 1 && changed, "the first scope read did not start");
   for (let generation = 101; generation < 104; generation++) {
@@ -120,10 +120,10 @@ test("ongoing run changes do not starve Home discovery and another Home rejects 
 });
 
 test("unchanged project discovery preserves an in-flight capability read during run activity", async () => {
-  const { useOctopusOsProjects, useChatCapabilityCatalog } = await compiled;
+  const { usePhobosOsProjects, useChatCapabilityCatalog } = await compiled;
   const contextReads = [];
   let changed, projects, catalog, scopeReads = 0, projectName = "Project";
-  w.octopusTransport = {
+  w.phobosTransport = {
     onProjectionChanged: listener => { changed = listener; return () => { changed = null; }; },
     providerInterfaces: async () => ({ providers: [providerFixture("provider.a", [model("model-a")])] }),
     projectionRead: async ({ method }) => {
@@ -138,7 +138,7 @@ test("unchanged project discovery preserves an in-flight capability read during 
     },
   };
   function Harness() {
-    projects = useOctopusOsProjects("live", "/catalog-discovery");
+    projects = usePhobosOsProjects("live", "/catalog-discovery");
     catalog = useChatCapabilityCatalog("live", true, true, "/catalog-discovery");
     return null;
   }

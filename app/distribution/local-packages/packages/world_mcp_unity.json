@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_mcp_unity",
   "version": "1.0.2",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Unity MCP",
     "description": "Work in your open Unity project through the MCP for Unity server on this Mac: inspect and change scenes, assets, scripts and builds.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "plugin",
     "icon": "code"
   },

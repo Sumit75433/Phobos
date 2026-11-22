@@ -1402,7 +1402,7 @@
   overflow: hidden;
 }
 
-.we-terminal-session [data-octopus-terminal] > div {
+.we-terminal-session [data-phobos-terminal] > div {
   padding: 6px 0 12px 16px;
 }
 
@@ -1860,7 +1860,7 @@
   margin: 0 8px;
 }
 
-.we-review-octopus-tree {
+.we-review-phobos-tree {
   min-height: 0;
   flex: 1;
 }

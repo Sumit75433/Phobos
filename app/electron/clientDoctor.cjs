@@ -90,8 +90,8 @@ async function runClientDoctor(options) {
 }
 
 async function diagnoseZeroLedgerGhostRuns(roots) {
-  const octopusHome = path.dirname(roots.activeRegistryRoot);
-  const host = await readJsonIfPresent(path.join(octopusHome, "host.json"));
+  const phobosHome = path.dirname(roots.activeRegistryRoot);
+  const host = await readJsonIfPresent(path.join(phobosHome, "host.json"));
   if (!host) return { checks: 0, findings: [] };
   const runsRoot = host.host_manifest_version === 1 && typeof host.root_refs?.run_records_root === "string"
     ? host.root_refs.run_records_root
@@ -119,7 +119,7 @@ async function diagnoseZeroLedgerGhostRuns(roots) {
     }
   }
   if (running.length === 0) return { checks, findings: [] };
-  const ledgerPath = path.join(octopusHome, "ledger", "movements.jsonl");
+  const ledgerPath = path.join(phobosHome, "ledger", "movements.jsonl");
   let ledger;
   try {
     ledger = await fs.readFile(ledgerPath, "utf8");
@@ -178,11 +178,11 @@ async function collectBoundContextArtifacts(roots) {
     }
   }
 
-  const octopusHome = path.dirname(roots.activeRegistryRoot);
-  const host = await readJsonIfPresent(path.join(octopusHome, "host.json"));
+  const phobosHome = path.dirname(roots.activeRegistryRoot);
+  const host = await readJsonIfPresent(path.join(phobosHome, "host.json"));
   const runsRoot = typeof host?.root_refs?.run_records_root === "string" && path.isAbsolute(host.root_refs.run_records_root)
     ? host.root_refs.run_records_root
-    : path.join(octopusHome, "state", "runs");
+    : path.join(phobosHome, "state", "runs");
   for (const entry of await directoryEntries(runsRoot)) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
     const run = await readJsonIfPresent(path.join(runsRoot, entry.name));

@@ -249,7 +249,7 @@ export type ChatTaskMessageSearchPage = {
   nextBeforeSeq: number;
   indexWatermark: number;
   scope: {
-    kind: "octopus_os_task_transcripts";
+    kind: "phobos_os_task_transcripts";
     taskCount: number;
     runCount: number;
     messageClasses: string[];
@@ -853,7 +853,7 @@ export async function searchChatTaskMessages(
       nextBeforeSeq: -1,
       indexWatermark: -1,
       scope: {
-        kind: "octopus_os_task_transcripts",
+        kind: "phobos_os_task_transcripts",
         taskCount: normalizedTaskRunIds.length,
         runCount: normalizedTaskRunIds.length,
         messageClasses: ["operator", "terminal_agent", "terminal_error"],
@@ -899,7 +899,7 @@ export async function searchChatTaskMessages(
     nextBeforeSeq: asNumber(response.next_before_seq ?? -1),
     indexWatermark: asNumber(response.index_watermark ?? -1),
     scope: {
-      kind: "octopus_os_task_transcripts",
+      kind: "phobos_os_task_transcripts",
       taskCount: asNumber(rawScope.task_count ?? normalizedTaskRunIds.length),
       runCount: asNumber(rawScope.run_count ?? normalizedTaskRunIds.length),
       messageClasses: asStringArray(rawScope.message_classes),

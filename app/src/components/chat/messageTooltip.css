@@ -27,7 +27,7 @@
   background: var(--color-surface-elevated-secondary);
   padding: 5px 12px;
   color: var(--color-text);
-  corner-shape: var(--octopus-corner-shape, round);
+  corner-shape: var(--phobos-corner-shape, round);
   box-shadow: 0 8px 18px #0f172a33;
   font-size: var(--text-sm);
   font-weight: var(--font-ui-weight);

@@ -1,0 +1,52 @@
+[package]
+name = "phobos-code-mode-room"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+
+phobos-code-mode-engine = { path = "../phobos-code-mode-engine" }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-run-record = { path = "../../../../../crates/phobos-run-record" }
+libc = "0.2.182"
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+
+phobos-run-authoring = { path = "../../../../interface/system_interface_authoring/packages/phobos-run-authoring" }
+phobos-app-server-interface = { path = "../../../../interface/world_operator_chat/packages/phobos-app-server-interface" }
+
+
+[dev-dependencies]
+phobos-runtime = { path = "../../../../../crates/phobos-runtime" }
+phobos-app-server = { path = "../../../../../crates/phobos-app-server", features = ["owner-contract-tests"] }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-file-storage = { path = "../../../../../crates/phobos-file-storage" }
+phobos-file-write-contract = { path = "../../../system_room/packages/phobos-file-write-contract" }
+phobos-interface-activation-app-server-transport = { path = "../../../../interface/world_operator_chat/packages/phobos-interface-activation-app-server-transport" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+futures = { version = "0.3", default-features = false }
+tokio-tungstenite = "0.28.0"
+sha2 = "0.10"
+phobos-marks = { path = "../../../../../crates/phobos-marks" }
+phobos-verifiers = { path = "../../../../../crates/phobos-verifiers" }
+phobos-system-gui-env = { path = "../../../desktop_session/packages/phobos-system-gui-env" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime", features = ["owner-contract-tests"] }
+blake3.workspace = true
+tempfile = "3"
+
+phobos-policy = { path = "../../../../../crates/phobos-policy" }
+fs2 = "0.4"
+json-patch.workspace = true

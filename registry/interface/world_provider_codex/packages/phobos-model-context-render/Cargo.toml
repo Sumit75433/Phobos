@@ -1,0 +1,21 @@
+[package]
+name = "phobos-model-context-render"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "phobos_model_context_render"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-marks = { path = "../../../../../crates/phobos-marks" }
+
+[dev-dependencies]
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }

@@ -6,7 +6,7 @@ departs as one. Inputs, outputs, memory, tool calls, tool results, evidence  -
 all artifacts. They are not a sub-category of "run data". They are the
 primitive.
 
-When artifacts stop moving, nothing meaningful has happened in Octopus. Hidden
+When artifacts stop moving, nothing meaningful has happened in Phobos. Hidden
 process state, handler-local memory, or provider fields that never appear as a
 movement are not replayable architecture.
 
@@ -40,7 +40,7 @@ special path beside artifact movement.
 ## Payload, manifest, and delivery metadata
 
 The useful network analogy is **payload plus delivery context**. A packet has
-content and information about its delivery. Octopus separates these concerns
+content and information about its delivery. Phobos separates these concerns
 too, but its payload can stay in storage while a reference crosses the boundary.
 
 | Part | Example | Who supplies it |

@@ -13,7 +13,7 @@
         "2025-11-25",
         "2025-06-18"
       ],
-      "client_name": "octopus-mcp-client",
+      "client_name": "phobos-mcp-client",
       "client_version": "1",
       "operation_catalog_dir": "operations",
       "operation_catalog_label": "mcp.operation_catalog",
@@ -27,7 +27,7 @@
       "reconnect_backoff_ms": 2000,
       "auth": {
         "mode": "chatgpt_account",
-        "auth_file_env": "OCTOPUS_MACHINE_CODEX_AUTH_FILE",
+        "auth_file_env": "PHOBOS_MACHINE_CODEX_AUTH_FILE",
         "account_header": "ChatGPT-Account-ID"
       },
       "tool_filter": {
@@ -48,7 +48,7 @@
       },
       "client_connection": {
         "schema_version": 1,
-        "module": "interface://world_mcp_example/packages/octopus-mcp-client/chatgpt_apps.cjs"
+        "module": "interface://world_mcp_example/packages/phobos-mcp-client/chatgpt_apps.cjs"
       },
       "server_tool_operations": {
         "prefix": "github"

@@ -1,23 +1,23 @@
-import type { OctopusChatgptAccount, OctopusChatgptUsage } from "../electron";
+import type { PhobosChatgptAccount, PhobosChatgptUsage } from "../electron";
 
-export type ChatgptUsageState = { identity: string | null; value: OctopusChatgptUsage | null; loading: boolean; error: string };
+export type ChatgptUsageState = { identity: string | null; value: PhobosChatgptUsage | null; loading: boolean; error: string };
 export const EMPTY_CHATGPT_USAGE_STATE: ChatgptUsageState = { identity: null, value: null, loading: false, error: "" };
 
-export function accountUsageIdentity(account: OctopusChatgptAccount | null): string | null {
+export function accountUsageIdentity(account: PhobosChatgptAccount | null): string | null {
   return account?.signedIn ? JSON.stringify([account.credentialHome, account.email, account.workspaceName ?? null, account.planType]) : null;
 }
 
-export function createChatgptUsageState(bridge: Pick<NonNullable<Window["octopusTransport"]>, "chatgptRateLimits">) {
+export function createChatgptUsageState(bridge: Pick<NonNullable<Window["phobosTransport"]>, "chatgptRateLimits">) {
   let state = EMPTY_CHATGPT_USAGE_STATE;
-  let account: OctopusChatgptAccount | null = null;
+  let account: PhobosChatgptAccount | null = null;
   let generation = 0;
-  let pending: Promise<OctopusChatgptUsage | null> | null = null;
+  let pending: Promise<PhobosChatgptUsage | null> | null = null;
   const listeners = new Set<() => void>();
   function update(patch: Partial<ChatgptUsageState>) {
     state = { ...state, ...patch };
     for (const listener of listeners) listener();
   }
-  function refresh(): Promise<OctopusChatgptUsage | null> {
+  function refresh(): Promise<PhobosChatgptUsage | null> {
     if (state.identity === null) return Promise.resolve(null);
     if (pending) return pending;
     const currentGeneration = ++generation;
@@ -38,7 +38,7 @@ export function createChatgptUsageState(bridge: Pick<NonNullable<Window["octopus
     getSnapshot: () => state,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     refresh,
-    observe(nextAccount: OctopusChatgptAccount | null) {
+    observe(nextAccount: PhobosChatgptAccount | null) {
       const identity = accountUsageIdentity(nextAccount);
       if (identity === null || identity !== state.identity) {
         generation += 1;

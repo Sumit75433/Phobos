@@ -4,7 +4,7 @@
   "name": "Unity MCP",
   "description": "Work in your open Unity project through the MCP for Unity server on this Mac.",
   "category": "plugin",
-  "developer": "Octopus",
+  "developer": "Phobos",
   "version": "1.0.2",
   "icon": "code",
   "logo": "application-logo.svg",
@@ -33,7 +33,7 @@
   "connection": {
     "disclosure": [
       "Tasks you connect can inspect and change the scenes, assets, scripts, packages and builds of the Unity project connected to MCP for Unity.",
-      "Octopus talks to the MCP for Unity server at 127.0.0.1:8080 on this Mac and keeps no sign-in for it.",
+      "Phobos talks to the MCP for Unity server at 127.0.0.1:8080 on this Mac and keeps no sign-in for it.",
       "Open your project in Unity with MCP for Unity set to HTTP Local: it starts that server and connects the Editor. Window \u203a MCP for Unity shows both."
     ],
     "help": {

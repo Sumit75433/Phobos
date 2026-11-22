@@ -4,7 +4,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
-const { createProjectionStore, mutateOctopusOsWorkspace } = require("../electron/projection.cjs");
+const { createProjectionStore, mutatePhobosOsWorkspace } = require("../electron/projection.cjs");
 const workspaceSetup = require("../electron/workspaceSetup.cjs");
 const projectionAuthoring = require("../electron/clientWorkspaceAuthoring.cjs");
 const { publishFiles } = require("../../registry/interface/world_operator_chat/publication.cjs");
@@ -15,7 +15,7 @@ const readWorkspaceSetupState = options => workspaceSetup.readWorkspaceSetupStat
 const recoverWorkspaceTransactions = options => workspaceSetup.recoverWorkspaceTransactions(withFixturePublisher(options));
 const commitClientAuthoringTransaction = options => workspaceSetup.commitClientAuthoringTransaction(withFixturePublisher(options));
 const commitProjectionClientAuthoring = (home, registry, request, options = {}) =>
-  projectionAuthoring.commitProjectionClientAuthoring(home, registry, request, withFixturePublisher({ octopusHomeRoot: home, ...options }));
+  projectionAuthoring.commitProjectionClientAuthoring(home, registry, request, withFixturePublisher({ phobosHomeRoot: home, ...options }));
 
 function fixtureCanonical(value) {
   if (Array.isArray(value)) return `[${value.map(fixtureCanonical).join(",")}]`;
@@ -42,7 +42,7 @@ function fixtureRetirementBarrier(publication) {
 }
 
 function retirementFixtureOptions(home, publication = fixtureDirectoryPublisher(home)) {
-  return { octopusHomeRoot: home, registryRoot: path.join(home, "registry"),
+  return { phobosHomeRoot: home, registryRoot: path.join(home, "registry"),
     publishFiles: fixtureFilePublisher(home), retirementBarrier: fixtureRetirementBarrier(publication),
     publication: Object.fromEntries(["snapshotDirectory", "publishDirectoryMoves", "reclaimDirectory"].map(method =>
       [method, () => assert.fail(`retirement escaped its held child through ${method}`)])) };
@@ -60,9 +60,9 @@ async function verifyDirectoryPublicationRecovery(temporary) {
     for (const directory of directories) { await fs.mkdir(directory, { recursive: true }); await fs.writeFile(path.join(directory, "owned.json"), "{}\n"); }
     await fs.writeFile(path.join(registry, "tool/owned/tool.json"), JSON.stringify({ id: "owned", interface: "provider" }));
     await fs.writeFile(path.join(registry, "artifact/owned/artifact.json"), JSON.stringify({ id: "owned", run: "task", owner_interface: "provider" }));
-    await fs.writeFile(path.join(provider, "octopus_os.json"), JSON.stringify({ schema_version: 1, workspace: "octopus_os", interface: "provider", owner_interface: "client" }));
+    await fs.writeFile(path.join(provider, "phobos_os.json"), JSON.stringify({ schema_version: 1, workspace: "phobos_os", interface: "provider", owner_interface: "client" }));
     await fs.writeFile(path.join(provider, "code_mode.json"), JSON.stringify({ context: { mode: "persistent" } }));
-    await fs.mkdir(path.join(provider, ".octopus-publication"), { mode: 0o700 });
+    await fs.mkdir(path.join(provider, ".phobos-publication"), { mode: 0o700 });
     const operationId = `directory_${fault}_12345678`, publication = fixtureDirectoryPublisher(home), events = [];
     const interrupted = { ...publication,
       async publishDirectoryMoves(id, moves) {
@@ -140,7 +140,7 @@ async function verifyDirectoryPublicationRecovery(temporary) {
 }
 
 async function main() {
-  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-workspace-test-"));
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-workspace-test-"));
   try {
     await verifyPublicationRecovery(temporary);
     await verifyConditionedPublicationRecovery(await fs.realpath(temporary));
@@ -156,7 +156,7 @@ async function main() {
     const fixtureHomeRoot = path.join(temporary, "home");
     const fixtureRegistryRoot = path.join(fixtureHomeRoot, "registry");
     await createFixture(fixtureHomeRoot, fixtureRegistryRoot);
-    const octopusHomeRoot = await fs.realpath(fixtureHomeRoot);
+    const phobosHomeRoot = await fs.realpath(fixtureHomeRoot);
     const registryRoot = await fs.realpath(fixtureRegistryRoot);
     const refusedHomeRoot = path.join(temporary, "refused-home");
     const refusedRegistryRoot = path.join(refusedHomeRoot, "registry");
@@ -167,7 +167,7 @@ async function main() {
     const refusedProjectId = deterministicId("ee_project", refusedRequest.operationId, "product");
     await assert.rejects(
       initializeWorkspace({
-        octopusHomeRoot: refusedHome,
+        phobosHomeRoot: refusedHome,
         registryRoot: refusedRegistry,
         request: refusedRequest,
         planOperatorSurface: (input) => {
@@ -182,10 +182,10 @@ async function main() {
     assert.deepEqual(await fs.readdir(path.join(refusedHome, "state", "ee_instances")), ["ee_existence.json"]);
     assert.deepEqual(await fs.readdir(path.join(refusedHome, "state", "runs")), []);
     assert.deepEqual(await fs.readdir(path.join(refusedRegistry, "interface")), []);
-    assert.equal((await readWorkspaceSetupState({ octopusHomeRoot: refusedHome, registryRoot: refusedRegistry })).status, "not_configured");
+    assert.equal((await readWorkspaceSetupState({ phobosHomeRoot: refusedHome, registryRoot: refusedRegistry })).status, "not_configured");
     const undeclaredTaskRequest = { ...refusedRequest }; delete undeclaredTaskRequest.task;
     await assert.rejects(initializeWorkspace({
-      octopusHomeRoot: refusedHome, registryRoot: refusedRegistry, request: undeclaredTaskRequest,
+      phobosHomeRoot: refusedHome, registryRoot: refusedRegistry, request: undeclaredTaskRequest,
       planOperatorSurface: () => { throw new Error("missing Task source must refuse before planning"); },
     }), /Workspace setup request.*task/);
     assert.deepEqual(await fs.readdir(path.join(refusedHome, "state", "ee_instances")), ["ee_existence.json"]);
@@ -196,12 +196,12 @@ async function main() {
         role: input.request.clientSurfaceRole,
         eeId: input.request.eeId,
       });
-      return fixturePlan(octopusHomeRoot, registryRoot, input);
+      return fixturePlan(phobosHomeRoot, registryRoot, input);
     };
     const request = setupRequest("workspace_setup_12345678");
     const progress = [];
     const first = await initializeWorkspace({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       request,
       planOperatorSurface,
@@ -218,7 +218,7 @@ async function main() {
       first.projects.map((project) => project.eeId).sort(),
     );
     assert.deepEqual(
-      await fs.readdir(path.join(octopusHomeRoot, "state", "runs")),
+      await fs.readdir(path.join(phobosHomeRoot, "state", "runs")),
       [`${first.homeRunId}.json`],
     );
     assert.equal(
@@ -226,7 +226,7 @@ async function main() {
       false,
     );
     assert.equal(progress.at(-1).phase, "complete");
-    const homeSidecarPath = path.join(registryRoot, "interface", first.homeInterfaceId, "octopus_os.json");
+    const homeSidecarPath = path.join(registryRoot, "interface", first.homeInterfaceId, "phobos_os.json");
     const sidecar = JSON.parse(await fs.readFile(homeSidecarPath, "utf8"));
     assert.equal(sidecar.presentation.name, "Founder");
     assert.equal(sidecar.presentation.projects.length, 3);
@@ -236,10 +236,10 @@ async function main() {
     assert.notEqual(rootTaskProfile.worker_choice_interface, sidecar.authoring_profile.worker_choice_interface);
     assert.deepEqual(rootTaskProfile.context_artifact_bindings, request.task.contextArtifactBindings);
     assert.ok(sidecar.task_authoring_profiles.every((profile) => profile.worker_choice_interface === request.task.workerInterfaceId));
-    const state = await readWorkspaceSetupState({ octopusHomeRoot, registryRoot });
+    const state = await readWorkspaceSetupState({ phobosHomeRoot, registryRoot });
     assert.equal(state.status, "configured");
     assert.equal(state.receipt.root_ee_id, first.rootEeId);
-    const second = await initializeWorkspace({ octopusHomeRoot, registryRoot, request, planOperatorSurface });
+    const second = await initializeWorkspace({ phobosHomeRoot, registryRoot, request, planOperatorSurface });
     assert.equal(second.changed, false);
     assert.equal(second.receiptDigest, first.receiptDigest);
     assert.equal(plannerCalls.length, 5);
@@ -249,41 +249,41 @@ async function main() {
     rootTaskProfile.payload_artifact_bindings = [{ id: "attachment:project-context", content: Array(32).fill(7) }];
     rootTaskProfile.external_relays = [{ checkpoint_id: "task_exact_return", interface_id: "system_return_task_exact", outbound_interface_ids: ["world_operator_chat_exact_recipient"] }];
     await fs.writeFile(homeSidecarPath, `${JSON.stringify(sidecar, null, 2)}\n`);
-    const configuredRootPath = path.join(octopusHomeRoot, "state", "ee_instances", `${first.rootEeId}.json`);
+    const configuredRootPath = path.join(phobosHomeRoot, "state", "ee_instances", `${first.rootEeId}.json`);
     const configuredRoot = JSON.parse(await fs.readFile(configuredRootPath, "utf8"));
-    configuredRoot.config = { octopus_os: { application_defaults: ["world_provider_codex"], driver_defaults: ["git_worktree"] } };
+    configuredRoot.config = { phobos_os: { application_defaults: ["world_provider_codex"], driver_defaults: ["git_worktree"] } };
     configuredRoot.policy_narrowing = { allowed_worker_environment_kinds: ["git_worktree"] };
     await fs.writeFile(configuredRootPath, `${JSON.stringify(configuredRoot, null, 2)}\n`);
-    let projectScope = await fixtureProjectScope(octopusHomeRoot, registryRoot, first);
+    let projectScope = await fixtureProjectScope(phobosHomeRoot, registryRoot, first);
     await fs.writeFile(homeSidecarPath, `${JSON.stringify({ ...sidecar,
       task_authoring_profiles: sidecar.task_authoring_profiles.filter((profile) => profile.ee_id !== first.rootEeId),
     }, null, 2)}\n`);
-    const missingSourceScope = await fixtureProjectScope(octopusHomeRoot, registryRoot, first);
+    const missingSourceScope = await fixtureProjectScope(phobosHomeRoot, registryRoot, first);
     const missingSourceBytes = await fs.readFile(homeSidecarPath, "utf8");
-    const missingSourceEes = (await fs.readdir(path.join(octopusHomeRoot, "state", "ee_instances"))).sort();
+    const missingSourceEes = (await fs.readdir(path.join(phobosHomeRoot, "state", "ee_instances"))).sort();
     await assert.rejects(mutateWorkspaceProject({
-      octopusHomeRoot, registryRoot, scope: missingSourceScope,
+      phobosHomeRoot, registryRoot, scope: missingSourceScope,
       planOperatorSurface: () => { throw new Error("missing Task source must not fall back to Home"); },
       request: { action: "create_project", operationId: "project_missing_source_12345678",
         workspace: fixtureWorkspaceIdentity(missingSourceScope), parentEeId: first.rootEeId,
         expectedParentDigest: missingSourceScope.environments.find((environment) => environment.eeId === first.rootEeId).recordDigest,
         templateName: "project", name: "Missing source", goal: "Missing source", presentation: { icon: "circle", color: "gray" } },
     }), /exact Agent source profiles/);
-    assert.deepEqual((await fs.readdir(path.join(octopusHomeRoot, "state", "ee_instances"))).sort(), missingSourceEes);
+    assert.deepEqual((await fs.readdir(path.join(phobosHomeRoot, "state", "ee_instances"))).sort(), missingSourceEes);
     assert.equal(await fs.readFile(homeSidecarPath, "utf8"), missingSourceBytes);
     await fs.writeFile(homeSidecarPath, `${JSON.stringify(sidecar, null, 2)}\n`);
     await fs.writeFile(homeSidecarPath, `${JSON.stringify({ ...sidecar, voice_context: { ...voiceContext, provider_id: "../escape" } }, null, 2)}\n`);
-    const invalidVoiceScope = await fixtureProjectScope(octopusHomeRoot, registryRoot, first);
+    const invalidVoiceScope = await fixtureProjectScope(phobosHomeRoot, registryRoot, first);
     await assert.rejects(mutateWorkspaceProject({
-      octopusHomeRoot, registryRoot, scope: invalidVoiceScope,
+      phobosHomeRoot, registryRoot, scope: invalidVoiceScope,
       request: { action: "update_project_presentation", operationId: "invalid_voice_12345678", workspace: fixtureWorkspaceIdentity(invalidVoiceScope), projects: sidecar.presentation.projects.map(({ ee_id, icon, color }) => ({ eeId: ee_id, icon, color })) },
     }), /Home voice context must declare exact/);
     await fs.writeFile(homeSidecarPath, `${JSON.stringify(sidecar, null, 2)}\n`);
-    const preflightEes = (await fs.readdir(path.join(octopusHomeRoot, "state", "ee_instances"))).sort();
-    const preflightSidecar = await fs.readFile(path.join(registryRoot, "interface", first.homeInterfaceId, "octopus_os.json"), "utf8");
+    const preflightEes = (await fs.readdir(path.join(phobosHomeRoot, "state", "ee_instances"))).sort();
+    const preflightSidecar = await fs.readFile(path.join(registryRoot, "interface", first.homeInterfaceId, "phobos_os.json"), "utf8");
     await assert.rejects(
       mutateWorkspaceProject({
-        octopusHomeRoot,
+        phobosHomeRoot,
         registryRoot,
         scope: projectScope,
         planOperatorSurface: async () => {
@@ -303,13 +303,13 @@ async function main() {
       }),
       /formed policy refuses the authored worker/,
     );
-    assert.deepEqual((await fs.readdir(path.join(octopusHomeRoot, "state", "ee_instances"))).sort(), preflightEes);
+    assert.deepEqual((await fs.readdir(path.join(phobosHomeRoot, "state", "ee_instances"))).sort(), preflightEes);
     assert.equal(
-      await fs.readFile(path.join(registryRoot, "interface", first.homeInterfaceId, "octopus_os.json"), "utf8"),
+      await fs.readFile(path.join(registryRoot, "interface", first.homeInterfaceId, "phobos_os.json"), "utf8"),
       preflightSidecar,
     );
     const createdProject = await mutateWorkspaceProject({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       scope: projectScope,
       planOperatorSurface,
@@ -327,11 +327,11 @@ async function main() {
     });
     assert.equal(createdProject.changed, true);
     assert.equal(createdProject.parentEeId, first.rootEeId);
-    const createdRecord = JSON.parse(await fs.readFile(path.join(octopusHomeRoot, "state", "ee_instances", `${createdProject.eeId}.json`), "utf8"));
+    const createdRecord = JSON.parse(await fs.readFile(path.join(phobosHomeRoot, "state", "ee_instances", `${createdProject.eeId}.json`), "utf8"));
     assert.equal(createdRecord.template_name, "project");
     assert.equal(createdRecord.name, "Research");
     assert.deepEqual(createdRecord.config, { ...configuredRoot.config,
-      octopus_os: { ...configuredRoot.config.octopus_os, source_folders: [] } });
+      phobos_os: { ...configuredRoot.config.phobos_os, source_folders: [] } });
     assert.equal(createdRecord.policy_narrowing, undefined);
     let updatedSidecar = JSON.parse(await fs.readFile(homeSidecarPath, "utf8"));
     assert.deepEqual(updatedSidecar.voice_context, voiceContext);
@@ -341,7 +341,7 @@ async function main() {
     assert.deepEqual(updatedSidecar.task_authoring_profiles.at(-1).payload_artifact_bindings, rootTaskProfile.payload_artifact_bindings);
     assert.deepEqual(updatedSidecar.task_authoring_profiles.at(-1).external_relays, rootTaskProfile.external_relays);
     const repeatedCreate = await mutateWorkspaceProject({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       scope: projectScope,
       request: {
@@ -360,7 +360,7 @@ async function main() {
     assert.equal(repeatedCreate.eeId, createdProject.eeId);
     delete updatedSidecar.presentation.name;
     await fs.writeFile(homeSidecarPath, `${JSON.stringify(updatedSidecar, null, 2)}\n`);
-    projectScope = await fixtureProjectScope(octopusHomeRoot, registryRoot, first);
+    projectScope = await fixtureProjectScope(phobosHomeRoot, registryRoot, first);
     const presentations = updatedSidecar.presentation.projects.map((row) => ({
       eeId: row.ee_id,
       expectedProjectDigest: projectScope.environments.find((environment) => environment.eeId === row.ee_id).recordDigest,
@@ -369,7 +369,7 @@ async function main() {
       color: row.color,
     })).reverse();
     const receiptPath = path.join(
-      octopusHomeRoot,
+      phobosHomeRoot,
       "client-state",
       "workspace",
       "topology-receipts",
@@ -386,7 +386,7 @@ async function main() {
     };
     try {
       const recoveredPresentation = await mutateWorkspaceProject({
-        octopusHomeRoot,
+        phobosHomeRoot,
         registryRoot,
         scope: projectScope,
         request: {
@@ -407,19 +407,19 @@ async function main() {
     assert.deepEqual(updatedSidecar.voice_context, voiceContext);
     assert.deepEqual(updatedSidecar.presentation.projects.map((row) => row.ee_id), presentations.map((row) => row.eeId));
     assert.equal(updatedSidecar.presentation.projects.find((row) => row.ee_id === createdProject.eeId).name, "Research Lab");
-    const renamedRecord = JSON.parse(await fs.readFile(path.join(octopusHomeRoot, "state", "ee_instances", `${createdProject.eeId}.json`), "utf8"));
+    const renamedRecord = JSON.parse(await fs.readFile(path.join(phobosHomeRoot, "state", "ee_instances", `${createdProject.eeId}.json`), "utf8"));
     assert.equal(renamedRecord.name, "Research Lab");
     assert.equal(renamedRecord.goal, createdRecord.goal);
-    projectScope = await fixtureProjectScope(octopusHomeRoot, registryRoot, first);
+    projectScope = await fixtureProjectScope(phobosHomeRoot, registryRoot, first);
     const projectDigest = projectScope.environments.find((environment) => environment.eeId === createdProject.eeId).recordDigest;
-    const lateRunPath = path.join(octopusHomeRoot, "state", "runs", "run_project_delete_guard.json");
+    const lateRunPath = path.join(phobosHomeRoot, "state", "runs", "run_project_delete_guard.json");
     await fs.writeFile(lateRunPath, `${JSON.stringify({
       id: "run_project_delete_guard",
       ee: createdProject.eeId,
     }, null, 2)}\n`);
     await assert.rejects(
       mutateWorkspaceProject({
-        octopusHomeRoot,
+        phobosHomeRoot,
         registryRoot,
         scope: projectScope,
         request: {
@@ -434,7 +434,7 @@ async function main() {
     );
     await fs.unlink(lateRunPath);
     const deletedProject = await mutateWorkspaceProject({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       scope: projectScope,
       request: {
@@ -446,13 +446,13 @@ async function main() {
       },
     });
     assert.equal(deletedProject.changed, true);
-    await assert.rejects(fs.readFile(path.join(octopusHomeRoot, "state", "ee_instances", `${createdProject.eeId}.json`)), /ENOENT/);
-    updatedSidecar = JSON.parse(await fs.readFile(path.join(registryRoot, "interface", first.homeInterfaceId, "octopus_os.json"), "utf8"));
+    await assert.rejects(fs.readFile(path.join(phobosHomeRoot, "state", "ee_instances", `${createdProject.eeId}.json`)), /ENOENT/);
+    updatedSidecar = JSON.parse(await fs.readFile(path.join(registryRoot, "interface", first.homeInterfaceId, "phobos_os.json"), "utf8"));
     assert.equal(updatedSidecar.presentation.projects.some((row) => row.ee_id === createdProject.eeId), false);
     assert.equal(updatedSidecar.task_authoring_profiles.some((row) => row.ee_id === createdProject.eeId), false);
     assert.deepEqual(updatedSidecar.voice_context, voiceContext);
     const repeatedDelete = await mutateWorkspaceProject({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       scope: projectScope,
       request: {
@@ -465,15 +465,15 @@ async function main() {
     });
     assert.equal(repeatedDelete.changed, false);
     const externalEeId = "ee_created_outside_client";
-    const externalEePath = path.join(octopusHomeRoot, "state", "ee_instances", `${externalEeId}.json`);
-    const rootRecord = JSON.parse(await fs.readFile(path.join(octopusHomeRoot, "state", "ee_instances", `${first.rootEeId}.json`), "utf8"));
+    const externalEePath = path.join(phobosHomeRoot, "state", "ee_instances", `${externalEeId}.json`);
+    const rootRecord = JSON.parse(await fs.readFile(path.join(phobosHomeRoot, "state", "ee_instances", `${first.rootEeId}.json`), "utf8"));
     await fs.writeFile(externalEePath, JSON.stringify({ ...rootRecord, ee_id: externalEeId, parent_ee_id: first.rootEeId, template_name: "project", goal: "Model-created goal" }));
     const retainedSidecar = await fs.readFile(homeSidecarPath, "utf8");
-    const agentCatalogFile = path.join(octopusHomeRoot, "client", "agents", "catalog.json");
+    const agentCatalogFile = path.join(phobosHomeRoot, "client", "agents", "catalog.json");
     const retainedCatalog = await fs.readFile(agentCatalogFile, "utf8");
-    projectScope = await fixtureProjectScope(octopusHomeRoot, registryRoot, first);
+    projectScope = await fixtureProjectScope(phobosHomeRoot, registryRoot, first);
     const externalDeleted = await mutateWorkspaceProject({
-      octopusHomeRoot, registryRoot, scope: projectScope,
+      phobosHomeRoot, registryRoot, scope: projectScope,
       request: { action: "delete_project", operationId: "external_delete_12345678", workspace: fixtureWorkspaceIdentity(projectScope),
         eeId: externalEeId, expectedProjectDigest: projectScope.environments.find((ee) => ee.eeId === externalEeId).recordDigest },
     });
@@ -481,10 +481,10 @@ async function main() {
     await assert.rejects(fs.access(externalEePath), { code: "ENOENT" });
     assert.equal(await fs.readFile(homeSidecarPath, "utf8"), retainedSidecar);
     assert.equal(await fs.readFile(agentCatalogFile, "utf8"), retainedCatalog);
-    assert.equal((await readWorkspaceSetupState({ octopusHomeRoot, registryRoot })).status, "configured");
+    assert.equal((await readWorkspaceSetupState({ phobosHomeRoot, registryRoot })).status, "configured");
     await assert.rejects(
       initializeWorkspace({
-        octopusHomeRoot,
+        phobosHomeRoot,
         registryRoot,
         request: setupRequest("workspace_second_12345678"),
         planOperatorSurface,
@@ -497,7 +497,7 @@ async function main() {
     await fs.writeFile(symlinkTarget, homeDescriptor);
     await fs.unlink(homeDescriptorPath);
     await fs.symlink(symlinkTarget, homeDescriptorPath);
-    const symlinkState = await readWorkspaceSetupState({ octopusHomeRoot, registryRoot });
+    const symlinkState = await readWorkspaceSetupState({ phobosHomeRoot, registryRoot });
     assert.equal(symlinkState.status, "degraded");
     assert.match(symlinkState.errors.join("\n"), /ELOOP|symbolic link/i);
     await fs.unlink(homeDescriptorPath);
@@ -509,7 +509,7 @@ async function main() {
     const progressFailureHomeRoot = await fs.realpath(progressFailureHome);
     const progressFailureRegistryRoot = await fs.realpath(progressFailureRegistry);
     const progressFailure = await initializeWorkspace({
-      octopusHomeRoot: progressFailureHomeRoot,
+      phobosHomeRoot: progressFailureHomeRoot,
       registryRoot: progressFailureRegistryRoot,
       request: setupRequest("workspace_progress_12345678"),
       planOperatorSurface: (input) => fixturePlan(progressFailureHomeRoot, progressFailureRegistryRoot, input),
@@ -523,7 +523,7 @@ async function main() {
       progressFailure.homeRunId,
     );
     assert.equal(
-      (await readWorkspaceSetupState({ octopusHomeRoot: progressFailureHomeRoot, registryRoot: progressFailureRegistryRoot })).status,
+      (await readWorkspaceSetupState({ phobosHomeRoot: progressFailureHomeRoot, registryRoot: progressFailureRegistryRoot })).status,
       "configured",
     );
 
@@ -536,7 +536,7 @@ async function main() {
     );
     await fs.mkdir(abandonedStageRoot);
     assert.equal(
-      (await readWorkspaceSetupState({ octopusHomeRoot: progressFailureHomeRoot, registryRoot: progressFailureRegistryRoot })).status,
+      (await readWorkspaceSetupState({ phobosHomeRoot: progressFailureHomeRoot, registryRoot: progressFailureRegistryRoot })).status,
       "configured",
     );
     await assert.rejects(fs.lstat(abandonedStageRoot), /ENOENT/);
@@ -551,7 +551,7 @@ async function main() {
     await fs.writeFile(mutableRootPath, `${JSON.stringify(mutableRoot, null, 2)}\n`);
     assert.equal(
       (await readWorkspaceSetupState({
-        octopusHomeRoot: progressFailureHomeRoot,
+        phobosHomeRoot: progressFailureHomeRoot,
         registryRoot: progressFailureRegistryRoot,
       })).status,
       "configured",
@@ -576,7 +576,7 @@ async function main() {
     };
     await assert.rejects(
       initializeWorkspace({
-        octopusHomeRoot: conflictHomeRoot,
+        phobosHomeRoot: conflictHomeRoot,
         registryRoot: conflictRegistryRoot,
         request: conflictRequest,
         planOperatorSurface: conflictPlanner,
@@ -595,7 +595,7 @@ async function main() {
     const driftRegistryRoot = await fs.realpath(driftFixtureRegistry);
     await assert.rejects(
       initializeWorkspace({
-        octopusHomeRoot: driftHomeRoot,
+        phobosHomeRoot: driftHomeRoot,
         registryRoot: driftRegistryRoot,
         request: setupRequest("workspace_plan_drift_12345678"),
         planOperatorSurface: async (input) => {
@@ -609,7 +609,7 @@ async function main() {
 
     await assert.rejects(
       initializeWorkspace({
-        octopusHomeRoot: driftHomeRoot,
+        phobosHomeRoot: driftHomeRoot,
         registryRoot: driftRegistryRoot,
         request: setupRequest("workspace_owner_drift_12345678"),
         planOperatorSurface: async (input) => {
@@ -629,7 +629,7 @@ async function main() {
     );
     for (const defect of ["disconnected", "inactive", "foreign-tool-door", "missing-descriptor"]) {
       await assert.rejects(initializeWorkspace({
-        octopusHomeRoot: driftHomeRoot, registryRoot: driftRegistryRoot,
+        phobosHomeRoot: driftHomeRoot, registryRoot: driftRegistryRoot,
         request: setupRequest(`workspace_${defect.replaceAll("-", "_")}_12345678`),
         planOperatorSurface: async (input) => {
           const plan = await fixturePlan(driftHomeRoot, driftRegistryRoot, input);
@@ -652,7 +652,7 @@ async function main() {
     }
     for (const defect of ["unbound", "unreadable", "wrong-tag", "non-object", "wrong-file", "changed-before"]) {
       await assert.rejects(initializeWorkspace({
-        octopusHomeRoot: driftHomeRoot, registryRoot: driftRegistryRoot, request: setupRequest(`workspace_artifact_${defect.replaceAll("-", "_")}`),
+        phobosHomeRoot: driftHomeRoot, registryRoot: driftRegistryRoot, request: setupRequest(`workspace_artifact_${defect.replaceAll("-", "_")}`),
         planOperatorSurface: async (input) => {
           const plan = await fixturePlan(driftHomeRoot, driftRegistryRoot, input);
           if (input.request.clientSurfaceRole !== "home") return plan;
@@ -683,12 +683,12 @@ async function main() {
       goal: "Orphaned workspace",
       config: {},
     }, null, 2)}\n`);
-    const orphanState = await readWorkspaceSetupState({ octopusHomeRoot: orphanHome, registryRoot: orphanRegistry });
+    const orphanState = await readWorkspaceSetupState({ phobosHomeRoot: orphanHome, registryRoot: orphanRegistry });
     assert.equal(orphanState.status, "degraded");
     assert.match(orphanState.errors.join("\n"), /operator spaces without receipts/);
     await assert.rejects(
       initializeWorkspace({
-        octopusHomeRoot: orphanHome,
+        phobosHomeRoot: orphanHome,
         registryRoot: orphanRegistry,
         request: setupRequest("workspace_orphan_12345678"),
         planOperatorSurface: (input) => fixturePlan(orphanHome, orphanRegistry, input),
@@ -705,7 +705,7 @@ async function main() {
       encoding: "utf8",
     });
     assert.equal(child.status, 73, child.stderr || child.stdout);
-    const recoveredState = await readWorkspaceSetupState({ octopusHomeRoot: crashHome, registryRoot: crashRegistry });
+    const recoveredState = await readWorkspaceSetupState({ phobosHomeRoot: crashHome, registryRoot: crashRegistry });
     assert.equal(recoveredState.status, "configured");
     assert.equal(recoveredState.receipt.operation_id, "workspace_crash_12345678");
     assert.equal(recoveredState.receipt.root_ee_id, "ee_existence");
@@ -718,7 +718,7 @@ async function main() {
     const projectCrashHome = await fs.realpath(projectCrashFixtureHome);
     const projectCrashRegistry = await fs.realpath(projectCrashFixtureRegistry);
     const projectCrashWorkspace = await initializeWorkspace({
-      octopusHomeRoot: projectCrashHome,
+      phobosHomeRoot: projectCrashHome,
       registryRoot: projectCrashRegistry,
       request: setupRequest("workspace_project_crash_12345678"),
       planOperatorSurface: (input) => fixturePlan(projectCrashHome, projectCrashRegistry, input),
@@ -742,13 +742,13 @@ async function main() {
       crashCreatedEeId,
     );
     let projectCrashSidecar = JSON.parse(await fs.readFile(
-      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "octopus_os.json"),
+      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "phobos_os.json"),
       "utf8",
     ));
     assert.equal(projectCrashSidecar.task_authoring_profiles.some((profile) => profile.ee_id === crashCreatedEeId), false);
     assert.equal(projectCrashSidecar.presentation.projects.some((projectRow) => projectRow.ee_id === crashCreatedEeId), false);
     let projectCrashState = await readWorkspaceSetupState({
-      octopusHomeRoot: projectCrashHome,
+      phobosHomeRoot: projectCrashHome,
       registryRoot: projectCrashRegistry,
     });
     assert.equal(projectCrashState.status, "configured");
@@ -757,7 +757,7 @@ async function main() {
       crashCreatedEeId,
     );
     projectCrashSidecar = JSON.parse(await fs.readFile(
-      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "octopus_os.json"),
+      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "phobos_os.json"),
       "utf8",
     ));
     assert.equal(projectCrashSidecar.task_authoring_profiles.filter((profile) => profile.ee_id === crashCreatedEeId).length, 1);
@@ -787,13 +787,13 @@ async function main() {
       historicalProject.eeId,
     );
     projectCrashSidecar = JSON.parse(await fs.readFile(
-      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "octopus_os.json"),
+      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "phobos_os.json"),
       "utf8",
     ));
     assert.equal(projectCrashSidecar.task_authoring_profiles.some((profile) => profile.ee_id === historicalProject.eeId), false);
     assert.equal(projectCrashSidecar.presentation.projects.some((projectRow) => projectRow.ee_id === historicalProject.eeId), false);
     projectCrashState = await readWorkspaceSetupState({
-      octopusHomeRoot: projectCrashHome,
+      phobosHomeRoot: projectCrashHome,
       registryRoot: projectCrashRegistry,
     });
     assert.equal(projectCrashState.status, "configured");
@@ -806,7 +806,7 @@ async function main() {
       /ENOENT/,
     );
     projectCrashSidecar = JSON.parse(await fs.readFile(
-      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "octopus_os.json"),
+      path.join(projectCrashRegistry, "interface", projectCrashWorkspace.homeInterfaceId, "phobos_os.json"),
       "utf8",
     ));
     assert.equal(projectCrashSidecar.task_authoring_profiles.some((profile) => profile.ee_id === historicalProject.eeId), false);
@@ -846,7 +846,7 @@ async function main() {
     mismatchJournal.receipt.writes[0].digest = "0".repeat(64);
     await fs.writeFile(mismatchJournalPath, `${JSON.stringify(mismatchJournal, null, 2)}\n`);
     const mismatchState = await readWorkspaceSetupState({
-      octopusHomeRoot: mismatchHome,
+      phobosHomeRoot: mismatchHome,
       registryRoot: mismatchRegistry,
     });
     assert.equal(mismatchState.status, "degraded");
@@ -855,7 +855,7 @@ async function main() {
     const driftedRootPath = mutableRootPath;
     await fs.writeFile(driftedRootPath, "{}\n");
     const driftedState = await readWorkspaceSetupState({
-      octopusHomeRoot: progressFailureHomeRoot,
+      phobosHomeRoot: progressFailureHomeRoot,
       registryRoot: progressFailureRegistryRoot,
     });
     assert.equal(driftedState.status, "degraded");
@@ -875,9 +875,9 @@ async function verifyPublicationRecovery(temporary) {
   const home = await fs.realpath(fixture), registry = path.join(home, "registry"), target = path.join(home, "state/runs/publication.json");
   const before = '{"before":true}\n', after = '{"after":"café"}\n', hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
   await fs.mkdir(path.dirname(target), { recursive: true }); await fs.writeFile(target, before);
-  const options = { octopusHomeRoot: home, registryRoot: registry, plan: { operationId: "publication_recovery_12345678", label: "publication recovery",
+  const options = { phobosHomeRoot: home, registryRoot: registry, plan: { operationId: "publication_recovery_12345678", label: "publication recovery",
     removals: [], writes: [{ destination: target, expectedBeforeDigest: hash(before), content: after, tag: "publication", publishBarrier: true }] } };
-  assert.equal((await workspaceSetup.readWorkspaceSetupState({ octopusHomeRoot: home, registryRoot: registry,
+  assert.equal((await workspaceSetup.readWorkspaceSetupState({ phobosHomeRoot: home, registryRoot: registry,
     publishFiles: () => assert.fail("read without a transaction invoked native publication") })).status, "not_configured");
   await assert.rejects(workspaceSetup.commitClientAuthoringTransaction(options), /native file publisher/);
   assert.equal(await fs.readFile(target, "utf8"), before);
@@ -916,7 +916,7 @@ async function verifyPublicationRecovery(temporary) {
   await createFixture(rollbackFixture, path.join(rollbackFixture, "registry"));
   const rollbackHome = await fs.realpath(rollbackFixture), rollbackRegistry = path.join(rollbackHome, "registry");
   const rollbackPublisher = fixtureFilePublisher(rollbackHome), calls = [];
-  await assert.rejects(initializeWorkspace({ octopusHomeRoot: rollbackHome, registryRoot: rollbackRegistry,
+  await assert.rejects(initializeWorkspace({ phobosHomeRoot: rollbackHome, registryRoot: rollbackRegistry,
     request: setupRequest("publication_rollback_12345678"), planOperatorSurface: input => fixturePlan(rollbackHome, rollbackRegistry, input),
     publishFiles: async writes => {
       calls.push(writes[0]);
@@ -942,7 +942,7 @@ async function verifyConditionedPublicationRecovery(temporary) {
   const before = "original\n", after = "updated\n", hash = text => crypto.createHash("sha256").update(text).digest("hex");
   await fs.mkdir(path.dirname(files[0]), { recursive: true });
   await fs.writeFile(dependency, "allowed"); for (const file of files) await fs.writeFile(file, before);
-  const condition = { octopus_home: home, preimages: [{ path: dependency, sha256: hash("allowed") }, ...files.map(path => ({ path, sha256: hash(before) }))] };
+  const condition = { phobos_home: home, preimages: [{ path: dependency, sha256: hash("allowed") }, ...files.map(path => ({ path, sha256: hash(before) }))] };
   const request = { label: "conditioned adoption", condition, removals: [], publishBarrierPath: files[1],
     writes: files.map(file => ({ file, content: after, beforeDigest: hash(before), label: file })) };
   const publisher = fixtureFilePublisher(home), submissions = [];
@@ -958,7 +958,7 @@ async function verifyConditionedPublicationRecovery(temporary) {
   assert.equal(journal.schema_version, 4); assert.deepEqual(journal.condition, condition);
   assert.equal(journal.writes.every(write => write.publication.receipt === null), true);
   await fs.writeFile(dependency, "allowed");
-  await assert.rejects(recoverWorkspaceTransactions({ octopusHomeRoot: home, registryRoot: registry,
+  await assert.rejects(recoverWorkspaceTransactions({ phobosHomeRoot: home, registryRoot: registry,
     publishFiles: async (writes, saved) => {
       submissions.push(writes.map(write => write.operationId)); await publisher(writes, saved);
       await fs.writeFile(dependency, "changed after original effects"); throw new Error("lost conditioned native verdict");
@@ -977,7 +977,7 @@ async function verifyConditionedPublicationRecovery(temporary) {
   await fs.writeFile(dependency, "allowed"); for (const file of files) await fs.writeFile(file, before);
   let rollback = 0;
   await assert.rejects(commitProjectionClientAuthoring(home, registry, request, { publishFiles: async (writes, saved) => {
-    if (writes.length === 1) { assert.deepEqual(saved, { octopus_home: home, preimages: [] }); rollback++; return publisher(writes, saved); }
+    if (writes.length === 1) { assert.deepEqual(saved, { phobos_home: home, preimages: [] }); rollback++; return publisher(writes, saved); }
     const [applied] = await publisher([writes[0]], saved);
     const refused = { digest_algorithm: "sha256", operation_id: writes[1].operationId, path: files[1], before_hash: hash(before),
       after_hash: hash(after), bytes: Buffer.byteLength(after), outcome: "not_applied", error: "fixture native refusal" };
@@ -1003,7 +1003,7 @@ async function verifyPreludeSnapshotSetup(temporary) {
   await fs.mkdir(path.dirname(sourcePath), { recursive: true });
   const request = setupRequest("snapshot_setup_12345678"); request.projects = [];
   let mode;
-  const options = { octopusHomeRoot: home, registryRoot: registry, request, planOperatorSurface: async (input) => {
+  const options = { phobosHomeRoot: home, registryRoot: registry, request, planOperatorSurface: async (input) => {
     const plan = await fixturePlan(home, registry, input);
     const source = { id: sourceId, content: pin(JSON.parse(sourceBytes)) };
     const sourceSha = crypto.createHash("sha256").update(sourceBytes).digest("hex");
@@ -1053,7 +1053,7 @@ async function verifyLinkedTaskRemoval(temporary) {
   await fs.symlink(target, path.join(owned, "app-server-home/auth.json"));
   await fs.symlink(`${target}-missing`, path.join(owned, "dangling"));
   const stat = await fs.lstat(owned);
-  const options = { octopusHomeRoot: home, registryRoot: registry, plan: {
+  const options = { phobosHomeRoot: home, registryRoot: registry, plan: {
     operationId: "task_remove_links_12345678", label: "delete task",
     writes: [{ destination: run, expectedBeforeDigest: crypto.createHash("sha256").update("{}\n").digest("hex"), content: null, tag: "run", publishBarrier: true }],
     removals: [{ destination: owned, type: "directory", expectedDev: stat.dev, expectedIno: stat.ino, tag: "private state" }],
@@ -1076,7 +1076,7 @@ async function verifyLinkedTaskRemoval(temporary) {
     await fs.writeFile(path.join(descriptor, "interface.json"), '{"id":"provider"}\n');
     await fs.writeFile(path.join(state, "ledger-cursor.json"), '{"seq":1}\n');
     await fs.symlink(target, path.join(state, "auth.json"));
-    if (mode === "metadata_alias") await fs.symlink(target, path.join(state, ".octopus-publication"));
+    if (mode === "metadata_alias") await fs.symlink(target, path.join(state, ".phobos-publication"));
     if (mode === "referenced") await fs.writeFile(path.join(currentHome, "state/runs/other.json"), '{"interface_state":{"provider":{}}}\n');
     const removal = async (destination) => {
       const identity = await fs.lstat(destination);
@@ -1096,7 +1096,7 @@ async function verifyLinkedTaskRemoval(temporary) {
       await fs.writeFile(path.join(state, "ledger-cursor.json"), '{"seq":2}\n');
     };
     try {
-      const commit = commitClientAuthoringTransaction({ octopusHomeRoot: currentHome, registryRoot: currentRegistry, plan });
+      const commit = commitClientAuthoringTransaction({ phobosHomeRoot: currentHome, registryRoot: currentRegistry, plan });
       await assert.rejects(commit, /identity changed|still referenced|publication metadata/);
       assert.equal(await fs.readFile(target, "utf8"), content);
     } finally { fs.unlink = unlink; }
@@ -1107,13 +1107,13 @@ async function verifyOperatorChatStatusProjection(temporary) {
   const fixtureHome = path.join(temporary, "operator-status-home");
   const fixtureRegistry = path.join(fixtureHome, "registry");
   await createFixture(fixtureHome, fixtureRegistry);
-  const octopusHomeRoot = await fs.realpath(fixtureHome);
+  const phobosHomeRoot = await fs.realpath(fixtureHome);
   const registryRoot = await fs.realpath(fixtureRegistry);
   const workspace = await initializeWorkspace({
-    octopusHomeRoot,
+    phobosHomeRoot,
     registryRoot,
     request: setupRequest("workspace_status_12345678"),
-    planOperatorSurface: (input) => fixturePlan(octopusHomeRoot, registryRoot, input),
+    planOperatorSurface: (input) => fixturePlan(phobosHomeRoot, registryRoot, input),
   });
   const protocolRoot = path.join(registryRoot, "interface", "world_operator_chat");
   await fs.mkdir(protocolRoot, { recursive: true });
@@ -1121,16 +1121,16 @@ async function verifyOperatorChatStatusProjection(temporary) {
     path.join(__dirname, "../../registry/interface/world_operator_chat/client.json"),
     path.join(protocolRoot, "client.json"),
   );
-  const ledgerRoot = path.join(octopusHomeRoot, "ledger");
+  const ledgerRoot = path.join(phobosHomeRoot, "ledger");
   const ledgerPath = path.join(ledgerRoot, "movements.jsonl");
   await fs.mkdir(ledgerRoot, { recursive: true });
   await fs.writeFile(ledgerPath, "", "utf8");
   const ledgerIndexAvailable = createFixtureLedgerIndex(path.join(ledgerRoot, "ledger-index.sqlite"));
-  const policyProjection = await fixturePolicyProjection(octopusHomeRoot);
+  const policyProjection = await fixturePolicyProjection(phobosHomeRoot);
   const store = createProjectionStore({
     resolveRepoRoot: () => path.resolve(__dirname, "../.."),
     sourceRegistry: () => registryRoot,
-    octopusHome: () => octopusHomeRoot,
+    phobosHome: () => phobosHomeRoot,
     projectEePolicies: async () => policyProjection,
   });
   const readStatuses = () => store.read({
@@ -1158,7 +1158,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
       fixtureMovement(0, workspace, "operator.message", workspace.homeInterfaceId, "run"),
       fixtureMovement(1, workspace, "turn.started", `${setupRequest("workspace_status_12345678").home.providerInterfaceId}_${workspace.homeRunId.replace("run_operator_chat_", "")}`, "run"),
     ];
-    for (const movement of workingMovements) await materializeFixtureMovement(octopusHomeRoot, movement);
+    for (const movement of workingMovements) await materializeFixtureMovement(phobosHomeRoot, movement);
     await fs.appendFile(ledgerPath, workingMovements.map((movement) => `${JSON.stringify(movement)}\n`).join(""));
     if (ledgerIndexAvailable) await indexFixtureMovements(ledgerRoot, workingMovements);
     const working = await readStatuses();
@@ -1174,7 +1174,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
       last_movement_seq: 1,
     }]);
     const firstReply = fixtureMovement(2, workspace, "interface.artifact.output", provider, "run");
-    await materializeFixtureMovement(octopusHomeRoot, firstReply);
+    await materializeFixtureMovement(phobosHomeRoot, firstReply);
     await fs.appendFile(ledgerPath, `${JSON.stringify(firstReply)}\n`);
     const idle = await readStatuses();
     assert.equal(idle.chats[0].turn_open, false);
@@ -1222,7 +1222,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
         movement.to = { Interface: from === "peer" ? provider : workspace.homeInterfaceId };
       }
       movement.recorded_at_unix_ms -= offset * 2;
-      await materializeFixtureMovement(octopusHomeRoot, movement, payload);
+      await materializeFixtureMovement(phobosHomeRoot, movement, payload);
       await fs.appendFile(ledgerPath, `${JSON.stringify(movement)}\n`);
       const status = (await readStatuses()).chats[0];
       assert.deepEqual([status.turn_state, status.turn_open], [expected, ["waiting", "working"].includes(expected)], label);
@@ -1237,7 +1237,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
     let nextSeq = cases.length + 3;
     const appendStatus = async (label, from, payload) => {
       const movement = fixtureMovement(nextSeq++, workspace, label, from, "run");
-      await materializeFixtureMovement(octopusHomeRoot, movement, payload);
+      await materializeFixtureMovement(phobosHomeRoot, movement, payload);
       await fs.appendFile(ledgerPath, `${JSON.stringify(movement)}\n`);
       return (await readStatuses()).chats[0];
     };
@@ -1280,10 +1280,10 @@ async function verifyOperatorChatStatusProjection(temporary) {
       assert.equal((await appendStatus("turn.control.failed", provider, { action, control_id: id, status: "failed", source_movement_seq: refusedSeq })).turn_open, expected);
     store.invalidate(); assert.equal((await readStatuses()).chats[0].turn_state, "failed");
     const retired = fixtureMovement(nextSeq, workspace, "turn.started", provider, "run");
-    await materializeFixtureMovement(octopusHomeRoot, retired);
+    await materializeFixtureMovement(phobosHomeRoot, retired);
     await fs.appendFile(ledgerPath, `${JSON.stringify(retired)}\n`);
     assert.equal((await readStatuses()).chats[0].turn_state, "working");
-    const runPath = path.join(octopusHomeRoot, "state", "runs", `${workspace.homeRunId}.json`);
+    const runPath = path.join(phobosHomeRoot, "state", "runs", `${workspace.homeRunId}.json`);
     const record = JSON.parse(await fs.readFile(runPath, "utf8"));
     record.interface_state[provider] = { authoring_generation: 0, context_generation: 0,
       run_authoring_binding: { run: workspace.homeRunId } };
@@ -1295,7 +1295,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
     store.invalidate();
     assert.equal((await readStatuses()).chats[0].turn_open, false, "a control or catalog rearm cannot reopen the retired turn");
     const current = fixtureMovement(retired.seq + 1, workspace, "operator.message", workspace.homeInterfaceId, "run");
-    await materializeFixtureMovement(octopusHomeRoot, current);
+    await materializeFixtureMovement(phobosHomeRoot, current);
     current.invocation_metadata.runtime.checkpoint = "cp_home_input";
     await fs.appendFile(ledgerPath, `${JSON.stringify(current)}\n`);
     assert.equal((await readStatuses()).chats[0].turn_state, "waiting", "current input remains open before provider authoring");
@@ -1309,7 +1309,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
     await fs.writeFile(runPath, JSON.stringify(record));
     store.invalidate();
     assert.equal((await readStatuses()).chats[0].turn_open, true, "pending source retains a turn after its input checkpoint is replaced");
-    const sidecarPath = path.join(registryRoot, "interface", workspace.homeInterfaceId, "octopus_os.json");
+    const sidecarPath = path.join(registryRoot, "interface", workspace.homeInterfaceId, "phobos_os.json");
     const sidecar = JSON.parse(await fs.readFile(sidecarPath, "utf8"));
     sidecar.authoring_profile.external_inputs = [{ checkpoint_id: "cp_external_input", interface_id: "peer", artifact_names: ["sensor.observation"] }];
     await fs.writeFile(sidecarPath, JSON.stringify(sidecar));
@@ -1322,7 +1322,7 @@ async function verifyOperatorChatStatusProjection(temporary) {
     const external = fixtureMovement(nextSeq++, workspace, "sensor.observation", "peer", "run");
     external.kind = "InterfaceOutbound"; external.to = { Interface: provider };
     external.invocation_metadata.runtime.checkpoint = "cp_external_input";
-    await materializeFixtureMovement(octopusHomeRoot, external, { text: "Review recent work." });
+    await materializeFixtureMovement(phobosHomeRoot, external, { text: "Review recent work." });
     await fs.appendFile(ledgerPath, `${JSON.stringify(external)}\n`);
     const waiting = (await readStatuses()).chats[0];
     assert.deepEqual([waiting.turn_open, waiting.turn_state, waiting.turn_opened_movement_seq], [true, "waiting", external.seq]);
@@ -1347,7 +1347,7 @@ async function verifyTaskArchive(temporary) {
     await fs.writeFile(path.join(workerRoot, "interface.json"), JSON.stringify({ id: workerId, interface_type: "system", role: "worker", direction: "bidirectional", source_names: ["fixture"] }));
     await fs.writeFile(path.join(workerRoot, "policy.json"), JSON.stringify({ id: workerId, role_artifacts: [], ceiling: { interfaces: [], tools: [], wek: [], mark_outcomes: [], hard_blocked_tools: [] } }));
   }
-  const workspace = await initializeWorkspace({ octopusHomeRoot: home, registryRoot: registry, request,
+  const workspace = await initializeWorkspace({ phobosHomeRoot: home, registryRoot: registry, request,
     planOperatorSurface: (input) => fixturePlan(home, registry, input) });
   const plan = await fixturePlan(home, registry, { eeInstancesRoot: path.join(home, "state", "ee_instances"),
     request: { ...request.home, eeId: workspace.projects[0].eeId, chatId: "archive_task_12345678", clientSurfaceRole: "task" } });
@@ -1355,8 +1355,8 @@ async function verifyTaskArchive(temporary) {
     await fs.mkdir(path.dirname(write.filePath), { recursive: true }); await fs.writeFile(write.filePath, write.content);
   }
   for (const [interfaceId, component] of [[plan.workerInterfaceId, "worker"], [plan.modelInterfaceId, "provider"]]) {
-    await fs.writeFile(path.join(registry, "interface", interfaceId, "octopus_os.json"), JSON.stringify({
-      schema_version: 1, workspace: "octopus_os", interface: interfaceId, owner_interface: plan.chatInterfaceId, component, surface_role: "task",
+    await fs.writeFile(path.join(registry, "interface", interfaceId, "phobos_os.json"), JSON.stringify({
+      schema_version: 1, workspace: "phobos_os", interface: interfaceId, owner_interface: plan.chatInterfaceId, component, surface_role: "task",
     }));
   }
   const protocolRoot = path.join(registry, "interface", "world_operator_chat");
@@ -1387,7 +1387,7 @@ async function verifyTaskArchive(temporary) {
   const writeRun = (run) => fs.writeFile(runFile, `${JSON.stringify(run, null, 2)}\n`);
   await writeRun(original); await fs.mkdir(path.dirname(ledger)); await fs.writeFile(ledger, "");
   let store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, "../.."), sourceRegistry: () => registry,
-    octopusHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
+    phobosHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
   const read = (method, params) => store.read({ contract_version: 1, method, params });
   const digest = async () => crypto.createHash("sha256").update(await fs.readFile(runFile)).digest("hex");
   let operations = 0;
@@ -1395,7 +1395,7 @@ async function verifyTaskArchive(temporary) {
   const hooks = {
     withTaskAuthoringLock: async (id, operation) => { assert.equal(id, plan.runId); return operation(); },
     readTaskStatus: async (id) => { store.invalidate(false); return (await read("projection.operator.chats.status", { run_ids: [id] })).chats[0]; },
-    commitClientAuthoring: (mutation) => commitClientAuthoringTransaction({ octopusHomeRoot: home, registryRoot: registry, plan: {
+    commitClientAuthoring: (mutation) => commitClientAuthoringTransaction({ phobosHomeRoot: home, registryRoot: registry, plan: {
       operationId: `task_archive_contract_${operations++}`, label: mutation.label,
       writes: mutation.writes.map((write) => ({ destination: write.file, expectedBeforeDigest: write.beforeDigest,
         content: write.next === null ? null : `${JSON.stringify(write.next, null, 2)}\n`, tag: "task", publishBarrier: write.file === mutation.publishBarrierPath })),
@@ -1407,7 +1407,7 @@ async function verifyTaskArchive(temporary) {
     store.invalidate(false);
     const scope = await read("projection.operator.os.scope");
     assert.equal(scope.status, "ready", JSON.stringify(scope.errors));
-    return mutateOctopusOsWorkspace(registry, home, scope,
+    return mutatePhobosOsWorkspace(registry, home, scope,
       { action: "set_task_archived", ...archiveIdentity, runId: plan.runId, expectedDigest: await digest(), archived, ...overrides }, hooks);
   };
   try {
@@ -1469,7 +1469,7 @@ async function verifyTaskArchive(temporary) {
     assert.deepEqual(saved.active_checkpoints, []);
     assert.deepEqual(saved.interface_state[plan.chatInterfaceId].client_archive.active_checkpoints, original.active_checkpoints);
     assert.deepEqual(saved.checkpoints, original.checkpoints); assert.equal(saved.status, original.status);
-    store.close(); store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, "../.."), sourceRegistry: () => registry, octopusHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
+    store.close(); store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, "../.."), sourceRegistry: () => registry, phobosHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
     const archivedChat = (await read("projection.operator.chats.list")).chats.find((chat) => chat.run_id === plan.runId);
     assert.equal(archivedChat.archived, true); assert.equal(archivedChat.writable, false); assert.equal(archivedChat.message_count, 2);
     assert.equal(archivedChat.provider_bound_interface_id, plan.modelInterfaceId);
@@ -1478,16 +1478,16 @@ async function verifyTaskArchive(temporary) {
     assert.deepEqual(await read("projection.operator.chat.messages", { run_id: plan.runId }), messagesBefore);
     assert.equal((await mutate(true)).changed, false); assert.equal(operations, 1);
     const scope = await read("projection.operator.os.scope");
-    await assert.rejects(mutateOctopusOsWorkspace(registry, home, scope,
+    await assert.rejects(mutatePhobosOsWorkspace(registry, home, scope,
       { action: "delete_task", runId: plan.runId, expectedDigest: await digest() }, hooks), /restore it before deleting/);
     const tampered = structuredClone(saved); tampered.checkpoints[0].epoch += 1; await writeRun(tampered);
     scope.client_runs.find((row) => row.run_id === plan.runId).record_digest = await digest();
-    await assert.rejects(mutateOctopusOsWorkspace(registry, home, scope,
+    await assert.rejects(mutatePhobosOsWorkspace(registry, home, scope,
       { action: "set_task_archived", ...archiveIdentity, runId: plan.runId, expectedDigest: await digest(), archived: false }, hooks), /topology changed/);
     await writeRun(saved);
     const reopened = structuredClone(saved); reopened.active_checkpoints = [...original.active_checkpoints]; await writeRun(reopened);
     scope.client_runs.find((row) => row.run_id === plan.runId).record_digest = await digest();
-    await assert.rejects(mutateOctopusOsWorkspace(registry, home, scope,
+    await assert.rejects(mutatePhobosOsWorkspace(registry, home, scope,
       { action: "set_task_archived", ...archiveIdentity, runId: plan.runId, expectedDigest: await digest(), archived: false }, hooks), /still admits artifacts/);
     await writeRun(saved);
     assert.equal((await mutate(false)).changed, true);
@@ -1497,8 +1497,8 @@ async function verifyTaskArchive(temporary) {
     assert.equal(restoredChat.archived, false); assert.equal(restoredChat.writable, true);
     assert.equal(operations, 2);
     console.log("task archive: checked writes, admission frontier, retained history, explicit restore and drift refusals passed");
-    for (const interfaceId of [intakeId, doorId]) await fs.writeFile(path.join(registry, "interface", interfaceId, "octopus_os.json"), JSON.stringify({
-      schema_version: 1, workspace: "octopus_os", interface: interfaceId, owner_interface: plan.chatInterfaceId, component: "worker_environment_door", surface_role: "task",
+    for (const interfaceId of [intakeId, doorId]) await fs.writeFile(path.join(registry, "interface", interfaceId, "phobos_os.json"), JSON.stringify({
+      schema_version: 1, workspace: "phobos_os", interface: interfaceId, owner_interface: plan.chatInterfaceId, component: "worker_environment_door", surface_role: "task",
     }));
     const applicationId = "world_amendment_fixture", applicationRoot = path.join(registry, "interface", applicationId);
     await fs.mkdir(applicationRoot);
@@ -1514,7 +1514,7 @@ async function verifyTaskArchive(temporary) {
     const genesis = { id: "amendment_writer", ee: original.ee, worker: original.worker, trace: "trace:amendment_writer",
       status: "idle", checkpoints: [], active_checkpoints: [], interface_state: {} };
     const genesisBytes = `${JSON.stringify(Object.fromEntries(Object.entries(genesis).sort(([a], [b]) => a.localeCompare(b))))}\n`, retainedRun = await fs.readFile(runFile, "utf8");
-    await mutateOctopusOsWorkspace(registry, home, amendmentScope,
+    await mutatePhobosOsWorkspace(registry, home, amendmentScope,
       { action: "configure_task_application", runId: plan.runId, expectedDigest: await digest(), applicationId, connected: true },
       { ...hooks, planTaskApplicationAmendment: async () => ({ removals: [], writes: [
         { filePath: amendmentWriterFile, expectedBeforeHash: null, content: genesisBytes },
@@ -1572,11 +1572,11 @@ async function verifyTaskArchive(temporary) {
     const blobFile = path.join(home, "ledger", "retained.blob"); await fs.writeFile(blobFile, "retained blob evidence");
     const ledgerBefore = await fs.readFile(ledger, "utf8");
     for (const interfaceId of [intakeId, doorId]) {
-      await fs.unlink(path.join(registry, "interface", interfaceId, "octopus_os.json"));
+      await fs.unlink(path.join(registry, "interface", interfaceId, "phobos_os.json"));
     }
     const remove = async (extraHooks = {}) => {
       store.invalidate(false);
-      return mutateOctopusOsWorkspace(registry, home, await read("projection.operator.os.scope"),
+      return mutatePhobosOsWorkspace(registry, home, await read("projection.operator.os.scope"),
         { action: "delete_task", runId: plan.runId, expectedDigest: await digest() }, { ...hooks, ...extraHooks });
     };
     const writerEnvironmentId = `we_${"b".repeat(32)}`;
@@ -1706,7 +1706,7 @@ async function indexFixtureMovements(ledgerRoot, movements) {
   }
 }
 
-async function fixturePolicyProjection(octopusHomeRoot) {
+async function fixturePolicyProjection(phobosHomeRoot) {
   const policy = {
     allowed_interfaces: [],
     allowed_tools: [],
@@ -1715,12 +1715,12 @@ async function fixturePolicyProjection(octopusHomeRoot) {
     allowed_artifact_verbs: [],
     hard_blocked_tools: [],
   };
-  const files = (await fs.readdir(path.join(octopusHomeRoot, "state", "ee_instances")))
+  const files = (await fs.readdir(path.join(phobosHomeRoot, "state", "ee_instances")))
     .filter((name) => name.endsWith(".json"))
     .sort();
   const environments = [];
   for (const file of files) {
-    const record = JSON.parse(await fs.readFile(path.join(octopusHomeRoot, "state", "ee_instances", file), "utf8"));
+    const record = JSON.parse(await fs.readFile(path.join(phobosHomeRoot, "state", "ee_instances", file), "utf8"));
     environments.push({
       ee_id: record.ee_id,
       effective_policy: policy,
@@ -1781,7 +1781,7 @@ async function verifyLiveWorkspaceLock(temporary) {
       const journal = path.join(transactions, "workspace_crash_12345678/journal.json");
       const before = await fs.readFile(journal);
       let settled = false;
-      const read = readWorkspaceSetupState({ octopusHomeRoot: home, registryRoot: registry }).finally(() => { settled = true; });
+      const read = readWorkspaceSetupState({ phobosHomeRoot: home, registryRoot: registry }).finally(() => { settled = true; });
       await new Promise(resolve => setTimeout(resolve, 100));
       assert.equal(settled, false, "a reader must wait for the live writer instead of recovering it");
       assert.deepEqual(await fs.readFile(journal), before);
@@ -1796,13 +1796,13 @@ async function verifyLiveWorkspaceLock(temporary) {
   }
 }
 
-async function crashChild(octopusHomeRoot, registryRoot, hold = false) {
+async function crashChild(phobosHomeRoot, registryRoot, hold = false) {
   let paused = false;
   await initializeWorkspace({
-    octopusHomeRoot,
+    phobosHomeRoot,
     registryRoot,
     request: setupRequest("workspace_crash_12345678"),
-    planOperatorSurface: (input) => fixturePlan(octopusHomeRoot, registryRoot, input),
+    planOperatorSurface: (input) => fixturePlan(phobosHomeRoot, registryRoot, input),
     onProgress: (event) => {
       if (event.phase !== "applying") return;
       if (!hold) process.exit(73);
@@ -1814,7 +1814,7 @@ async function crashChild(octopusHomeRoot, registryRoot, hold = false) {
 
 async function projectCrashChild(
   mode,
-  octopusHomeRoot,
+  phobosHomeRoot,
   registryRoot,
   rootEeId,
   homeRunId,
@@ -1822,19 +1822,19 @@ async function projectCrashChild(
   targetEeId,
 ) {
   const workspace = { rootEeId, homeRunId, homeInterfaceId };
-  const scope = await fixtureProjectScope(octopusHomeRoot, registryRoot, workspace);
+  const scope = await fixtureProjectScope(phobosHomeRoot, registryRoot, workspace);
   if (mode === "create") {
     const operationId = "project_crash_create_12345678";
     armProjectCrash(
-      octopusHomeRoot,
+      phobosHomeRoot,
       operationId,
-      path.join(registryRoot, "interface", homeInterfaceId, "octopus_os.json"),
+      path.join(registryRoot, "interface", homeInterfaceId, "phobos_os.json"),
     );
     await mutateWorkspaceProject({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       scope,
-      planOperatorSurface: (input) => fixturePlan(octopusHomeRoot, registryRoot, input),
+      planOperatorSurface: (input) => fixturePlan(phobosHomeRoot, registryRoot, input),
       request: {
         action: "create_project",
         operationId,
@@ -1852,12 +1852,12 @@ async function projectCrashChild(
     const target = scope.environments.find((environment) => environment.eeId === targetEeId);
     assert.ok(target);
     armProjectCrash(
-      octopusHomeRoot,
+      phobosHomeRoot,
       operationId,
-      path.join(octopusHomeRoot, "state", "ee_instances", `${targetEeId}.json`),
+      path.join(phobosHomeRoot, "state", "ee_instances", `${targetEeId}.json`),
     );
     await mutateWorkspaceProject({
-      octopusHomeRoot,
+      phobosHomeRoot,
       registryRoot,
       scope,
       request: {
@@ -1874,9 +1874,9 @@ async function projectCrashChild(
   process.exit(74);
 }
 
-function armProjectCrash(octopusHomeRoot, operationId, publishBarrierPath) {
+function armProjectCrash(phobosHomeRoot, operationId, publishBarrierPath) {
   const journalPath = path.join(
-    octopusHomeRoot,
+    phobosHomeRoot,
     "client-state",
     "workspace",
     "transactions",
@@ -1890,7 +1890,7 @@ function armProjectCrash(octopusHomeRoot, operationId, publishBarrierPath) {
   fs.rename = async (source, destination) => {
     if (destination === journalPath) {
       const journal = JSON.parse(await fs.readFile(source, "utf8"));
-      armed = journal.schema === "octopus.workspace_project_transaction"
+      armed = journal.schema === "phobos.workspace_project_transaction"
         && journal.phase === "committing"
         && journal.writes[0]?.state === "applied"
         && journal.writes.some((writeRow) => writeRow.publish_barrier && writeRow.state === "staged");
@@ -1911,10 +1911,10 @@ async function verifyProjectionReadinessBarrier(temporary) {
   const fixtureHome = path.join(temporary, "projection-readiness-home");
   const registryRoot = path.join(fixtureHome, "registry");
   await createFixture(fixtureHome, registryRoot);
-  const octopusHomeRoot = await fs.realpath(fixtureHome);
-  const runsRoot = path.join(octopusHomeRoot, "state", "runs");
+  const phobosHomeRoot = await fs.realpath(fixtureHome);
+  const runsRoot = path.join(phobosHomeRoot, "state", "runs");
   await fs.mkdir(runsRoot, { recursive: true });
-  await fs.writeFile(path.join(octopusHomeRoot, "host.json"), JSON.stringify({
+  await fs.writeFile(path.join(phobosHomeRoot, "host.json"), JSON.stringify({
     host_manifest_version: 1,
     root_refs: { run_records_root: runsRoot },
   }));
@@ -1925,14 +1925,14 @@ async function verifyProjectionReadinessBarrier(temporary) {
   let policyProjectionCalls = 0;
   const recovery = new Promise((resolve) => { releaseRecovery = resolve; });
   let store;
-  await readWorkspaceSetupState({ octopusHomeRoot, registryRoot });
+  await readWorkspaceSetupState({ phobosHomeRoot, registryRoot });
   store = createProjectionStore({
     resolveRepoRoot: () => path.resolve(__dirname, "../.."),
     sourceRegistry: () => registryRoot,
-    octopusHome: () => octopusHomeRoot,
+    phobosHome: () => phobosHomeRoot,
     inspectWorkspaceSetupState: async options => {
       workspaceReadCalls += 1;
-      assert.equal(options.octopusHomeRoot, octopusHomeRoot);
+      assert.equal(options.phobosHomeRoot, phobosHomeRoot);
       assert.equal(options.registryRoot, registryRoot);
       return inspectWorkspaceSetupState(options);
     },
@@ -1962,7 +1962,7 @@ async function verifyProjectionReadinessBarrier(temporary) {
     deferred.then(() => { settled = true; }, () => { settled = true; });
     await new Promise((resolve) => setImmediate(resolve));
     assert.equal(settled, false);
-    await fs.writeFile(path.join(octopusHomeRoot, "state", "ee_instances", "ee_after_recovery.json"), `${JSON.stringify({
+    await fs.writeFile(path.join(phobosHomeRoot, "state", "ee_instances", "ee_after_recovery.json"), `${JSON.stringify({
       ee_id: "ee_after_recovery",
       template_name: "project",
       parent_ee_id: "ee_existence",
@@ -1974,7 +1974,7 @@ async function verifyProjectionReadinessBarrier(temporary) {
     assert.equal(recovered.ee_instances.some((entry) => entry.ee_id === "ee_after_recovery"), true);
     mode = "reject";
     await assert.rejects(store.read(request), /workspace recovery failed closed/);
-    await fs.writeFile(path.join(octopusHomeRoot, "state", "ee_instances", "ee_after_retry.json"), `${JSON.stringify({
+    await fs.writeFile(path.join(phobosHomeRoot, "state", "ee_instances", "ee_after_retry.json"), `${JSON.stringify({
       ee_id: "ee_after_retry",
       template_name: "project",
       parent_ee_id: "ee_existence",
@@ -1991,9 +1991,9 @@ async function verifyProjectionReadinessBarrier(temporary) {
 }
 
 async function verifyCapabilityPreferenceSetup() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-capability-preferences-")));
-  const browser = require("../../registry/worker_environment_kind/browser_session/packages/octopus-browser-session-env/native/setup-host.cjs");
-  const desktop = require("../../registry/worker_environment_kind/desktop_session/packages/octopus-system-gui-env/native/setup-preferences.cjs");
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-capability-preferences-")));
+  const browser = require("../../registry/worker_environment_kind/browser_session/packages/phobos-browser-session-env/native/setup-host.cjs");
+  const desktop = require("../../registry/worker_environment_kind/desktop_session/packages/phobos-system-gui-env/native/setup-preferences.cjs");
   const userHome = process.env.HOME;
   try {
     process.env.HOME = root;
@@ -2005,7 +2005,7 @@ async function verifyCapabilityPreferenceSetup() {
       await fs.writeFile(path.join(home,"host.json"),original);
       const request = setupRequest(fail ? "prefs_rollback_12345678" : "prefs_complete_12345678"); request.projects = [];
       const rollback = [];
-      const options = { octopusHomeRoot:home, registryRoot:registry, request,
+      const options = { phobosHomeRoot:home, registryRoot:registry, request,
         planOperatorSurface:async input => {
           const plan = await fixturePlan(home,registry,input);
           for (const family of ["browser", "gui"]) {
@@ -2028,7 +2028,7 @@ async function verifyCapabilityPreferenceSetup() {
           const plan=await desktop.planDesktopApplicationPreferences({...input,plannedWrites:[nullPreferences,...input.plannedWrites]});
           const host=JSON.parse(plan.writes[0].content);assert.equal(host.root_refs.browser_native_host_root,path.join(home,'client/browser-native-host'));
           assert.equal(host.root_refs.desktop_app_preferences_root,path.join(home,'client/desktop-app-preferences'));assert.equal(host.root_refs.retained_root,root);
-          assert.equal(host.root_refs.desktop_device_lock_root,path.join(root,'Library/Application Support/Octopus/desktop-device'));
+          assert.equal(host.root_refs.desktop_device_lock_root,path.join(root,'Library/Application Support/Phobos/desktop-device'));
           return {...plan,writes:plan.writes.map(row=>({...row,expectedBeforeDigest:fail?'0'.repeat(64):row.expectedBeforeDigest})),rollback:async()=>{rollback.push('desktop');await plan.rollback();}};
         },
       };
@@ -2050,7 +2050,7 @@ async function verifyCapabilityPreferenceSetup() {
 }
 
 async function verifyRetiredConsentSetup() {
-  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-consent-setup-test-"));
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-consent-setup-test-"));
   let store;
   try {
     const home = path.join(await fs.realpath(temporary), "home");
@@ -2063,7 +2063,7 @@ async function verifyRetiredConsentSetup() {
     await fs.writeFile(path.join(workerRoot, "interface.json"), JSON.stringify({ id: workerId, interface_type: "system", role: "worker", direction: "bidirectional", source_names: ["fixture"] }));
     await fs.writeFile(path.join(workerRoot, "policy.json"), JSON.stringify({ id: workerId, role_artifacts: [], ceiling: { interfaces: [], tools: [], wek: [], mark_outcomes: [], hard_blocked_tools: [] } }));
     let plannerCalls = 0;
-    const options = { octopusHomeRoot: home, registryRoot: registry, request,
+    const options = { phobosHomeRoot: home, registryRoot: registry, request,
       planOperatorSurface: async (input) => { plannerCalls += 1; return fixturePlan(home, registry, input); } };
     await assert.rejects(initializeWorkspace({ ...options, request: { ...request,
       applicationConsentAuthority: { packId: "codex", expectedPackManifestDigest: "1".repeat(64) } } }), /unknown fields: applicationConsentAuthority/);
@@ -2076,7 +2076,7 @@ async function verifyRetiredConsentSetup() {
     assert.equal(descriptor.interface_driver_config?.private_config?.application_consent_authority, undefined);
     assert.equal((await readWorkspaceSetupState(options)).status, "configured");
     await fs.mkdir(path.join(home, "ledger")); await fs.writeFile(path.join(home, "ledger", "movements.jsonl"), "");
-    store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, "../.."), sourceRegistry: () => registry, octopusHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
+    store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, "../.."), sourceRegistry: () => registry, phobosHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
     const readScope = () => store.read({ contract_version: 1, method: "projection.operator.os.scope" });
     const initialScope = await readScope();
     assert.equal(initialScope.status, "ready", JSON.stringify(initialScope));
@@ -2127,7 +2127,7 @@ async function verifyRetiredConsentSetup() {
     }
     await fs.writeFile(path.join(transaction, "after", "home.bin"), selectedBytes);
     await fs.writeFile(path.join(transaction, "before", "home.bin"), descriptorBytes);
-    const journal = { schema: "octopus.workspace_setup_transaction", schema_version: 1, operation_id: request.operationId,
+    const journal = { schema: "phobos.workspace_setup_transaction", schema_version: 1, operation_id: request.operationId,
       request_digest: receipt.request_digest, phase: "staged", writes: journalWrites, receipt: { ...receipt,
         writes: journalWrites.map((write) => ({ path: write.destination, digest: write.after_digest, tag: write.tag, publish_barrier: write.publish_barrier })) } };
     const journalBytes = `${JSON.stringify(journal, null, 2)}\n`;
@@ -2156,7 +2156,7 @@ async function verifyFreshAgentRecipe(temporary) {
     const request = setupRequest(admitted ? "recipe_admitted_001" : "recipe_refused_001");
     request.agentPresets = [{ packId: "fixture", expectedPackManifestDigest: "a".repeat(64), presetId: "computer-use", projectKeys: ["work"], providerInterfaceId: request.home.providerInterfaceId, providerModel: request.home.providerModel, reasoningEffort: "high" }];
     const options = {
-      octopusHomeRoot: home, registryRoot: registry, request,
+      phobosHomeRoot: home, registryRoot: registry, request,
       planOperatorSurface: (input) => fixturePlan(home, registry, input),
       planAgentPreset: async ({ choice, projectEeId, operationId }) => ({
         ...planClientAgentTemplate({ operationId, projectEeId, sourceInterface, sourcePolicy, name: "Computer Use", icon: "goggles",
@@ -2175,7 +2175,7 @@ async function verifyFreshAgentRecipe(temporary) {
     const catalog = await readClientAgentCatalog(home);
     assert.equal(catalog.document.agents.length, 1);
     const agent = catalog.document.agents[0];
-    const profile = JSON.parse(await fs.readFile(path.join(registry, "interface", result.homeInterfaceId, "octopus_os.json"))).task_authoring_profiles.find((row) => row.worker_choice_interface === agent.worker_interface);
+    const profile = JSON.parse(await fs.readFile(path.join(registry, "interface", result.homeInterfaceId, "phobos_os.json"))).task_authoring_profiles.find((row) => row.worker_choice_interface === agent.worker_interface);
     assert.deepEqual(profile.context_artifact_bindings.map((row) => row.id), sourcePolicy.role_artifacts);
     assert.deepEqual(JSON.parse(await fs.readFile(path.join(registry, "interface", agent.worker_interface, "policy.json"))), { ...sourcePolicy, id: agent.worker_interface });
     assert.deepEqual(JSON.parse(await fs.readFile(templatePath)).allowed_interfaces, [sourceInterface.id]);
@@ -2187,9 +2187,9 @@ async function verifyFreshAgentRecipe(temporary) {
 async function verifyExistingRootAttachment(temporary) {
   const fixture = path.join(temporary, "existing-root");
   await createFixture(fixture, path.join(fixture, "registry"));
-  const octopusHomeRoot = await fs.realpath(fixture);
-  const registryRoot = path.join(octopusHomeRoot, "registry");
-  const rootPath = path.join(octopusHomeRoot, "state/ee_instances/ee_existence.json");
+  const phobosHomeRoot = await fs.realpath(fixture);
+  const registryRoot = path.join(phobosHomeRoot, "registry");
+  const rootPath = path.join(phobosHomeRoot, "state/ee_instances/ee_existence.json");
   const root = JSON.parse(await fs.readFile(rootPath, "utf8"));
   Object.assign(root, { goal: "Preserve the authored goal", config: { selected: ["keep"] }, policy_narrowing: { allowed_tools: ["file.read"] } });
   const before = `${JSON.stringify(root, null, 2)}\n`;
@@ -2205,9 +2205,9 @@ async function verifyExistingRootAttachment(temporary) {
     const selected = input.request.clientSurfaceRole === "home" ? request.home : request.task;
     assert.equal(input.request.workerInterfaceId, selected.workerInterfaceId);
     assert.deepEqual(input.request.selectedWorkerEnvironmentKinds, selected.selectedWorkerEnvironmentKinds);
-    return fixturePlan(octopusHomeRoot, registryRoot, input);
+    return fixturePlan(phobosHomeRoot, registryRoot, input);
   };
-  const options = { octopusHomeRoot, registryRoot, request, planOperatorSurface };
+  const options = { phobosHomeRoot, registryRoot, request, planOperatorSurface };
   await assert.rejects(initializeWorkspace({ ...options, request: { ...request, root: { ...request.root, expectedEeDigest: "0".repeat(64) } } }), /changed before planning/);
   await assert.rejects(initializeWorkspace({ ...options, request: { ...request, root: { ...request.root, goal: "Rewrite" } } }), /unknown fields/);
   const foreign = JSON.stringify({ ...root, ee_id: "ee_foreign" });
@@ -2235,7 +2235,7 @@ async function verifyExistingRootAttachment(temporary) {
   } }), /changed during initialization/);
   assert.equal(drifted, true);
   assert.equal(await fs.readFile(rootPath, "utf8"), `${before}\n`);
-  assert.deepEqual(await fs.readdir(path.join(octopusHomeRoot, "state/runs")), []);
+  assert.deepEqual(await fs.readdir(path.join(phobosHomeRoot, "state/runs")), []);
   assert.equal((await readWorkspaceSetupState(options)).status, "not_configured");
   await fs.writeFile(rootPath, before);
   const outcome = await initializeWorkspace(options);
@@ -2250,14 +2250,14 @@ async function verifyExistingRootAttachment(temporary) {
   assert.equal(JSON.parse(artifactBytes).text, "Exact fixture Home context");
   assert.equal(state.receipt.existing_root.digest, request.root.expectedEeDigest);
   assert.equal(state.receipt.writes.some((write) => write.path === rootPath), false);
-  const runPath = path.join(octopusHomeRoot, "state/runs", `${outcome.homeRunId}.json`);
+  const runPath = path.join(phobosHomeRoot, "state/runs", `${outcome.homeRunId}.json`);
   const run = JSON.parse(await fs.readFile(runPath, "utf8"));
   run.status = "idle";
   run.checkpoints[0].epoch += 1;
   await fs.writeFile(runPath, JSON.stringify(run));
   assert.equal((await readWorkspaceSetupState(options)).status, "configured");
   assert.equal((await initializeWorkspace(options)).receiptDigest, outcome.receiptDigest);
-  const receiptPath = path.join(octopusHomeRoot, "client-state/workspace/receipts", `${request.operationId}.json`);
+  const receiptPath = path.join(phobosHomeRoot, "client-state/workspace/receipts", `${request.operationId}.json`);
   const receipt = state.receipt;
   receipt.existing_root.path = path.join(temporary, "foreign-home/state/ee_instances/ee_existence.json");
   await fs.writeFile(receiptPath, JSON.stringify(receipt));
@@ -2277,7 +2277,7 @@ async function verifyRootFirstSetup(temporary) {
     model: "fixture-model", reasoningEffort: "high", recommended: [] });
   const cliHome = path.join(await fs.realpath(temporary), "cli-root-first"), cliRegistry = path.join(cliHome, "registry");
   await createFixture(cliHome, cliRegistry);
-  const cliOptions = { octopusHomeRoot: cliHome, registryRoot: cliRegistry, request: cliPlan.workspace.request,
+  const cliOptions = { phobosHomeRoot: cliHome, registryRoot: cliRegistry, request: cliPlan.workspace.request,
     planOperatorSurface: (input) => fixturePlan(cliHome, cliRegistry, input) };
   await initializeWorkspace(cliOptions);
   assert.equal((await readWorkspaceSetupState(cliOptions)).receipt.request_digest, cliPlan.workspace.request_digest);
@@ -2309,7 +2309,7 @@ async function verifyRootFirstSetup(temporary) {
   Object.assign(root, { config: { selected: ["preserved"] }, policy_narrowing: { allowed_worker_environment_kinds: ["git_worktree"] } });
   const before = `${JSON.stringify(root, null, 2)}\n`, template = await fs.readFile(templatePath);
   await fs.writeFile(rootPath, before);
-  const options = { octopusHomeRoot: home, registryRoot: registry, request, planOperatorSurface: (input) => fixturePlan(home, registry, input) };
+  const options = { phobosHomeRoot: home, registryRoot: registry, request, planOperatorSurface: (input) => fixturePlan(home, registry, input) };
   await assert.rejects(initializeWorkspace({ ...options, request: { ...request, root: { ...request.root, templateName: "operator_space" } } }), /actual bootstrap-root/);
   await fs.writeFile(templatePath, JSON.stringify({ ...JSON.parse(template), bootstrap_root: false }));
   await assert.rejects(initializeWorkspace(options), /declared bootstrap-root/);
@@ -2348,7 +2348,7 @@ async function verifyRootFirstSetup(temporary) {
     assert.equal(record.parent_ee_id, project.parentKey === "root" ? root.ee_id : projectIds.get(project.parentKey));
     assert.equal(record.goal, project.goal);
   }
-  const sidecar = JSON.parse(await fs.readFile(path.join(registry, "interface", outcome.homeInterfaceId, "octopus_os.json")));
+  const sidecar = JSON.parse(await fs.readFile(path.join(registry, "interface", outcome.homeInterfaceId, "phobos_os.json")));
   assert.deepEqual(sidecar.authoring_profile.door_host_slots, request.home.doorHostSlots);
   assert.ok(sidecar.task_authoring_profiles.every((profile) => Object.keys(profile.door_host_slots).length === 0));
   assert.equal(sidecar.presentation.name, draft.spaceName);
@@ -2368,7 +2368,7 @@ async function verifyMaintenanceSetup(temporary) {
   const { maintenanceFixture } = require("../../registry/interface/world_operator_chat/test_maintenance_client.cjs");
   const request = setupRequest("maintenance_setup_12345678"); request.projects = [];
   let invalid = "";
-  const options = { octopusHomeRoot: home, registryRoot: registry, request, planOperatorSurface: async (input) => {
+  const options = { phobosHomeRoot: home, registryRoot: registry, request, planOperatorSurface: async (input) => {
     const plan = await fixturePlan(home, registry, input);
     if (input.request.clientSurfaceRole !== "home") return plan;
     const source = plan.writes.find((write) => write.tag === `run:${plan.runId}`);
@@ -2413,7 +2413,7 @@ async function verifyMaintenanceSetup(temporary) {
   console.log("maintenance setup: exact companions and writers, independent ceilings, partial/foreign/changed plan refusal passed");
 }
 
-async function fixturePlan(octopusHomeRoot, registryRoot, { eeInstancesRoot, request }) {
+async function fixturePlan(phobosHomeRoot, registryRoot, { eeInstancesRoot, request }) {
   const rootRecord = JSON.parse(await fs.readFile(path.join(eeInstancesRoot, `${request.eeId}.json`), "utf8"));
   const clientSurfaceRole = request.clientSurfaceRole ?? "home";
   if (clientSurfaceRole === "home") {
@@ -2453,7 +2453,7 @@ async function fixturePlan(octopusHomeRoot, registryRoot, { eeInstancesRoot, req
   const interfaceRoot = path.join(registryRoot, "interface", chatInterfaceId);
   const sidecar = {
     schema_version: 1,
-    workspace: "octopus_os",
+    workspace: "phobos_os",
     interface: chatInterfaceId,
     owner_interface: chatInterfaceId,
     component: "client",
@@ -2523,7 +2523,7 @@ async function fixturePlan(octopusHomeRoot, registryRoot, { eeInstancesRoot, req
     writes: [
       ...artifactWrites,
       write(path.join(interfaceRoot, "interface.json"), `${JSON.stringify({ id: chatInterfaceId })}\n`, `interface:${chatInterfaceId}`),
-      write(path.join(interfaceRoot, "octopus_os.json"), `${JSON.stringify(sidecar, null, 2)}\n`, `octopus-os:${chatInterfaceId}`),
+      write(path.join(interfaceRoot, "phobos_os.json"), `${JSON.stringify(sidecar, null, 2)}\n`, `phobos-os:${chatInterfaceId}`),
       write(path.join(registryRoot, "interface", modelInterfaceId, "interface.json"), `${JSON.stringify({ id: modelInterfaceId, interface_driver_config: { private_config: { model: request.providerModel } } })}\n`, `interface:${modelInterfaceId}`),
       write(path.join(registryRoot, "interface", workerInterfaceId, "interface.json"), `${JSON.stringify({ id: workerInterfaceId })}\n`, `interface:${workerInterfaceId}`),
       write(path.join(registryRoot, "interface", workerInterfaceId, "policy.json"), `${JSON.stringify({ id: workerInterfaceId, ceiling: { interfaces: requiredInterfaceIds, tools: requiredToolIds } })}\n`, `policy:${workerInterfaceId}`),
@@ -2532,15 +2532,15 @@ async function fixturePlan(octopusHomeRoot, registryRoot, { eeInstancesRoot, req
       write(path.join(registryRoot, "interface", writerId, "interface.json"), JSON.stringify({ id: writerId, role: "system" }), `interface:${writerId}`),
       write(path.join(registryRoot, "tool", toolId, "tool.json"), `${JSON.stringify({ id: toolId, interface: writerId })}\n`, `tool:${toolId}`),
       write(path.join(registryRoot, "tool", inputToolId, "tool.json"), JSON.stringify({ id: inputToolId, interface: writerId }), `tool:${inputToolId}`),
-      write(path.join(octopusHomeRoot, "state", "runs", `${runId}.json`), `${JSON.stringify(runRecord, null, 2)}\n`, `run:${runId}`),
+      write(path.join(phobosHomeRoot, "state", "runs", `${runId}.json`), `${JSON.stringify(runRecord, null, 2)}\n`, `run:${runId}`),
     ],
     ledgerOffset: 0,
   };
 }
 
-async function fixtureProjectScope(octopusHomeRoot, registryRoot, workspace) {
+async function fixtureProjectScope(phobosHomeRoot, registryRoot, workspace) {
   const environments = [];
-  const eeRoot = path.join(octopusHomeRoot, "state", "ee_instances");
+  const eeRoot = path.join(phobosHomeRoot, "state", "ee_instances");
   for (const entry of await fs.readdir(eeRoot, { withFileTypes: true })) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
     const bytes = await fs.readFile(path.join(eeRoot, entry.name));
@@ -2554,7 +2554,7 @@ async function fixtureProjectScope(octopusHomeRoot, registryRoot, workspace) {
       allowedChildTemplateIds: [...template.allowed_child_ee_templates].sort(),
     });
   }
-  const sidecar = await fs.readFile(path.join(registryRoot, "interface", workspace.homeInterfaceId, "octopus_os.json"));
+  const sidecar = await fs.readFile(path.join(registryRoot, "interface", workspace.homeInterfaceId, "phobos_os.json"));
   return {
     status: "ready",
     rootEeId: workspace.rootEeId,
@@ -2576,14 +2576,14 @@ function fixtureWorkspaceIdentity(scope) {
   };
 }
 
-async function createFixture(octopusHomeRoot, registryRoot) {
+async function createFixture(phobosHomeRoot, registryRoot) {
   for (const directory of [
-    path.join(octopusHomeRoot, "state", "ee_instances"),
+    path.join(phobosHomeRoot, "state", "ee_instances"),
     path.join(registryRoot, "interface"),
     path.join(registryRoot, "tool"),
     path.join(registryRoot, "artifact"),
   ]) await fs.mkdir(directory, { recursive: true });
-  await fs.writeFile(path.join(octopusHomeRoot, "state", "ee_instances", "ee_existence.json"), `${JSON.stringify({
+  await fs.writeFile(path.join(phobosHomeRoot, "state", "ee_instances", "ee_existence.json"), `${JSON.stringify({
     ee_id: "ee_existence",
     template_name: "existence",
     parent_ee_id: null,
@@ -2649,18 +2649,18 @@ function deterministicId(prefix, operationId, key) {
 }
 
 async function verifyProjectPolicies() {
-  const home = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-project-policy-test-"))), registry = path.join(home, "registry");
+  const home = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-project-policy-test-"))), registry = path.join(home, "registry");
   try {
     await createFixture(home, registry);
     const planOperatorSurface = (input) => fixturePlan(home, registry, input);
-    const workspace = await initializeWorkspace({ octopusHomeRoot: home, registryRoot: registry, request: setupRequest("policy_setup_12345678"), planOperatorSurface });
-    await fs.mkdir(path.join(home, "state/ee_instances/.octopus-publication"), { mode: 0o700 });
+    const workspace = await initializeWorkspace({ phobosHomeRoot: home, registryRoot: registry, request: setupRequest("policy_setup_12345678"), planOperatorSurface });
+    await fs.mkdir(path.join(home, "state/ee_instances/.phobos-publication"), { mode: 0o700 });
     await writeTemplate(registry, "existence", ["project", "operator_space", "existence"]);
     const scope = await fixtureProjectScope(home, registry, workspace);
     const request = { action: "create_project", operationId: "policy_create_12345678", workspace: fixtureWorkspaceIdentity(scope), parentEeId: workspace.rootEeId,
       expectedParentDigest: scope.environments.find((row) => row.eeId === workspace.rootEeId).recordDigest,
       sourceFolders: [home, registry], templateName: "operator_space", name: "General work", goal: "A concrete goal", presentation: { icon: "folder", color: "blue" } };
-    const options = { octopusHomeRoot: home, registryRoot: registry, scope, request, planOperatorSurface };
+    const options = { phobosHomeRoot: home, registryRoot: registry, scope, request, planOperatorSurface };
     const before = await fs.readdir(path.join(home, "state/ee_instances"));
     await assert.rejects(mutateWorkspaceProject({ ...options, request: { ...request, templateName: "missing" } }), /does not allow/);
     await assert.rejects(mutateWorkspaceProject({ ...options, request: { ...request, templateName: "existence" } }), /bootstrap-root/);
@@ -2677,11 +2677,11 @@ async function verifyProjectPolicies() {
     const child = JSON.parse(await fs.readFile(path.join(home, "state/ee_instances", `${created.eeId}.json`)));
     assert.equal(child.name, "General work");
     assert.equal(child.goal, "A concrete goal");
-    assert.deepEqual(child.config.octopus_os.source_folders, [home, registry]);
+    assert.deepEqual(child.config.phobos_os.source_folders, [home, registry]);
     assert.equal(child.template_name, "operator_space"); assert.equal(child.parent_ee_id, workspace.rootEeId);
     assert.equal((await mutateWorkspaceProject(options)).changed, false);
     const editScope = await fixtureProjectScope(home, registry, workspace);
-    const homeSidecar = JSON.parse(await fs.readFile(path.join(registry, "interface", workspace.homeInterfaceId, "octopus_os.json")));
+    const homeSidecar = JSON.parse(await fs.readFile(path.join(registry, "interface", workspace.homeInterfaceId, "phobos_os.json")));
     const edit = { action: "update_project_presentation", operationId: "folder_edit_12345678",
       workspace: fixtureWorkspaceIdentity(editScope),
       projects: homeSidecar.presentation.projects.map(({ ee_id, icon, color }) => ({ eeId: ee_id, icon, color,
@@ -2692,14 +2692,14 @@ async function verifyProjectPolicies() {
       projects: edit.projects.map((project) => project.eeId === created.eeId ? { ...project, expectedProjectDigest: "0".repeat(64) } : project) } }), /Project changed/);
     await mutateWorkspaceProject({ ...options, scope: editScope, request: edit });
     const edited = JSON.parse(await fs.readFile(path.join(home, "state/ee_instances", `${created.eeId}.json`)));
-    assert.deepEqual(edited.config.octopus_os.source_folders, [registry, home]);
+    assert.deepEqual(edited.config.phobos_os.source_folders, [registry, home]);
     assert.equal(edited.name, "Renamed environment");
     assert.equal(edited.ee_id, child.ee_id);
     assert.equal(edited.template_name, child.template_name);
     assert.deepEqual(edited.policy_narrowing, child.policy_narrowing);
     assert.equal(edited.goal, child.goal);
     assert.equal((await mutateWorkspaceProject({ ...options, scope: editScope, request: edit })).changed, false);
-    const sidecarPath = path.join(registry, "interface", workspace.homeInterfaceId, "octopus_os.json");
+    const sidecarPath = path.join(registry, "interface", workspace.homeInterfaceId, "phobos_os.json");
     const sidecarBytes = await fs.readFile(sidecarPath);
     const aliased = JSON.parse(sidecarBytes);
     aliased.presentation.projects.find((project) => project.ee_id === created.eeId).name = "Client-only alias";
@@ -2707,7 +2707,7 @@ async function verifyProjectPolicies() {
     await fs.mkdir(path.join(home, "ledger"), { recursive: true });
     await fs.writeFile(path.join(home, "ledger/movements.jsonl"), "");
     const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, "../.."), sourceRegistry: () => registry,
-      octopusHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
+      phobosHome: () => home, projectEePolicies: () => fixturePolicyProjection(home) });
     try {
       const topology = await store.read({ contract_version: 1, method: "projection.runtime.topology", params: { include_ledger: false } });
       const environment = topology.eeRaw.ee_instances.find((row) => row.ee_id === created.eeId);
@@ -2717,10 +2717,10 @@ async function verifyProjectPolicies() {
       const scope = await store.read({ contract_version: 1, method: "projection.operator.os.scope" });
       assert.equal(scope.projects.find((row) => row.ee_id === created.eeId).name, edited.name);
     } finally { store.close(); await fs.writeFile(sidecarPath, sidecarBytes); }
-    const health = await readWorkspaceSetupState({ octopusHomeRoot: home, registryRoot: registry });
+    const health = await readWorkspaceSetupState({ phobosHomeRoot: home, registryRoot: registry });
     assert.equal(health.status, "configured", health.errors.join("; "));
     await fs.writeFile(path.join(home, "state/ee_instances/ee_unreceipted.json"), JSON.stringify({ ...child, ee_id: "ee_unreceipted" }));
-    const orphaned = await readWorkspaceSetupState({ octopusHomeRoot: home, registryRoot: registry });
+    const orphaned = await readWorkspaceSetupState({ phobosHomeRoot: home, registryRoot: registry });
     assert.equal(orphaned.status, "degraded"); assert.match(orphaned.errors.join("; "), /operator spaces without receipts: ee_unreceipted/);
     console.log("project policy authoring: admitted preset, refusal, drift and replay passed");
   } finally { await fs.rm(home, { recursive: true, force: true }); }
@@ -2771,10 +2771,10 @@ async function verifySetupFile() {
   assert.equal(imported.providerModel, "fixture-model");
   assert.equal(life.parentKey, null);
   assert.throws(() => files.draftFromSetupFile({ ...file, capabilities: [...file.capabilities, { kind: "application", id: "world_telegram", projects: [] }] }, base, catalog, provider, ids),
-    /needs 'world_telegram', which this Octopus does not offer/);
+    /needs 'world_telegram', which this Phobos does not offer/);
   assert.throws(() => files.draftFromSetupFile({ ...file, model: { id: "missing-model" } }, base, catalog, provider, ids), /model 'missing-model', which is not available here/);
-  assert.throws(() => files.parseSetupFile(JSON.stringify({ ...file, schema: "other" })), /not an Octopus setup file/);
-  assert.throws(() => files.parseSetupFile(JSON.stringify({ ...file, extra: true })), /fields Octopus does not read: extra/);
+  assert.throws(() => files.parseSetupFile(JSON.stringify({ ...file, schema: "other" })), /not a Phobos setup file/);
+  assert.throws(() => files.parseSetupFile(JSON.stringify({ ...file, extra: true })), /fields Phobos does not read: extra/);
   const home = files.setupFileFromHome({
     scope: { status: "ready", root_ee_id: "ee_root", root_environment: { name: "Lab", goal: "Run experiments" }, projects: [
       { ee_id: "ee_root", parent_ee_id: "", name: "Lab", goal: "Run experiments" },
@@ -2807,25 +2807,25 @@ async function verifySetupFile() {
 }
 
 const execution = process.argv[2] === "conditioned-recover"
-  ? recoverWorkspaceTransactions({ octopusHomeRoot: process.argv[3], registryRoot: path.join(process.argv[3], "registry") })
+  ? recoverWorkspaceTransactions({ phobosHomeRoot: process.argv[3], registryRoot: path.join(process.argv[3], "registry") })
   : process.argv[2] === "publication-recovery"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-publication-test-")).then(async temporary => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-publication-test-")).then(async temporary => {
     try { await verifyPublicationRecovery(await fs.realpath(temporary)); }
     finally { await fs.rm(temporary, { recursive: true, force: true }); }
   })
   : process.argv[2] === "home-recipe"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-home-recipe-test-")).then(async temporary => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-home-recipe-test-")).then(async temporary => {
     try { await verifyRootFirstSetup(await fs.realpath(temporary)); } finally { await fs.rm(temporary, { recursive: true, force: true }); }
   })
   : process.argv[2] === "conditioned-publication"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-conditioned-test-")).then(async temporary => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-conditioned-test-")).then(async temporary => {
     try { await verifyConditionedPublicationRecovery(await fs.realpath(temporary)); }
     finally { await fs.rm(temporary, { recursive: true, force: true }); }
   })
   : process.argv[2] === "directory-recover"
   ? recoverWorkspaceTransactions(retirementFixtureOptions(process.argv[3]))
   : process.argv[2] === "task-removal"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-task-removal-test-")).then(async (temporary) => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-task-removal-test-")).then(async (temporary) => {
     try { await verifyLinkedTaskRemoval(await fs.realpath(temporary)); }
     finally { await fs.rm(temporary, { recursive: true, force: true }); }
   })
@@ -2834,7 +2834,7 @@ const execution = process.argv[2] === "conditioned-recover"
   : process.argv[2] === "project-policy"
   ? verifyProjectPolicies()
   : process.argv[2] === "task-archive"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-task-archive-test-")).then(async (temporary) => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-task-archive-test-")).then(async (temporary) => {
       try { await verifyTaskArchive(temporary); } finally { await fs.rm(temporary, { recursive: true, force: true }); }
     })
   : process.argv[2] === "capability-preferences"
@@ -2842,7 +2842,7 @@ const execution = process.argv[2] === "conditioned-recover"
   : process.argv[2] === "consent-setup"
   ? verifyRetiredConsentSetup()
   : process.argv[2] === "maintenance-setup"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-maintenance-setup-test-")).then(async (temporary) => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-maintenance-setup-test-")).then(async (temporary) => {
     try { await verifyMaintenanceSetup(await fs.realpath(temporary)); } finally { await fs.rm(temporary, { recursive: true, force: true }); }
   })
   : process.argv[2] === "crash-child"
@@ -2850,7 +2850,7 @@ const execution = process.argv[2] === "conditioned-recover"
   : process.argv[2] === "hold-workspace-child"
   ? crashChild(process.argv[3], process.argv[4], true)
   : process.argv[2] === "workspace-lock"
-  ? fs.mkdtemp(path.join(os.tmpdir(), "octopus-workspace-lock-test-")).then(async temporary => {
+  ? fs.mkdtemp(path.join(os.tmpdir(), "phobos-workspace-lock-test-")).then(async temporary => {
     try { await verifyLiveWorkspaceLock(await fs.realpath(temporary)); } finally { await fs.rm(temporary, { recursive: true, force: true }); }
   })
   : process.argv[2] === "project-crash-child"

@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.process_session",
   "version": "1.0.2",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Process Session",
     "description": "Private process rooms with their own workspace, terminals and long-running commands.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "terminal"
   },

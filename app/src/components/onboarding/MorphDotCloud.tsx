@@ -162,7 +162,7 @@ export function MorphDotCloud({ srcs, progressRef, className = "" }: Props) {
     };
   }, [srcs, progressRef]);
 
-  return <canvas ref={canvasRef} className={`octopus-cloud ${className}`.trim()} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`phobos-cloud ${className}`.trim()} aria-hidden="true" />;
 }
 
 let glowSprite: HTMLCanvasElement | null = null;

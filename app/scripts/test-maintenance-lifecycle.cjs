@@ -16,7 +16,7 @@ const projectionAuthoring = require("../electron/clientWorkspaceAuthoring.cjs");
 const workspaceSetup = require("../electron/workspaceSetup.cjs");
 const { withFixturePublisher, fixtureFilePublisher, fixtureDirectoryPublisher } = require("./fixturePublication.cjs");
 const commitProjectionClientAuthoring = (home, registry, request, options = {}) =>
-  projectionAuthoring.commitProjectionClientAuthoring(home, registry, request, withFixturePublisher({ octopusHomeRoot: home, ...options }));
+  projectionAuthoring.commitProjectionClientAuthoring(home, registry, request, withFixturePublisher({ phobosHomeRoot: home, ...options }));
 const recoverWorkspaceTransactions = (options) => workspaceSetup.recoverWorkspaceTransactions(withFixturePublisher(options));
 const loaded = { exports: require("../electron/projection/taskDeletion.cjs") };
 const authoringFile = path.join(__dirname, "../electron/workspaceSetup.cjs"), authoring = { exports: {} };
@@ -68,7 +68,7 @@ async function stagedRetiredGroup(f, withProof = false) {
   await f.remove({}, async (value) => { request = value; return { cleanupWarnings: [] }; });
   const options = adapter.exports.commitProjectionClientAuthoring(f.root, f.registry, request);
   const api = authoring.exports, roots = await api.normalizeRoots({ ...options,
-    publishFiles: fixtureFilePublisher(options.octopusHomeRoot), publication: fixtureDirectoryPublisher(options.octopusHomeRoot) });
+    publishFiles: fixtureFilePublisher(options.phobosHomeRoot), publication: fixtureDirectoryPublisher(options.phobosHomeRoot) });
   await api.ensureStateRoots(roots);
   const transactionRoot = await api.stageClientAuthoringTransaction(roots, api.parseClientAuthoringPlan(options.plan));
   const journal = await api.readJournal(roots, transactionRoot);
@@ -110,7 +110,7 @@ async function adoptCatalogue(f) {
 }
 
 async function fixture(t) {
-  const root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "octopus-lifecycle-contract-"));
+  const root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "phobos-lifecycle-contract-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const registry = path.join(root, "registry"), runs = path.join(root, "state", "runs");
   for (const directory of [registry, runs, path.join(root, "state", "ee_instances"), path.join(registry, "tool"), path.join(registry, "ee_template")]) await fs.mkdir(directory, { recursive: true });
@@ -169,7 +169,7 @@ async function fixture(t) {
   for (const target of targets) await fs.writeFile(path.join(runs, `${target.run}.json`), target.initial_record_content);
   for (const writer of writerRecords) await writeJson(path.join(runs, `${writer.id}.json`), writer);
   for (const [id, component] of [["source_client", "client"], ["source_worker", "worker"], ["source_provider", "provider"]]) {
-    await writeJson(path.join(registry, "interface", id, "octopus_os.json"), { schema_version: 1, workspace: "octopus_os",
+    await writeJson(path.join(registry, "interface", id, "phobos_os.json"), { schema_version: 1, workspace: "phobos_os",
       interface: id, owner_interface: "source_client", component, surface_role: "task",
       ...(component === "client" ? { provider_choice_interface: "provider_template", worker_choice_interface: "worker_template" } : {}) });
   }
@@ -181,13 +181,13 @@ async function fixture(t) {
   await fs.writeFile(path.join(root, "ledger", "movements.jsonl"), "retained movements\n");
   await fs.writeFile(path.join(root, "ledger", "blobs", "snapshot"), "retained snapshot");
   const readTopology = (record = source) => lifecycle.readMaintenanceTaskTopology({ registryRoot: registry, runRecordsRoot: runs,
-    sourceRecord: record, sourceClientInterface: "source_client", readWriterRuns: (target, ids) => loaded.exports.octopusOsOwnedWriterRuns(root, target, ids) });
+    sourceRecord: record, sourceClientInterface: "source_client", readWriterRuns: (target, ids) => loaded.exports.phobosOsOwnedWriterRuns(root, target, ids) });
   const connectedClients = [];
   const remove = async (hooks = {}, commit) => {
     const digest = crypto.createHash("sha256").update(await fs.readFile(sourceFile)).digest("hex");
     const scope = { clientRuns: [{ run_id: source.id, surface_role: "task", record_path: sourceFile,
       record_digest: digest, interface_id: "source_client", ee_id: source.ee }, ...connectedClients], readOnlyRuns: [] };
-    return loaded.exports.deleteOctopusOsTask(registry, root, scope, { runId: source.id, expectedDigest: digest }, hooks.releaseTaskWorkerEnvironments ?? null,
+    return loaded.exports.deletePhobosOsTask(registry, root, scope, { runId: source.id, expectedDigest: digest }, hooks.releaseTaskWorkerEnvironments ?? null,
       commit ?? ((request) => commitProjectionClientAuthoring(root, registry, request, { retirementBarrier: hooks.retirementBarrier })),
       { taskLifecycle: lifecycle, ...hooks });
   };
@@ -209,7 +209,7 @@ test("task deletion disconnects idle client outputs atomically and retains autho
     authoring: { run: f.source.id, worker: f.source.worker, provider_interface: "source_provider", registry_root: f.registry, run_file: f.sourceFile } };
   const artifact = path.join(f.registry, "artifact", coordinates.id, "artifact.json"); await writeJson(artifact, coordinates);
   f.source.checkpoints[0].artifact_bindings.push({ id: coordinates.id }); await writeJson(f.sourceFile, f.source);
-  await fs.mkdir(path.join(f.registry, "tool", ".octopus-publication"), { mode: 0o700 });
+  await fs.mkdir(path.join(f.registry, "tool", ".phobos-publication"), { mode: 0o700 });
   await assert.rejects(f.remove({ readTaskStatus: async () => ({ turn_open: true }) }), /connected task to finish/);
   const hooks = { readTaskStatus: async () => ({ turn_open: false, turn_state: "idle" }), retirementBarrier: contractBarrier() };
   await assert.rejects(f.remove(hooks, request => {
@@ -358,7 +358,7 @@ test("crash after source publication barrier without held proof rolls back throu
   await assert.rejects(fs.stat(f.sourceFile), /ENOENT/);
   assert.equal(staged.journal.writes.find((write) => write.publish_barrier).state, "applied");
   assert.equal(staged.journal.retirement.proof, null);
-  assert.equal((await recoverWorkspaceTransactions({ octopusHomeRoot: f.root, registryRoot: f.registry })).recovered, 1);
+  assert.equal((await recoverWorkspaceTransactions({ phobosHomeRoot: f.root, registryRoot: f.registry })).recovered, 1);
   for (const [file, bytes] of staged.before) assert.deepEqual(await fs.readFile(file), bytes);
   assert.equal((await f.readTopology()).records.size, 4);
   assert.deepEqual(await fs.readdir(staged.roots.transactionsRoot), []);
@@ -371,7 +371,7 @@ test("changed live Run bytes or corrupt saved originals stop rollback without ov
     const changed = Buffer.from(JSON.stringify({ ...f.source, status: "running" }));
     const file = corruptOriginal ? path.join(staged.transactionRoot, write.before_file) : f.sourceFile;
     await fs.writeFile(file, changed);
-    await assert.rejects(recoverWorkspaceTransactions({ octopusHomeRoot: f.root, registryRoot: f.registry }), /changed bytes|snapshot .* corrupt/);
+    await assert.rejects(recoverWorkspaceTransactions({ phobosHomeRoot: f.root, registryRoot: f.registry }), /changed bytes|snapshot .* corrupt/);
     assert.deepEqual(await fs.readFile(file), changed);
     assert.ok(await fs.stat(path.join(staged.transactionRoot, "journal.json")));
     for (const id of f.d.lifecycle_ownership.private_interface_ids) assert.ok(await fs.stat(path.join(f.registry, "interface", id)));
@@ -388,7 +388,7 @@ test("dead helper after durable proof refuses the next removal; recovery must re
   } }) }), /helper has died/);
   await assert.rejects(fs.stat(f.sourceFile), /ENOENT/);
   for (const id of f.d.lifecycle_ownership.private_interface_ids) assert.ok(await fs.stat(path.join(f.registry, "interface", id)));
-  const options = { octopusHomeRoot: f.root, registryRoot: f.registry };
+  const options = { phobosHomeRoot: f.root, registryRoot: f.registry };
   await assert.rejects(recoverWorkspaceTransactions(options), /live preflight and held ownership barrier/);
   let heldChecks = 0;
   await recoverWorkspaceTransactions({ ...options, retirementBarrier: contractBarrier({ verifyBefore: async () => {
@@ -404,7 +404,7 @@ test("recovery after descriptor tombstoning uses pinned originals and prior proo
   const removal = staged.journal.removals.find((entry) => entry.destination === path.join(f.registry, "interface", f.d.provider_interface));
   await authoring.exports.applyClientAuthoringRemoval(staged.roots, staged.transactionRoot, removal, staged.journal);
   removal.state = "moved"; await authoring.exports.writeJournal(staged.transactionRoot, staged.journal);
-  const options = { octopusHomeRoot: f.root, registryRoot: f.registry };
+  const options = { phobosHomeRoot: f.root, registryRoot: f.registry };
   await assert.rejects(recoverWorkspaceTransactions({ ...options, retirementBarrier: contractBarrier({ verify: async () => {
     throw new Error("selected Run has a new affected ledger tail");
   } }) }), /affected ledger tail/);
@@ -431,7 +431,7 @@ test("a cleaned journal renamed for cleanup without its native plan fails closed
   const cleanupRoot = path.join(staged.roots.transactionsRoot, `.cleanup-${staged.journal.operation_id}`);
   await fs.rename(staged.transactionRoot, cleanupRoot);
   await fs.unlink(path.join(cleanupRoot, staged.journal.writes.find((write) => write.before_file).before_file));
-  await assert.rejects(recoverWorkspaceTransactions({ octopusHomeRoot: f.root, registryRoot: f.registry }),
+  await assert.rejects(recoverWorkspaceTransactions({ phobosHomeRoot: f.root, registryRoot: f.registry }),
     (error) => error.code === "workspace_directory_publication_uncertain");
   assert.deepEqual(await fs.readdir(staged.roots.transactionsRoot), [path.basename(cleanupRoot)]);
   assert.equal(await fs.readFile(path.join(f.entries, "published.json"), "utf8"), "published knowledge");
@@ -450,7 +450,7 @@ test("a rollback written outside native publication is refused while ordinary Ru
   await fs.unlink(path.join(cleanupRoot, staged.journal.writes.find((write) => write.before_file).before_file));
   const advanced = Buffer.from(JSON.stringify({ ...f.source, status: "running" }));
   await fs.writeFile(f.sourceFile, advanced);
-  await assert.rejects(recoverWorkspaceTransactions({ octopusHomeRoot: f.root, registryRoot: f.registry }), /exact publication evidence/);
+  await assert.rejects(recoverWorkspaceTransactions({ phobosHomeRoot: f.root, registryRoot: f.registry }), /exact publication evidence/);
   assert.deepEqual(await fs.readFile(f.sourceFile), advanced);
   assert.deepEqual(await fs.readdir(staged.roots.transactionsRoot), [path.basename(cleanupRoot)]);
   assert.equal((await f.readTopology()).records.size, 4);

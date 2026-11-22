@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { WorkerEnvironmentProjection, WorkerEnvironmentSurfaceProjection } from "../../data/topology";
 import {
-  OctopusTerminal,
-  type OctopusTerminalSession,
-  type OctopusTerminalSessionHandlers,
-} from "../terminal/OctopusTerminal";
+  PhobosTerminal,
+  type PhobosTerminalSession,
+  type PhobosTerminalSessionHandlers,
+} from "../terminal/PhobosTerminal";
 import {
   createProcessViewerTerminalSession,
   type ProcessViewerTerminalState,
@@ -69,7 +69,7 @@ function ProcessRoomTerminal({ active, environment, surface }: {
   const [connectionError, setConnectionError] = useState("");
   const [viewer, setViewer] = useState<ProcessViewerTerminalState | null>(null);
   const [manualControlConfirmed, setManualControlConfirmed] = useState(() => (
-    sessionStorage.getItem("octopus.process-viewer.manual-control-warning.v1") === "acknowledged"
+    sessionStorage.getItem("phobos.process-viewer.manual-control-warning.v1") === "acknowledged"
   ));
   const session = useMemo(
     () => createProcessViewerTerminalSession(
@@ -83,7 +83,7 @@ function ProcessRoomTerminal({ active, environment, surface }: {
     [environment.id, surface.id],
   );
   const warning = dataText(surface.data, "warning")
-    || "Manual terminal control is direct room I/O and is not Octopus artifact evidence.";
+    || "Manual terminal control is direct room I/O and is not Phobos artifact evidence.";
   const state = viewer?.state;
   const status = state?.status || dataText(surface.data, "process_status") || surface.status;
   const tty = state ? state.tty && !surface.readOnly : surface.data.tty === true && !surface.readOnly;
@@ -95,7 +95,7 @@ function ProcessRoomTerminal({ active, environment, surface }: {
     action();
   };
   const confirmManualControl = () => {
-    sessionStorage.setItem("octopus.process-viewer.manual-control-warning.v1", "acknowledged");
+    sessionStorage.setItem("phobos.process-viewer.manual-control-warning.v1", "acknowledged");
     setManualControlConfirmed(true);
   };
   return (
@@ -135,7 +135,7 @@ function ProcessRoomTerminal({ active, environment, surface }: {
         </div>
       ) : null}
       <div className="we-terminal-session">
-        <OctopusTerminal
+        <PhobosTerminal
           autoFocus={active && tty && manualControlConfirmed}
           id={`worker-environment-process-terminal-${environment.id}-${surface.id}`}
           readOnly={!tty || !manualControlConfirmed || !running}
@@ -186,7 +186,7 @@ function LiveTerminal({ active, environment, surface }: {
     <div className="we-terminal-workspace">
       <TerminalSurfaceBar environment={environment} surface={surface} />
       <div className="we-terminal-session">
-        <OctopusTerminal
+        <PhobosTerminal
           autoFocus={active}
           id={`worker-environment-terminal-${environment.id}-${surface.id}-${generation}`}
           session={session}
@@ -224,7 +224,7 @@ function TranscriptTerminal({ active, environment, surface, transcript }: {
     <div className="we-terminal-workspace">
       <TerminalSurfaceBar environment={environment} surface={surface} />
       <div className="we-terminal-session">
-        <OctopusTerminal
+        <PhobosTerminal
           autoFocus={active}
           id={`worker-environment-terminal-${environment.id}-${surface.id}`}
           readOnly
@@ -269,9 +269,9 @@ function validWebSocketUrl(value: string): boolean {
 function createRestartableWebSocketTerminalSession(
   socketUrl: string,
   onState: (state: WebSocketTerminalState) => void,
-): OctopusTerminalSession {
-  let handlers: OctopusTerminalSessionHandlers | null = null;
-  let inner: OctopusTerminalSession | null = null;
+): PhobosTerminalSession {
+  let handlers: PhobosTerminalSessionHandlers | null = null;
+  let inner: PhobosTerminalSession | null = null;
   let unsubscribeInner: (() => void) | null = null;
   const disposeInner = () => {
     unsubscribeInner?.();

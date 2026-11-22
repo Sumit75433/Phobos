@@ -79,7 +79,7 @@
 .pane-tab,
 .pane-tab-background,
 .pane-tab-main,
-.pane-tab-close { corner-shape: var(--octopus-corner-shape); }
+.pane-tab-close { corner-shape: var(--phobos-corner-shape); }
 
 .pane-tab {
   position: relative;

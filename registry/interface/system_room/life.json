@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-system-room-tool-door-life",
+      "bin": "target/debug/phobos-system-room-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -27,9 +27,9 @@
         "read_paths": [],
         "write_paths": [],
         "executable_paths": [
-          "target/debug/octopus-artifact-send-tool",
-          "target/debug/octopus-file-read-tool",
-          "target/debug/octopus-file-write-tool"
+          "target/debug/phobos-artifact-send-tool",
+          "target/debug/phobos-file-read-tool",
+          "target/debug/phobos-file-write-tool"
         ],
         "executable_commands": [],
         "read_env_paths": [],

@@ -1,9 +1,9 @@
 import { loadChatRunMessages, type ChatRunMessage } from "../../chatRuns";
 import type {
-  OctopusClientAccessProfile,
-  OctopusOperatorChatArtifact,
-  OctopusOperatorChatCursor,
-  OctopusOperatorChatMovementArtifact,
+  PhobosClientAccessProfile,
+  PhobosOperatorChatArtifact,
+  PhobosOperatorChatCursor,
+  PhobosOperatorChatMovementArtifact,
 } from "../../electron";
 import { readOperatorChatArtifacts } from "../../projectionClient";
 import { currentProjectionGeneration, nextProjectionChange } from "../../projectionLive";
@@ -25,11 +25,11 @@ export async function observeChatArtifacts(input: {
   interfaceId: string;
   afterSeq: number;
   isCurrent: () => boolean;
-  onArtifacts: (artifacts: OctopusOperatorChatArtifact[]) => void;
+  onArtifacts: (artifacts: PhobosOperatorChatArtifact[]) => void;
   onFailure: (failure: unknown) => void;
   onRecovered: () => void;
 }): Promise<void> {
-  let cursor: OctopusOperatorChatCursor | undefined;
+  let cursor: PhobosOperatorChatCursor | undefined;
   let afterSeq = input.afterSeq;
   while (input.isCurrent()) {
     const generation = currentProjectionGeneration();
@@ -75,13 +75,13 @@ export function chatObservationFailureMessage(input: {
 }
 
 export async function observeChatReply(input: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   knownRunId: string;
   interfaceId: string;
   afterSeq: number;
-  cursor: OctopusOperatorChatCursor;
+  cursor: PhobosOperatorChatCursor;
   isCurrent: () => boolean;
-  onArtifacts: (artifacts: OctopusOperatorChatArtifact[]) => void;
+  onArtifacts: (artifacts: PhobosOperatorChatArtifact[]) => void;
 }): Promise<{ runId: string; terminal: ObservedTerminalArtifact; messages?: ChatRunMessage[] } | null> {
   if (!input.knownRunId) throw new Error("operator turn returned no run id");
   const currentFailure = (failure: unknown) => {
@@ -102,7 +102,7 @@ export async function observeChatReply(input: {
       if (!batch || !input.isCurrent()) return null;
       cursor = batch.cursor;
       input.onArtifacts(batch.artifacts);
-      const terminal = batch.artifacts.find((artifact): artifact is OctopusOperatorChatMovementArtifact => (
+      const terminal = batch.artifacts.find((artifact): artifact is PhobosOperatorChatMovementArtifact => (
         artifact.source === "movement" && isChatReplyTerminal(artifact.event_kind, artifact.event_data, artifact.terminal)
       ));
       if (!terminal) continue;

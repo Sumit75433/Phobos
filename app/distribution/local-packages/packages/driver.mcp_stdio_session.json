@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.mcp_stdio_session",
   "version": "1.0.1",
@@ -9,7 +9,7 @@
   "display": {
     "name": "MCP Stdio Session",
     "description": "A local MCP server over stdio: list and call its tools, prompts and resources.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "plugins"
   },

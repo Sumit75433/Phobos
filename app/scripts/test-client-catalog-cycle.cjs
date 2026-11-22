@@ -40,7 +40,7 @@ const catalogReads = [], usageReads = [], contextReads = [], traces = [];
 let projectionChanged, accountChanged, current, latestGate, gateInput, home = "fixture-a", replyOpen = false;
 const dom = new JSDOM('<div id="root"></div>', { url: "http://localhost" });
 Object.assign(global, { window: dom.window, document: dom.window.document, IS_REACT_ACT_ENVIRONMENT: true });
-window.octopusTransport = {
+window.phobosTransport = {
   onProjectionChanged: (listener) => { projectionChanged = listener; return () => { projectionChanged = null; }; },
   onChatgptAccountChanged: (listener) => { accountChanged = listener; return () => { accountChanged = null; }; },
 };

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import type { OctopusClientContext } from "../electron";
+import type { PhobosClientContext } from "../electron";
 import { clientObservationContext } from "./clientObservation";
 import { homeWidgetDismissalsKey, homeWidgetHiddenKey } from "./homeWidgetControls";
 
-export function useClientObservation(options: Parameters<typeof clientObservationContext>[0]): OctopusClientContext {
+export function useClientObservation(options: Parameters<typeof clientObservationContext>[0]): PhobosClientContext {
   const [, changed] = useState(0);
   useEffect(() => {
     const hidden = homeWidgetHiddenKey(options.accessProfile);

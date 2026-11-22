@@ -1,5 +1,5 @@
 import type { ChatRun, ChatRunMessage } from "../../chatRuns";
-import type { OctopusOperatorChatArtifact, OctopusOperatorChatMovementArtifact } from "../../electron";
+import type { PhobosOperatorChatArtifact, PhobosOperatorChatMovementArtifact } from "../../electron";
 
 function value(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -47,9 +47,9 @@ export function operatorTurnResumeAcknowledgedOpen(messages: readonly ChatRunMes
   return open;
 }
 
-export function reconcileChatRunReceipts(run: ChatRun, artifacts: readonly OctopusOperatorChatArtifact[]): ChatRun {
+export function reconcileChatRunReceipts(run: ChatRun, artifacts: readonly PhobosOperatorChatArtifact[]): ChatRun {
   let next = run;
-  const movements = artifacts.filter((artifact): artifact is OctopusOperatorChatMovementArtifact => artifact.source === "movement" && artifact.run_id === run.runId)
+  const movements = artifacts.filter((artifact): artifact is PhobosOperatorChatMovementArtifact => artifact.source === "movement" && artifact.run_id === run.runId)
     .sort((left, right) => left.movement_seq - right.movement_seq);
   for (const artifact of movements) {
     if (artifact.movement_seq <= next.lastMovementSeq) continue;

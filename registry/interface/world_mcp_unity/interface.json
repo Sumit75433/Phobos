@@ -14,7 +14,7 @@
         "2025-06-18",
         "2025-03-26"
       ],
-      "client_name": "octopus-mcp-client",
+      "client_name": "phobos-mcp-client",
       "client_version": "1",
       "operation_catalog_dir": "operations",
       "operation_catalog_label": "mcp.operation_catalog",
@@ -35,7 +35,7 @@
       },
       "client_connection": {
         "schema_version": 1,
-        "module": "interface://world_mcp_example/packages/octopus-mcp-client/connection.cjs"
+        "module": "interface://world_mcp_example/packages/phobos-mcp-client/connection.cjs"
       },
       "server_tool_operations": {
         "prefix": "unity"

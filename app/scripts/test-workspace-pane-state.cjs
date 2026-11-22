@@ -76,7 +76,7 @@ test("exact chats restore pane tabs, contents and layout through A to B to A", a
       const history = delta => callback("navigateSurfaceHistory", { surfaceNavigation: navigation, chatWorkspace: workspace, setSurfaceNavigation: setNavigation, setSecondaryPaneOpen: pane.setOpen, setSecondaryPaneFocused: pane.setFocused, setActivePane: pane.setActivePane, setQuery() {}, setSearchFocusTick() {} })(delta);
       const selected = model.tabs.find(tab => tab.id === model.activeTabId);
       controls = { pane, model, key, openChat, selectSurface, history, run: destination.runId,
-        openFile(id, file) { model.openTab({ id, target: { kind: "files", workspaceKey: "octopus-os", openTarget: { kind: "file", rootId: "docs", path: file } } }); pane.setOpen(true); },
+        openFile(id, file) { model.openTab({ id, target: { kind: "files", workspaceKey: "phobos-os", openTarget: { kind: "file", rootId: "docs", path: file } } }); pane.setOpen(true); },
         draft(text) { api.updateFilesPane(api.filesPaneKey(profile, model.activeTabId, key), snapshot => ({ ...snapshot, draft: text })); },
       };
       React.useLayoutEffect(() => { observed.push([destination.runId, activeFileContent()?.getAttribute("data-file-content")]); });
@@ -122,7 +122,7 @@ test("exact chats restore pane tabs, contents and layout through A to B to A", a
     assert.equal(document.querySelector('[aria-label="Resize secondary pane"]').getAttribute("aria-valuenow"), "504");
     const sourcePane = controls.pane;
     const owner = { key: keyA, read: sourcePane.getState, write: state => sourcePane.setStateAt(keyA, state) };
-    const staged = { id: "shared-chat", target: { kind: "surface", surfaceId: "chat", runId: "X", workspaceKey: "octopus-os" } };
+    const staged = { id: "shared-chat", target: { kind: "surface", surfaceId: "chat", runId: "X", workspaceKey: "phobos-os" } };
     const pending = { owner, previousActiveTabId: "doc", previousActivePane: "primary", previousFocused: false, previousOpen: true, previousTabs: controls.model.tabs, tabId: staged.id, stagedTab: staged };
     await act(() => controls.model.openTab(staged));
     await act(() => controls.openChat("B"));
@@ -138,7 +138,7 @@ test("exact chats restore pane tabs, contents and layout through A to B to A", a
     const completion = { sourceWindowId: "main", transferId: "move-from-a", sourceTabId: staged.id, sourcePane: "secondary", target: staged.target };
     let acknowledgements = 0;
     const bridge = { beginClientPaneTransfer: () => completion, acknowledgeClientPaneSourceFinalization: async () => { acknowledgements++; }, windowControl: assert.fail };
-    w.octopusTransport = bridge;
+    w.phobosTransport = bridge;
     callback("beginPaneTransfer", { nativeWindowCloseRequestRef: { current: null }, clientWindow, paneStateKey: keyA })(staged.id, staged.target, "secondary");
     await act(() => controls.openChat("B"));
     await act(() => controls.model.openTab(staged));
@@ -172,8 +172,8 @@ test("exact chats restore pane tabs, contents and layout through A to B to A", a
     assert.equal(controls.model.tabs.length, 2);
     await act(() => controls.pane.setOpen(true));
     assert.equal(content(), "unsaved A");
-    await act(() => controls.model.openTab({ id: "terminal-live", target: { kind: "terminal", terminalId: "live-process", title: "Terminal", workspaceKey: "octopus-os" } }));
-    await act(() => controls.model.openTab({ id: "sources-live", target: { kind: "task_sources", target: { runId: "A", sources: [] }, workspaceKey: "octopus-os" } }));
+    await act(() => controls.model.openTab({ id: "terminal-live", target: { kind: "terminal", terminalId: "live-process", title: "Terminal", workspaceKey: "phobos-os" } }));
+    await act(() => controls.model.openTab({ id: "sources-live", target: { kind: "task_sources", target: { runId: "A", sources: [] }, workspaceKey: "phobos-os" } }));
     await act(() => controls.openChat("B"));
     await act(() => controls.openChat("A"));
     assert.equal(controls.model.activeTabId, "sources-live");

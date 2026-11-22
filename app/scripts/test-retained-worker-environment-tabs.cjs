@@ -23,8 +23,8 @@ test('real worker file drafts survive launcher selection, hiding and reordering;
   const channels = [], NativeBroadcastChannel = globalThis.BroadcastChannel;
   globalThis.BroadcastChannel = class extends NativeBroadcastChannel {constructor(name) {super(name); channels.push(this);}};
   const listeners = new Set(), add = w.addEventListener.bind(w), remove = w.removeEventListener.bind(w);
-  w.addEventListener = (type, listener, ...args) => {if (type === 'octopus:worker-environment-local-mutation') listeners.add(listener); add(type, listener, ...args);};
-  w.removeEventListener = (type, listener, ...args) => {if (type === 'octopus:worker-environment-local-mutation') listeners.delete(listener); remove(type, listener, ...args);};
+  w.addEventListener = (type, listener, ...args) => {if (type === 'phobos:worker-environment-local-mutation') listeners.add(listener); add(type, listener, ...args);};
+  w.removeEventListener = (type, listener, ...args) => {if (type === 'phobos:worker-environment-local-mutation') listeners.delete(listener); remove(type, listener, ...args);};
   const {createRoot} = require('react-dom/client');
   const result = await build({
     stdin: {contents: `import './src/components/icon-glyphs/shell'; import './src/components/icon-glyphs/chat'; export {RetainedWorkerEnvironmentTabs} from './src/components/shell/RetainedWorkerEnvironmentTabs';`, resolveDir: appRoot, loader: 'tsx'},
@@ -33,10 +33,10 @@ test('real worker file drafts survive launcher selection, hiding and reordering;
     plugins: [{name: 'display-dependencies', setup(b) {
       b.onResolve({filter: /(?:^|\/)appearance$/}, () => ({path: 'appearance', namespace: 'test'}));
       b.onResolve({filter: /^@pierre\/diffs\/react$/}, () => ({path: 'diffs', namespace: 'test'}));
-      b.onResolve({filter: /octopusDiffThemes$/}, () => ({path: 'themes', namespace: 'test'}));
+      b.onResolve({filter: /phobosDiffThemes$/}, () => ({path: 'themes', namespace: 'test'}));
       b.onLoad({filter: /.*/, namespace: 'test'}, ({path: name}) => ({contents: name === 'appearance'
         ? 'export function useAppearance(){return {themeMode:"dark"}}; export function useShouldReduceMotion(){return true}'
-        : name === 'themes' ? 'export function registerOctopusDiffThemes(){}; export function octopusDiffThemeName(){return "test"}'
+        : name === 'themes' ? 'export function registerPhobosDiffThemes(){}; export function phobosDiffThemeName(){return "test"}'
         : 'import React from "react"; export function File({file}){return React.createElement("pre",null,file.contents)}; export function FileDiff(){return null}', loader: 'js'}));
     }}],
   });
@@ -51,12 +51,12 @@ test('real worker file drafts survive launcher selection, hiding and reordering;
   const snapshot = {environments: [{id: 'ee', name: 'EE', runs: [], workerEnvironments: rooms}]};
   const fileTab = id => ({id: `file-${id}`, title: 'same.json', target: {kind: 'worker_environment', target: {schemaVersion: 1, workerEnvironmentId: id, surfaceId: `files-${id}`, panelKind: 'file', filePath: 'same.json'}}});
   const a = fileTab('a'), b = fileTab('b');
-  const launcher = {id: 'new-tab', target: {kind: 'launcher', runId: 'run', workspaceKey: 'octopus-os'}};
+  const launcher = {id: 'new-tab', target: {kind: 'launcher', runId: 'run', workspaceKey: 'phobos-os'}};
   const browser = {id: 'browser', target: {kind: 'worker_environment', target: {schemaVersion: 1, workerEnvironmentId: 'a', surfaceId: 'browser', panelKind: 'browser'}}};
   let tabs = [a, b, launcher, browser];
   const reads = [], writes = [], failures = [], browserReleases = [];
   let prepareBrowser, browserRequest, browserListeners = 0;
-  w.octopusTransport = {
+  w.phobosTransport = {
     readWorkerEnvironmentFile: async request => {reads.push(request); return {...request, kind: 'text', text: `original-${request.workerEnvironmentId}`, size: 10, modifiedAt: 'now', digest: 'a'.repeat(64), truncated: false};},
     writeWorkerEnvironmentFile: async request => {writes.push(request); throw Error('Unexpected save');},
     logClientEvent: async event => {failures.push(event);},

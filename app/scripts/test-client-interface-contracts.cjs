@@ -184,10 +184,10 @@ test("task statuses have compact accessible indicators without replacing the tit
   const glyphs = { Glyph: () => React.createElement("svg", { "aria-hidden": true }) };
   const { SidebarTaskStatus } = load("src/components/navigation/SidebarTaskStatus.tsx", { "../../appearance": appearance, "../IconGlyphs": glyphs });
   const { SidebarWorkingIndicator } = load("src/components/navigation/SidebarWorkingIndicator.tsx", { "./SidebarTaskStatus": { SidebarTaskStatus } });
-  const { OctopusTaskRow } = load("src/components/navigation/OctopusNav.tsx", {
+  const { PhobosTaskRow } = load("src/components/navigation/PhobosNav.tsx", {
     "../../appearance": appearance,
     "motion/react": { AnimatePresence: ({ children }) => children, motion: {} },
-    "./OctopusMarquee": { OctopusMarquee: ({ animateOnGroupHover, ...props }) => React.createElement("span", props) },
+    "./PhobosMarquee": { PhobosMarquee: ({ animateOnGroupHover, ...props }) => React.createElement("span", props) },
     "./SidebarWorkingIndicator": { SidebarWorkingIndicator },
     "./SidebarTaskStatus": { SidebarTaskStatus },
     "./TaskHoverCard": { TaskHoverCard: ({ children }) => children },
@@ -196,7 +196,7 @@ test("task statuses have compact accessible indicators without replacing the tit
   });
   let opened = 0, restored = 0;
   const props = { title: "Actual task", active: false, onClick: () => opened++, meta: "3d", action: { glyph: "retry", label: "Restore task", onClick: () => restored++ } };
-  const { host, root } = await mount(React.createElement(OctopusTaskRow, { ...props, failed: true, unread: true }));
+  const { host, root } = await mount(React.createElement(PhobosTaskRow, { ...props, failed: true, unread: true }));
   const row = host.querySelector('[role="button"]');
   assert.equal(host.querySelector("[data-thread-title]").textContent, "Actual task");
   assert.equal(host.textContent.includes("Attention"), false); assert.equal(row.classList.contains("is-task-failed"), false);
@@ -207,30 +207,30 @@ test("task statuses have compact accessible indicators without replacing the tit
   assert.match(row.getAttribute("aria-label"), /Failed.*unread/);
   await act(async () => host.querySelector("button").click()); assert.equal(restored, 1); assert.equal(opened, 0);
   await act(async () => key(row, "Enter")); assert.equal(opened, 1);
-  await act(async () => root.render(React.createElement(OctopusTaskRow, { ...props, working: true })));
+  await act(async () => root.render(React.createElement(PhobosTaskRow, { ...props, working: true })));
   assert.equal(host.querySelector('[role="button"]').getAttribute("aria-busy"), "true");
   assert.equal(host.querySelector('[role="img"]').getAttribute("aria-label"), "Running");
   assert.equal(host.querySelector('[role="img"]').dataset.reduceMotion, "true");
-  await act(async () => root.render(React.createElement(OctopusTaskRow, { ...props, waiting: true })));
+  await act(async () => root.render(React.createElement(PhobosTaskRow, { ...props, waiting: true })));
   assert.equal(host.querySelector('[role="img"]').getAttribute("aria-label"), "Waiting");
-  await act(async () => root.render(React.createElement(OctopusTaskRow, { ...props, unread: true })));
+  await act(async () => root.render(React.createElement(PhobosTaskRow, { ...props, unread: true })));
   assert.equal(host.querySelector('[role="img"]').getAttribute("aria-label"), "Unread reply");
   assert.equal(host.querySelector('[role="img"]').textContent, "");
   assert.equal(host.querySelector("[data-thread-title]").dataset.unread, "true");
-  await act(async () => root.render(React.createElement(OctopusTaskRow, { ...props, action: { ...props.action, disabled: true } })));
+  await act(async () => root.render(React.createElement(PhobosTaskRow, { ...props, action: { ...props.action, disabled: true } })));
   assert.equal(host.querySelector("button").disabled, true);
 });
 
 test("Settings keeps window history without a sidebar toggle, and native history yields to a modal", async () => {
   const calls = [], handlers = {};
-  window.octopusTransport = {
+  window.phobosTransport = {
     windowState: async () => ({ fullScreen: false, nativeControlInset: 76 }),
     onWindowStateChanged: (handler) => { handlers.state = handler; return () => {}; },
     setHistoryNavigationState: (state) => calls.push(state),
     onNavigateBack: (handler) => { handlers.back = handler; return () => {}; },
     onNavigateForward: (handler) => { handlers.forward = handler; return () => {}; },
   };
-  releases.push(() => { delete window.octopusTransport; });
+  releases.push(() => { delete window.phobosTransport; });
   const rect = HTMLElement.prototype.getBoundingClientRect;
   HTMLElement.prototype.getBoundingClientRect = function () {
     return this.role === "tooltip" ? { x: 50, y: 202, left: 50, top: 202, right: 250, bottom: 232, width: 200, height: 30 } : rect.call(this);

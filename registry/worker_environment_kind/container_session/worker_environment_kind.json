@@ -5,7 +5,7 @@
     "system_container"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-container-room-tool"
+    "target/debug/phobos-container-room-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "instance_config_files": [

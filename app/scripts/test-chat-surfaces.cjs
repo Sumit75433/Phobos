@@ -61,8 +61,8 @@ const surfaces = bundle([
 ].join("\n"), {
   "./chat": ["ChatComposer", "ChatMessageList", "QueuedMessageList", "ChatThreadHeader", "ChatThreadHeaderActions", "ChatRenderBoundary", "TaskSummaryPanel", "useChatWorkspace"],
   ChatComposer: ["ChatComposer"], useChatWorkspace: ["useChatWorkspace"], MessageContent: ["MessageContent"], QueuedMessageList: ["QueuedMessageList"],
-  OperatorRequestSurface: ["OperatorRequestSurface"], VoiceOrbScene: ["VoiceOrbScene"], OctopusOceanScene: ["OctopusOceanScene"],
-  OctopusSwarm: ["OctopusSwarm"], ClientSurfaceRenderer: ["ClientSurfaceRenderer", "resetVoiceWidgetLayout", "restoreVoiceWidgetLayout", "useVoiceWidgetResize"],
+  OperatorRequestSurface: ["OperatorRequestSurface"], VoiceOrbScene: ["VoiceOrbScene"], PhobosOceanScene: ["PhobosOceanScene"],
+  PhobosSwarm: ["PhobosSwarm"], ClientSurfaceRenderer: ["ClientSurfaceRenderer", "resetVoiceWidgetLayout", "restoreVoiceWidgetLayout", "useVoiceWidgetResize"],
   toasts: "export const appToast = { warning: (message) => globalThis.__surfaceStubs.toasts.warnings.push(message), info() {}, success() {}, danger() {} }; export function useAppErrorToast() {} export function AppToastViewport() { return null; }",
 });
 const presentations = bundle([
@@ -119,7 +119,7 @@ const topology = (runs = []) => ({ projection: { mode: "live" }, environments: [
 
 test("every task surface hands the composer the workspace's submit state and exact Resume action", async () => {
   const { ChatView, QuickTaskWindow, VoiceView, ClientPreferencesProvider } = await surfaces;
-  w.octopusTransport = {};
+  w.phobosTransport = {};
   const surfacesUnderTest = {
     chat: (chat) => React.createElement(ChatView, { workspace: chat, searchFocusTick: 0, topology: topology(), surfaces: [], onOpenFiles: noop }),
     quick: (chat) => { stubs.useChatWorkspace = { useChatWorkspace: () => chat }; return React.createElement(QuickTaskWindow, { accessProfile: "lab", runtimeReady: true, runtimeHome: "/home/quick" }); },
@@ -169,7 +169,7 @@ const message = (id, eventKind, textValue, eventData = {}, extra = {}) => ({ id,
 test("the task summary lists every environment, background process and related agent, opens surfaces from the projection alone, and offers no binding facts or git actions", async () => {
   const { TaskSummaryPanel } = await presentations;
   const transportReads = [];
-  w.octopusTransport = new Proxy({}, { get: (_, key) => { transportReads.push(key); return undefined; } });
+  w.phobosTransport = new Proxy({}, { get: (_, key) => { transportReads.push(key); return undefined; } });
   const processes = Array.from({ length: 13 }, (_, index) => message(`process-${index}`, "tool", "", { process_id: `pid-${index}`, command: `job ${index}`, status: "running" }));
   const agents = Array.from({ length: 13 }, (_, index) => message(`agent-${index}`, "subagent_activity", "", { agent_thread_id: `thread-${String(index).padStart(2, "0")}`, agent_path: `root/agent_${index}`, kind: "started" }));
   const room = (id, root) => ({ id, runId: "run-1", revision: "", eeId: "ee.root", kind: "shell", lifecycle: "active", status: "ready", live: true, label: id, detail: "", substrateFamily: "",
@@ -231,7 +231,7 @@ test("overscrolling past the latest reply counts as being at the latest reply", 
 
 test("settings describe Send as steering and document the queue shortcut the composer uses", async () => {
   const { GeneralSection, ShortcutsSection, ClientPreferencesProvider, useSetClientPreferences, formatKeyboardShortcut } = await presentations;
-  w.octopusTransport = { providerInterfaces: async () => ({ repoRoot: "/repo", providers: [] }), onProjectionChanged: () => noop };
+  w.phobosTransport = { providerInterfaces: async () => ({ repoRoot: "/repo", providers: [] }), onProjectionChanged: () => noop };
   let setPreferences;
   const Preferences = ({ children }) => { setPreferences = useSetClientPreferences(); return children; };
   const settings = (section) => show(React.createElement(ClientPreferencesProvider, { profile: "lab" }, React.createElement(Preferences, null, section)));
@@ -251,7 +251,7 @@ test("settings describe Send as steering and document the queue shortcut the com
 
 test("the command menu ranks recent task titles first, caps the list, and searches local titles without archived tasks", async () => {
   const { CommandMenu, renameClientTask, recordClientTaskOpened } = await presentations;
-  w.octopusTransport = { projectionRead: async () => ({ matches: [], has_older: false, next_before_seq: -1 }) };
+  w.phobosTransport = { projectionRead: async () => ({ matches: [], has_older: false, next_before_seq: -1 }) };
   const chatRuns = Array.from({ length: 30 }, (_, index) => run(`task-${index}`, { title: `Task ${index}`, updatedAtMs: 1000 - index }));
   chatRuns.push(run("archived", { title: "Quasar Zebra Unique", updatedAtMs: 2000, archived: true }));
   renameClientTask("lab", "task-29", "Quasar Zebra Unique");

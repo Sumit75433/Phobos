@@ -9,17 +9,17 @@ const hash = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
 const nullableHash = (value) => value === null || (typeof value === "string" && /^[0-9a-f]{64}$/.test(value));
 
 function publicationCondition(value) {
-  publicationObject(value, ["octopus_home", "preimages"], "file publication condition");
+  publicationObject(value, ["phobos_home", "preimages"], "file publication condition");
   const normalPath = target => {
     if (typeof target !== "string" || !path.isAbsolute(target) || path.resolve(target) !== target
-      || target.includes("\0") || target.split(path.sep).includes(".octopus-publication")) {
+      || target.includes("\0") || target.split(path.sep).includes(".phobos-publication")) {
       throw new Error("file publication condition requires normal absolute paths");
     }
     return target;
   };
   if (!Array.isArray(value.preimages) || value.preimages.length > 4096) throw new Error("file publication condition exceeds its preimage bound");
   const seen = new Set();
-  return { octopus_home: normalPath(value.octopus_home), preimages: value.preimages.map(pin => {
+  return { phobos_home: normalPath(value.phobos_home), preimages: value.preimages.map(pin => {
     publicationObject(pin, ["path", "sha256"], "file publication preimage");
     const target = normalPath(pin.path);
     if (seen.has(target) || !nullableHash(pin.sha256)) throw new Error("file publication condition has duplicate paths or an invalid SHA-256 preimage");
@@ -150,7 +150,7 @@ function publicationNumber(value, maximum = Number.MAX_SAFE_INTEGER) {
 function directoryPath(value, relative = false) {
   if (typeof value !== "string" || !value || value.includes("\0") || Buffer.from(value).toString() !== value
     || path.isAbsolute(value) === relative || path.normalize(value) !== value
-    || value.split("/").some(part => [".", "..", ".octopus-publication"].includes(part))
+    || value.split("/").some(part => [".", "..", ".phobos-publication"].includes(part))
     || (relative ? value.split("/").some(part => !part) : value !== path.resolve(value) || value === path.parse(value).root)) {
     throw new Error("directory publication requires an ordinary normalized path");
   }

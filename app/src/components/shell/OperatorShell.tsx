@@ -58,7 +58,7 @@ import { workerEnvironmentPanelKind, type WorkerEnvironmentPanelKind } from "../
 import { TopBar } from "../TopBar";
 import { SurfaceLoadingState, SurfaceRenderBoundary } from "./SurfaceBoundary";
 import type { SelectionRef } from "../../data/topology";
-import type { OctopusClientAccessProfile, OctopusClientWindowCloseRequest } from "../../electron";
+import type { PhobosClientAccessProfile, PhobosClientWindowCloseRequest } from "../../electron";
 import { useRuntimeTopology } from "../../runtimeTopology";
 import { useClientSurfaces } from "../../shell/surfaceRegistry";
 import { applyHomeWidgetAction } from "../../client-surfaces/homeWidgetControls";
@@ -101,7 +101,7 @@ import {
   useClientTaskOrganization,
   type ClientWorkspaceKey,
 } from "../../shell/clientWorkspaces";
-import { useOctopusOsProjects } from "../../shell/useOctopusOsProjects";
+import { usePhobosOsProjects } from "../../shell/usePhobosOsProjects";
 import { activeDestinationStorageKey, clientNavigationDestinations, navigationSectionForSurface, navigationSectionLabel, type ClientNavigationSection } from "../../shell/navigation";
 import { useChatWorkspace } from "../chat/useChatWorkspace";
 import { projectAssistantCodeComments } from "../chat/assistantDirectives";
@@ -131,7 +131,7 @@ import type { ClientSurfaceActionEvent } from "../../client-surfaces/types";
 import {
   CLIENT_SURFACE_ACTION_EVENT,
   MCP_RESOURCE_ACTION_EVENT,
-  OCTOPUS_OPERATOR_DIFF_REVIEW_SEND_EVENT,
+  PHOBOS_OPERATOR_DIFF_REVIEW_SEND_EVENT,
   type McpResourceActionDetail,
   type OperatorDiffReviewSendDetail,
 } from "../../clientEvents";
@@ -200,7 +200,7 @@ type WorkspacePaneOwner = {
 };
 
 export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHost }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   clientWindow: ClientWindowBootstrap;
   onLogOut: () => void;
   runtimeHost: RuntimeHostView;
@@ -209,7 +209,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   const windowStateStorage = clientWindowStateStorage(clientWindow.scope);
   const initialTargetConsumptionKey = clientWindowStateKey(
     clientWindow.scope,
-    "octopus.client-window.initial-target-consumed.v1",
+    "phobos.client-window.initial-target-consumed.v1",
   );
   const clientWindowInitialTarget = useMemo(() => {
     if (!clientWindow.initialTarget) return undefined;
@@ -226,7 +226,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     () => installedVoiceWidgetIds(surfaceRegistry.extensions),
     [surfaceRegistry.extensions.installedBuiltinWidgetIds, surfaceRegistry.extensions.voiceSurfaces],
   );
-  const agentProjectWorkspace = useOctopusOsProjects(accessProfile, runtimeHost.home);
+  const agentProjectWorkspace = usePhobosOsProjects(accessProfile, runtimeHost.home);
   const [projectFilterEeId, setProjectFilterEeIdState] = useState(() => readClientProjectFilterEeId(accessProfile).trim());
   const clientPreferences = useClientPreferences();
   const taskOrganization = useClientTaskOrganization(accessProfile);
@@ -317,7 +317,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     write: (state) => workspacePane.setStateAt(paneStateKey, state),
   }), [paneStateKey, workspacePane.getState, workspacePane.setStateAt]);
   const transferPaneOwner = useCallback((transferId: string): WorkspacePaneOwner | null => {
-    const key = window.sessionStorage.getItem(`octopus.client-pane-owner.${transferId}`);
+    const key = window.sessionStorage.getItem(`phobos.client-pane-owner.${transferId}`);
     if (!key) return null;
     const stored = workspacePane.getStateAt(key) ?? readSecondaryPaneStateAtKey(clientWindow.scope, key);
     if (!stored.layout) return null;
@@ -379,7 +379,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   );
 
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.setPowerSaveBlocker) return;
     void bridge.setPowerSaveBlocker(shouldKeepAwake);
     return () => {
@@ -388,7 +388,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [shouldKeepAwake]);
 
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.setGlobalDictationShortcut) return;
     const shortcut = keyboardShortcuts.start_dictation?.[0] ?? "";
     void bridge.setGlobalDictationShortcut({
@@ -402,12 +402,12 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [clientPreferences.globalQuickDictation, keyboardShortcuts.start_dictation, setClientPreferences]);
 
   useEffect(() => {
-    void window.octopusTransport?.setNativeCommandShortcuts?.(keyboardShortcuts).catch((error) => {
+    void window.phobosTransport?.setNativeCommandShortcuts?.(keyboardShortcuts).catch((error) => {
       appToast.warning(error instanceof Error ? error.message : String(error));
     });
   }, [keyboardShortcuts]);
 
-  useEffect(() => window.octopusTransport?.onNativeClientCommand?.((command) => {
+  useEffect(() => window.phobosTransport?.onNativeClientCommand?.((command) => {
     if (!isClientCommandId(command)) return;
     if (clientDialogOwnsCommands()) return;
     if (keyboardTargetHasRichEditingOwner(document.activeElement) && keyboardCommandConflictsWithEditing(command, keyboardShortcuts)) return;
@@ -415,9 +415,9 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }), [keyboardShortcuts]);
 
   useEffect(() => {
-    if (clientWindow.primary || !window.octopusTransport?.clientWindowReady) return;
+    if (clientWindow.primary || !window.phobosTransport?.clientWindowReady) return;
     const frame = window.requestAnimationFrame(() => {
-      void window.octopusTransport?.clientWindowReady({ windowId: clientWindow.windowId }).catch((error) => {
+      void window.phobosTransport?.clientWindowReady({ windowId: clientWindow.windowId }).catch((error) => {
         appToast.danger(error instanceof Error ? error.message : String(error));
       });
     });
@@ -453,7 +453,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     visibleSurfaces.find((surface) => surface.id === activeSurfaceId)
       ?? visibleSurfaces.find((surface) => surface.id === "voice")
   ), [activeSurfaceId, visibleSurfaces]);
-  const activeWorkspaceKey = activeSurface ? workspaceForSurface(activeSurface) : "octopus-os";
+  const activeWorkspaceKey = activeSurface ? workspaceForSurface(activeSurface) : "phobos-os";
   const secondaryTabs = secondaryTabModel.tabs;
   const activeSecondaryTabId = secondaryTabModel.activeTabId;
   const activeSecondaryTab = secondaryTabs.find((tab) => tab.id === activeSecondaryTabId) ?? null;
@@ -478,7 +478,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     tabId: string;
     stagedTab: SecondaryPaneTabState;
   }>());
-  const secondaryWorkspaceKey = activeSecondaryTab?.target.workspaceKey ?? "octopus-os";
+  const secondaryWorkspaceKey = activeSecondaryTab?.target.workspaceKey ?? "phobos-os";
   const secondarySurfaceId = activeSecondaryTab?.target.kind === "surface" ? activeSecondaryTab.target.surfaceId : "";
   const setSecondaryTabs = secondaryTabModel.setTabs;
   const setActiveSecondaryTabId = secondaryTabModel.selectTab;
@@ -841,7 +841,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [activateSecondaryTab, activeSecondaryTabId, paneStateKey, secondaryTabs]);
 
   const openSecondaryChatTab = useCallback((runId: string) => {
-    openSecondaryTab(secondaryPaneTab("octopus-os", "chat", runId));
+    openSecondaryTab(secondaryPaneTab("phobos-os", "chat", runId));
   }, [openSecondaryTab]);
 
   const openTerminalTab = useCallback(() => {
@@ -876,7 +876,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [activeClientSurfaceIdentity.workspaceKey, openSecondaryTab]);
 
   const openTaskSourcesPane = useCallback((target: TaskSourcesPaneTarget) => {
-    openSecondaryTab(workspaceTaskSourcesPaneTab("octopus-os", target));
+    openSecondaryTab(workspaceTaskSourcesPaneTab("phobos-os", target));
   }, [openSecondaryTab]);
 
   const updateTerminalTitle = useCallback((terminalId: string, titleValue: string) => {
@@ -916,7 +916,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   clientBrowserPaneOwnerRef.current = { open: openSecondaryTab, workspaceKey: activeClientSurfaceIdentity.workspaceKey };
   useEffect(() => {
     let disposed = false;
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     const show = (page: ClientBrowserState, owner = clientBrowserPaneOwnerRef.current) => {
       if (disposed) { void bridge?.clientBrowser({ action: "close", id: page.id }); return; }
       owner.open({ id: `browser:${page.id}`, target: { kind: "client_browser", pageId: page.id,
@@ -1104,7 +1104,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     })),
     ...(workerEnvironmentActionRunIds.length ? [{ glyph: "chat" as const, id: "chat:side", section: "tasks", shortcut: paneShortcut("open_side_task"), title: "Side task" }] : []),
     { glyph: "newTask" as const, id: "chat:new", section: "tasks", title: "New task" },
-    ...(["dashboard", "octopus-os"] as const).flatMap((workspaceKey) => visibleSurfaces
+    ...(["dashboard", "phobos-os"] as const).flatMap((workspaceKey) => visibleSurfaces
       .filter((surface) => (
         surface.id !== "chat"
         && !isSidebarOnlySurface(surface)
@@ -1209,7 +1209,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   const openSecondarySurfaceRun = useCallback((runId: string, role: "home" | "task") => {
     if (role === "home") {
       homeChatWorkspace.selectRun(runId);
-      openSecondaryTab(secondaryPaneTab("octopus-os", "voice", ""));
+      openSecondaryTab(secondaryPaneTab("phobos-os", "voice", ""));
     } else openSecondaryChatTab(runId);
   }, [homeChatWorkspace, openSecondaryChatTab, openSecondaryTab]);
 
@@ -1293,7 +1293,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       if (current.navigation.clientSurfaceRole === "home") {
         homeChatWorkspace.selectRun(current.navigation.runId);
         setSecondaryHomeViewMode("activity");
-        openSecondaryTab(secondaryPaneTab("octopus-os", "voice", current.navigation.runId));
+        openSecondaryTab(secondaryPaneTab("phobos-os", "voice", current.navigation.runId));
       } else {
         openSecondaryChatTab(current.navigation.runId);
       }
@@ -1322,14 +1322,14 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     return () => window.removeEventListener(CLIENT_NOTIFICATION_ACTIVATE_EVENT, activate);
   }, [markActivity.projectedItems, selectInboxItem, selectSurface]);
 
-  useEffect(() => window.octopusTransport?.onGlobalDictationRequested?.(() => {
+  useEffect(() => window.phobosTransport?.onGlobalDictationRequested?.(() => {
     setSettingsOpen(false);
     setCommandMenuOpen(false);
     openChat(chatWorkspace.activeRunId);
     window.setTimeout(() => dispatchClientCommand("start_dictation", "keyboard"), 80);
   }), [chatWorkspace.activeRunId, openChat, setSettingsOpen]);
 
-  useEffect(() => window.octopusTransport?.onOpenRunRequested?.((runId) => {
+  useEffect(() => window.phobosTransport?.onOpenRunRequested?.((runId) => {
     if (typeof runId !== "string" || !runId.trim()) return;
     setSettingsOpen(false);
     setCommandMenuOpen(false);
@@ -1347,8 +1347,8 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       event.preventDefault();
       appToast.success(`${detail.comments.length} review ${detail.comments.length === 1 ? "comment" : "comments"} added to the task composer.`);
     };
-    window.addEventListener(OCTOPUS_OPERATOR_DIFF_REVIEW_SEND_EVENT, prepareReview);
-    return () => window.removeEventListener(OCTOPUS_OPERATOR_DIFF_REVIEW_SEND_EVENT, prepareReview);
+    window.addEventListener(PHOBOS_OPERATOR_DIFF_REVIEW_SEND_EVENT, prepareReview);
+    return () => window.removeEventListener(PHOBOS_OPERATOR_DIFF_REVIEW_SEND_EVENT, prepareReview);
   }, [chatWorkspace, openChat]);
 
   useEffect(() => {
@@ -1356,7 +1356,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       if (!(event instanceof CustomEvent)) return;
       const detail = event.detail as ArtifactContextPreparedDetail | undefined;
       if (
-        detail?.schema !== "octopus.client.artifact_context"
+        detail?.schema !== "phobos.client.artifact_context"
         || detail.schemaVersion !== 1
         || !detail.artifact?.artifactId
         || !detail.prompt?.trim()
@@ -1415,7 +1415,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
         action: detail.action,
         payload: detail.payload,
         provenance: detail.provenance,
-        schema: "octopus.client.mcp_resource_action",
+        schema: "phobos.client.mcp_resource_action",
         schema_version: 1,
       });
       if (!action) {
@@ -1430,7 +1430,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     return () => window.removeEventListener(MCP_RESOURCE_ACTION_EVENT, prepareMcpAction);
   }, [chatWorkspace, openChat]);
 
-  useEffect(() => window.octopusTransport?.onOpenWorkerEnvironmentRequested?.((target) => {
+  useEffect(() => window.phobosTransport?.onOpenWorkerEnvironmentRequested?.((target) => {
     if (!target?.workerEnvironmentId) return;
     setSettingsOpen(false);
     setCommandMenuOpen(false);
@@ -1502,13 +1502,13 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       let state = transferSourceStateRef.current;
       if (closing.some((tab) => state.secondaryTabs.find((current) => current.id === tab.id) !== tab)) return;
       for (const tab of closing) {
-        if (tab.target.kind === "client_browser") { await window.octopusTransport?.clientBrowser({ action: "close", id: tab.target.pageId }); continue; }
+        if (tab.target.kind === "client_browser") { await window.phobosTransport?.clientBrowser({ action: "close", id: tab.target.pageId }); continue; }
         if (tab.target.kind !== "worker_environment") continue;
         const room = resolveWorkerEnvironment(topology, tab.target.target.workerEnvironmentId);
         const surface = room && resolvePaneSurface(room.workerEnvironment, tab.target.target);
         if (!isControllableNativeBrowserSurface(surface)) continue;
-        if (!window.octopusTransport?.closeNativeBrowserPage) throw new Error("The native browser is not connected.");
-        await window.octopusTransport.closeNativeBrowserPage({ home: topology.projection.endpoint, workerEnvironmentId: tab.target.target.workerEnvironmentId, surfaceId: surface.id });
+        if (!window.phobosTransport?.closeNativeBrowserPage) throw new Error("The native browser is not connected.");
+        await window.phobosTransport.closeNativeBrowserPage({ home: topology.projection.endpoint, workerEnvironmentId: tab.target.target.workerEnvironmentId, surfaceId: surface.id });
       }
       state = transferSourceStateRef.current;
       if (closing.some((tab) => state.secondaryTabs.find((current) => current.id === tab.id) !== tab)) return;
@@ -1520,7 +1520,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
         || tabs[Math.min(index, tabs.length - 1)];
       secondaryTabModel.replaceState({ tabs, activeTabId: nextActive?.id ?? "" });
       for (const tab of closing) {
-        if (tab.target.kind === "terminal") void window.octopusTransport?.closeTerminal(tab.target.terminalId).catch(() => undefined);
+        if (tab.target.kind === "terminal") void window.phobosTransport?.closeTerminal(tab.target.terminalId).catch(() => undefined);
         if (tab.target.kind === "files") forgetFilesPane(filesPaneKey(accessProfile, tab.id, paneStateKey));
       }
       if (!nextActive) setSecondaryPaneOpen(false);
@@ -1551,7 +1551,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [closeSecondaryTabSet]);
 
   const openTargetInClientWindow = useCallback(async (target: NonNullable<ReturnType<typeof transferableWorkspacePaneTarget>>) => {
-    const open = window.octopusTransport?.openClientWindow;
+    const open = window.phobosTransport?.openClientWindow;
     if (!open) throw new Error("Native client windows are unavailable.");
     return open({ initialTarget: target });
   }, []);
@@ -1590,12 +1590,12 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     titlebarTransferTarget,
   };
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge) return;
     let disposed = false;
     let registration: { windowId: string; generation: number } | null = null;
-    let queued: OctopusClientWindowCloseRequest | null = null;
-    let current: { request: OctopusClientWindowCloseRequest; controller: AbortController } | null = null;
+    let queued: PhobosClientWindowCloseRequest | null = null;
+    let current: { request: PhobosClientWindowCloseRequest; controller: AbortController } | null = null;
     const cancelCurrent = () => {
       if (!current) return;
       current.controller.abort();
@@ -1604,7 +1604,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       current = null;
       if (!disposed) setBrowserPresentationGeneration((generation) => generation + 1);
     };
-    const handleClose = async (request: OctopusClientWindowCloseRequest) => {
+    const handleClose = async (request: PhobosClientWindowCloseRequest) => {
       if (disposed || request.windowId !== clientWindow.windowId) return;
       if (!registration) { queued = request; return; }
       if (request.generation !== registration.generation) return;
@@ -1670,7 +1670,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
 
   const beginPaneTransfer = useCallback((sourceTabId: string, target: TransferableWorkspacePaneTarget, sourcePane: "primary" | "secondary") => {
     if (nativeWindowCloseRequestRef.current) throw new Error("Finish or cancel this window's close request before moving a pane.");
-    const begin = window.octopusTransport?.beginClientPaneTransfer;
+    const begin = window.phobosTransport?.beginClientPaneTransfer;
     if (!begin) throw new Error("Native client pane transfer is unavailable.");
     if (target.kind === "files") {
       const key = filesPaneKey(accessProfile, sourceTabId, paneStateKey);
@@ -1683,16 +1683,16 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     if (reference.sourceWindowId !== clientWindow.windowId) {
       throw new Error("Client pane transfer source does not match this window.");
     }
-    try { window.sessionStorage.setItem(`octopus.client-pane-owner.${reference.transferId}`, paneStateKey); }
+    try { window.sessionStorage.setItem(`phobos.client-pane-owner.${reference.transferId}`, paneStateKey); }
     catch (error) {
-      void window.octopusTransport?.cancelClientPaneTransfer({ transferId: reference.transferId });
+      void window.phobosTransport?.cancelClientPaneTransfer({ transferId: reference.transferId });
       throw error;
     }
     return { reference, target } satisfies ActiveClientPaneTransfer;
   }, [accessProfile, clientWindow.windowId, paneStateKey]);
 
   const cancelPaneTransfer = useCallback((transfer: ActiveClientPaneTransfer) => {
-    const cancel = window.octopusTransport?.cancelClientPaneTransfer;
+    const cancel = window.phobosTransport?.cancelClientPaneTransfer;
     if (cancel) void cancel({ transferId: transfer.reference.transferId }).catch(() => undefined);
   }, []);
 
@@ -1723,7 +1723,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [accessProfile, clientWindow.primary, clientWindow.windowId, transferPaneOwner]);
 
   const handleClientPaneTransferCompletion = useCallback((completion: ClientPaneTransferCompleted) => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge || preparedSourceTransfersRef.current.has(completion.transferId)) return;
     const state = transferSourceStateRef.current;
     if (!state.primaryRunIdentityReady || !state.secondaryRunIdentityReady) return;
@@ -1744,7 +1744,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [accessProfile, sourceTransferMatches]);
 
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge) return;
     const cancelled = bridge.onClientPaneTransferCancelled((completion) => {
       const prepared = preparedSourceTransfersRef.current.get(completion.transferId);
@@ -1759,7 +1759,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       setSourceFinalizationPendingCount((count) => count + 1);
       preparedSourceTransfersRef.current.delete(completion.transferId);
       setSourceHandoffPending(preparedSourceTransfersRef.current.size > 0);
-      const marker = `octopus.client-pane-finalized.${completion.transferId}`;
+      const marker = `phobos.client-pane-finalized.${completion.transferId}`;
       let closeWindow = false;
       try {
         const owner = transferPaneOwner(completion.transferId);
@@ -1806,7 +1806,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
   }, [accessProfile, clientWindow.primary, clientWindow.scope, clientWindow.windowId, getWorkspacePaneStates, primaryRunIdentityReady, secondaryRunIdentityReady, sourceTransferMatches, transferPaneOwner]);
 
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.onClientPaneTransferCompleted || !bridge.pendingClientPaneTransfers) return;
     const dispatch = (completion: ClientPaneTransferCompleted) => {
       void handleClientPaneTransferCompletion(completion);
@@ -1825,7 +1825,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       kind: "surface",
       runId,
       surfaceId: "chat",
-      workspaceKey: "octopus-os",
+      workspaceKey: "phobos-os",
     }).catch((error) => {
       appToast.danger(error instanceof Error ? error.message : String(error));
     });
@@ -1854,7 +1854,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     if (!target || tab.id === state.activeSecondaryTabId && !state.secondaryRunIdentityReady) return;
     const blocked = paneTransferBlockReasonRef.current(target, "secondary");
     if (blocked) { appToast.warning(blocked); return; }
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge) { appToast.danger("Native pane transfer is unavailable."); return; }
     let transfer: ActiveClientPaneTransfer;
     try { transfer = beginPaneTransfer(tab.id, target, "secondary"); }
@@ -1896,7 +1896,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     if (!homeRunId.trim()) return;
     if (pendingAcceptedPaneTransfersRef.current.has(transfer.transferId)) return;
     if (nativeWindowCloseRequestRef.current) {
-      void window.octopusTransport?.rejectClientPaneTransfer({ transferId: transfer.transferId }).catch((error) => appToast.danger(error instanceof Error ? error.message : String(error)));
+      void window.phobosTransport?.rejectClientPaneTransfer({ transferId: transfer.transferId }).catch((error) => appToast.danger(error instanceof Error ? error.message : String(error)));
       appToast.warning("The pane remains in its source window while this window is closing.");
       return;
     }
@@ -1932,7 +1932,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
     if (reference.sourceWindowId === clientWindow.windowId) return;
-    const accept = window.octopusTransport?.acceptClientPaneTransfer;
+    const accept = window.phobosTransport?.acceptClientPaneTransfer;
     if (!accept) {
       appToast.danger("Native client pane transfer is unavailable.");
       return;
@@ -1947,12 +1947,12 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     });
   }, [clientWindow.windowId, stageDestinationPaneTransfer]);
 
-  useEffect(() => window.octopusTransport?.onClientPaneTransferAccepted((accepted) => {
+  useEffect(() => window.phobosTransport?.onClientPaneTransferAccepted((accepted) => {
     stageDestinationPaneTransfer(accepted, false);
   }), [stageDestinationPaneTransfer]);
 
   useEffect(() => {
-    const pending = window.octopusTransport?.pendingClientPaneDestinationTransfers;
+    const pending = window.phobosTransport?.pendingClientPaneDestinationTransfers;
     if (!pending) return;
     let active = true;
     void pending().then((transfers) => {
@@ -1989,12 +1989,12 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     }
   }, [accessProfile, clientWindow.scope]);
 
-  useEffect(() => window.octopusTransport?.onClientPaneTransferCancelled((completion) => {
+  useEffect(() => window.phobosTransport?.onClientPaneTransferCancelled((completion) => {
     if (completion.sourceWindowId !== clientWindow.windowId) rollbackAcceptedPaneTransfer(completion.transferId);
   }), [clientWindow.windowId, rollbackAcceptedPaneTransfer]);
 
   useEffect(() => {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge || pendingAcceptedPaneTransfersRef.current.size === 0) return;
     const tabIds = new Set(secondaryTabs.map((tab) => tab.id));
     for (const [transferId, pending] of pendingAcceptedPaneTransfersRef.current) {
@@ -2065,7 +2065,7 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
     }
     const [kind, rawWorkspaceKey, ...surfaceParts] = actionId.split(":");
     const surfaceId = surfaceParts.join(":");
-    const workspaceKey = rawWorkspaceKey === "dashboard" || rawWorkspaceKey === "octopus-os"
+    const workspaceKey = rawWorkspaceKey === "dashboard" || rawWorkspaceKey === "phobos-os"
       ? rawWorkspaceKey
       : null;
     if (kind !== "surface" || !workspaceKey || !surfaceId) return;
@@ -2253,8 +2253,8 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
       surfaces: surfaceRegistry.voiceSurfaces, extensions: surfaceRegistry.extensions }, action, operationId),
     inspect: (action) => inspectClient(action, visibleSurfaces.filter((surface) => !isSidebarOnlySurface(surface))),
     relaunch: async () => {
-      if (!window.octopusTransport) throw new Error("Client relaunch is unavailable.");
-      return window.octopusTransport.relaunchClient();
+      if (!window.phobosTransport) throw new Error("Client relaunch is unavailable.");
+      return window.phobosTransport.relaunchClient();
     },
     onRefusal: (reason) => appToast.warning(reason),
   });
@@ -2295,9 +2295,9 @@ export function OperatorShell({ accessProfile, clientWindow, onLogOut, runtimeHo
 
   useEffect(() => {
     const surface = visibleSurfaces.find((candidate) => candidate.id === activeClientSurfaceIdentity.surfaceId);
-    document.title = settingsOpen ? "Settings — Octopus" : surface
-      ? `${surface.label} — Octopus`
-      : "Octopus";
+    document.title = settingsOpen ? "Settings — Phobos" : surface
+      ? `${surface.label} — Phobos`
+      : "Phobos";
   }, [activeClientSurfaceIdentity, settingsOpen, visibleSurfaces]);
 
   function toggleDashboardFullscreen() {

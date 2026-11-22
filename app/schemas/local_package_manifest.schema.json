@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/local_package_manifest.schema.json",
-  "title": "Octopus Local Package Manifest",
+  "$id": "https://phobos.local/schemas/local_package_manifest.schema.json",
+  "title": "Phobos Local Package Manifest",
   "type": "object",
   "required": [
     "schema",
@@ -16,7 +16,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "octopus.local_package"
+      "const": "phobos.local_package"
     },
     "schema_version": {
       "const": 1

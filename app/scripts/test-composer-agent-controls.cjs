@@ -184,10 +184,10 @@ async function dialog(workers, overrides = {}) {
   root.render(React.createElement(AgentPresetDialog, { contexts: projectChatExecutionContexts({ contexts: [rootRow(workers)] }), initialProjectEeId: "ee.root", open: true, preset: null,
     presets: [], projects: [], providers: [providerA], onRefreshModels: async () => {}, onCancel: () => {}, onDelete: () => {}, onSubmit: (value) => submitted.push(value), ...overrides }));
   await settle(5);
-  const panel = document.querySelector('[aria-labelledby="octopus-agent-preset-title"]');
+  const panel = document.querySelector('[aria-labelledby="phobos-agent-preset-title"]');
   const select = (label) => [...panel.querySelectorAll(".oc-select-field")].find((field) => text(field.querySelector(".oc-field__label")) === label).querySelector("button");
   const name = async (value) => {
-    const input = panel.querySelector("#octopus-agent-name");
+    const input = panel.querySelector("#phobos-agent-name");
     Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype, "value").set.call(input, value);
     input.dispatchEvent(new w.Event("input", { bubbles: true }));
     await settle();

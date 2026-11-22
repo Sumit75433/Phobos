@@ -109,7 +109,7 @@ async function admitOperatorMessage(options, input) {
   if (recovered) return recovered;
 
   const verdict = await requiredFunction(options.handInArtifact, "handInArtifact")({
-    endpoint: interfaceEndpoint(input.octopusHome, input.chatInterfaceId),
+    endpoint: interfaceEndpoint(input.phobosHome, input.chatInterfaceId),
     interfaceId: input.chatInterfaceId,
     manifest: {
       label: input.label,
@@ -285,7 +285,7 @@ async function recoverOperatorMessageAdmission(options, input, admissionPath, do
 
 async function validateAdmittedOperatorMessage(options, input, admission) {
   const movement = await readLedgerMovementAtSeq(
-    path.join(input.octopusHome, "ledger", "movements.jsonl"),
+    path.join(input.phobosHome, "ledger", "movements.jsonl"),
     admission.movement_seq,
   );
   const resolved = await operatorMessageMovement(options, input, movement);
@@ -297,7 +297,7 @@ async function validateAdmittedOperatorMessage(options, input, admission) {
 }
 
 async function findPreparedOperatorMessage(options, input, admission) {
-  const movementsPath = path.join(input.octopusHome, "ledger", "movements.jsonl");
+  const movementsPath = path.join(input.phobosHome, "ledger", "movements.jsonl");
   const tail = await readCompleteLedgerTail(
     movementsPath,
     admission.outbound_cursor_offset,

@@ -8,8 +8,8 @@
 /docs/references/
 /docs/ai/
 /docs/archive2/
-/docs/octopus_architecture.md
-/docs/octopus_os_distribution_and_welcome_plan.md
+/docs/phobos_architecture.md
+/docs/phobos_os_distribution_and_welcome_plan.md
 /concepts/
 /lab/
 /lab2/
@@ -55,13 +55,13 @@ coverage/
 *.log
 .DS_Store
 
-# Octopus Homes, credentials and local installation state
+# Phobos Homes, credentials and local installation state
 /var/
-/.octopus/
-/.octopus-home/
-/octopus-home/
-/octopus-home-*/
-/octopus_home/
+/.phobos/
+/.phobos-home/
+/phobos-home/
+/phobos-home-*/
+/phobos_home/
 /client/
 /client-state/
 /interface-hand-in/
@@ -72,19 +72,19 @@ coverage/
 /host.json
 /client-access.json
 /client-lab-access.json
-/.octopus-source-manifest.json
+/.phobos-source-manifest.json
 /publications/
-*.octopus-package
-*.octopus-client-extension
+*.phobos-package
+*.phobos-client-extension
 .claude/settings.local.json
 
 # Outputs declared in app/distribution/generated-outputs.json
 /registry/interface/world_provider_codex/packages/bin/
-/registry/interface/world_provider_codex/packages/octopus-provider-codex/life-bin/
-/registry/interface/world_provider_codex/packages/octopus-provider-codex/build-receipt.json
-/registry/interface/world_provider_codex/packages/octopus-provider-codex/intake/life-bin/
-/registry/interface/world_provider_codex/packages/octopus-provider-codex/intake/build-receipt.json
-/registry/worker_environment_kind/desktop_session/packages/octopus-system-gui-env/native/bin/
+/registry/interface/world_provider_codex/packages/phobos-provider-codex/life-bin/
+/registry/interface/world_provider_codex/packages/phobos-provider-codex/build-receipt.json
+/registry/interface/world_provider_codex/packages/phobos-provider-codex/intake/life-bin/
+/registry/interface/world_provider_codex/packages/phobos-provider-codex/intake/build-receipt.json
+/registry/worker_environment_kind/desktop_session/packages/phobos-system-gui-env/native/bin/
 
 # Private agent instructions
 /AGENTS.override.md

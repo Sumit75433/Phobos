@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { OcButton, OcDialog, OcIconButton, OcStatus } from "../../design-system/components";
 import { readCameraPermission, requestCameraPermission, type CameraPermission } from "../../gestureRecognition";
 import { useGestureShortcutPreferences, useSetGestureShortcutPreferences } from "../../gestureShortcuts";
@@ -17,7 +17,7 @@ const STEP_TITLE: Readonly<Record<TourStep, string>> = {
 const STEP_PRIMARY: Readonly<Record<TourStep, string>> = { welcome: "Take 2-step tour", focus: "Last step", commands: "Start using gestures" };
 
 export function GestureTourHost({ accessProfile, onOpenSettings }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   onOpenSettings: () => void;
 }) {
   const preferences = useGestureShortcutPreferences(accessProfile);
@@ -75,7 +75,7 @@ function TourBody({ step }: { step: TourStep }) {
   if (step === "welcome") {
     return (
       <div className="flex w-full flex-col gap-4">
-        <TourCopy>Your hands become a second way to move through Octopus. Tracking runs on this device, and camera frames never reach a task.</TourCopy>
+        <TourCopy>Your hands become a second way to move through Phobos. Tracking runs on this device, and camera frames never reach a task.</TourCopy>
         <TourCameraAccess />
       </div>
     );
@@ -123,8 +123,8 @@ function TourCameraAccess() {
         <span className="text-sm font-medium text-default">Allow the camera</span>
         <span className="text-xs leading-4 text-secondary">
           {denied
-            ? "Camera access was denied. Enable it for Octopus in System Settings → Privacy & Security → Camera."
-            : "Octopus needs the camera to see your hands."}
+            ? "Camera access was denied. Enable it for Phobos in System Settings → Privacy & Security → Camera."
+            : "Phobos needs the camera to see your hands."}
         </span>
       </div>
       {denied ? null : (

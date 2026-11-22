@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-provider-codex-life",
+      "bin": "target/debug/phobos-provider-codex-life",
       "doctor": {
         "args": [
           "--doctor"
@@ -32,8 +32,8 @@
         "HTTPS_PROXY",
         "ALL_PROXY",
         "NO_PROXY",
-        "OCTOPUS_MACHINE_CODEX_AUTH_FILE",
-        "OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE"
+        "PHOBOS_MACHINE_CODEX_AUTH_FILE",
+        "PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE"
       ],
       "authority": {
         "read_root_slots": [
@@ -48,7 +48,7 @@
           "/etc"
         ],
         "write_paths": [
-          "/tmp/octopus-provider-cwd"
+          "/tmp/phobos-provider-cwd"
         ],
         "executable_paths": [],
         "executable_root_subpaths": [
@@ -63,11 +63,11 @@
         ],
         "executable_commands": [],
         "read_env_paths": [
-          "OCTOPUS_MACHINE_CODEX_AUTH_FILE"
+          "PHOBOS_MACHINE_CODEX_AUTH_FILE"
         ],
         "write_env_paths": [
-          "OCTOPUS_MACHINE_CODEX_AUTH_FILE",
-          "OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE"
+          "PHOBOS_MACHINE_CODEX_AUTH_FILE",
+          "PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE"
         ],
         "executable_env_paths": [],
         "read_env_subpaths": [],

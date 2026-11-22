@@ -1,4 +1,4 @@
-import type { OctopusApplicationConnectionState } from "../../electron";
+import type { PhobosApplicationConnectionState } from "../../electron";
 
 export type ApplicationCategory = "provider" | "connector" | "plugin" | "artifact";
 
@@ -92,7 +92,7 @@ export type ApplicationProject = {
 
 export type ApplicationConnectionProbeState = {
   checking: boolean;
-  interfaces: Record<string, OctopusApplicationConnectionState>;
+  interfaces: Record<string, PhobosApplicationConnectionState>;
 };
 
 export type ApplicationConnectionStatus = "none" | "checking" | "connected" | "not_connected" | "expired" | "error";
@@ -123,24 +123,24 @@ export function applicationConnectionSummary(
   if (application.configuration?.status === "issue") {
     return { ...base, status: "error", message: application.configuration.error || "Saved connection details could not be verified." };
   }
-  const states: Array<OctopusApplicationConnectionState | { state: "checking" }> = [
+  const states: Array<PhobosApplicationConnectionState | { state: "checking" }> = [
     ...moduleInterfaces.map((interfaceId) => probe?.interfaces[interfaceId] ?? { state: "checking" as const }),
-    ...fieldInterfaces.map((interfaceId): OctopusApplicationConnectionState => {
+    ...fieldInterfaces.map((interfaceId): PhobosApplicationConnectionState => {
       const interfaceFields = fields.filter((field) => field.interface_id === interfaceId);
       if (interfaceFields.some((field) => field.source === "conflict")) {
-        return { state: "error", message: "A saved value conflicts with the environment Octopus starts with." };
+        return { state: "error", message: "A saved value conflicts with the environment Phobos starts with." };
       }
       return { state: interfaceFields.every((field) => !field.required || field.configured) ? "connected" : "not_connected" };
     }),
   ];
-  const failure = states.find((state) => state.state === "error") as OctopusApplicationConnectionState | undefined;
+  const failure = states.find((state) => state.state === "error") as PhobosApplicationConnectionState | undefined;
   const account = states.flatMap((state) => "account" in state && state.account ? [state.account] : [])[0] ?? null;
   const manage = states.flatMap((state) => "manage" in state && state.manage ? [state.manage] : [])[0] ?? null;
   if (failure) return { ...base, account, manage, status: "error", message: failure.message || "The connection could not be checked." };
   if (states.some((state) => state.state === "checking")) return { ...base, account, manage, status: "checking" };
-  const expired = states.find((state) => state.state === "expired") as OctopusApplicationConnectionState | undefined;
+  const expired = states.find((state) => state.state === "expired") as PhobosApplicationConnectionState | undefined;
   if (expired) return { ...base, account, manage, status: "expired", message: expired.message || "" };
-  const missing = states.find((state) => state.state === "not_connected") as OctopusApplicationConnectionState | undefined;
+  const missing = states.find((state) => state.state === "not_connected") as PhobosApplicationConnectionState | undefined;
   if (missing) return { ...base, account, manage, status: "not_connected", message: missing.message || "" };
   return { ...base, account, manage, status: "connected" };
 }

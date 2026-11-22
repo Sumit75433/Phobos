@@ -1,7 +1,7 @@
 import { settingsTargetProps } from "./settingsCatalog";
 import { useEffect, useRef, useState, type ChangeEvent, type RefObject } from "react";
 import { OcButton, OcCard, OcGroup, OcSettingsRow, OcStatus, OcTextField } from "../../design-system/components";
-import type { OctopusClientAccessDetails, OctopusClientAccessProfile, OctopusTouchIdStatus } from "../../electron";
+import type { PhobosClientAccessDetails, PhobosClientAccessProfile, PhobosTouchIdStatus } from "../../electron";
 import { readClientAccessDetails, readTouchIdStatus, setTouchIdEnabled, updateClientAdministratorAccess, updateClientLabAccess } from "../../clientAccess";
 import {
   clearClientProfileStorageWithRecovery,
@@ -13,8 +13,8 @@ import { useAppErrorToast } from "../../toasts";
 import { SettingsHeading } from "./SettingsHeading";
 import { SavedPermissionsSection } from "./SavedPermissionsSection";
 
-export function AccessSection({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
-  const [details, setDetails] = useState<OctopusClientAccessDetails | null>(null);
+export function AccessSection({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
+  const [details, setDetails] = useState<PhobosClientAccessDetails | null>(null);
   const [currentAdministratorPassword, setCurrentAdministratorPassword] = useState("");
   const [administratorPassword, setAdministratorPassword] = useState("");
   const [administratorConfirmation, setAdministratorConfirmation] = useState("");
@@ -22,7 +22,7 @@ export function AccessSection({ accessProfile }: { accessProfile: OctopusClientA
   const [testConfirmation, setTestConfirmation] = useState("");
   const [administratorState, setAdministratorState] = useState<"idle" | "saving" | "saved">("idle");
   const [testState, setTestState] = useState<"idle" | "saving" | "saved">("idle");
-  const [touchId, setTouchId] = useState<OctopusTouchIdStatus | null>(null);
+  const [touchId, setTouchId] = useState<PhobosTouchIdStatus | null>(null);
   const [touchIdBusy, setTouchIdBusy] = useState(false);
   const [error, setError] = useState("");
   const [clearLocalState, setClearLocalState] = useState<"idle" | "confirm" | "clearing" | "error">("idle");
@@ -124,15 +124,15 @@ export function AccessSection({ accessProfile }: { accessProfile: OctopusClientA
     try {
       const settings = Object.fromEntries(clientProfileStorageEntries(accessProfile));
       const payload = JSON.stringify({
-        schema: "octopus.client_settings_export",
+        schema: "phobos.client_settings_export",
         schema_version: 1,
         profile: accessProfile,
         exported_at: new Date().toISOString(),
         settings,
       }, null, 2);
-      const result = await window.octopusTransport?.saveClientFile({
+      const result = await window.phobosTransport?.saveClientFile({
         bytes: new TextEncoder().encode(payload),
-        filename: `octopus-${accessProfile === "live" ? "administrator" : "test"}-settings.json`,
+        filename: `phobos-${accessProfile === "live" ? "administrator" : "test"}-settings.json`,
       });
       if (!result) throw new Error("Native file saving is unavailable.");
       if (!result.saved) return;
@@ -509,7 +509,7 @@ function PermissionRows() {
 
   useEffect(() => {
     let cancelled = false;
-    window.octopusTransport?.cameraAccessStatus?.()
+    window.phobosTransport?.cameraAccessStatus?.()
       .then((status) => {
         if (!cancelled) setCamera(status);
       })
@@ -520,7 +520,7 @@ function PermissionRows() {
   async function requestCamera() {
     setPermissionError("");
     try {
-      const status = await window.octopusTransport?.requestCameraAccess?.();
+      const status = await window.phobosTransport?.requestCameraAccess?.();
       if (status) setCamera(status);
     } catch (error) {
       setPermissionError(error instanceof Error ? error.message : String(error));
@@ -530,7 +530,7 @@ function PermissionRows() {
   async function requestMicrophone() {
     setPermissionError("");
     try {
-      const status = await window.octopusTransport?.requestMicrophoneAccess?.();
+      const status = await window.phobosTransport?.requestMicrophoneAccess?.();
       if (status) setMicrophone(status);
     } catch (error) {
       setPermissionError(error instanceof Error ? error.message : String(error));
@@ -569,7 +569,7 @@ function PermissionRows() {
   );
 }
 
-function parseClientSettingsImport(source: string, accessProfile: OctopusClientAccessProfile): Array<[string, string]> {
+function parseClientSettingsImport(source: string, accessProfile: PhobosClientAccessProfile): Array<[string, string]> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(source);
@@ -578,8 +578,8 @@ function parseClientSettingsImport(source: string, accessProfile: OctopusClientA
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Settings import must be a JSON object.");
   const document = parsed as Record<string, unknown>;
-  if (document.schema !== "octopus.client_settings_export" || document.schema_version !== 1) {
-    throw new Error("Settings import does not satisfy octopus.client_settings_export@1.");
+  if (document.schema !== "phobos.client_settings_export" || document.schema_version !== 1) {
+    throw new Error("Settings import does not satisfy phobos.client_settings_export@1.");
   }
   if (document.profile !== accessProfile) {
     throw new Error(`This export belongs to the ${document.profile === "lab" ? "Test" : "Administrator"} profile.`);

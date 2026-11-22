@@ -21,7 +21,7 @@ function load(relative, mocks = {}, source = fs.readFileSync(path.join(appRoot, 
 }
 const activity = load("src/components/activity/markActivity.ts", { "../../agentPresets": load("src/agentPresets.ts") });
 const ids = (items) => items.map((item) => item.id).sort();
-const readKey = (profile = "operator", home = "/test/home") => `octopus.mark-activity.${encodeURIComponent(profile)}.${encodeURIComponent(home)}.read.v1`;
+const readKey = (profile = "operator", home = "/test/home") => `phobos.mark-activity.${encodeURIComponent(profile)}.${encodeURIComponent(home)}.read.v1`;
 
 function hookHost() {
   const cells = [];
@@ -109,7 +109,7 @@ function mountedActivity({ disk, initialReadFailure = false, primary = true, typ
 let temporary, store, projected, movementRows;
 const previousWindow = global.window;
 before(async () => {
-  temporary = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-mark-test-"));
+  temporary = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-mark-test-"));
   temporary = fs.realpathSync(temporary);
   fs.mkdirSync(path.join(temporary, "library"));
   const ledger = path.join(temporary, "ledger"), registry = path.join(temporary, "registry");
@@ -129,7 +129,7 @@ before(async () => {
   }));
   fs.writeFileSync(path.join(ledger, "movements.jsonl"), rows.map(JSON.stringify).join("\n") + "\n");
   store = createProjectionStore({
-    resolveRepoRoot: () => path.resolve(appRoot, ".."), octopusHome: () => temporary,
+    resolveRepoRoot: () => path.resolve(appRoot, ".."), phobosHome: () => temporary,
     sourceRegistry: () => registry, localPackageLibrary: () => path.join(temporary, "library"),
     projectEePolicies: async () => ({ environments: [], issues: [] }),
   });
@@ -304,7 +304,7 @@ test("clearing the latest message never reveals older messages and a new receipt
 });
 
 test("actual client terminal/request decoders and content-addressed receipts produce attention without marks or error-message substitutes", async () => {
-  const audited = require("../electron/projection.cjs").createProjectionContext({ resolveRepoRoot: () => path.resolve(appRoot, ".."), octopusHome: () => temporary });
+  const audited = require("../electron/projection.cjs").createProjectionContext({ resolveRepoRoot: () => path.resolve(appRoot, ".."), phobosHome: () => temporary });
   const ledger = path.join(temporary, "attention-ledger"), blobs = path.join(ledger, "blobs"); fs.mkdirSync(blobs, { recursive: true });
   const { blake3 } = require("@noble/hashes/blake3");
   const validate = new (require("ajv"))({ strict: false, logger: false }).compile(require("../../schemas/movement.schema.json"));
@@ -588,7 +588,7 @@ function eventLog(overrides = {}) {
   const host = hookHost(), requests = [];
   let generation = 0;
   const client = { hasProjectionBridge: () => true, formatProjectionError: (error) => error.message, readProjection: (method, params) => new Promise((resolve, reject) => requests.push({ method, params, resolve, reject })) };
-  const resource = load("src/components/projectionResource.tsx", { react: host.react, "../design-system/components": {}, "../projectionClient": client, "./OctopusLoadingLogo": load("src/components/OctopusLoadingLogo.tsx") });
+  const resource = load("src/components/projectionResource.tsx", { react: host.react, "../design-system/components": {}, "../projectionClient": client, "./PhobosLoadingLogo": load("src/components/PhobosLoadingLogo.tsx") });
   const View = load("src/components/EventLogView.tsx", {
     react: host.react, "../projectionClient": client, "../projectionLive": { useProjectionGeneration: () => generation },
     "../runtimeFormat": {}, "./chat/format": {}, "./IconGlyphs": {}, "./JsonPanel": {}, "./SurfaceCopyButton": {},
@@ -661,7 +661,7 @@ test("movement cursors cover indexed rows, an unindexed burst, partial writes an
     INSERT INTO movements(seq, lamport, recorded_at_unix_ms, trace, kind, from_kind, from_id, to_kind, to_id)
       VALUES (0, 0, 1000, 'cursor-test', 'InterfaceOutbound', 'interface', 'source', 'interface', 'target');`);
   db.close();
-  const projection = createProjectionStore({ resolveRepoRoot: () => path.resolve(appRoot, ".."), octopusHome: () => root,
+  const projection = createProjectionStore({ resolveRepoRoot: () => path.resolve(appRoot, ".."), phobosHome: () => root,
     sourceRegistry: () => { throw new Error("Movement paging must not read registry configuration"); }, localPackageLibrary: () => path.join(temporary, "library"), projectEePolicies: async () => ({ environments: [], issues: [] }) });
   const read = params => projection.read({ contract_version: 1, method: "projection.movements.list", params: { limit: 2, ...params } });
   try {
@@ -764,7 +764,7 @@ test("Inbox selection stays on its detail surface and explicit open follows exac
       assert.deepEqual(calls[0], [role === "home" ? "home" : "chat", "run-test"]);
       if (role === "home") {
         assert.deepEqual(calls[1], ["home-mode", "activity"]);
-        assert.deepEqual(calls[2], ["side-tab", {workspaceKey: "octopus-os", surfaceId: "voice", runId: "run-test"}]);
+        assert.deepEqual(calls[2], ["side-tab", {workspaceKey: "phobos-os", surfaceId: "voice", runId: "run-test"}]);
       }
       assert.deepEqual(calls.at(-1), ["read", [item.id]]);
       assert.ok(!calls.some(([kind]) => kind === "surface"));
@@ -784,7 +784,7 @@ test("sidebar selection restores its destination without overwriting its retaine
   for (const pane of ["primary", "secondary"]) {
     const calls = [];
     const dependencies = {
-      useCallback: (fn) => fn, activeClientSurfaceIdentity: { pane, workspaceKey: "octopus-os" }, visibleSurfaces: [{ id: "event-log" }],
+      useCallback: (fn) => fn, activeClientSurfaceIdentity: { pane, workspaceKey: "phobos-os" }, visibleSurfaces: [{ id: "event-log" }],
       setSecondaryPaneFocused: (...args) => calls.push(["focused", ...args]), setSecondaryPaneOpen: (...args) => calls.push(["pane", ...args]),
       openSecondaryTab: (...args) => calls.push(["side-surface", ...args]), secondaryPaneTab: (...args) => args,
       selectSurface: (...args) => calls.push(["main-surface", ...args]), workspaceForSurface: () => "dashboard",

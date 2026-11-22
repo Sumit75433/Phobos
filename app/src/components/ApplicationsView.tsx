@@ -13,10 +13,10 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type {
-  OctopusApplicationConnectionState,
-  OctopusApplicationLifecycleProgress,
-  OctopusClientAccessProfile,
-  OctopusClientSetupState,
+  PhobosApplicationConnectionState,
+  PhobosApplicationLifecycleProgress,
+  PhobosClientAccessProfile,
+  PhobosClientSetupState,
 } from "../electron";
 import type { ClientExtensionActionStatus, ClientExtensionRecord } from "../extensions/types";
 import {
@@ -30,7 +30,7 @@ import {
   formatProjectionError,
   hasProjectionBridge,
   mutateApplicationPrivateConfiguration,
-  mutateOctopusOsWorkspace,
+  mutatePhobosOsWorkspace,
   onApplicationLifecycleProgress,
   probeApplicationConnection,
   readCurrentClientSetup,
@@ -75,7 +75,7 @@ import {
   CatalogToolbarBreadcrumb,
 } from "./catalog";
 import { Glyph, type GlyphName } from "./IconGlyphs";
-import { OctopusLoadingState } from "./OctopusLoadingLogo";
+import { PhobosLoadingState } from "./PhobosLoadingLogo";
 import { PackageInstallReviewDialog } from "./applications/PackageInstallReviewDialog";
 import { SetupDialogShell } from "./SetupDialogShell";
 import { appToast, useAppErrorToast } from "../toasts";
@@ -142,7 +142,7 @@ type LocalPackagesProjection = {
 type ApplicationLifecycleOperation = {
   operationId: string;
   operation: "install" | "remove" | "repair";
-  phase: OctopusApplicationLifecycleProgress["phase"] | "failed";
+  phase: PhobosApplicationLifecycleProgress["phase"] | "failed";
   percent: number;
   error: string;
   settlesAfterRead: number | null;
@@ -175,7 +175,7 @@ export function ApplicationsView({
   accessProfile,
   searchFocusTick,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   searchFocusTick: number;
 }) {
   const generation = useProjectionStructureGeneration();
@@ -197,11 +197,11 @@ export function ApplicationsView({
   const [projectedPacks, setApplicationPacks] = useState<ApplicationPackRecord[]>([]);
   const [projects, setProjects] = useState<ApplicationProject[]>([]);
   const [rootEeId, setRootEeId] = useState("");
-  const [loadedProfile, setLoadedProfile] = useState<OctopusClientAccessProfile | null>(null);
-  const [packsLoadedProfile, setPacksLoadedProfile] = useState<OctopusClientAccessProfile | null>(null);
+  const [loadedProfile, setLoadedProfile] = useState<PhobosClientAccessProfile | null>(null);
+  const [packsLoadedProfile, setPacksLoadedProfile] = useState<PhobosClientAccessProfile | null>(null);
   const [error, setError] = useState("");
   const [packError, setPackError] = useState("");
-  const [clientSetup, setClientSetup] = useState<OctopusClientSetupState | null>(null);
+  const [clientSetup, setClientSetup] = useState<PhobosClientSetupState | null>(null);
   const [clientSetupError, setClientSetupError] = useState("");
   const [browseQuery, setBrowseQuery] = useState("");
   const [browseSection, setBrowseSection] = useState<string | null>(null);
@@ -282,7 +282,7 @@ export function ApplicationsView({
   }, [accessProfile, generation, reloadTick]);
 
   useEffect(() => {
-    if (accessProfile !== "live" || !window.octopusTransport?.clientSetupReadCurrent) {
+    if (accessProfile !== "live" || !window.phobosTransport?.clientSetupReadCurrent) {
       setClientSetup(null);
       setClientSetupError("");
       return;
@@ -501,13 +501,13 @@ export function ApplicationsView({
     if (!interfaces.length) return;
     const request = (probeRequests.current.get(application.id) ?? 0) + 1;
     probeRequests.current.set(application.id, request);
-    const settle = (states: Record<string, OctopusApplicationConnectionState>) => {
+    const settle = (states: Record<string, PhobosApplicationConnectionState>) => {
       if (probeRequests.current.get(application.id) !== request) return;
       setConnectionProbes((current) => ({ ...current, [application.id]: { checking: false, interfaces: states } }));
     };
     setConnectionProbes((current) => ({ ...current, [application.id]: { checking: true, interfaces: current[application.id]?.interfaces ?? {} } }));
     if (!connectAvailable) {
-      settle(Object.fromEntries(interfaces.map((interfaceId) => [interfaceId, { state: "error", message: "Connect applications from the Octopus desktop client." }])));
+      settle(Object.fromEntries(interfaces.map((interfaceId) => [interfaceId, { state: "error", message: "Connect applications from the Phobos desktop client." }])));
       return;
     }
     probeApplicationConnection(application.id).then(
@@ -626,7 +626,7 @@ export function ApplicationsView({
 
   async function disconnectApplication(application: ApplicationRecord) {
     const summary = summaryOf(application);
-    const results: Record<string, OctopusApplicationConnectionState> = {};
+    const results: Record<string, PhobosApplicationConnectionState> = {};
     setDisconnectingId(application.id);
     try {
       for (const interfaceId of summary.moduleInterfaces) {
@@ -674,7 +674,7 @@ export function ApplicationsView({
     if (next.available === state.policy_allowed && next.selected === state.selected_by_default) return;
     setAvailabilitySaving({ applicationId: application.id, eeId: state.ee_id });
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "configure_application",
         applicationId: application.id,
         projects: [{
@@ -701,7 +701,7 @@ export function ApplicationsView({
       [application.id]: { operationId, operation: "install", phase: "preflight", percent: 0, error: "", settlesAfterRead: null, presentation: application },
     }));
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "install_package",
         packageIds: application.install_packages.map((entry) => entry.id),
         expectedSourceDigests: Object.fromEntries(application.install_packages.map((entry) => [entry.id, entry.source_digest])),
@@ -738,7 +738,7 @@ export function ApplicationsView({
       [application.id]: { operationId, operation: "repair", phase: "preflight", percent: 0, error: "", settlesAfterRead: null, presentation: application },
     }));
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "repair_package",
         packageIds: [application.package_id],
         expectedRepairs: { [application.package_id]: expectation },
@@ -782,7 +782,7 @@ export function ApplicationsView({
       [application.id]: { operationId, operation: "remove", phase: "preflight", percent: 0, error: "", settlesAfterRead: null, presentation: application },
     }));
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "remove_application",
         applicationId: application.id,
         expectedInstalledDigest: application.installed_digest,
@@ -831,7 +831,7 @@ export function ApplicationsView({
       [pack.id]: { operationId, operation: "install", phase: "preflight", percent: 0, error: "", packageIds, settlesAfterRead: null, presentation },
     }));
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "apply_application_pack",
         packId: pack.id,
         selectedRecommended,
@@ -869,7 +869,7 @@ export function ApplicationsView({
     }
   }
 
-  if (!hasProjectionBridge()) return <SurfaceState title="Applications are unavailable" detail="Start Octopus to manage installed applications." />;
+  if (!hasProjectionBridge()) return <SurfaceState title="Applications are unavailable" detail="Start Phobos to manage installed applications." />;
   const detailOpen = Boolean(selected || selectedPack);
   return (
     <>
@@ -877,7 +877,7 @@ export function ApplicationsView({
         <div aria-hidden={detailOpen || undefined} className={cx("h-full min-h-0", detailOpen && "pointer-events-none invisible absolute inset-0")}>
           <div className="h-full min-h-0" key={`applications-${catalogView}`}>
             {!loaded || catalogView === "browse" && !packsLoaded ? (
-              <OctopusLoadingState className="surface-content-loading-state" label="Loading applications" />
+              <PhobosLoadingState className="surface-content-loading-state" label="Loading applications" />
             ) : <section className="flex h-full min-h-0 flex-col text-base select-none">
               <header className="surface-titlebar-spacer draggable flex h-toolbar shrink-0 items-center justify-between gap-2 px-panel">
                 {catalogView === "manage" ? (
@@ -907,7 +907,7 @@ export function ApplicationsView({
                             <div className="flex items-start justify-between gap-4 px-2">
                               <div className="flex min-w-0 flex-col gap-2">
                                 <h1 className="heading-xl font-normal text-default">Applications</h1>
-                                <div className="text-lg leading-6 text-secondary">Connect Octopus to the tools and context you use</div>
+                                <div className="text-lg leading-6 text-secondary">Connect Phobos to the tools and context you use</div>
                               </div>
                             </div>
                           </div>
@@ -1104,8 +1104,8 @@ export function ApplicationsView({
 }
 
 function ApplicationPackCard({ accessProfile, clientSetup, clientSetupError, highlighted, installLocked, lifecycle, onApply, onOpen, pack, setRef, setupStatus }: {
-  accessProfile: OctopusClientAccessProfile;
-  clientSetup: OctopusClientSetupState | null;
+  accessProfile: PhobosClientAccessProfile;
+  clientSetup: PhobosClientSetupState | null;
   clientSetupError: string;
   highlighted: boolean;
   installLocked: boolean;
@@ -1186,8 +1186,8 @@ function ApplicationPackCard({ accessProfile, clientSetup, clientSetupError, hig
 }
 
 function ApplicationPackDetail({ accessProfile, clientSetup, clientSetupError, extensionById, installLocked, lifecycle, onApply, onBack, onRecommendedChange, pack, selectedRecommended, setupStatus }: {
-  accessProfile: OctopusClientAccessProfile;
-  clientSetup: OctopusClientSetupState | null;
+  accessProfile: PhobosClientAccessProfile;
+  clientSetup: PhobosClientSetupState | null;
   clientSetupError: string;
   extensionById: Map<string, ClientExtensionRecord>;
   installLocked: boolean;
@@ -1261,7 +1261,7 @@ function ApplicationPackDetail({ accessProfile, clientSetup, clientSetupError, e
             {lifecycle?.phase === "failed" ? (
               <div className="mx-[var(--detail-page-inline-inset,0px)] rounded-xl border border-token-error-foreground/25 bg-token-error-background px-4 py-3 text-sm text-token-error-foreground" role="alert">
                 <div className="font-medium">Pack installation failed</div>
-                <div className="mt-1 text-xs opacity-90">Octopus could not finish applying this pack. Retry after resolving the incomplete item.</div>
+                <div className="mt-1 text-xs opacity-90">Phobos could not finish applying this pack. Retry after resolving the incomplete item.</div>
               </div>
             ) : null}
             <DetailSection title="Setup">
@@ -1372,7 +1372,7 @@ function ApplicationPackLogo({ large = false }: { large?: boolean }) {
   );
 }
 
-function ApplicationPackFactBadges({ clientSetup, clientSetupError, compact = false, pack, setupStatus }: { clientSetup: OctopusClientSetupState | null; clientSetupError: string; compact?: boolean; pack: ApplicationPackRecord; setupStatus?: ClientExtensionActionStatus }) {
+function ApplicationPackFactBadges({ clientSetup, clientSetupError, compact = false, pack, setupStatus }: { clientSetup: PhobosClientSetupState | null; clientSetupError: string; compact?: boolean; pack: ApplicationPackRecord; setupStatus?: ClientExtensionActionStatus }) {
   return (
     <span className={cx("flex min-w-0 flex-wrap items-center gap-1", compact && "mt-1")}>
       {applicationPackFacts(pack, setupStatus, clientSetup, clientSetupError).map((fact) => <OcStatus key={fact.label} label={fact.label} tone={fact.tone} />)}
@@ -1390,7 +1390,7 @@ type ApplicationConnectionActions = {
 };
 
 function ManageApplicationsList({ accessProfile, applicationRefs, applications, connectionFor, highlightedId, installLocked, lifecycleFor, onInstall, onOpen, onRemove, setupStatusByInterface }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   applicationRefs: RefObject<Map<string, HTMLElement>>;
   applications: ApplicationRecord[];
   connectionFor: (application: ApplicationRecord) => ApplicationConnectionActions;
@@ -1444,7 +1444,7 @@ function ApplicationCard({
   setRef,
   view = "browse",
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   application: ApplicationRecord;
   connection: ApplicationConnectionActions;
   highlighted: boolean;
@@ -1507,7 +1507,7 @@ function ApplicationCard({
 }
 
 function ApplicationCardActions({ accessProfile, application, installLocked, lifecycle, onInstall, onOpen, onRemove, view }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   application: ApplicationRecord;
   installLocked: boolean;
   lifecycle?: ApplicationLifecycleOperation;
@@ -1555,7 +1555,7 @@ function ApplicationCardActions({ accessProfile, application, installLocked, lif
 }
 
 function ApplicationMoreActions({ accessProfile, application, onManage, onRemove }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   application: ApplicationRecord;
   onManage?: () => void;
   onRemove: () => void;
@@ -1626,7 +1626,7 @@ function ApplicationDetail({
   rootEeId,
   setupStatus,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   application: ApplicationRecord;
   availabilitySavingEeId: string;
   configurationSaving: boolean;
@@ -1762,7 +1762,7 @@ function ApplicationDetail({
                             />
                           ))}
                         </OcCard>
-                        <p className="px-2 pt-2 text-xs leading-4 text-secondary">Private values for this application's processes. A value you don't set here comes from the environment Octopus starts with.</p>
+                        <p className="px-2 pt-2 text-xs leading-4 text-secondary">Private values for this application's processes. A value you don't set here comes from the environment Phobos starts with.</p>
                       </DetailSection>
                     ) : null}
                   </div>
@@ -1951,7 +1951,7 @@ function withoutSettledOperations<T extends { phase: ApplicationLifecycleOperati
   return remaining.length === Object.keys(operations).length ? operations : Object.fromEntries(remaining);
 }
 
-function announceDisconnectResult(name: string, state: OctopusApplicationConnectionState) {
+function announceDisconnectResult(name: string, state: PhobosApplicationConnectionState) {
   const manage = state.manage;
   const options = manage ? { action: { label: manage.label, onSelect: () => { window.open(manage.url, "_blank", "noopener,noreferrer"); } } } : undefined;
   const duration = manage ? 10 : undefined;
@@ -2060,7 +2060,7 @@ function applicationAttention(
 }
 
 function configurationFieldStatus(field: ApplicationConfigurationField): string {
-  if (field.source === "conflict") return "Saved value conflicts with the environment Octopus starts with";
+  if (field.source === "conflict") return "Saved value conflicts with the environment Phobos starts with";
   if (field.private_saved) return "Saved";
   if (field.source === "environment") return "Set in environment";
   if (field.source === "unknown") return "Not checked";
@@ -2212,7 +2212,7 @@ function applicationPackSetupStatus(
 function applicationPackFacts(
   pack: ApplicationPackRecord,
   setupStatus?: ClientExtensionActionStatus,
-  clientSetup?: OctopusClientSetupState | null,
+  clientSetup?: PhobosClientSetupState | null,
   clientSetupError = "",
 ): Array<{ label: string; tone: "neutral" | "success" | "warning" | "danger" }> {
   const inventory = applicationPackInventory(pack);
@@ -2234,7 +2234,7 @@ function applicationPackFacts(
 
 function applicationPackSetupVerified(
   pack: ApplicationPackRecord,
-  setup: OctopusClientSetupState | null | undefined,
+  setup: PhobosClientSetupState | null | undefined,
 ): boolean {
   return setup?.status === "complete"
     && Boolean(setup.receiptDigest)

@@ -15,8 +15,8 @@ export type WorkerEnvironmentLocalMutation = {
   recordedAtMs: number;
 };
 
-const LOCAL_MUTATION_EVENT = "octopus:worker-environment-local-mutation";
-const LOCAL_MUTATION_CHANNEL = "octopus.worker-environment-local-mutation.v1";
+const LOCAL_MUTATION_EVENT = "phobos:worker-environment-local-mutation";
+const LOCAL_MUTATION_CHANNEL = "phobos.worker-environment-local-mutation.v1";
 const rendererId = crypto.randomUUID();
 let channel: BroadcastChannel | null | undefined;
 

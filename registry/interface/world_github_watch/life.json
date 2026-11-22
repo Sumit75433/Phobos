@@ -12,7 +12,7 @@
         "registry/interface/world_github_watch/github_watch.py",
         "registry/interface/world_github_watch/github_api.py",
         "registry/interface/world_github_watch/github_watch_boundary.py",
-        "registry/interface/world_github_watch/octopus_content_hash.py"
+        "registry/interface/world_github_watch/phobos_content_hash.py"
       ],
       "env": {
         "PYTHONDONTWRITEBYTECODE": "1"

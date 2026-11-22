@@ -4,9 +4,9 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useAppearance } from "../../appearance";
 import type { WorkerEnvironmentProjection, WorkerEnvironmentSurfaceProjection } from "../../data/topology";
 import type {
-  OctopusWorkerEnvironmentFile,
-  OctopusWorkerEnvironmentFileEntry,
-  OctopusWorkerEnvironmentFilePreview,
+  PhobosWorkerEnvironmentFile,
+  PhobosWorkerEnvironmentFileEntry,
+  PhobosWorkerEnvironmentFilePreview,
 } from "../../electron";
 import { formatProjectionError } from "../../projectionClient";
 import { clientDialogOwnsCommands } from "../../keyboardShortcuts";
@@ -16,14 +16,14 @@ import { OcButton, OcDialog, OcDialogFooter, OcDialogHeader, OcIconButton } from
 import { Glyph, type GlyphName } from "../IconGlyphs";
 import { ShellTooltip } from "../shell/ShellTooltip";
 import "./filePreview.css";
-import { octopusDiffRawUnsafeCss } from "../settings/octopusDiffUnsafeCss";
-import { octopusDiffThemeName, registerOctopusDiffThemes } from "../settings/octopusDiffThemes";
+import { phobosDiffRawUnsafeCss } from "../settings/phobosDiffUnsafeCss";
+import { phobosDiffThemeName, registerPhobosDiffThemes } from "../settings/phobosDiffThemes";
 import {
-  OctopusFileTree,
-  OctopusFilterField,
-  OctopusPanelNote,
-  octopusTreeAncestors,
-} from "../OctopusSurface";
+  PhobosFileTree,
+  PhobosFilterField,
+  PhobosPanelNote,
+  phobosTreeAncestors,
+} from "../PhobosSurface";
 import {
   dispatchWorkerEnvironmentLocalMutation,
   subscribeWorkerEnvironmentLocalMutations,
@@ -33,14 +33,14 @@ import {
   dataText,
 } from "./RunEnvironmentSurfacePrimitives";
 
-const diffThemeRegistrationKey = Symbol.for("octopus.diff-themes.registered");
+const diffThemeRegistrationKey = Symbol.for("phobos.diff-themes.registered");
 const diffThemeRegistry = globalThis as typeof globalThis & { [diffThemeRegistrationKey]?: boolean };
 if (!diffThemeRegistry[diffThemeRegistrationKey]) {
-  registerOctopusDiffThemes();
+  registerPhobosDiffThemes();
   diffThemeRegistry[diffThemeRegistrationKey] = true;
 }
 
-const fileRendererUnsafeCss = `${octopusDiffRawUnsafeCss}
+const fileRendererUnsafeCss = `${phobosDiffRawUnsafeCss}
 [data-file] {
   --diffs-font-family: var(--font-mono);
   --diffs-font-size: var(--code-font-size, 12px);
@@ -77,7 +77,7 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
   onOpenFile: (filePath: string, permanent?: boolean, surface?: WorkerEnvironmentSurfaceProjection) => void;
   surface: WorkerEnvironmentSurfaceProjection;
 }) {
-  const [directories, setDirectories] = useState<Record<string, OctopusWorkerEnvironmentFileEntry[]>>({});
+  const [directories, setDirectories] = useState<Record<string, PhobosWorkerEnvironmentFileEntry[]>>({});
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState<Set<string>>(() => new Set());
   const [query, setQuery] = useState("");
@@ -85,7 +85,7 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
   const [error, setError] = useState("");
   const [indexState, setIndexState] = useState<"idle" | "indexing" | "complete" | "bounded" | "error">("idle");
   const [indexedEntries, setIndexedEntries] = useState(0);
-  const [searchEntries, setSearchEntries] = useState<OctopusWorkerEnvironmentFileEntry[]>([]);
+  const [searchEntries, setSearchEntries] = useState<PhobosWorkerEnvironmentFileEntry[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const requestGenerationRef = useRef(0);
@@ -175,7 +175,7 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
   const searchTreePaths = useMemo(() => (
     [...new Set(matchedEntries.map((entry) => entry.kind === "directory" ? `${entry.path}/` : entry.path))]
   ), [normalizedQuery, searchUniverse]);
-  const searchExpanded = useMemo(() => octopusTreeAncestors(searchTreePaths), [searchTreePaths]);
+  const searchExpanded = useMemo(() => phobosTreeAncestors(searchTreePaths), [searchTreePaths]);
   const knownDirectories = useMemo(() => (
     loadedEntries.filter((entry) => entry.kind === "directory").map((entry) => entry.path)
   ), [directories]);
@@ -250,14 +250,14 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
   }, [active, environment.id, expanded, surface.id]);
 
   async function indexWorkspace() {
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.listWorkerEnvironmentFiles) {
       setIndexState("error");
       return;
     }
     const generation = requestGenerationRef.current;
     const queue = [""];
-    const discovered: OctopusWorkerEnvironmentFileEntry[] = [];
+    const discovered: PhobosWorkerEnvironmentFileEntry[] = [];
     const visited = new Set<string>();
     let count = 0;
     let truncated = false;
@@ -302,7 +302,7 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
     <div className="flex h-full min-h-0 w-full flex-col bg-token-main-surface-primary" ref={rootRef}>
       <div className="shrink-0 px-2 pt-2 pb-px">
         <FilesRootIdentity surface={surface} />
-        <OctopusFilterField
+        <PhobosFilterField
           inputId={filterInputId}
           inputRef={searchInputRef}
           label="Filter files"
@@ -333,16 +333,16 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
           </div>
         ) : searching ? (
           indexState === "indexing" && !searchTreePaths.length ? (
-            <OctopusPanelNote>Searching files…</OctopusPanelNote>
+            <PhobosPanelNote>Searching files…</PhobosPanelNote>
           ) : !searchTreePaths.length ? (
-            <OctopusPanelNote>No matching files</OctopusPanelNote>
+            <PhobosPanelNote>No matching files</PhobosPanelNote>
           ) : (
             <div className="flex h-full min-h-0 flex-col">
               {indexState === "bounded" || indexState === "error" ? (
-                <OctopusPanelNote>{indexState === "bounded" ? `Showing the first ${indexedEntries} indexed entries` : "Workspace index failed"}</OctopusPanelNote>
+                <PhobosPanelNote>{indexState === "bounded" ? `Showing the first ${indexedEntries} indexed entries` : "Workspace index failed"}</PhobosPanelNote>
               ) : null}
               <div className="min-h-0 flex-1">
-                <OctopusFileTree
+                <PhobosFileTree
                   flattenEmptyDirectories
                   initialExpandedPaths={searchExpanded}
                   onOpenPath={(path) => onOpenFile(path, true, surface)}
@@ -359,9 +359,9 @@ function LiveFilesSurface({ active, environment, onOpenFile, surface }: {
         ) : rootLoading && !treePaths.length ? (
           <OcLoadingRows label="Loading directory entries…" />
         ) : !treePaths.length ? (
-          <OctopusPanelNote>No files in this folder</OctopusPanelNote>
+          <PhobosPanelNote>No files in this folder</PhobosPanelNote>
         ) : (
-          <OctopusFileTree
+          <PhobosFileTree
             initialExpandedPaths={[...expanded]}
             initialSelectedPaths={selectedPath ? [selectedPath] : undefined}
             onModelEvent={syncExpandedDirectories}
@@ -393,12 +393,12 @@ function ProjectedFilesSurface({ onOpenFile, surface }: {
   const matchedPaths = normalizedQuery
     ? allPaths.filter((path) => path.toLowerCase().includes(normalizedQuery))
     : allPaths;
-  const searchExpanded = useMemo(() => octopusTreeAncestors(matchedPaths), [matchedPaths]);
+  const searchExpanded = useMemo(() => phobosTreeAncestors(matchedPaths), [matchedPaths]);
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-token-main-surface-primary">
       <div className="shrink-0 px-2 pt-2 pb-px">
         <FilesRootIdentity surface={surface} />
-        <OctopusFilterField
+        <PhobosFilterField
           inputId={filterInputId}
           label="Filter files"
           onQueryChange={setQuery}
@@ -408,9 +408,9 @@ function ProjectedFilesSurface({ onOpenFile, surface }: {
       </div>
       <div className="min-h-0 flex-1">
         {!matchedPaths.length ? (
-          <OctopusPanelNote>{entries.length ? "No matching files" : "No files in this folder"}</OctopusPanelNote>
+          <PhobosPanelNote>{entries.length ? "No matching files" : "No files in this folder"}</PhobosPanelNote>
         ) : (
-          <OctopusFileTree
+          <PhobosFileTree
             flattenEmptyDirectories={Boolean(normalizedQuery)}
             initialExpandedPaths={normalizedQuery ? searchExpanded : undefined}
             initialSelectedPaths={selectedPath ? [selectedPath] : undefined}
@@ -450,10 +450,10 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
   const projectedFile = surface && (surface.mode === "fixture" || surface.mode === "evidence")
     ? fixtureFileEntries(surface).find((entry) => entry.kind === "file" && entry.path === path) ?? null
     : null;
-  const [liveFile, setLiveFile] = useState<OctopusWorkerEnvironmentFile | null>(null);
+  const [liveFile, setLiveFile] = useState<PhobosWorkerEnvironmentFile | null>(null);
   const [liveState, setLiveState] = useState<"idle" | "loading" | "error">("idle");
   const [liveError, setLiveError] = useState("");
-  const [binaryPreview, setBinaryPreview] = useState<(OctopusWorkerEnvironmentFilePreview & { url: string }) | null>(null);
+  const [binaryPreview, setBinaryPreview] = useState<(PhobosWorkerEnvironmentFilePreview & { url: string }) | null>(null);
   const [binaryPreviewState, setBinaryPreviewState] = useState<"idle" | "loading" | "error">("idle");
   const [binaryPreviewError, setBinaryPreviewError] = useState("");
   const [binaryPreviewGeneration, setBinaryPreviewGeneration] = useState(0);
@@ -475,11 +475,11 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
       return;
     }
     if (!active) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.readWorkerEnvironmentFile) {
       setLiveFile(null);
       setLiveState("error");
-      setLiveError("Direct filesystem viewing is available only in the Octopus desktop client.");
+      setLiveError("Direct filesystem viewing is available only in the Phobos desktop client.");
       return;
     }
     let cancelled = false;
@@ -533,10 +533,10 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
       setBinaryPreviewState("idle");
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.readWorkerEnvironmentFilePreview) {
       setBinaryPreviewState("error");
-      setBinaryPreviewError("Binary preview is available only in the Octopus desktop client.");
+      setBinaryPreviewError("Binary preview is available only in the Phobos desktop client.");
       return;
     }
     let cancelled = false;
@@ -580,8 +580,8 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
     disableFileHeader: true,
     overflow: "scroll" as const,
     theme: {
-      dark: octopusDiffThemeName("dark", appearance.darkCodeTheme),
-      light: octopusDiffThemeName("light", appearance.lightCodeTheme),
+      dark: phobosDiffThemeName("dark", appearance.darkCodeTheme),
+      light: phobosDiffThemeName("light", appearance.lightCodeTheme),
     },
     themeType: appearance.themeMode,
     unsafeCSS: fileRendererUnsafeCss,
@@ -589,9 +589,9 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
 
   async function performFileSystemAction(action: "resolve" | "reveal" | "open") {
     if (!direct || !surface) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.performWorkerEnvironmentFileSystemAction) {
-      appToast.warning("File system actions are available only in the Octopus desktop client.");
+      appToast.warning("File system actions are available only in the Phobos desktop client.");
       return;
     }
     try {
@@ -635,10 +635,10 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
 
   async function saveManualEdit() {
     if (!editable || !surface || !liveFile || saveState === "saving" || editDraft === liveFile.text) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.writeWorkerEnvironmentFile) {
       setSaveState("error");
-      setSaveError("Manual file editing is available only in the Octopus desktop client.");
+      setSaveError("Manual file editing is available only in the Phobos desktop client.");
       return;
     }
     setSaveState("saving");
@@ -654,7 +654,7 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
         expectedSize: liveFile.size,
       });
       assertWorkerEnvironmentFileResponse(result, environment.id, surface.id, path);
-      if (!result.outsideOctopusEvidence) throw new Error("Manual file write returned an invalid boundary receipt.");
+      if (!result.outsidePhobosEvidence) throw new Error("Manual file write returned an invalid boundary receipt.");
       setLiveFile(result);
       setEditDraft(result.text);
       setEditMode(false);
@@ -666,7 +666,7 @@ export function FilePreviewSurface({ active, environment, path, surface }: {
         surfaceId: surface.id,
         workerEnvironmentId: environment.id,
       });
-      appToast.success("File saved outside Octopus evidence");
+      appToast.success("File saved outside Phobos evidence");
     } catch (failure) {
       const message = formatProjectionError(failure);
       setSaveState("error");
@@ -798,7 +798,7 @@ function ManualFileEditWarning({ onCancel, onContinue, open }: {
         <div className="we-manual-control-dialog__icon"><Glyph name="file" size={20} /></div>
         <OcDialogHeader
           className="we-manual-control-dialog__copy p-0"
-          description="The file changes on disk immediately when you save. This operator action is not recorded as an Octopus artifact, movement, mark, or model action."
+          description="The file changes on disk immediately when you save. This operator action is not recorded as a Phobos artifact, movement, mark, or model action."
           title="Edit this room file manually?"
           titleId="we-manual-file-edit-title"
         />
@@ -824,7 +824,7 @@ function isBinaryPreviewPath(value: string): boolean {
 }
 
 async function loadDirectFilesystemDirectory(workerEnvironmentId: string, surfaceId: string, path: string) {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.listWorkerEnvironmentFiles) throw new Error("Direct filesystem viewing is unavailable");
   const result = await transport.listWorkerEnvironmentFiles({ workerEnvironmentId, surfaceId, path });
   assertWorkerEnvironmentFileResponse(result, workerEnvironmentId, surfaceId, path);

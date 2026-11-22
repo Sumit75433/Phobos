@@ -1,13 +1,13 @@
 import { DEFAULT_RUNTIME_ENDPOINT } from "./gateway";
-import type { OctopusRuntimeEndpointValidation } from "./electron";
+import type { PhobosRuntimeEndpointValidation } from "./electron";
 
 export type ConnectionPrefs = {
   baseUrl: string;
 };
 
-const PREFS_KEY = "octopus.runtimeUi.prefs.v1";
-export const RUNTIME_PREFS_CHANGED_EVENT = "octopus:runtime-prefs-changed";
-const DEV_VALIDATE_ENDPOINT_URL = "/__octopus/validate-endpoint";
+const PREFS_KEY = "phobos.runtimeUi.prefs.v1";
+export const RUNTIME_PREFS_CHANGED_EVENT = "phobos:runtime-prefs-changed";
+const DEV_VALIDATE_ENDPOINT_URL = "/__phobos/validate-endpoint";
 
 export function loadRuntimePrefs(): ConnectionPrefs {
   try {
@@ -31,8 +31,8 @@ export function saveRuntimePrefs(next: ConnectionPrefs): void {
   window.dispatchEvent(new CustomEvent(RUNTIME_PREFS_CHANGED_EVENT));
 }
 
-export async function validateRuntimeEndpoint(endpoint: string): Promise<OctopusRuntimeEndpointValidation> {
-  const bridge = window.octopusTransport;
+export async function validateRuntimeEndpoint(endpoint: string): Promise<PhobosRuntimeEndpointValidation> {
+  const bridge = window.phobosTransport;
   if (bridge?.validateRuntimeEndpoint) {
     const result = await bridge.validateRuntimeEndpoint({ endpoint });
     if (!result.valid) throw new Error(result.error || "The endpoint is invalid.");
@@ -44,7 +44,7 @@ export async function validateRuntimeEndpoint(endpoint: string): Promise<Octopus
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ endpoint }),
     });
-    const result = await response.json() as OctopusRuntimeEndpointValidation;
+    const result = await response.json() as PhobosRuntimeEndpointValidation;
     if (!response.ok || !result.valid) throw new Error(result.error || `Endpoint validation failed: ${response.status}`);
     return result;
   }

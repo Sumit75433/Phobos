@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.remote_exec_server",
   "version": "1.0.1",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Remote Exec Server",
     "description": "Files, commands and processes on a remote machine reached through its exec server.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "sites"
   },

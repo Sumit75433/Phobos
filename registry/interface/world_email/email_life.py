@@ -13,7 +13,7 @@ import threading
 import time
 import urllib.parse
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 import email_contract as contract
 from email_contract import ContractError
@@ -21,18 +21,18 @@ from email_wire import CommitUncertain
 from email_wire import ImapSession
 from email_wire import MailError
 from email_wire import SmtpSession
-from octopus_operation_catalog import RequestError
-from octopus_operation_catalog import answer
-from octopus_operation_catalog import load_catalog
-from octopus_operation_catalog import parse_request
+from phobos_operation_catalog import RequestError
+from phobos_operation_catalog import answer
+from phobos_operation_catalog import load_catalog
+from phobos_operation_catalog import parse_request
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-INTERFACE_DIR = os.environ["OCTOPUS_INTERFACE_DIR"]
-VAR_DIR = os.path.abspath(os.environ["OCTOPUS_VAR_DIR"])
-MOVEMENTS_JSONL = os.environ["OCTOPUS_MOVEMENTS_JSONL"]
-BLOBS_DIR = os.environ["OCTOPUS_BLOBS_DIR"]
-LEDGER_INDEX_SQLITE = os.environ["OCTOPUS_LEDGER_INDEX_SQLITE"]
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+INTERFACE_DIR = os.environ["PHOBOS_INTERFACE_DIR"]
+VAR_DIR = os.path.abspath(os.environ["PHOBOS_VAR_DIR"])
+MOVEMENTS_JSONL = os.environ["PHOBOS_MOVEMENTS_JSONL"]
+BLOBS_DIR = os.environ["PHOBOS_BLOBS_DIR"]
+LEDGER_INDEX_SQLITE = os.environ["PHOBOS_LEDGER_INDEX_SQLITE"]
 CONFIG_PATH = os.path.join(INTERFACE_DIR, "config.json")
 DESCRIPTOR_PATH = os.path.join(INTERFACE_DIR, "interface.json")
 CURSOR_PATH = os.path.join(VAR_DIR, "ledger-cursor.json")
@@ -183,7 +183,7 @@ def read_json(path, name):
 
 
 def io_limits():
-    value = contract.require_keys(json.loads(os.environ["OCTOPUS_INTERFACE_HOST_IO_LIMITS"]), {"max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes"}, set(), "email host I/O limits")
+    value = contract.require_keys(json.loads(os.environ["PHOBOS_INTERFACE_HOST_IO_LIMITS"]), {"max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes"}, set(), "email host I/O limits")
     return {key: contract.require_int(value[key], f"email host I/O limits.{key}", 1) for key in value}
 
 
@@ -206,7 +206,7 @@ def load_operations():
 
 def attachment_root():
     try:
-        slots = json.loads(os.environ["OCTOPUS_ROOT_SLOTS_JSON"])
+        slots = json.loads(os.environ["PHOBOS_ROOT_SLOTS_JSON"])
         root = slots["interface_hand_in_root"]
     except (KeyError, TypeError, ValueError) as error:
         raise ContractError("email needs the interface_hand_in_root slot to store attachments") from error
@@ -275,14 +275,14 @@ def materialize(stem, label, payload=None):
         if len(payload) > io_limits()["max_payload_bytes"]:
             raise ValueError("email artifact payload exceeds the host payload limit")
         atomic_bytes(payload_path, payload)
-    manifest = canonical_json({"label": label, "payload_path": payload_path, "payload_content_hash": octopus_content_hash(payload)})
+    manifest = canonical_json({"label": label, "payload_path": payload_path, "payload_content_hash": phobos_content_hash(payload)})
     try:
         current = read_bounded(manifest_path, io_limits()["max_manifest_bytes"], "artifact manifest")
     except FileNotFoundError:
         current = None
     if current != manifest:
         atomic_bytes(manifest_path, manifest)
-    return manifest_path, f"{label}:{octopus_content_hash(manifest)}"
+    return manifest_path, f"{label}:{phobos_content_hash(manifest)}"
 
 
 def materialized(stem):
@@ -296,7 +296,7 @@ def hand_json(label, value, stem):
         clean["media"] = media
     payload = None if value is None else canonical_json(clean)
     manifest_path, artifact_id = materialize(stem, label, payload)
-    digest = bytes.fromhex(octopus_content_hash(artifact_id.encode("utf-8")))
+    digest = bytes.fromhex(phobos_content_hash(artifact_id.encode("utf-8")))
     evidence = [{"interface_id": INTERFACE_ID, "artifact_id": artifact_id, "label": "email.arrival.idempotency", "bytes": list(digest)}]
     try:
         return hand_artifact(manifest_path, evidence)
@@ -450,7 +450,7 @@ def content_hexdigest(content):
 
 def read_blob(digest, maximum, name):
     content = read_bounded(os.path.join(BLOBS_DIR, digest), maximum, name)
-    if octopus_content_hash(content) != digest:
+    if phobos_content_hash(content) != digest:
         raise ValueError(f"email {name} failed content-address verification")
     return content
 

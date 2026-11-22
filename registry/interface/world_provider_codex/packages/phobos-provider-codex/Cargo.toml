@@ -1,0 +1,77 @@
+[package]
+name = "phobos-provider-codex"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[lib]
+name = "phobos_provider_codex"
+path = "src/lib.rs"
+doctest = false
+
+[[bin]]
+name = "phobos-provider-codex-life"
+path = "src/bin/life.rs"
+
+[[bin]]
+name = "phobos-input-intake-life"
+path = "src/bin/input_intake_life.rs"
+
+[[bin]]
+name = "phobos-provider-opencodex-life"
+path = "src/bin/opencodex_life.rs"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+blake3 = "1"
+base64 = "0.22"
+sha2 = "0.10"
+regex = "1"
+tokio = { workspace = true, features = ["sync", "time", "rt", "net", "fs", "process", "io-util", "macros"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+notify.workspace = true
+tracing-subscriber = { version = "0.3.22", features = ["fmt"] }
+
+phobos-appserver-proto = { path = "../phobos-appserver-proto" }
+phobos-protocol = { path = "../phobos-protocol" }
+phobos-util-string = { path = "../phobos-util-string" }
+phobos-util-image = { path = "../phobos-util-image" }
+phobos-util-abspath = { path = "../../../../worker_environment_kind/process_session/packages/phobos-util-abspath" }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-runtime = { path = "../../../../../crates/phobos-runtime" }
+phobos-run-record = { path = "../../../../../crates/phobos-run-record" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-world-pyecho-life-runtime = { path = "../../../world_pyecho/packages/phobos-world-pyecho-life-runtime" }
+phobos-interface-activation-app-server-transport = { path = "../../../world_operator_chat/packages/phobos-interface-activation-app-server-transport" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-model-context-render = { path = "../phobos-model-context-render" }
+phobos-run-authoring = { path = "../../../system_interface_authoring/packages/phobos-run-authoring" }
+phobos-operator-chat-client = { path = "../../../world_operator_chat/packages/phobos-operator-chat-client" }
+phobos-login = { path = "../phobos-codex-login" }
+phobos-secrets = { path = "../phobos-secrets" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+futures = { version = "0.3", default-features = false }
+rustls = { version = "0.23", default-features = false, features = [
+    "aws_lc_rs",
+    "std",
+] }
+tokio-tungstenite = { version = "0.28.0", features = ["rustls-tls-native-roots"] }
+tracing = "0.1.44"
+url = "2"
+zeroize = "1.8.2"
+
+phobos-app-server-interface = { path = "../../../world_operator_chat/packages/phobos-app-server-interface" }
+
+[dev-dependencies]
+json-patch.workspace = true
+tokio = { workspace = true, features = ["test-util"] }
+phobos-app-server = { path = "../../../../../crates/phobos-app-server" }
+phobos-system-room-env = { path = "../../../../../registry/worker_environment_kind/system_room/packages/phobos-system-room-env" }
+toml = "0.9.5"
+tempfile = "3.23.0"

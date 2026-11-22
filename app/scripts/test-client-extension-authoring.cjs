@@ -79,10 +79,10 @@ async function writePackage(root, manifest) {
   return `sha256:${crypto.createHash("sha256").update(text).digest("hex")}`;
 }
 const examples = authoring.contract.extensions.use_cases.map((useCase) => useCase.client);
-const inspect = (extra = {}) => ({ schema: "octopus.client_action", schema_version: 1, action: "inspect_client", request_id: "inspect-1", ...extra });
+const inspect = (extra = {}) => ({ schema: "phobos.client_action", schema_version: 1, action: "inspect_client", request_id: "inspect-1", ...extra });
 
 test("every authored Extension example passes the running client's admission and reaches owner review", async () => {
-  const root = path.join(await scratch("octopus-extension-authoring-"), "extensions");
+  const root = path.join(await scratch("phobos-extension-authoring-"), "extensions");
   const store = createClientExtensionStore({ root });
   try {
     const digests = new Map();
@@ -111,7 +111,7 @@ test("every authored Extension example passes the running client's admission and
 });
 
 test("a refused revision reports exact issues and runtime issues follow the current surface revision", async () => {
-  const root = path.join(await scratch("octopus-extension-refusal-"), "extensions");
+  const root = path.join(await scratch("phobos-extension-refusal-"), "extensions");
   const store = createClientExtensionStore({ root });
   try {
     const broken = structuredClone(examples[0]);
@@ -144,8 +144,8 @@ test("inspect_client is a declared client.mcp operation and describes the host f
   assert.equal(operation.input_schema.properties.action.properties.action.const, "inspect_client");
   assert.ok(parseClientAction(inspect({ extension_id: "home.attention", source: { method: "projection.runs.list", params: { limit: 1 } } })));
   assert.throws(() => parseClientAction(inspect({ source: { method: "projection.runs.list", url: "x" } })), /inspect_client/);
-  assert.ok(parseClientAction({ schema: "octopus.client_action", schema_version: 1, action: "relaunch_client", request_id: "relaunch-1" }));
-  assert.throws(() => parseClientAction({ schema: "octopus.client_action", schema_version: 1, action: "relaunch_client", request_id: "relaunch-1", force: true }), /relaunch_client/);
+  assert.ok(parseClientAction({ schema: "phobos.client_action", schema_version: 1, action: "relaunch_client", request_id: "relaunch-1" }));
+  assert.throws(() => parseClientAction({ schema: "phobos.client_action", schema_version: 1, action: "relaunch_client", request_id: "relaunch-1", force: true }), /relaunch_client/);
   const inventory = buildClientInventory({ snapshot: { generation: 0, root: "/home/client/extensions", manifests: [], state: {}, stateStatus: "valid", lifecycle: {}, credentials: {}, actionStatuses: [], errors: [] }, surfaces: [], runtimeIssues: [] });
   assert.deepEqual(inventory.host.targets["voice.widget"].slot, documentSchema.$defs.voiceTarget.properties.slot.enum);
   assert.deepEqual(inventory.host.glyphs, documentSchema.$defs.glyph.enum);
@@ -155,7 +155,7 @@ test("inspect_client is a declared client.mcp operation and describes the host f
 });
 
 test("a feed reader shows the newest emission and inspect previews it through the real projection", async () => {
-  const home = await scratch("octopus-extension-feed-");
+  const home = await scratch("phobos-extension-feed-");
   const blobs = path.join(home, "ledger/blobs");
   await fs.mkdir(blobs, { recursive: true });
   const blob = async (value) => {
@@ -176,13 +176,13 @@ test("a feed reader shows the newest emission and inspect previews it through th
       invocation_metadata: { runtime: { run: "run_producer", ee: "ee", worker: "worker", checkpoint: "emit", interface: "system_room_producer", epoch: 0 } } });
   }
   await fs.writeFile(path.join(home, "ledger/movements.jsonl"), `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`);
-  const store = createProjectionStore({ resolveRepoRoot: () => repoRoot, octopusHome: () => home, sourceRegistry: () => path.join(home, "registry"), projectEePolicies: () => new Promise(() => {}) });
+  const store = createProjectionStore({ resolveRepoRoot: () => repoRoot, phobosHome: () => home, sourceRegistry: () => path.join(home, "registry"), projectEePolicies: () => new Promise(() => {}) });
   try {
     const read = (params) => store.read({ contract_version: 1, method: source.method, params });
     assert.deepEqual((await read(source.params)).artifacts.map((row) => row.payload.free_gb), [182.4]);
     assert.deepEqual((await read({ ...source.params, order: undefined, limit: 3 })).artifacts.map((row) => row.payload.free_gb), [120, 150, 182.4]);
     await assert.rejects(read({ ...source.params, order: "latest" }), /oldest or newest/);
-    globalThis.window = { octopusTransport: {
+    globalThis.window = { phobosTransport: {
       projectionRead: (request) => store.read(request),
       clientExtensions: async () => ({ generation: 0, root: "", manifests: [], state: {}, stateStatus: "valid", lifecycle: {}, credentials: {}, actionStatuses: [], errors: [] }),
     } };

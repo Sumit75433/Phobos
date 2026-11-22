@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/octopus-icon.png" width="128" alt="Octopus">
+  <img src="assets/phobos-icon.png" width="128" alt="Phobos">
 </p>
 
-<h1 align="center">Octopus Superintelligence OS</h1>
+<h1 align="center">Phobos Superintelligence OS</h1>
 
 <p align="center">
   <b>A self-evolving agentic OS.</b><br>
@@ -17,9 +17,9 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/MIT-DCEBFA?style=flat-square" alt="MIT license"></a>
 </p>
 
-![Octopus OS](assets/octopus-os.gif)
+![Phobos OS](assets/phobos-os.gif)
 
-Octopus is an operating system for persistent agent work. Goals, permissions,
+Phobos is an operating system for persistent agent work. Goals, permissions,
 runs, tools, context, and external events are explicit, durable records rather
 than state held inside a model loop. A small Rust kernel forms grants, admits
 artifact movements, and records them in an append-only ledger. Providers,
@@ -82,13 +82,13 @@ prints their path. Package and open the app:
 
 ```sh
 headers="$(node app/native/runtime.cjs headers)" &&
-OCTOPUS_NATIVE_NODE_HEADERS="$headers" npm --prefix app run package:mac &&
-open -n ./app/build/Octopus.app
+PHOBOS_NATIVE_NODE_HEADERS="$headers" npm --prefix app run package:mac &&
+open -n ./app/build/Phobos.app
 ```
 
-Packaging builds the client, the release runtime, the capability executables, and the provider bridge, and bundles the managed Codex distribution. The result is `app/build/Octopus.app`, ad-hoc signed for this machine. It is not notarized, so Gatekeeper may warn.
+Packaging builds the client, the release runtime, the capability executables, and the provider bridge, and bundles the managed Codex distribution. The result is `app/build/Phobos.app`, ad-hoc signed for this machine. It is not notarized, so Gatekeeper may warn.
 
-Already running Octopus from this checkout? Do not rebuild the live bundle in
+Already running Phobos from this checkout? Do not rebuild the live bundle in
 place. Use the [staged self-update procedure](docs/development.md#updating-an-installation-that-runs-from-the-checkout).
 
 </details>
@@ -100,8 +100,8 @@ place. Use the [staged self-update procedure](docs/development.md#updating-an-in
 
 1. **Sign in with ChatGPT.** It opens the browser. There is no terminal login.
 2. **Set a local password.** It guards the client on this machine.
-3. **Start the system.** The embedded terminal prepares a command ending in `octopus up`. Press Enter and wait for the ready state.
-4. **Pick a starting structure.** Projects, names, capabilities. Select **Set up Octopus**.
+3. **Start the system.** The embedded terminal prepares a command ending in `phobos up`. Press Enter and wait for the ready state.
+4. **Pick a starting structure.** Projects, names, capabilities. Select **Set up Phobos**.
 5. **Say something in Home.** A reply proves the connection. A task that uses its tools proves that task's setup.
 
 For a new task, create an Agent first: choose a Project and a model, review its capabilities, then select it in the task composer.
@@ -115,22 +115,22 @@ Model availability and usage limits belong to your provider account. Voice and s
 
 <br>
 
-A setup file (`*.octopus-setup.json`) carries an Octopus's space, projects, capabilities and model, never its keys, accounts or history. On the first setup step, **Import setup…** fills the wizard from one; **Export setup…** on the review step, or **Settings → General → Setup file**, saves yours. Try it with the [Legacy watch setup file](registry/interface/world_legacy_watch/legacy-watch.octopus-setup.json). More in [Setup files](docs/getting-started.md#setup-files).
+A setup file (`*.phobos-setup.json`) carries a Phobos's space, projects, capabilities and model, never its keys, accounts or history. On the first setup step, **Import setup…** fills the wizard from one; **Export setup…** on the review step, or **Settings → General → Setup file**, saves yours. Try it with the [Legacy watch setup file](registry/interface/world_legacy_watch/legacy-watch.phobos-setup.json). More in [Setup files](docs/getting-started.md#setup-files).
 
 </details>
 
-To use the terminal client, build it from the checkout and open Octopus:
+To use the terminal client, build it from the checkout and open Phobos:
 
 ```sh
 npm --prefix app run build:cli
-./octopus
+./phobos
 ```
 
 See [Terminal client](docs/cli.md) for setup, keyboard controls, existing Home selection, and commands for scripts or other agents.
 
 ## How it works
 
-Two words carry the picture. **System** is everything Octopus can act on. **World** is everything else. They meet only at declared interfaces; there is no other route.
+Two words carry the picture. **System** is everything Phobos can act on. **World** is everything else. They meet only at declared interfaces; there is no other route.
 
 Underneath, there are a few primitives and no orchestrator:
 
@@ -149,7 +149,7 @@ Underneath, there are a few primitives and no orchestrator:
 
 <br>
 
-You type a message in Home and Octopus reads a file to answer it.
+You type a message in Home and Phobos reads a file to answer it.
 
 ```mermaid
 sequenceDiagram
@@ -203,7 +203,7 @@ More in [Scenarios](docs/scenarios.md).
 
 </details>
 
-The cookbook is [Extending Octopus](docs/contracts/EXTENSION_SURFACES.md).
+The cookbook is [Extending Phobos](docs/contracts/EXTENSION_SURFACES.md).
 
 <details>
 <summary><b>Desktop client — voice, tasks, and a view into the system</b></summary>
@@ -235,7 +235,7 @@ MIT-licensed companion tools:
   discovery paths failed structural checks—not a web-wide readiness estimate.
 
 See the collection for three-line quickstarts, compact data, reproduction steps,
-and the scientific and security scope boundaries. Neither tool requires Octopus.
+and the scientific and security scope boundaries. Neither tool requires Phobos.
 
 ## Documentation
 
@@ -244,13 +244,13 @@ and the scientific and security scope boundaries. Neither tool requires Octopus.
 - [Architecture](docs/architecture.md) - System and World, the primitives, one turn end to end.
 - [Scenarios](docs/scenarios.md) - what the primitives are meant to express.
 - [Contracts](docs/contracts/README.md) - policy, artifacts, interfaces, workers, environments, tools, verifiers, the ledger.
-- [Extending Octopus](docs/contracts/EXTENSION_SURFACES.md) - adding providers, channels, workers, tools, checks.
+- [Extending Phobos](docs/contracts/EXTENSION_SURFACES.md) - adding providers, channels, workers, tools, checks.
 - [Security model](docs/security-model.md) - trust boundaries and known risks.
 - [Glossary](docs/glossary.md) · [Development](docs/development.md) · [Troubleshooting](TROUBLESHOOTING.md)
 
 ---
 
-Home state is stored locally in `~/.octopus` by default; provider calls and
+Home state is stored locally in `~/.phobos` by default; provider calls and
 connected applications can send data off-machine. Grants constrain boundary
 crossings, and enforced-mode tools run in a deny-by-default sandbox. Full-access
 rooms and explicitly unsandboxed processes do not have that isolation - see the

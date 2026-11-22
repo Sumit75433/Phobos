@@ -17,5 +17,5 @@ The generator verifies required installed package versions against the lockfile,
 checks supplemental notice and asset hashes, and reports absent optional
 dependencies. It does not silently omit a missing required dependency.
 
-The Octopus logo, video, and agent illustrations are the project's own artwork
+The Phobos logo, video, and agent illustrations are the project's own artwork
 and are not attributed to a third party.

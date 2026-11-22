@@ -53,7 +53,7 @@ test("actual socket admission distinguishes pre-dispatch failure, unknown outcom
     if (server.listening) await new Promise((resolve) => server.close(resolve));
     fs.rmSync(scratch, { recursive: true });
   });
-  const request = { endpoint: `unix://${endpoint}`, interfaceId: "test", octopusHome: scratch,
+  const request = { endpoint: `unix://${endpoint}`, interfaceId: "test", phobosHome: scratch,
     manifest: { label: "test.control", payload_path: path.join(scratch, "payload") }, timeoutMs: 300 };
   const { assertAdmitted } = require("../../registry/interface/world_operator_chat/client/values.cjs");
   const send = (input = request) => captureArtifactDelivery(async (deliver) => {
@@ -155,12 +155,12 @@ test("actual main handler serializes pre-dispatch errors as data through preload
   let callback;
   function visit(node) {
     if (ts.isCallExpression(node) && node.expression.getText(ast) === "ipcMain.handle"
-      && node.arguments[0]?.text === "octopus:submit-operator-turn-control") callback = node.arguments[1].getText(ast);
+      && node.arguments[0]?.text === "phobos:submit-operator-turn-control") callback = node.arguments[1].getText(ast);
     ts.forEachChild(node, visit);
   }
   visit(ast); assert.ok(callback);
   let authorized = false, loaded = 0;
-  const handler = Function("captureArtifactDelivery", "getClientAccessController", "resolveOctopusHome", "loadOperatorChatClient", "path", `return (${callback})`)(
+  const handler = Function("captureArtifactDelivery", "getClientAccessController", "resolvePhobosHome", "loadOperatorChatClient", "path", `return (${callback})`)(
     captureArtifactDelivery,
     () => ({ requireSession: () => { if (!authorized) throw new Error("expired access"); } }),
     () => "/unused-test-home",
@@ -170,5 +170,5 @@ test("actual main handler serializes pre-dispatch errors as data through preload
   assert.equal(loaded, 0);
   authorized = true;
   assert.deepEqual(await handler({}, "token", {}), { deliveryError: { stage: "not-sent", message: "invalid run" } });
-  assert.match(source("app/electron/preload.cjs"), /submitOperatorTurnControl\(request\)\s*\{\s*return invokeAccess\("octopus:submit-operator-turn-control", request\);/);
+  assert.match(source("app/electron/preload.cjs"), /submitOperatorTurnControl\(request\)\s*\{\s*return invokeAccess\("phobos:submit-operator-turn-control", request\);/);
 });

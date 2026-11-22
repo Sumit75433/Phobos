@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_system_review",
   "version": "1.2.0",
@@ -8,8 +8,8 @@
   "release_status": "optional",
   "display": {
     "name": "System review",
-    "description": "A trigger template: after a quiet period in your work, a run studies recent experience and improves Octopus when the evidence supports it.",
-    "developer": "Octopus",
+    "description": "A trigger template: after a quiet period in your work, a run studies recent experience and improves Phobos when the evidence supports it.",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "sparkles"
   },

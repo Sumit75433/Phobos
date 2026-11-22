@@ -56,8 +56,8 @@ function createClientDictationStream(request, options = {}) {
       headers: {
         Authorization: `Bearer ${auth.token}`,
         ...(auth.accountId ? { "ChatGPT-Account-Id": auth.accountId } : {}),
-        originator: "octopus-desktop",
-        "User-Agent": `Octopus Desktop/${options.clientVersion || "0.1.0"} (${process.platform}; ${process.arch})`,
+        originator: "phobos-desktop",
+        "User-Agent": `Phobos Desktop/${options.clientVersion || "0.1.0"} (${process.platform}; ${process.arch})`,
       },
       maxPayload: 8 * 1024 * 1024,
       followRedirects: false,

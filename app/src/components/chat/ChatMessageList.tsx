@@ -19,7 +19,7 @@ import { OperatorRequestSurface } from "./OperatorRequestSurface";
 import { ActivityDisclosure, TerminalErrorActivity, TurnActivity } from "./TurnActivity";
 import { McpResourceSurface } from "./McpResourceSurface";
 import { ArtifactEndResources, artifactEndResourceFromMessage } from "../artifacts/ArtifactEndResources";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 import { baseDynamicToolId, dynamicToolGlyph, dynamicToolOperationLabel, dynamicToolPresentation, dynamicToolReadLabel, dynamicToolSummary, webSearchActivityDetail, webSearchActivityLabel, type DynamicToolPresentation } from "./toolPresentation";
 import { conversationTraceAdmission, isFinalAssistantResponse } from "./conversationTrace";
 import { commandActivityModel, commandOutcomeLabel, commandResultBody } from "./commandActivityModel";
@@ -393,7 +393,7 @@ export function ChatMessageList({
   useLayoutEffect(() => {
     if (!findState.query || findState.total <= 0) return;
     const frame = window.requestAnimationFrame(() => {
-      const active = listRef.current?.querySelector<HTMLElement>(`[data-octopus-thread-find-index="${findActiveIndex}"]`);
+      const active = listRef.current?.querySelector<HTMLElement>(`[data-phobos-thread-find-index="${findActiveIndex}"]`);
       if (active) {
         pinnedRef.current = false;
         active.scrollIntoView({ block: "center", behavior: reducedMotion ? "instant" : "smooth" });
@@ -625,13 +625,13 @@ export function ChatMessageList({
   if (effectiveActiveMessageCount === 0 && emptyState === "new-task") {
     return (
       <div
-        className={`octopus-chat-scroll octopus-chat-home [container-type:size] flex min-h-0 w-full flex-1 flex-col overflow-y-auto [scrollbar-gutter:stable_both-edges] ${dragOver ? "is-drag-over" : ""}`}
+        className={`phobos-chat-scroll phobos-chat-home [container-type:size] flex min-h-0 w-full flex-1 flex-col overflow-y-auto [scrollbar-gutter:stable_both-edges] ${dragOver ? "is-drag-over" : ""}`}
         onDragLeave={dropEnabled ? onDragLeave : undefined}
         onDragOver={dropEnabled ? onDragOver : undefined}
         onDrop={dropEnabled ? onDrop : undefined}
         ref={listRef}
       >
-        {backdrop ? <div aria-hidden="true" className="octopus-chat-backdrop">{backdrop}</div> : null}
+        {backdrop ? <div aria-hidden="true" className="phobos-chat-backdrop">{backdrop}</div> : null}
         <div className="relative z-[1] mx-auto flex min-h-full w-full max-w-3xl flex-col justify-center gap-3 px-panel py-6">
           <div
             className="flex max-w-full min-w-0 flex-col items-center gap-4 text-center select-none"
@@ -639,7 +639,7 @@ export function ChatMessageList({
           >
             {footer ? <InteractiveHeroMark /> : <Glyph className="text-token-text-tertiary" name="chat" size={22} />}
             <h1 className="heading-xl font-normal whitespace-pre-wrap text-token-foreground">
-              {emptyLabel || "What should Octopus work on?"}
+              {emptyLabel || "What should Phobos work on?"}
             </h1>
           </div>
           {footer ? (
@@ -739,7 +739,7 @@ export function ChatMessageList({
         onReveal={revealUserMessage}
       />
       <div
-        className={`octopus-chat-scroll thread-scroll-container h-full overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scroll-padding-bottom:var(--thread-scroll-padding-bottom,0px)] electron:[scrollbar-gutter:stable_both-edges] pt-(--thread-content-top-inset) [container-name:thread-content] [container-type:inline-size] [&:has([data-thread-scroll-footer='true']:focus-within)]:[scroll-padding-bottom:0px] flex flex-col-reverse focus:outline-none${scrolledFromLatest ? " is-scrolled" : ""}${dragOver ? " is-drag-over" : ""}`}
+        className={`phobos-chat-scroll thread-scroll-container h-full overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scroll-padding-bottom:var(--thread-scroll-padding-bottom,0px)] electron:[scrollbar-gutter:stable_both-edges] pt-(--thread-content-top-inset) [container-name:thread-content] [container-type:inline-size] [&:has([data-thread-scroll-footer='true']:focus-within)]:[scroll-padding-bottom:0px] flex flex-col-reverse focus:outline-none${scrolledFromLatest ? " is-scrolled" : ""}${dragOver ? " is-drag-over" : ""}`}
         data-scrollbar-visible={scrollbarAwayFromLatest || scrollbarActive || undefined}
         onClickCapture={(event) => {
           const target = event.target;
@@ -820,7 +820,7 @@ export function ChatMessageList({
                 onRevealReady={(request) => {
                   setVirtualRevealRequest(null);
                   if (request.id.startsWith("__find:")) {
-                    const target = listRef.current?.querySelector<HTMLElement>(`[data-octopus-thread-find-index="${findActiveIndex}"]`);
+                    const target = listRef.current?.querySelector<HTMLElement>(`[data-phobos-thread-find-index="${findActiveIndex}"]`);
                     pinnedRef.current = false;
                     target?.scrollIntoView({ block: "center", behavior: request.instant ? "instant" : "smooth" });
                     return;
@@ -879,7 +879,7 @@ export function ChatMessageList({
                 )}
               /> : null}
               {presentationMessageCount === 0 && emptyState === "loading-task" ? (
-                <OctopusLoadingState
+                <PhobosLoadingState
                   className="flex min-h-28 flex-1 items-center justify-center"
                   label="Loading task"
                 />
@@ -1871,7 +1871,7 @@ function UserMessage({ find, message, onEditUserMessage, onSteerUserMessage, ste
   }
   return (
     <div
-      className={`group flex w-full flex-col items-end justify-end gap-2 ${message.error ? "octopus-chat-error" : ""}${steering ? " chat-steering-message" : ""}`}
+      className={`group flex w-full flex-col items-end justify-end gap-2 ${message.error ? "phobos-chat-error" : ""}${steering ? " chat-steering-message" : ""}`}
       data-steering-status={steering ? steeringStatus : undefined}
     >
       {steering ? (
@@ -1938,7 +1938,7 @@ function AssistantMessage({ find, isLatestTurn, message, onContinueInNewTask, on
   toolPresentations: ChatToolPresentationIndex;
 }) {
   return (
-    <div className={`group flex min-w-0 flex-col ${message.error ? "octopus-chat-error" : ""}`}>
+    <div className={`group flex min-w-0 flex-col ${message.error ? "phobos-chat-error" : ""}`}>
       <SelectableMessageText message={message} onPinMessageExcerpt={onPinMessageExcerpt} taskActionsEnabled={taskActionsEnabled}>
         <AssistantEventContent find={find} message={message} onOpenAssistantReview={onOpenAssistantReview} onOpenAssistantVisualization={onOpenAssistantVisualization} onOpenFile={onOpenFile} onOperatorRequestResponse={onOperatorRequestResponse} resolveAssistantVisualization={resolveAssistantVisualization} streaming={streaming} toolPresentations={toolPresentations} />
       </SelectableMessageText>
@@ -2134,7 +2134,7 @@ function AssistantEventContent({ find, message, onOpenAssistantReview, onOpenAss
   if (kind === "commentary" || kind === "commentary_delta") {
     const commentaryStreaming = kind === "commentary_delta";
     return message.text.trim() ? (
-      <div className={commentaryStreaming ? "octopus-assistant-commentary octopus-assistant-streaming min-w-0" : "octopus-assistant-commentary min-w-0"}>
+      <div className={commentaryStreaming ? "phobos-assistant-commentary phobos-assistant-streaming min-w-0" : "phobos-assistant-commentary min-w-0"}>
         <MessageContent
           find={find}
           streamKey={commentaryStreaming ? message.id : undefined}
@@ -2150,7 +2150,7 @@ function AssistantEventContent({ find, message, onOpenAssistantReview, onOpenAss
     const reasoningStreaming = kind === "reasoning_delta";
     const reasoning = reasoningBody(message.text, reasoningStreaming);
     return reasoning ? (
-      <div className={reasoningStreaming ? "octopus-assistant-streaming min-w-0" : "min-w-0"}>
+      <div className={reasoningStreaming ? "phobos-assistant-streaming min-w-0" : "min-w-0"}>
         <MessageContent
           find={find}
           streamKey={reasoningStreaming ? message.id : undefined}
@@ -2208,17 +2208,17 @@ function AssistantEventContent({ find, message, onOpenAssistantReview, onOpenAss
       const detail = label.slice(action.length).trim();
       const copy = presentation.kind === "read" && presentation.target && presentation.pathLabel ? (
         <CadencedShimmerText active={active} highlight={label}>
-          <span className="octopus-activity-action">{action}</span>{presentation.targetKind === "artifact" ? " artifact " : " "}
+          <span className="phobos-activity-action">{action}</span>{presentation.targetKind === "artifact" ? " artifact " : " "}
           <TraceReadTarget message={message} presentation={presentation} onOpenFile={onOpenFile} />
         </CadencedShimmerText>
       ) : (
         <CadencedShimmerText active={active} highlight={label}>
-          <span className="octopus-activity-action">{action}</span>
-          {detail ? <>{" "}<span className="octopus-activity-detail">{detail}</span></> : null}
+          <span className="phobos-activity-action">{action}</span>
+          {detail ? <>{" "}<span className="phobos-activity-detail">{detail}</span></> : null}
         </CadencedShimmerText>
       );
       return (
-        <div className="octopus-inline-activity min-w-0">
+        <div className="phobos-inline-activity min-w-0">
           <Glyph
             aria-hidden="true"
             className="icon-xs shrink-0"
@@ -2291,7 +2291,7 @@ function AssistantEventContent({ find, message, onOpenAssistantReview, onOpenAss
       ? automatic ? "Context automatically compacting" : "Compacting context"
       : automatic ? "Context automatically compacted" : "Context compacted";
     return (
-      <div className="octopus-inline-activity min-w-0">
+      <div className="phobos-inline-activity min-w-0">
         <Glyph aria-hidden="true" className="icon-xs shrink-0" name="compact" />
         <CadencedShimmerText active={active}>{label}</CadencedShimmerText>
       </div>
@@ -2313,7 +2313,7 @@ function AssistantEventContent({ find, message, onOpenAssistantReview, onOpenAss
         <ConversationNotice
           glyph="pulse"
           title={eventString(data.message) || message.text || (visible ? "The model is taking extra time to review this request before responding." : "The model's additional review period has ended.")}
-          detail={visible ? "No action is required. Octopus will keep waiting for the response." : ""}
+          detail={visible ? "No action is required. Phobos will keep waiting for the response." : ""}
         />
       );
     }
@@ -2370,7 +2370,7 @@ function AssistantResponseContent({ find, message, onOpenAssistantReview, onOpen
       />
     </>
   );
-  return <div className={streamingChrome && streaming ? "octopus-assistant-streaming min-w-0" : "min-w-0"}>{content}</div>;
+  return <div className={streamingChrome && streaming ? "phobos-assistant-streaming min-w-0" : "min-w-0"}>{content}</div>;
 }
 
 function TraceReadTarget({ message, presentation, onOpenFile }: {
@@ -2410,7 +2410,7 @@ function TraceReadTarget({ message, presentation, onOpenFile }: {
     <MessageTooltip label={<code>{presentation.target}</code>} onActivate={presentation.targetKind === "artifact"
       ? () => void openArtifact()
       : presentation.path ? () => onOpenFile(presentation.path, presentation.exactToolId) : undefined} variant="activity-target">
-      <span aria-busy={pending || undefined} className="octopus-activity-detail octopus-activity-file-target">{presentation.pathLabel}</span>
+      <span aria-busy={pending || undefined} className="phobos-activity-detail phobos-activity-file-target">{presentation.pathLabel}</span>
     </MessageTooltip>
   </>;
 }
@@ -2468,11 +2468,11 @@ function traceReadArtifactReference(message: ChatRenderMessage, presentation: Dy
 function WebSearchActivity({ active, detail }: { active: boolean; detail: string }) {
   const label = webSearchActivityLabel(detail, active);
   return (
-    <div className="octopus-inline-activity min-w-0">
+    <div className="phobos-inline-activity min-w-0">
       <Glyph className="icon-xs shrink-0" name="search" />
       <CadencedShimmerText active={active} className="min-w-0 truncate" highlight={label}>
-        <span className="octopus-activity-action">{active ? "Searching the web" : "Searched the web"}</span>
-        {detail ? <>{" "}<span className="octopus-activity-detail">for {detail}</span></> : null}
+        <span className="phobos-activity-action">{active ? "Searching the web" : "Searched the web"}</span>
+        {detail ? <>{" "}<span className="phobos-activity-detail">for {detail}</span></> : null}
       </CadencedShimmerText>
     </div>
   );
@@ -2507,19 +2507,19 @@ function ExecActivity({ message, onOpenFile }: { message: ChatRenderMessage; onO
     const detail = label.slice(action.length).trim();
     const copy = parsedType === "read" && target ? (
       <CadencedShimmerText active={active} highlight={label}>
-        <span className="octopus-activity-action">{action}</span>{" "}
+        <span className="phobos-activity-action">{action}</span>{" "}
         <MessageTooltip label={<code>{target}</code>} onActivate={() => onOpenFile(target)} variant="activity-target">
-          <span className="octopus-activity-detail octopus-activity-file-target">{displayTarget || command}</span>
+          <span className="phobos-activity-detail phobos-activity-file-target">{displayTarget || command}</span>
         </MessageTooltip>
       </CadencedShimmerText>
     ) : (
       <CadencedShimmerText active={active} highlight={label}>
-        <span className="octopus-activity-action">{action}</span>
-        {detail ? <>{" "}<span className="octopus-activity-detail">{detail}</span></> : null}
+        <span className="phobos-activity-action">{action}</span>
+        {detail ? <>{" "}<span className="phobos-activity-detail">{detail}</span></> : null}
       </CadencedShimmerText>
     );
     return (
-      <div className="octopus-inline-activity min-w-0">
+      <div className="phobos-inline-activity min-w-0">
         <Glyph
           aria-hidden="true"
           className="icon-xs shrink-0"
@@ -2590,42 +2590,42 @@ function CommandActivity({ command, isCode = false, message }: {
   const shellCommand = command;
   const outputSections = model.sections.map((section) => ({ ...section, text: normalizeTerminalControl(section.text) }));
   return (
-    <div className="octopus-exec-activity group/exec min-w-0" data-state={lifecycle} data-command-state={model.phase} data-tool-status={model.invocationStatus}>
-      <div className="octopus-exec-activity-header group/activity-header">
+    <div className="phobos-exec-activity group/exec min-w-0" data-state={lifecycle} data-command-state={model.phase} data-tool-status={model.invocationStatus}>
+      <div className="phobos-exec-activity-header group/activity-header">
         <button
           aria-expanded={expanded}
           aria-labelledby={summaryId}
-          className="octopus-exec-activity-toggle cursor-interaction"
+          className="phobos-exec-activity-toggle cursor-interaction"
           onClick={() => setExpanded((current) => !current)}
           type="button"
         />
-        <span className="octopus-exec-activity-visual">
+        <span className="phobos-exec-activity-visual">
           <Glyph aria-hidden="true" className="icon-xs shrink-0" name="terminal" />
-          <span className="octopus-exec-activity-summary" id={summaryId}>
+          <span className="phobos-exec-activity-summary" id={summaryId}>
             <CadencedShimmerText active={lifecycle === "active"}>{summary}</CadencedShimmerText>
           </span>
         </span>
-        <span className="octopus-exec-activity-chevron-wrap">
-          <Glyph aria-hidden="true" className={`octopus-exec-activity-chevron icon-2xs shrink-0${expanded ? " is-expanded" : ""}`} name="chevronDown" size={12} />
+        <span className="phobos-exec-activity-chevron-wrap">
+          <Glyph aria-hidden="true" className={`phobos-exec-activity-chevron icon-2xs shrink-0${expanded ? " is-expanded" : ""}`} name="chevronDown" size={12} />
         </span>
       </div>
       <motion.div
         animate={{ height: expanded ? bodyHeight : 0, opacity: expanded ? 1 : 0 }}
         aria-hidden={!expanded}
-        className="octopus-exec-activity-body"
+        className="phobos-exec-activity-body"
         data-thread-find-skip={expanded ? undefined : true}
         initial={false}
         inert={expanded ? undefined : true}
         style={{ overflow: expanded ? "visible" : "hidden", pointerEvents: expanded ? "auto" : "none" }}
         transition={{ duration: reducedMotion ? 0 : 0.3, ease: [0.19, 1, 0.22, 1] }}
       >
-        <div className="octopus-exec-activity-body-inner" ref={bodyRef}>
-          <div className="octopus-exec-shell">
-            <div className="octopus-exec-shell-label">{isCode ? "Code" : "Shell"}</div>
-            {shellCommand ? <div className="octopus-exec-shell-command-row group/command">
+        <div className="phobos-exec-activity-body-inner" ref={bodyRef}>
+          <div className="phobos-exec-shell">
+            <div className="phobos-exec-shell-label">{isCode ? "Code" : "Shell"}</div>
+            {shellCommand ? <div className="phobos-exec-shell-command-row group/command">
               <button
                 aria-label={isCode ? shellCommand : `$ ${shellCommand}`}
-                className="octopus-exec-shell-command"
+                className="phobos-exec-shell-command"
                 data-expanded={commandExpanded || undefined}
                 onClick={() => setCommandExpanded(true)}
                 type="button"
@@ -2634,27 +2634,27 @@ function CommandActivity({ command, isCode = false, message }: {
                 <code>{shellCommand}</code>
               </button>
               <ShellCopyButton label={isCode ? "Copy code" : "Copy command"} value={shellCommand} />
-            </div> : <div className="octopus-exec-shell-no-output" role="status">Command unavailable</div>}
+            </div> : <div className="phobos-exec-shell-no-output" role="status">Command unavailable</div>}
             {terminalInputs.map((input, index) => (
-              <pre className="octopus-exec-shell-input" key={`${input}:${index}`}><span aria-hidden="true">&gt; </span>{input}</pre>
+              <pre className="phobos-exec-shell-input" key={`${input}:${index}`}><span aria-hidden="true">&gt; </span>{input}</pre>
             ))}
-            {(outputSections.length ? outputSections : [{ stream: "", text: "" }]).map((section, index) => <div className="octopus-exec-shell-output-row group/output" key={`${section.stream}:${index}`}>
-              <pre className="octopus-exec-shell-output vertical-scroll-fade-mask">
-                <span className="octopus-exec-shell-output-content">
-                  {section.stream ? <span className="octopus-exec-shell-label">{section.stream}{"\n"}</span> : null}
-                  {section.text ? <TerminalAnsiText text={section.text} /> : lifecycle === "active" ? null : <span className="octopus-exec-shell-no-output">{model.notices.length || model.phase === "unknown" ? "No output available" : "No output"}</span>}
+            {(outputSections.length ? outputSections : [{ stream: "", text: "" }]).map((section, index) => <div className="phobos-exec-shell-output-row group/output" key={`${section.stream}:${index}`}>
+              <pre className="phobos-exec-shell-output vertical-scroll-fade-mask">
+                <span className="phobos-exec-shell-output-content">
+                  {section.stream ? <span className="phobos-exec-shell-label">{section.stream}{"\n"}</span> : null}
+                  {section.text ? <TerminalAnsiText text={section.text} /> : lifecycle === "active" ? null : <span className="phobos-exec-shell-no-output">{model.notices.length || model.phase === "unknown" ? "No output available" : "No output"}</span>}
                 </span>
               </pre>
               <ShellCopyButton label={section.stream ? `Copy ${section.stream}` : "Copy output"} value={section.text} />
             </div>)}
-            <div className="octopus-exec-shell-footer">
+            <div className="phobos-exec-shell-footer">
               {success ? (
-                <span className="octopus-exec-shell-success"><Glyph aria-hidden="true" name="check" size={10} />Success</span>
+                <span className="phobos-exec-shell-success"><Glyph aria-hidden="true" name="check" size={10} />Success</span>
               ) : (
                 <span>{commandOutcomeLabel(model, isCode)}</span>
               )}
             </div>
-            {model.notices.map((notice) => <div className="octopus-exec-shell-footer" key={notice}>{notice}</div>)}
+            {model.notices.map((notice) => <div className="phobos-exec-shell-footer" key={notice}>{notice}</div>)}
           </div>
         </div>
       </motion.div>
@@ -2688,9 +2688,9 @@ function ShellCopyButton({ label, value }: { label: string; value: string }) {
   }
 
   return (
-    <span className="octopus-exec-shell-copy-anchor">
+    <span className="phobos-exec-shell-copy-anchor">
       <MessageTooltip label={copied ? "Copied" : label}>
-        <button aria-label={copied ? "Copied" : label} className="octopus-exec-shell-copy" onClick={copied ? undefined : onCopy} type="button">
+        <button aria-label={copied ? "Copied" : label} className="phobos-exec-shell-copy" onClick={copied ? undefined : onCopy} type="button">
           <Glyph aria-hidden="true" name={copied ? "check" : "copy"} size={14} />
         </button>
       </MessageTooltip>
@@ -3012,7 +3012,7 @@ function FileActivity({ message, onOpenFile }: { message: ChatRenderMessage; onO
     : sourceData;
   if (message.eventKind === "file_change_delta") {
     return (
-      <div className="octopus-inline-activity min-w-0">
+      <div className="phobos-inline-activity min-w-0">
         <Glyph aria-hidden="true" className="icon-xs shrink-0" name="edit" />
         <CadencedShimmerText>Editing files</CadencedShimmerText>
       </div>
@@ -3098,10 +3098,10 @@ function FileChangeActivity({ added, changeKind, deleted, detailsLoading = false
     <>
       <Glyph aria-hidden="true" className="icon-xs shrink-0" name="edit" />
       <span className="activity-file-summary">
-        <CadencedShimmerText active={active} className="octopus-activity-action">{summary}</CadencedShimmerText>
+        <CadencedShimmerText active={active} className="phobos-activity-action">{summary}</CadencedShimmerText>
         {!completedExpanded ? <>{" "}
           <MessageTooltip label={<code>{path}</code>} onActivate={() => onOpenFile(path)} variant="activity-target">
-            <span className="octopus-activity-file-target">{activityPathLabel(path)}</span>
+            <span className="phobos-activity-file-target">{activityPathLabel(path)}</span>
           </MessageTooltip>
         </> : null}
       </span>
@@ -3318,7 +3318,7 @@ function StructuredActivity({ glyph, label, status, details, danger = false, rel
     >
       {() => <div className="structured-activity-body">
         {relatedRuns?.map((run) => <button className="text-token-text-link cursor-interaction" key={run.runId}
-          onClick={() => void window.octopusTransport?.openRunInMain(run.runId)} type="button">{run.title}</button>)}
+          onClick={() => void window.phobosTransport?.openRunInMain(run.runId)} type="button">{run.title}</button>)}
         <dl>
           {visible.map(([name, value], index) => <div key={`${name}:${index}`}><dt>{name}</dt><dd>{value}</dd></div>)}
         </dl>
@@ -3441,7 +3441,7 @@ function eventJson(value: unknown): string {
 
 function ChatEventCard({ eyebrow, text }: { eyebrow: string; text: string }) {
   return (
-    <div className="octopus-chat-event">
+    <div className="phobos-chat-event">
       <div>{eyebrow}</div>
       {text ? <div>{text}</div> : null}
     </div>
@@ -3483,7 +3483,7 @@ function reasoningBody(value: string, streaming: boolean): string {
 
 function MessageAttachments({ message }: { message: ChatRenderMessage }) {
   if (!message.attachments?.length) return null;
-  return <ChatAttachmentStrip attachments={message.attachments} className={`octopus-message-attachments${message.role === "user" ? " is-user" : ""}`} scope={message} />;
+  return <ChatAttachmentStrip attachments={message.attachments} className={`phobos-message-attachments${message.role === "user" ? " is-user" : ""}`} scope={message} />;
 }
 
 function MessageActions({
@@ -3613,7 +3613,7 @@ function ContinueTaskAction({ isLatestTurn, message, onContinue }: {
             />
             <button autoFocus className="continue-task-dialog-choice" onClick={continueTask} ref={choiceRef} type="button">
               <Glyph name="newTask" size={16} />
-              <span><strong>New task</strong><small>Continue from this message in a new Octopus task</small></span>
+              <span><strong>New task</strong><small>Continue from this message in a new Phobos task</small></span>
             </button>
             <OcDialogFooter>
               <OcButton onClick={() => setConfirmOpen(false)} size="sm" variant="secondary">Cancel</OcButton>
@@ -3646,7 +3646,7 @@ function MessageActionButton({ active = false, disabled = false, glyph, label, o
   );
 }
 
-const READ_ALOUD_START_EVENT = "octopus:read-aloud-start";
+const READ_ALOUD_START_EVENT = "phobos:read-aloud-start";
 let activeReadAloudId = "";
 
 function ReadAloudActionButton({ messageId, text }: { messageId: string; text: string }) {
@@ -3756,13 +3756,13 @@ function InteractiveHeroMark() {
 
   return (
     <motion.button
-      aria-label="Octopus"
+      aria-label="Phobos"
       className="relative size-14 cursor-interaction border-0 bg-transparent p-0 text-token-foreground opacity-30 outline-none transition-opacity duration-basic ease-enter-snappy motion-reduce:transition-none [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-40 focus-visible:opacity-50 focus-visible:ring-2 focus-visible:ring-token-focus-border"
       transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.55 }}
       type="button"
       whileTap={reducedMotion ? { opacity: 0.42 } : { opacity: 0.56, scale: 0.9 }}
     >
-      <img alt="" className="absolute inset-0 size-full object-contain" draggable={false} src="./octopus-logo.png" />
+      <img alt="" className="absolute inset-0 size-full object-contain" draggable={false} src="./phobos-logo.png" />
     </motion.button>
   );
 }

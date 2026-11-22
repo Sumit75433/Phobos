@@ -5,7 +5,7 @@ import { projectAssistantDirectives } from "../chat/assistantDirectives";
 import { MessageContent } from "../chat/MessageContent";
 import { requestPresentation } from "../chat/OperatorRequestSurface";
 import { Glyph } from "../IconGlyphs";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 import { ActivityMark } from "./ActivityMark";
 import type { MarkActivityItem } from "./markActivity";
 import { activityMoment, activityPresentation, activitySource, isActivityRequest } from "./markPresentation";
@@ -28,7 +28,7 @@ export function InboxSurface({ activity, selected, selectedGroup = [], onOpen }:
       {activity.error ? (
         <div className="inbox-placeholder" role="alert"><Glyph name="warning" size={16} /><span>{activity.error}</span></div>
       ) : !activity.loaded ? (
-        <OctopusLoadingState className="inbox-placeholder" label="Loading Inbox" />
+        <PhobosLoadingState className="inbox-placeholder" label="Loading Inbox" />
       ) : selected && !item ? (
         <p className="inbox-placeholder" role="status">This notification is no longer in your Inbox</p>
       ) : item ? (

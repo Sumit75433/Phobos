@@ -25,7 +25,7 @@ test("drop captures richer item evidence and never captures pane or text drags",
   const richer = transfer([regular], transfer([regular, folder]).items);
   assert.deepEqual(drop.captureAttachmentDrop(richer).map((item) => item.isDirectory), [false, true]);
   assert.deepEqual(drop.captureAttachmentDrop(transfer([], [], ["text/plain"])), []);
-  assert.equal(drop.isAttachmentDrop(transfer([folder], undefined, ["Files", "application/x-octopus-client-pane"])), false);
+  assert.equal(drop.isAttachmentDrop(transfer([folder], undefined, ["Files", "application/x-phobos-client-pane"])), false);
   assert.throws(() => drop.captureAttachmentDrop(transfer([], [{ kind: "file", getAsFile: () => null, webkitGetAsEntry: () => ({ isDirectory: true }) }])), /could not be read/);
 });
 
@@ -47,14 +47,14 @@ test("actual preload captures every native File path synchronously and preserves
   let bridge, finish; const calls = [], captures = [], regular = file(), synthetic = file("pasted.txt");
   const paths = new Map([[regular, "/operator/note.txt"], [folder, "/operator/folder"]]);
   const electron = {
-    contextBridge: { exposeInMainWorld: (name, value) => { assert.equal(name, "octopusTransport"); bridge = value; } },
+    contextBridge: { exposeInMainWorld: (name, value) => { assert.equal(name, "phobosTransport"); bridge = value; } },
     webUtils: { getPathForFile: (value) => { assert.ok(value instanceof File); captures.push(value); return paths.get(value) ?? ""; } },
-    ipcRenderer: { sendSync: (...args) => { assert.deepEqual(args, ["octopus:access-inherit", "claim"]); return "owner"; }, invoke: (...args) => { calls.push(args); return new Promise((resolve) => { finish = resolve; }); } },
+    ipcRenderer: { sendSync: (...args) => { assert.deepEqual(args, ["phobos:access-inherit", "claim"]); return "owner"; }, invoke: (...args) => { calls.push(args); return new Promise((resolve) => { finish = resolve; }); } },
   };
-  Function("require", "process", readFileSync(path.join(app, "electron/preload.cjs"), "utf8"))((name) => { assert.equal(name, "electron"); return electron; }, { argv: ["--octopus-access-claim=claim"] });
+  Function("require", "process", readFileSync(path.join(app, "electron/preload.cjs"), "utf8"))((name) => { assert.equal(name, "electron"); return electron; }, { argv: ["--phobos-access-claim=claim"] });
   const pending = bridge.stageDroppedAttachments([regular, synthetic, folder]);
   assert.deepEqual(captures, [regular, synthetic, folder]);
-  assert.deepEqual(calls, [["octopus:stage-dropped-attachments", "owner", ["/operator/note.txt", "/operator/folder"]]]);
+  assert.deepEqual(calls, [["phobos:stage-dropped-attachments", "owner", ["/operator/note.txt", "/operator/folder"]]]);
   paths.delete(folder);
   finish({ canceled: false, attachments: [handle, { ...handle, id: "folder-stage" }] });
   assert.deepEqual((await pending).fileIndices, [0, 2]);
@@ -63,13 +63,13 @@ test("actual preload captures every native File path synchronously and preserves
   const rejected = assert.rejects(drop.resolveAttachmentDrop(drop.captureAttachmentDrop(transfer([regular, folder])), bridge), /no native file handle/);
   finish({ canceled: false, attachments: [handle] });
   await new Promise((resolve) => setImmediate(resolve));
-  assert.deepEqual(calls.at(-1), ["octopus:attachment-stages-discard", "owner", [handle]]); finish(); await rejected;
+  assert.deepEqual(calls.at(-1), ["phobos:attachment-stages-discard", "owner", [handle]]); finish(); await rejected;
   const beforeInvalid = calls.length; await assert.rejects(bridge.stageDroppedAttachments([{}]));
   await assert.rejects(bridge.stageDroppedAttachments(Array(13).fill(regular)), /up to 12/); assert.equal(calls.length, beforeInvalid);
 });
 
 test("actual main drop, picker and discard handlers enforce token ownership and rollback only their stages", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-drop-handlers-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-drop-handlers-"));
   const stagingDir = path.join(root, "stages", "attachment-staging");
   const store = createClientAttachmentStagingStore({ root: () => path.join(root, "stages") });
   const main = ts.createSourceFile("main.cjs", readFileSync(path.join(app, "electron/main.cjs"), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
@@ -80,7 +80,7 @@ test("actual main drop, picker and discard handlers enforce token ownership and 
     assert.ok(statement, `missing actual handler ${channel}`);
     return Function(...Object.keys(dependencies), `return (${statement.expression.arguments[1].getText(main)});`)(...Object.values(dependencies));
   };
-  const stage = handler("octopus:stage-dropped-attachments"), pick = handler("octopus:client-attachments-select"), discard = handler("octopus:attachment-stages-discard"), event = { sender: {} };
+  const stage = handler("phobos:stage-dropped-attachments"), pick = handler("phobos:client-attachments-select"), discard = handler("phobos:attachment-stages-discard"), event = { sender: {} };
   try {
     const source = path.join(root, "note.txt"), missing = path.join(root, "missing"); await fs.writeFile(source, "exact bytes");
     await assert.rejects(stage(event, "invalid", [source]), /no session/);
@@ -107,7 +107,7 @@ test("actual main drop, picker and discard handlers enforce token ownership and 
 });
 
 test("picker and drop share bounded directory packaging, exact bytes and owned failure cleanup", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-attachment-drop-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-attachment-drop-"));
   const store = createClientAttachmentStagingStore({ root: () => path.join(root, "stages") });
   const discarded = [];
   const writer = { stageFile: (meta, p) => store.stageFile("owner", meta, p), stageBytes: (meta, bytes) => store.stageBytes("owner", meta, bytes), discard: async (h) => { discarded.push(h.id); await store.discard(await store.consume("owner", h)); } };
@@ -121,7 +121,7 @@ test("picker and drop share bounded directory packaging, exact bytes and owned f
     await assert.rejects(store.consume("other-owner", dropped.attachments[0]), /unavailable/);
     const payload = await store.consume("owner", dropped.attachments[1]);
     const manifest = JSON.parse(await fs.readFile(payload.payloadPath, "utf8"));
-    assert.equal(manifest.schema, "octopus.client.directory_attachment");
+    assert.equal(manifest.schema, "phobos.client.directory_attachment");
     assert.deepEqual(manifest.entries.find((e) => e.kind === "symlink"), { kind: "symlink", path: "link", target: "../binary.dat" });
     assert.equal(manifest.entries.find((e) => e.path === "note.txt").content.text, "folder bytes");
     assert.equal((await fs.stat(payload.payloadPath)).mode & 0o777, 0o600); await store.discard(payload);
@@ -145,7 +145,7 @@ test("actual draft hook rejects a stale drop after navigation and retains existi
   const { useChatDraftState } = compile("src/components/chat/useChatDraftState.ts", { "./storage": storage });
   const { createRoot } = require("react-dom/client"), root = createRoot(document.getElementById("root"));
   let state, runId = "a", resolveStage, rejectStage; const errors = [], discarded = [];
-  window.octopusTransport = { stageDroppedAttachments: () => new Promise((resolve) => { resolveStage = resolve; }), discardClientAttachmentStages: async (h) => discarded.push(...h) };
+  window.phobosTransport = { stageDroppedAttachments: () => new Promise((resolve) => { resolveStage = resolve; }), discardClientAttachmentStages: async (h) => discarded.push(...h) };
   function Host() { state = useChatDraftState({ accessProfile: "live", storageScope: "test", activeRunId: runId, onError: (e) => errors.push(e), preserveSubmissionIntentOnEdit: () => false }); return null; }
   const render = () => React.act(async () => { root.render(React.createElement(Host)); });
   const fire = (files) => state.dropFiles({ dataTransfer: transfer(files), preventDefault() {} });
@@ -153,16 +153,16 @@ test("actual draft hook rejects a stale drop after navigation and retains existi
     await render(); await React.act(async () => { fire([folder]); });
     runId = "b"; await render(); await React.act(async () => { resolveStage({ canceled: false, attachments: [handle], fileIndices: [0] }); });
     assert.equal(state.attachments.length, 0); assert.deepEqual(discarded, [handle]);
-    window.octopusTransport.stageDroppedAttachments = () => new Promise((_resolve, reject) => { rejectStage = reject; });
+    window.phobosTransport.stageDroppedAttachments = () => new Promise((_resolve, reject) => { rejectStage = reject; });
     await React.act(async () => { fire([folder]); }); runId = "c"; await render();
     await React.act(async () => { rejectStage(new Error("old draft rejection")); }); assert.deepEqual(errors, []);
     const original = file(); await React.act(async () => { state.onFilesPicked([original]); });
-    window.octopusTransport.stageDroppedAttachments = async () => { throw new Error("rejected folder"); };
+    window.phobosTransport.stageDroppedAttachments = async () => { throw new Error("rejected folder"); };
     await React.act(async () => { fire([folder, file("next.txt")]); });
     assert.equal(state.attachments.length, 1); assert.equal(state.attachments[0].file, original); assert.match(errors.at(-1), /rejected folder/);
-    window.octopusTransport.stageDroppedAttachments = async () => ({ canceled: true, attachments: [], fileIndices: [] });
+    window.phobosTransport.stageDroppedAttachments = async () => ({ canceled: true, attachments: [], fileIndices: [] });
     await React.act(async () => { fire([folder]); }); assert.equal(state.attachments.length, 1);
-    window.octopusTransport.stageDroppedAttachments = async () => ({ canceled: false, attachments: [handle], fileIndices: [0] });
+    window.phobosTransport.stageDroppedAttachments = async () => ({ canceled: false, attachments: [handle], fileIndices: [0] });
     await React.act(async () => { fire([folder]); });
     assert.equal(state.attachments.length, 2); assert.equal(state.attachments[1].stage, handle);
   } finally {
@@ -175,7 +175,7 @@ test("actual draft hook rejects a stale drop after navigation and retains existi
 test("selected binary attachments preserve exact cached manifest refs without JSON payload wrapping", async () => {
   const {materializeContentAddressedAttachment, prepareContentAddressedPayloadBindings, payloadArtifactBindings, readContentAddressedArtifactPayload} = require("../electron/contentAddressedArtifact.cjs");
   const {blake3} = require("@noble/hashes/blake3");
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-selected-payload-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-selected-payload-")));
   const store = createClientAttachmentStagingStore({root:() => path.join(root,"stages")});
   const blobsRoot = path.join(root,"blobs"), bytes = Buffer.from([0,255,128,1,13,10]);
   await fs.mkdir(blobsRoot, {mode:0o700}); let current = true;

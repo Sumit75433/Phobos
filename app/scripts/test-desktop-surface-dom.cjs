@@ -52,7 +52,7 @@ function fixture() {
 
 test('application pane hides native layer under overlays and detaches to the widget only on pane hide',async()=>{
  const f=fixture(),calls=[],views=[];let resolveAttach;
- f.w.octopusTransport={desktopSurfaceRequest:async request=>{calls.push(request);return request.operation==='pause_view'?{...request,paused:true}:{...request,evidence:evidence('room')};},desktopApplicationView:request=>{views.push(request);return request.operation==='attach'&&views.length===1?new Promise(resolve=>{resolveAttach=resolve;}):Promise.resolve({attached:request.operation==='attach'});}};
+ f.w.phobosTransport={desktopSurfaceRequest:async request=>{calls.push(request);return request.operation==='pause_view'?{...request,paused:true}:{...request,evidence:evidence('room')};},desktopApplicationView:request=>{views.push(request);return request.operation==='attach'&&views.length===1?new Promise(resolve=>{resolveAttach=resolve;}):Promise.resolve({attached:request.operation==='attach'});}};
  const props={environment:{id:'room',runId:'room-run'},surface:surfaceFor('room')},render=active=>React.act(async()=>f.root.render(React.createElement(DesktopSurface,{...props,active})));
  try {
   await render(true);await f.tick();assert.equal(views[0].operation,'attach');assert.equal(views[0].appInstanceId,'actual-app');assert.equal(f.w.document.querySelector('img'),null);
@@ -68,7 +68,7 @@ test('application pane hides native layer under overlays and detaches to the wid
 
 test('desktop controls reject stale room completions and allow Stop to preempt a pending control',async()=>{
  const f=fixture(),pending=[],calls=[];let room='a',value=evidence(room),fail=false;
- f.w.octopusTransport={desktopApplicationView:async r=>({attached:r.operation==='attach'}),desktopSurfaceRequest:async request=>{
+ f.w.phobosTransport={desktopApplicationView:async r=>({attached:r.operation==='attach'}),desktopSurfaceRequest:async request=>{
   calls.push(request);if(request.operation==='pause_view')return {...request,paused:true};
   if(request.operation!=='view')return new Promise(resolve=>pending.push({request,resolve}));
   if(fail)throw new Error('stream disconnected');return {...request,evidence:structuredClone(value)};
@@ -91,7 +91,7 @@ test('desktop controls reject stale room completions and allow Stop to preempt a
 test('upfront settings persists the real enable gate, requests setup only explicitly, and refetches OS status on focus',async()=>{
  const f=fixture(),calls=[];let enabled=false,ready=false;
  const status=()=>({enabled,ready,permissions:[{kind:'screen_capture',status:ready?'granted':'not_granted'},{kind:'accessibility',status:ready?'granted':'not_granted'}]});
- f.w.octopusTransport={desktopComputerUseSettings:async request=>{calls.push(request);if(request.operation==='set_enabled')enabled=request.enabled;return status();}};
+ f.w.phobosTransport={desktopComputerUseSettings:async request=>{calls.push(request);if(request.operation==='set_enabled')enabled=request.enabled;return status();}};
  try {
   await React.act(async()=>f.root.render(React.createElement(ComputerUseSettingsSection)));await f.tick();assert.deepEqual(calls,[{operation:'status'}]);assert.equal(f.button('Enable Computer use').getAttribute('aria-checked'),'false');
   await f.click('Enable Computer use');await f.tick();assert.deepEqual(calls.slice(1,3),[{operation:'set_enabled',enabled:true},{operation:'setup'}]);assert.equal(f.button('Enable Computer use').getAttribute('aria-checked'),'true');

@@ -12,11 +12,11 @@ import threading
 import time
 import urllib.parse
 
-from octopus_content_hash import octopus_content_hash
-from octopus_operation_catalog import RequestError
-from octopus_operation_catalog import answer
-from octopus_operation_catalog import load_catalog
-from octopus_operation_catalog import parse_request
+from phobos_content_hash import phobos_content_hash
+from phobos_operation_catalog import RequestError
+from phobos_operation_catalog import answer
+from phobos_operation_catalog import load_catalog
+from phobos_operation_catalog import parse_request
 
 from slack_contract import CHANNEL_RE
 from slack_contract import TEAM_RE
@@ -43,12 +43,12 @@ from slack_wire import SlackWireError
 from slack_wire import WebSocket
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-INTERFACE_DIR = os.environ["OCTOPUS_INTERFACE_DIR"]
-VAR_DIR = os.environ["OCTOPUS_VAR_DIR"]
-MOVEMENTS_JSONL = os.environ["OCTOPUS_MOVEMENTS_JSONL"]
-BLOBS_DIR = os.environ["OCTOPUS_BLOBS_DIR"]
-LEDGER_INDEX_SQLITE = os.environ["OCTOPUS_LEDGER_INDEX_SQLITE"]
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+INTERFACE_DIR = os.environ["PHOBOS_INTERFACE_DIR"]
+VAR_DIR = os.environ["PHOBOS_VAR_DIR"]
+MOVEMENTS_JSONL = os.environ["PHOBOS_MOVEMENTS_JSONL"]
+BLOBS_DIR = os.environ["PHOBOS_BLOBS_DIR"]
+LEDGER_INDEX_SQLITE = os.environ["PHOBOS_LEDGER_INDEX_SQLITE"]
 CONFIG_PATH = os.path.join(INTERFACE_DIR, "config.json")
 DESCRIPTOR_PATH = os.path.join(INTERFACE_DIR, "interface.json")
 CURSOR_PATH = os.path.join(VAR_DIR, "ledger-cursor.json")
@@ -313,13 +313,13 @@ def materialized_artifact_id(manifest_path, config):
     if not os.path.isabs(payload_path):
         raise ValueError("Slack materialized artifact payload_path must be absolute")
     payload = read_bounded_regular(payload_path, config["outbound"]["max_payload_bytes"], "materialized artifact payload")
-    payload_hash = octopus_content_hash(payload)
+    payload_hash = phobos_content_hash(payload)
     declared = manifest.get("payload_content_hash")
     if declared is not None and declared != payload_hash:
         raise ValueError("Slack materialized artifact payload hash mismatched")
     pinned = {"label": label, "payload_path": payload_path, "payload_content_hash": payload_hash}
     pinned_bytes = json.dumps(pinned, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    return f"{label}:{octopus_content_hash(pinned_bytes)}"
+    return f"{label}:{phobos_content_hash(pinned_bytes)}"
 
 
 def find_admitted_arrival_seq(artifact_id, config):
@@ -896,7 +896,7 @@ def materialize_movement_payload(content, config):
         config["outbound"]["max_manifest_bytes"],
         "cached artifact manifest",
     )
-    if octopus_content_hash(manifest_bytes) != digest:
+    if phobos_content_hash(manifest_bytes) != digest:
         raise ValueError("Slack cached artifact manifest failed content-address verification")
     manifest = json.loads(manifest_bytes)
     manifest = require_object(manifest, "Slack cached artifact manifest")
@@ -909,7 +909,7 @@ def materialize_movement_payload(content, config):
         config["outbound"]["max_payload_bytes"],
         "cached artifact payload",
     )
-    if octopus_content_hash(payload) != payload_digest:
+    if phobos_content_hash(payload) != payload_digest:
         raise ValueError("Slack cached artifact payload failed content-address verification")
     return label, payload, digest
 
@@ -1146,7 +1146,7 @@ def artifact_blob(blob_id, maximum):
     if not isinstance(blob_id, str) or not re.fullmatch(r"[0-9a-f]{64}", blob_id):
         raise ValueError("Slack file upload blob_id must be a content hash")
     content = read_bounded_regular(os.path.join(BLOBS_DIR, blob_id), maximum, "file upload blob")
-    if octopus_content_hash(content) != blob_id:
+    if phobos_content_hash(content) != blob_id:
         raise ValueError("Slack file upload blob failed content-address verification")
     return content
 

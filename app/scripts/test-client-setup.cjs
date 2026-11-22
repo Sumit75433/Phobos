@@ -15,7 +15,7 @@ const KINDS = {
 };
 
 async function main() {
-  const temporary = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-client-setup-")));
+  const temporary = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-client-setup-")));
   try {
     if (process.argv[2] === "--plan-admission") return await rendererPlanAdmission(path.join(temporary, "renderer"));
     if (process.argv[2] === "--live-progress") return await readWhileApplying(path.join(temporary, "live-progress"));
@@ -42,15 +42,15 @@ async function relaunchSelection(root) {
   const { resolveClientLaunchSelection: read, saveClientLaunchSelection: save } = require("../electron/clientLaunchSelection.cjs");
   const selectionPath = path.join(root, "launch.json"), userRoot = path.join(root, "user");
   const resolve = env => read({ selectionPath, userRoot, env });
-  const chosen = resolve({ OCTOPUS_HOME: path.join(root, "Fresh"), CODEX_HOME: path.join(root, "Fresh", "codex") });
+  const chosen = resolve({ PHOBOS_HOME: path.join(root, "Fresh"), CODEX_HOME: path.join(root, "Fresh", "codex") });
   save(selectionPath, chosen);
   const restarted = JSON.parse(require("node:child_process").execFileSync(process.execPath, ["-e",
     `console.log(JSON.stringify(require(process.argv[1]).resolveClientLaunchSelection({selectionPath:process.argv[2],userRoot:process.argv[3],env:{}})))`,
     path.resolve(__dirname, "../electron/clientLaunchSelection.cjs"), selectionPath, userRoot], { encoding: "utf8" }));
   assert.deepEqual(restarted, chosen);
-  assert.equal(resolve({ OCTOPUS_HOME: path.join(root, "Other") }).codexHome, undefined);
+  assert.equal(resolve({ PHOBOS_HOME: path.join(root, "Other") }).codexHome, undefined);
   assert.equal(resolve({ CODEX_HOME: path.join(root, "auth") }).home, chosen.home);
-  assert.throws(() => resolve({ OCTOPUS_HOME: "relative" }), /absolute/);
+  assert.throws(() => resolve({ PHOBOS_HOME: "relative" }), /absolute/);
   await fs.writeFile(selectionPath, "{}");
   assert.throws(() => resolve({}), /malformed/);
   await fs.unlink(selectionPath);
@@ -162,13 +162,13 @@ async function coldPresetLoader(root) {
   const life = { processes: [{ bin: "owner://packages/bin/client", authority: { sandbox_mode: "enforced", allow_network: false } }] };
   await write(path.join(roots.sourceRegistryRoot, "interface", "world_operator_chat", "life.json"), life);
   await write(path.join(roots.libraryRoot, "packages", "world_operator_chat.json"), {
-    schema: "octopus.local_package", schema_version: 1, id: "world_operator_chat", version: "1.0.0", product_kind: "application", product_id: "world_operator_chat", release_status: "optional",
-    display: { name: "Planner", description: "Cold planner package fixture.", developer: "Octopus", category: "provider" },
+    schema: "phobos.local_package", schema_version: 1, id: "world_operator_chat", version: "1.0.0", product_kind: "application", product_id: "world_operator_chat", release_status: "optional",
+    display: { name: "Planner", description: "Cold planner package fixture.", developer: "Phobos", category: "provider" },
     members: ["world_operator_chat", worker, provider].map((owner) => ({ registry_kind: "interface", owner, ...(owner === "world_operator_chat" ? { primary: true } : {}) })),
   });
   const recipe = { id: "fixture", component_package_id: "world_operator_chat", name: "Fixture", icon: "goggles", worker_interface_id: worker, provider_interface_id: provider, context_artifact_bindings: [], selected_worker_environment_kinds: [], selected_application_ids: [] };
   await write(path.join(roots.libraryRoot, "packs", "fixture.json"), {
-    schema: "octopus.local_application_pack", schema_version: 1, id: "fixture", version: "1.0.0", name: "Fixture", description: "Cold planner fixture.",
+    schema: "phobos.local_application_pack", schema_version: 1, id: "fixture", version: "1.0.0", name: "Fixture", description: "Cold planner fixture.",
     components: [{ package_id: "world_operator_chat", selection: "included", reason: "Planner owner." }],
     workspace_setup: { selection: "included", home: { provider_interface_id: provider, worker_interface_id: worker, context_artifact_bindings: [], selected_worker_environment_kinds: [] },
       task: { worker_interface_id: worker, context_artifact_bindings: [], selected_worker_environment_kinds: [] }, project_defaults: [], agent_presets: [recipe] },
@@ -183,7 +183,7 @@ async function coldPresetLoader(root) {
   const mainSource = await fs.readFile(path.join(__dirname, "../electron/main.cjs"), "utf8");
   const functions = mainSource.slice(mainSource.indexOf("async function planWorkspaceHomeSurface("), mainSource.indexOf("async function planWorkspaceAgentPreset("));
   const invoke = vm.runInNewContext(`${functions}; withWorkspaceAgentPreset`, {
-    path, createHash: crypto.createHash, resolveOctopusHome: () => home, resolveInstallationRoot: () => root,
+    path, createHash: crypto.createHash, resolvePhobosHome: () => home, resolveInstallationRoot: () => root,
     loadOperatorChatClient: loader.load, withInstalledAgentPreset, clientSetupPackageRoots: () => roots,
     requiredString: (value) => { assert.equal(typeof value, "string"); assert.ok(value.trim()); return value; },
   });

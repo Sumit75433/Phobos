@@ -11,7 +11,7 @@ export type ScheduledRowStatus = "active" | "paused" | "completed" | "invalid";
 
 export type ScheduledRowAction = { glyph: GlyphName; label: string; disabled?: boolean; tone?: "default" | "danger"; onSelect: () => void };
 
-const ROW_SURFACE = "octopus-nav-row octopus-task-row group relative cursor-interaction sidebar-item text-sm hover:bg-token-list-hover-background focus-visible:outline-offset-[-2px] aria-disabled:cursor-default aria-disabled:opacity-50";
+const ROW_SURFACE = "phobos-nav-row phobos-task-row group relative cursor-interaction sidebar-item text-sm hover:bg-token-list-hover-background focus-visible:outline-offset-[-2px] aria-disabled:cursor-default aria-disabled:opacity-50";
 
 export function scheduledRowStatus(task: ScheduledInterfaceProjection): ScheduledRowStatus {
   if (task.status === "invalid") return "invalid";

@@ -19,7 +19,7 @@ function LightThemePreview() {
           <path d="M8 12C8 9.79086 9.79086 8 12 8H20V52H12C9.79086 52 8 50.2091 8 48V12Z" fill="black" fillOpacity={0.03} shapeRendering="crispEdges" />
         </g>
         <g opacity={0.5}>
-          <image href="./octopus-logo.png" x={11} y={11} width={6} height={6} style={{ filter: "invert(1)" }} />
+          <image href="./phobos-logo.png" x={11} y={11} width={6} height={6} style={{ filter: "invert(1)" }} />
         </g>
       </g>
       <rect x={0.25} y={0.25} width={79.5} height={59.5} rx={7.75} stroke="black" strokeOpacity={0.1} strokeWidth={0.5} />
@@ -78,7 +78,7 @@ function DarkThemePreview() {
           <path d="M8 12C8 9.79086 9.79086 8 12 8H20V52H12C9.79086 52 8 50.2091 8 48V12Z" fill="white" fillOpacity={0.2} shapeRendering="crispEdges" />
         </g>
         <g opacity={0.5}>
-          <image href="./octopus-logo.png" x={11} y={11} width={6} height={6} />
+          <image href="./phobos-logo.png" x={11} y={11} width={6} height={6} />
         </g>
       </g>
       <rect x={0.25} y={0.25} width={79.5} height={59.5} rx={7.75} stroke="black" strokeOpacity={0.4} strokeWidth={0.5} />
@@ -135,7 +135,7 @@ function SystemLightThemePreview() {
           <path d="M8 12C8 9.79086 9.79086 8 12 8H20V52H12C9.79086 52 8 50.2091 8 48V12Z" fill="black" fillOpacity={0.03} shapeRendering="crispEdges" />
         </g>
         <g opacity={0.5}>
-          <image href="./octopus-logo.png" x={11} y={11} width={6} height={6} style={{ filter: "invert(1)" }} />
+          <image href="./phobos-logo.png" x={11} y={11} width={6} height={6} style={{ filter: "invert(1)" }} />
         </g>
       </g>
       <defs>
@@ -191,7 +191,7 @@ function SystemDarkThemePreview() {
           <path d="M8 12C8 9.79086 9.79086 8 12 8H20V52H12C9.79086 52 8 50.2091 8 48V12Z" fill="white" fillOpacity={0.2} shapeRendering="crispEdges" />
         </g>
         <g opacity={0.5}>
-          <image href="./octopus-logo.png" x={11} y={11} width={6} height={6} />
+          <image href="./phobos-logo.png" x={11} y={11} width={6} height={6} />
         </g>
       </g>
       <defs>

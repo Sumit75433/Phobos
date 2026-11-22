@@ -24,7 +24,7 @@ function clientRuntime() {
 function verifyNodeHeaders(headers) {
   const { electron, node } = clientRuntime();
   if (typeof headers !== "string" || !path.isAbsolute(headers)) {
-    throw new Error(`Set OCTOPUS_NATIVE_NODE_HEADERS to the include/node directory of the Node ${node} headers; node app/native/runtime.cjs headers fetches them`);
+    throw new Error(`Set PHOBOS_NATIVE_NODE_HEADERS to the include/node directory of the Node ${node} headers; node app/native/runtime.cjs headers fetches them`);
   }
   const directory = fs.realpathSync(headers);
   const version = fs.readFileSync(path.join(directory, "node_version.h"), "utf8");

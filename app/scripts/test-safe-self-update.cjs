@@ -110,13 +110,13 @@ async function main() {
   assert.equal(buildInfo(layout.prev).revision, "live");
   assert.equal(fs.existsSync(layout.staging), false);
 
-  assert.throws(() => swapBundles(layout), /not a packaged Octopus bundle/);
+  assert.throws(() => swapBundles(layout), /not a packaged Phobos bundle/);
   assert.equal(buildInfo(layout.live).revision, "staging");
 
   assert.equal(rollbackBundles(layout, { dryRun: true }).applied, false);
   assert.equal(rollbackBundles(layout).revision, "live");
   assert.equal(buildInfo(layout.failed).revision, "staging");
-  assert.throws(() => rollbackBundles(layout), /not a packaged Octopus bundle/);
+  assert.throws(() => rollbackBundles(layout), /not a packaged Phobos bundle/);
   assert.equal(buildInfo(layout.live).revision, "live");
 
   const chats = [{ run_id: "a", turn_open: true }, { run_id: "b", turn_open: false }, { run_id: "c", turn_open: true }];

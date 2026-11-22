@@ -1,5 +1,5 @@
 {
-  "name": "octopus-desktop-app",
+  "name": "phobos-desktop-app",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -39,7 +39,7 @@
     "package:mac": "node scripts/package-macos.cjs",
     "self-update": "node scripts/safe-self-update.cjs",
     "test:safe-self-update": "node scripts/test-safe-self-update.cjs",
-    "desktop": "npm run package:mac && open -n ./build/Octopus.app",
+    "desktop": "npm run package:mac && open -n ./build/Phobos.app",
     "gen:types": "node scripts/generate-schema-types.mjs",
     "gen:licenses": "node scripts/generate-client-licenses.mjs",
     "gen:code-theme-seeds": "node scripts/generate-code-theme-seeds.mjs"
@@ -50,7 +50,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@mediapipe/tasks-vision": "^1.2.0",
     "@noble/hashes": "1.8.0",
-    "@octopus/files-diffs": "npm:@pierre/diffs@1.5.2",
+    "@phobos/files-diffs": "npm:@pierre/diffs@1.5.2",
     "@pierre/diffs": "1.2.12",
     "@pierre/trees": "^1.0.0-beta.5",
     "@shikijs/themes": "4.3.1",
@@ -101,7 +101,7 @@
     "@pierre/diffs@1.2.12": {
       "shiki": "4.3.1"
     },
-    "@octopus/files-diffs": {
+    "@phobos/files-diffs": {
       "shiki": "3.20.0",
       "@shikijs/themes": "4.3.1"
     }

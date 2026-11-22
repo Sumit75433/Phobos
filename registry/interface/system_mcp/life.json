@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-mcp-stdio-session-tool-door-life",
+      "bin": "target/debug/phobos-mcp-stdio-session-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -17,7 +17,7 @@
         "executable_root_slots": [],
         "read_paths": [],
         "write_paths": [],
-        "executable_paths": ["target/debug/octopus-mcp-stdio-room-tool"],
+        "executable_paths": ["target/debug/phobos-mcp-stdio-room-tool"],
         "executable_commands": [],
         "read_env_paths": [],
         "write_env_paths": [],

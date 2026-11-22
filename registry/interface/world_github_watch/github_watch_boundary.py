@@ -8,12 +8,12 @@ import stat
 import sys
 import time
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-VAR_DIR = os.path.abspath(os.environ["OCTOPUS_VAR_DIR"])
-MOVEMENTS_JSONL = os.path.abspath(os.environ["OCTOPUS_MOVEMENTS_JSONL"])
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+VAR_DIR = os.path.abspath(os.environ["PHOBOS_VAR_DIR"])
+MOVEMENTS_JSONL = os.path.abspath(os.environ["PHOBOS_MOVEMENTS_JSONL"])
 PAYLOADS_DIR = os.path.join(VAR_DIR, "payloads")
 DUPLICATE_MESSAGE = "arrival evidence already exists in the movement ledger"
 HEX_HASH = re.compile(r"[0-9a-f]{64}")
@@ -85,7 +85,7 @@ def require_hash(value, name):
 
 def load_io_limits():
     value = require_keys(
-        json.loads(os.environ["OCTOPUS_INTERFACE_HOST_IO_LIMITS"]),
+        json.loads(os.environ["PHOBOS_INTERFACE_HOST_IO_LIMITS"]),
         {"max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes"},
         set(),
         "host IO limits",
@@ -250,13 +250,13 @@ def private_file(path, content, maximum, name):
 
 def verify_prepared(state):
     manifest = stable_read(state["manifest_path"], IO_LIMITS["max_manifest_bytes"], "prepared notice manifest", private=True)
-    if octopus_content_hash(manifest) != state["manifest_hash"]:
+    if phobos_content_hash(manifest) != state["manifest_hash"]:
         raise ValueError("the prepared notice manifest no longer matches its recorded hash")
     descriptor = require_keys(json.loads(manifest), {"label", "payload_path", "payload_content_hash"}, set(), "prepared notice manifest")
     if descriptor["label"] != state["label"]:
         raise ValueError("the prepared notice manifest label differs from its recorded label")
     payload = stable_read(descriptor["payload_path"], IO_LIMITS["max_payload_bytes"], "prepared notice payload", private=True)
-    if octopus_content_hash(payload) != descriptor["payload_content_hash"]:
+    if phobos_content_hash(payload) != descriptor["payload_content_hash"]:
         raise ValueError("the prepared notice payload no longer matches its recorded hash")
 
 
@@ -315,7 +315,7 @@ def staging_pair(manifest_hash):
         raise ValueError("invalid staging manifest hash")
     path = os.path.join(PAYLOADS_DIR, manifest_hash + ".artifact.json")
     raw = stable_read(path, IO_LIMITS["max_manifest_bytes"], "staging manifest", private=True)
-    if octopus_content_hash(raw) != manifest_hash:
+    if phobos_content_hash(raw) != manifest_hash:
         raise ValueError("staging manifest hash mismatch")
     manifest = json.loads(raw)
     digest = manifest.get("payload_content_hash")
@@ -325,7 +325,7 @@ def staging_pair(manifest_hash):
     if manifest.get("payload_path") != payload:
         raise ValueError("staging payload escapes its content-addressed path")
     raw_payload = stable_read(payload, IO_LIMITS["max_payload_bytes"], "staging payload", private=True)
-    if octopus_content_hash(raw_payload) != digest:
+    if phobos_content_hash(raw_payload) != digest:
         raise ValueError("staging payload hash mismatch")
     return path, payload
 

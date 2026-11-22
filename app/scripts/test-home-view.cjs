@@ -41,7 +41,7 @@ const stubbed = {
   OperatorRequestSurface: "export function OperatorRequestSurface() { return null; }",
   HomeCallControls: "export function HomeCallControls() { return null; }",
   VoiceOrbScene: "export function VoiceOrbScene() { return null; }",
-  OctopusOceanScene: "export function OctopusOceanScene() { return null; }",
+  PhobosOceanScene: "export function PhobosOceanScene() { return null; }",
 };
 const bundle = (entry, names) => build({
   stdin: { contents: entry, resolveDir: appRoot, loader: "ts" },
@@ -121,7 +121,7 @@ test("Home opens behind its loading status until its own task is selected and lo
 test("a working Home turn shows its live activity in a compact stage, and a long reply expands it", async () => {
   await showHome(workspace({ busy: true, renderedMessages: [prompt, reading] }));
   assert.ok(stage().classList.contains("is-compact") && stage().classList.contains("is-generating"));
-  const live = query(".home-response-output--live .octopus-turn-activity");
+  const live = query(".home-response-output--live .phobos-turn-activity");
   assert.equal(live.dataset.state, "working");
   assert.match(live.textContent, /report\.md/);
   await showHome(workspace({ busy: true, renderedMessages: [prompt, reading, { ...longReply, terminal: false, eventKind: "message_delta" }] }));
@@ -212,7 +212,7 @@ test("saved widget positions survive slot changes and older layouts without a sl
   const documents = Object.fromEntries(buildVoiceWidgetDocuments(widgetInput).map((admitted) => [admitted.document.id, admitted]));
   const legacy = { x: 20, y: 20, width: 300, height: 240, stageWidth: 1200, stageHeight: 800, z: 1 };
   for (const id of ["builtin.voice.live-context", "builtin.voice.insights", "builtin.voice.task-progress"]) {
-    w.localStorage.setItem("octopus.voice.widget-layout.v3", JSON.stringify({ [id]: { ...legacy, ...(id.endsWith("task-progress") ? { slot: "left" } : {}) } }));
+    w.localStorage.setItem("phobos.voice.widget-layout.v3", JSON.stringify({ [id]: { ...legacy, ...(id.endsWith("task-progress") ? { slot: "left" } : {}) } }));
     root.render(null);
     await settle();
     root.render(React.createElement("div", { className: "voice-widget-canvas" },
@@ -221,7 +221,7 @@ test("saved widget positions survive slot changes and older layouts without a sl
     const widget = query(`[data-surface-document="${id}"]`);
     assert.equal(widget.style.left, "20px", id);
     assert.equal(widget.style.top, "20px", id);
-    assert.equal(JSON.parse(w.localStorage.getItem("octopus.voice.widget-layout.v3"))[id].slot, "right", id);
+    assert.equal(JSON.parse(w.localStorage.getItem("phobos.voice.widget-layout.v3"))[id].slot, "right", id);
   }
   root.render(null);
   await settle();
@@ -254,7 +254,7 @@ test("automatic placement uses free space on both sides, protects the conversati
 test("widgets opened together reserve their positions, keep them on remount, and restore a reset", async () => {
   const { ClientSurfaceRenderer, buildVoiceWidgetDocuments, resetVoiceWidgetLayout, restoreVoiceWidgetLayout } = await widgetBundle;
   root.render(null); await settle();
-  w.localStorage.removeItem("octopus.voice.widget-layout.v3");
+  w.localStorage.removeItem("phobos.voice.widget-layout.v3");
   const template = buildVoiceWidgetDocuments(widgetInput)[0];
   const widgets = ["builtin.voice.first", "builtin.voice.second", "agent.widget"].map((id, index) => ({
     ...template,

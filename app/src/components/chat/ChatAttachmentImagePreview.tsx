@@ -140,7 +140,7 @@ export function ChatAttachmentImagePreview({ blob, filename, src, onClose, onErr
 
   async function download() {
     try {
-      const transport = window.octopusTransport;
+      const transport = window.phobosTransport;
       if (!transport?.saveClientFile) throw new Error("Native file saving is unavailable.");
       const bytes = new Uint8Array(await blob.arrayBuffer());
       if (live.current) await transport.saveClientFile({ bytes, filename: safeArtifactFilename(filename) });

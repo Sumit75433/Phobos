@@ -13,7 +13,7 @@ function project(rows, indexed) {
   return clientSurfacesProjection(store).clientSurfaceDocumentSnapshot({ ledgerRows: rows });
 }
 function row(seq, run, recipient, patch = {}) {
-  return { seq, kind: "InterfaceOutbound", artifact: { id: "client.surface.document:same-content" }, from: { Interface: "provider" }, to: { Interface: recipient }, invocation_metadata: { runtime: { run, interface: "provider" } }, recorded_at_unix_ms: 1000 + seq, payload: { schema: "octopus.client_surface", schema_version: 1, id: "home.test", runId: "untrusted-run", interfaceId: "untrusted-interface" }, ...patch };
+  return { seq, kind: "InterfaceOutbound", artifact: { id: "client.surface.document:same-content" }, from: { Interface: "provider" }, to: { Interface: recipient }, invocation_metadata: { runtime: { run, interface: "provider" } }, recorded_at_unix_ms: 1000 + seq, payload: { schema: "phobos.client_surface", schema_version: 1, id: "home.test", runId: "untrusted-run", interfaceId: "untrusted-interface" }, ...patch };
 }
 test("indexed and ledger projection preserve every exact recipient delivery and host provenance", async () => {
   const rows = [row(1, "home", "home-client"), row(2, "task", "task-client"), row(3, "home", "other-client"), row(4, "home", "home-client")];

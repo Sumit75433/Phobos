@@ -1,5 +1,5 @@
 import type { GlyphName } from "../components/IconGlyphs";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import type { ClientSurfaceDescriptor } from "./surfaceTypes";
 import { profileStorageKey } from "./clientWorkspaces";
 
@@ -42,6 +42,6 @@ export function navigationSectionLabel(surface: Pick<ClientSurfaceDescriptor, "i
   return clientNavigationDestinations.find((destination) => destination.id === section)!.label;
 }
 
-export function activeDestinationStorageKey(profile: OctopusClientAccessProfile): string {
-  return profileStorageKey("octopus.shell.activeDestination.v1", profile);
+export function activeDestinationStorageKey(profile: PhobosClientAccessProfile): string {
+  return profileStorageKey("phobos.shell.activeDestination.v1", profile);
 }

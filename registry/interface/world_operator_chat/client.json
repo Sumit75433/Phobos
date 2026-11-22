@@ -66,8 +66,8 @@
     "max_projected_bytes": 41943040
   },
   "executables": {
-    "topology_planner": "target/debug/octopus-operator-chat-topology",
-    "artifact_materializer": "target/debug/octopus-operator-chat-artifact"
+    "topology_planner": "target/debug/phobos-operator-chat-topology",
+    "artifact_materializer": "target/debug/phobos-operator-chat-artifact"
   },
   "artifact_labels": {
     "message": "operator.message",
@@ -163,7 +163,7 @@
       "verifier": "tool_result_correspondence",
       "params": {}
     },
-    "listen_env": "OCTOPUS_CHAT_LISTEN",
+    "listen_env": "PHOBOS_CHAT_LISTEN",
     "maintenance_observer": {
       "template_interface_id": "system_worker_memory_observer",
       "config_file": "maintenance.json"

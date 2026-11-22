@@ -307,7 +307,7 @@ export function VideoDotCloud({ src, sampleSrc, progressRef, revealAt, className
     };
   }, [src, sampleSrc, progressRef, revealAt]);
 
-  return <canvas ref={canvasRef} className={`octopus-cloud ${className}`.trim()} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`phobos-cloud ${className}`.trim()} aria-hidden="true" />;
 }
 
 function loadDotsFromImage(srcUrl: string, target: number, darkSurface: boolean): Promise<{ dots: Dot[]; aspect: number }> {
@@ -348,7 +348,7 @@ function loadFirstFrameData(
 
 // Organic distribution via rejection sampling at continuous positions —
 // no grid lattice, so it reads as a cloud, not an infographic. Same logic as
-// OctopusDotCloud so the morph cloud and the video cloud share one look.
+// PhobosDotCloud so the morph cloud and the video cloud share one look.
 function sampleRandom(image: HTMLImageElement, target: number, darkSurface: boolean): { dots: Dot[]; aspect: number } {
   const aspect = image.naturalWidth / Math.max(1, image.naturalHeight);
   const sw = aspect >= 1 ? SAMPLE_SIZE : Math.round(SAMPLE_SIZE * aspect);

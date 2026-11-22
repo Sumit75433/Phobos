@@ -27,18 +27,18 @@ async function buildCli({ runtime = false, target = null } = {}) {
     const repoRoot = path.dirname(appRoot);
     const registry = path.join(repoRoot, "registry");
     const packager = require("./runtime-package.cjs").createRuntimePackager({ repoRoot, appRoot, outputRoot: path.join(outdir, "runtime") });
-    const provider = path.join(registry, "interface/world_provider_codex/packages/octopus-provider-codex");
+    const provider = path.join(registry, "interface/world_provider_codex/packages/phobos-provider-codex");
     const bridge = path.join(provider, "opencodex-bridge");
     run("npm", ["ci"], bridge);
     run("npm", ["run", "build"], bridge);
     if (cli.components.desktop_native) {
-      const desktop = path.join(registry, "worker_environment_kind/desktop_session/packages/octopus-system-gui-env/native");
-      require(path.join(desktop, "build.cjs")).buildDesktopNative(path.join(desktop, "bin/octopus-desktop-native"));
+      const desktop = path.join(registry, "worker_environment_kind/desktop_session/packages/phobos-system-gui-env/native");
+      require(path.join(desktop, "build.cjs")).buildDesktopNative(path.join(desktop, "bin/phobos-desktop-native"));
     }
-    const bins = [...new Set([...packager.collectBundledBinaries(registry), "octopus-provider-opencodex-life", "octopus-input-intake-life"])];
+    const bins = [...new Set([...packager.collectBundledBinaries(registry), "phobos-provider-opencodex-life", "phobos-input-intake-life"])];
     run("cargo", ["build", "--locked", "--release", ...bins.flatMap((bin) => ["--bin", bin])], repoRoot);
-    packager.materializeProviderLife(provider, "octopus-provider-opencodex-life");
-    packager.materializeProviderLife(path.join(provider, "intake"), "octopus-input-intake-life");
+    packager.materializeProviderLife(provider, "phobos-provider-opencodex-life");
+    packager.materializeProviderLife(path.join(provider, "intake"), "phobos-input-intake-life");
     packager.validateOpenCodexOwnerAssets(provider);
     require("./package-cli.cjs").packageCliRuntime({ appRoot, target: cli.triple });
   }
@@ -56,7 +56,7 @@ if (require.main === module) Promise.resolve().then(() => {
   if (rest.some((arg) => arg !== "--runtime")) throw new Error(USAGE);
   return buildCli({ runtime: rest.includes("--runtime"), target });
 }).then((directory) => {
-  process.stdout.write(`Octopus CLI client modules built in ${directory}\n`);
+  process.stdout.write(`Phobos CLI client modules built in ${directory}\n`);
   require("./build-space-notice.cjs").printBuildSpaceNotice();
 }).catch((error) => {
   process.stderr.write(`${error.message}\n`);

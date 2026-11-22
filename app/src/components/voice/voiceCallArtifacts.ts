@@ -1,7 +1,7 @@
 import { readProjection, submitInterfaceArtifact } from "../../projectionClient";
 import { nextProjectionChange } from "../../projectionLive";
 import type { ChatRenderMessage } from "../chat/types";
-import type { OctopusClientContext, OctopusInterfaceArtifactResponse } from "../../electron";
+import type { PhobosClientContext, PhobosInterfaceArtifactResponse } from "../../electron";
 
 export type VoiceContextMessage = Readonly<{
   id: string; role: "user" | "assistant"; text: string;
@@ -19,13 +19,13 @@ export type VoiceContextSelection = {
   omittedMessageCount: number;
   truncated: boolean;
   disclosure: string;
-  clientContext?: OctopusClientContext;
+  clientContext?: PhobosClientContext;
 };
 
 const CONTEXT_MESSAGE_LIMIT = 24;
 const CONTEXT_TEXT_BYTES = 24_000;
 
-export function projectHomeVoiceContext(messages: readonly ChatRenderMessage[], runId: string, interfaceId: string, delegationInterfaceId = "", clientContext?: OctopusClientContext): VoiceContextSelection {
+export function projectHomeVoiceContext(messages: readonly ChatRenderMessage[], runId: string, interfaceId: string, delegationInterfaceId = "", clientContext?: PhobosClientContext): VoiceContextSelection {
   const admitted = new Map<string, VoiceContextMessage>();
   for (const message of messages) {
     const voiceInput = Boolean(delegationInterfaceId) && message.interfaceId === delegationInterfaceId
@@ -131,7 +131,7 @@ export type VoiceCall = {
   callId: string;
   remoteClosed: boolean;
   closedPayload?: Record<string, unknown>;
-  clientContext?: OctopusClientContext;
+  clientContext?: PhobosClientContext;
 };
 
 export async function assertVoiceControlReady(binding: VoiceCallBinding): Promise<void> {
@@ -216,7 +216,7 @@ function enqueueVoiceControl<T>(call: VoiceCall, step: () => Promise<T>): Promis
   return operation;
 }
 
-function assertVoiceContextAdmitted(result: OctopusInterfaceArtifactResponse): void {
+function assertVoiceContextAdmitted(result: PhobosInterfaceArtifactResponse): void {
   const verdict = result?.verdict as { admitted?: { seq?: number }; refused?: { reason?: string } } | undefined;
   const seq = verdict?.admitted?.seq;
   if (typeof seq !== "number" || !Number.isSafeInteger(seq) || seq < 0) {
@@ -224,7 +224,7 @@ function assertVoiceContextAdmitted(result: OctopusInterfaceArtifactResponse): v
   }
 }
 
-export function openVoiceCall(call: VoiceCall, offerSdp: string, initialItems: VoiceInitialItem[] = [], clientContext?: OctopusClientContext): Promise<Record<string, unknown>> {
+export function openVoiceCall(call: VoiceCall, offerSdp: string, initialItems: VoiceInitialItem[] = [], clientContext?: PhobosClientContext): Promise<Record<string, unknown>> {
   if (call.closeRequested) throw new Error("This voice call was cancelled before its offer was submitted.");
   if (call.answer) throw new Error("This voice offer was already submitted.");
   call.creationDisposition = "unconfirmed";
@@ -259,7 +259,7 @@ export async function updateVoiceContext(call: VoiceCall, message: VoiceContextM
   await waitForVoiceStep(enqueueVoiceControl(call, () => submitVoiceContext(call, message, signal)), signal);
 }
 
-export async function updateVoiceClientContext(call: VoiceCall, clientContext: OctopusClientContext, signal: AbortSignal): Promise<void> {
+export async function updateVoiceClientContext(call: VoiceCall, clientContext: PhobosClientContext, signal: AbortSignal): Promise<void> {
   signal.throwIfAborted();
   await waitForVoiceStep(enqueueVoiceControl(call, async () => {
     if (JSON.stringify(call.clientContext) === JSON.stringify(clientContext)) return;

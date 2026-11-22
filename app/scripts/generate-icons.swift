@@ -4,9 +4,9 @@ import Foundation
 let fileManager = FileManager.default
 let appRoot = URL(fileURLWithPath: fileManager.currentDirectoryPath)
 let publicDir = appRoot.appendingPathComponent("public", isDirectory: true)
-let glyphURL = publicDir.appendingPathComponent("octopus-glyph.png")
-let legacyLogoURL = publicDir.appendingPathComponent("octopus-logo.png")
-let appIconsetURL = publicDir.appendingPathComponent("octopus.iconset", isDirectory: true)
+let glyphURL = publicDir.appendingPathComponent("phobos-glyph.png")
+let legacyLogoURL = publicDir.appendingPathComponent("phobos-logo.png")
+let appIconsetURL = publicDir.appendingPathComponent("phobos.iconset", isDirectory: true)
 
 if !fileManager.fileExists(atPath: glyphURL.path) {
   try fileManager.copyItem(at: legacyLogoURL, to: glyphURL)
@@ -23,20 +23,20 @@ try fileManager.createDirectory(
 
 try replaceFile(from: glyphURL, to: legacyLogoURL)
 try writePNG(renderTransparentIcon(size: 96, glyph: glyph, glyphScale: 0.94), to: publicDir.appendingPathComponent("favicon.png"))
-try writePNG(renderDevelopmentDockIcon(size: 1024, glyph: glyph), to: publicDir.appendingPathComponent("octopus-dev-dock-icon.png"))
+try writePNG(renderDevelopmentDockIcon(size: 1024, glyph: glyph), to: publicDir.appendingPathComponent("phobos-dev-dock-icon.png"))
 
 let appIconOutputs: [(String, Int)] = [
-  ("octopus-app-icon.png", 1024),
-  ("octopus.iconset/icon_16x16.png", 16),
-  ("octopus.iconset/icon_16x16@2x.png", 32),
-  ("octopus.iconset/icon_32x32.png", 32),
-  ("octopus.iconset/icon_32x32@2x.png", 64),
-  ("octopus.iconset/icon_128x128.png", 128),
-  ("octopus.iconset/icon_128x128@2x.png", 256),
-  ("octopus.iconset/icon_256x256.png", 256),
-  ("octopus.iconset/icon_256x256@2x.png", 512),
-  ("octopus.iconset/icon_512x512.png", 512),
-  ("octopus.iconset/icon_512x512@2x.png", 1024),
+  ("phobos-app-icon.png", 1024),
+  ("phobos.iconset/icon_16x16.png", 16),
+  ("phobos.iconset/icon_16x16@2x.png", 32),
+  ("phobos.iconset/icon_32x32.png", 32),
+  ("phobos.iconset/icon_32x32@2x.png", 64),
+  ("phobos.iconset/icon_128x128.png", 128),
+  ("phobos.iconset/icon_128x128@2x.png", 256),
+  ("phobos.iconset/icon_256x256.png", 256),
+  ("phobos.iconset/icon_256x256@2x.png", 512),
+  ("phobos.iconset/icon_512x512.png", 512),
+  ("phobos.iconset/icon_512x512@2x.png", 1024),
 ]
 
 for (relativePath, size) in appIconOutputs {

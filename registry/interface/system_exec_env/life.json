@@ -1,6 +1,6 @@
 {
   "processes": [{
-      "bin": "target/debug/octopus-process-session-tool-door-life",
+      "bin": "target/debug/phobos-process-session-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -23,7 +23,7 @@
         "read_paths": [],
         "write_paths": [],
         "executable_paths": [
-          "target/debug/octopus-process-room-tool"
+          "target/debug/phobos-process-room-tool"
         ],
         "executable_commands": [],
         "read_env_paths": [],

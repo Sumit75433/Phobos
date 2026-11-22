@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from "react-dom";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "motion/react";
 import { PowerBurst, PowerDecoration } from "./providerModelPickerEffects";
-import type { OctopusProviderInterface, OctopusProviderModel } from "../../electron";
+import type { PhobosProviderInterface, PhobosProviderModel } from "../../electron";
 import { useShouldReduceMotion } from "../../appearance";
 import { subscribeClientCommands } from "../../clientActions";
 import { OcMenuItem } from "../../design-system/components";
@@ -13,8 +13,8 @@ import { providerModels, providerReasoningEfforts, providerSelectedModel, provid
 import "./providerModelPicker.css";
 
 type Props = {
-  providers: OctopusProviderInterface[];
-  activeProvider?: OctopusProviderInterface;
+  providers: PhobosProviderInterface[];
+  activeProvider?: PhobosProviderInterface;
   loading?: boolean;
   providerInterfaceId: string;
   providerModel: string;
@@ -27,7 +27,7 @@ type Props = {
   onRefreshModels?: () => void;
   listenToGlobalCommands?: boolean;
 };
-type ModelOption = { provider: OctopusProviderInterface; model: OctopusProviderModel };
+type ModelOption = { provider: PhobosProviderInterface; model: PhobosProviderModel };
 
 function displayName(option: ModelOption, options: ModelOption[]): string {
   const name = (option.model.displayName || option.model.model).replace(/^gpt[-\s]+/i, "");

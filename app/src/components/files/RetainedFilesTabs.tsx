@@ -1,11 +1,11 @@
 import { lazy, Suspense, useState } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { WorkspacePaneTabState } from "../../shell/clientWindowModel";
 import { SurfaceLoadingState, SurfaceRenderBoundary } from "../shell/SurfaceBoundary";
 import { filesPaneKey } from "./filesPaneLifecycle";
 
 const FilesView = lazy(() => import("./FilesView").then((module) => ({ default: module.FilesView })));
-type Props = { accessProfile: OctopusClientAccessProfile; active: boolean; activeTabId: string; paneStateKey: string; tabs: WorkspacePaneTabState[] };
+type Props = { accessProfile: PhobosClientAccessProfile; active: boolean; activeTabId: string; paneStateKey: string; tabs: WorkspacePaneTabState[] };
 
 export function RetainedFilesTabs({ accessProfile, active, activeTabId, paneStateKey, tabs }: Props) {
   return tabs.map((tab) => tab.target.kind === "files" ? <RetainedFilesTab accessProfile={accessProfile} active={active && tab.id === activeTabId} paneStateKey={paneStateKey} key={JSON.stringify([accessProfile, paneStateKey, tab.id])} tab={tab} /> : null);

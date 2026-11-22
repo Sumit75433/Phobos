@@ -64,7 +64,7 @@ export const CLIENT_SURFACE_PROJECTION_READ_METHODS = [
   "projection.worker_environments.list"
 ] as const;
 export type ClientSurfaceProjectionReadMethod = typeof CLIENT_SURFACE_PROJECTION_READ_METHODS[number];
-export type OctopusClientProjectionReadRequest = {
+export type PhobosClientProjectionReadRequest = {
   contract_version: typeof PROJECTION_READ_CONTRACT_VERSION;
   method: ProjectionReadMethod;
   params?: Record<string, unknown>;

@@ -184,7 +184,7 @@ test("dismissal survives remount, is revision scoped, fails visibly on corrupt s
     await React.act(async () => state.restoreAll()); assert.equal(state.visibleDocuments.length, 1);
     assert.notEqual(homeSurfaceIdentity(first), homeSurfaceIdentity(admitted({ ...doc, revision: 2 })));
     await close();
-    const storageKey = `octopus.home.surface-dismissals.v1:${JSON.stringify(["live", scope.runId, scope.interfaceId])}`;
+    const storageKey = `phobos.home.surface-dismissals.v1:${JSON.stringify(["live", scope.runId, scope.interfaceId])}`;
     window.localStorage.setItem(storageKey, "{"); await mount([first]);
     assert.ok(state.errors.length); assert.equal(state.visibleDocuments.length, 0);
     await React.act(async () => state.restoreAll()); assert.equal(state.visibleDocuments.length, 1);

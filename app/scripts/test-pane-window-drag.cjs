@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const ts = require('typescript');
 const { createClientWindowRegistry } = require('../electron/clientWindows.cjs');
 const { createPaneWindowDragHost } = require('../electron/paneWindowDrag.cjs');
-const target = { kind: 'surface', workspaceKey: 'octopus-os', surfaceId: 'chat', runId: 'run-exact-1' };
+const target = { kind: 'surface', workspaceKey: 'phobos-os', surfaceId: 'chat', runId: 'run-exact-1' };
 const ref = (value) => ({ transferId: value.transferId });
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 function fixture(options = {}) {
@@ -173,7 +173,7 @@ test('source authentication, request shape, geometry, terminal and unresolved/li
   f.host.cancel(f.source.webContentsId, ref(transfer));
   assert.throws(() => f.lease(f.source, { kind: 'terminal' }), /Terminal panes/);
   for (const extra of [{ panelKind: 'browser' }, { surfaceId: 'opaque-browser-surface' }]) {
-    const browser = f.lease(f.source, { kind: 'worker_environment', workspaceKey: 'octopus-os', target: { schemaVersion: 1, workerEnvironmentId: 'we-1', ...extra } });
+    const browser = f.lease(f.source, { kind: 'worker_environment', workspaceKey: 'phobos-os', target: { schemaVersion: 1, workerEnvironmentId: 'we-1', ...extra } });
     await assert.rejects(f.begin(browser), /Live browser adoption is unavailable/);
     await assert.rejects(f.host.detach(f.source.webContentsId, ref(browser)), /Live browser adoption is unavailable/);
     f.host.cancel(f.source.webContentsId, ref(browser));

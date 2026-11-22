@@ -8,7 +8,7 @@ type Props = {
 
 type Dot = [number, number, number, number];
 
-const LOGO_SRC = "./octopus-logo.png";
+const LOGO_SRC = "./phobos-logo.png";
 const SAMPLE_SIZE = 212;
 const SAMPLE_STEP = 3;
 const MAX_DOTS = 3000;
@@ -230,7 +230,7 @@ export function DottedLogoCanvas({ variant }: Props) {
       schedule();
     }).catch((error) => {
       if (stopped) return;
-      throw new Error(`Cannot load Octopus dot mark: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Cannot load Phobos dot mark: ${error instanceof Error ? error.message : String(error)}`);
     });
 
     const canvas = canvasRef.current;

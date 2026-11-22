@@ -20,7 +20,7 @@ w.HTMLElement.prototype.scrollTo = function () {};
 w.HTMLElement.prototype.scrollIntoView = function () {};
 const copies = [], projectionListeners = new Set();
 let currentHost = null;
-w.octopusTransport = new Proxy({}, { get: (_, name) => name === "copyText" ? async (value) => { copies.push(value); }
+w.phobosTransport = new Proxy({}, { get: (_, name) => name === "copyText" ? async (value) => { copies.push(value); }
   : name === "onProjectionChanged" ? (listener) => { projectionListeners.add(listener); return () => projectionListeners.delete(listener); }
     : currentHost?.transport[name] });
 globalThis.indexedDB = (() => {
@@ -95,17 +95,17 @@ async function show(messages, { streaming = false, presentation = "conversation"
   await settle();
 }
 const all = (selector, scope = container) => [...scope.querySelectorAll(selector)];
-const groupToggles = (scope = container) => all(".octopus-agent-activity-toggle", scope).filter((toggle) => !toggle.closest(".octopus-agent-activity-viewport"));
+const groupToggles = (scope = container) => all(".phobos-agent-activity-toggle", scope).filter((toggle) => !toggle.closest(".phobos-agent-activity-viewport"));
 const summaries = (scope = container) => groupToggles(scope).map((toggle) => toggle.getAttribute("aria-label"));
 async function openGroups(scope = container) {
   for (const toggle of groupToggles(scope)) if (toggle.getAttribute("aria-expanded") === "false") toggle.click();
   await settle();
 }
 const turn = (key) => container.querySelector(`[data-thread-turn-key="${key}"]`);
-const rows = (scope = container) => all(".octopus-agent-activity-row", scope);
-const exec = (scope = container) => all(".octopus-exec-activity", scope);
+const rows = (scope = container) => all(".phobos-agent-activity-row", scope);
+const exec = (scope = container) => all(".phobos-exec-activity", scope);
 const spoken = (node) => { const copy = node.cloneNode(true); copy.querySelectorAll("[aria-hidden='true']").forEach((hidden) => hidden.remove()); return copy.textContent; };
-const execSummary = (node) => spoken(node.querySelector(".octopus-exec-activity-summary"));
+const execSummary = (node) => spoken(node.querySelector(".phobos-exec-activity-summary"));
 const button = (label, scope = container) => all("button", scope).find((node) => node.getAttribute("aria-label") === label);
 
 const origin = { interface_id: "provider", interface_role: "provider" };
@@ -137,7 +137,7 @@ test("a tool result returns to the turn that started its exact call while unrela
   const user = ask("first"), queued = ask("queued", 3);
   const started = tool("call", { tool: "code_mode.run", call_id: "exact-call", status: "started", thread_id: "thread", turn_id: "native-turn", arguments: { script: "broken();" } });
   const failed = { ...started, id: "result", createdAtMs: 4, eventData: { ...started.eventData, status: "failed", ok: false, arguments: undefined, error: { message: "recorded native failure" } } };
-  const activityIn = (key) => turn(key).querySelector(".octopus-turn-activity .octopus-agent-activity") !== null;
+  const activityIn = (key) => turn(key).querySelector(".phobos-turn-activity .phobos-agent-activity") !== null;
   await show([user, started, queued, failed]);
   assert.deepEqual([activityIn("first"), activityIn("queued")], [true, false]);
   await openGroups(turn("first"));
@@ -168,14 +168,14 @@ test("finished turns stop activity animation without inventing a tool outcome", 
   const pending = tool("widget", { tool: "client.widgets", call_id: "widget", status: "started" });
   await show([ask("u"), pending], { streaming: true });
   await openGroups();
-  assert.ok(container.querySelector(".octopus-cadenced-shimmer"));
+  assert.ok(container.querySelector(".phobos-cadenced-shimmer"));
   for (const end of [event("error", "turn_error", {}, { text: "Provider disconnected", error: true, terminal: true }),
     event("done", "message", { phase: "final_answer" }, { text: "Done", terminal: true })]) {
     await show([ask("u"), pending, end]);
-    const history = container.querySelector(".octopus-worked-for-toggle");
+    const history = container.querySelector(".phobos-worked-for-toggle");
     if (history) { history.click(); await settle(); }
     await openGroups();
-    assert.equal(container.querySelector(".octopus-cadenced-shimmer"), null);
+    assert.equal(container.querySelector(".phobos-cadenced-shimmer"), null);
   }
   const { commandActivityModel } = await ui;
   const result = custom("exited", { process_id: "p", output: { running: true, exit_code: 0 } });
@@ -205,9 +205,9 @@ test("every supplied command shape shows its command, an absent one says so, and
   await openGroups();
   const [running] = exec();
   assert.equal(execSummary(running), "Running code");
-  assert.equal(running.querySelector(".octopus-exec-shell-command").textContent, script);
+  assert.equal(running.querySelector(".phobos-exec-shell-command").textContent, script);
   assert.ok(button("Copy code", running));
-  assert.equal(running.querySelector(".octopus-exec-shell-label").textContent, "Code");
+  assert.equal(running.querySelector(".phobos-exec-shell-label").textContent, "Code");
   assert.doesNotMatch(running.textContent, /\$ Run|\$ const/);
 });
 
@@ -253,7 +253,7 @@ test("a yielded code cell and the wait that finishes it read as one completed ce
   const [cell] = exec();
   assert.equal(exec().length, 1);
   assert.equal(cell.dataset.state, "complete");
-  assert.equal(cell.querySelector(".octopus-exec-shell-command").textContent, script);
+  assert.equal(cell.querySelector(".phobos-exec-shell-command").textContent, script);
   assert.match(cell.textContent, /CELL_STATE_OK/);
   assert.doesNotMatch(cell.textContent, /still running/i);
   const other = { ...waitDone, id: "other-wait", eventData: { ...waitDone.eventData, call_id: "other", arguments: { cell_id: "9" }, body: { ...waitDone.eventData.body, cell_id: "9" } } };
@@ -271,8 +271,8 @@ test("a command call shows its started arguments with its completed result", asy
   await show([ask("u"), begin, complete]);
   await openGroups();
   const [activity] = exec();
-  assert.equal(activity.querySelector(".octopus-exec-shell-command code").textContent, "/bin/sh -c pwd");
-  assert.match(activity.querySelector(".octopus-exec-shell-output").textContent, /\/work/);
+  assert.equal(activity.querySelector(".phobos-exec-shell-command code").textContent, "/bin/sh -c pwd");
+  assert.match(activity.querySelector(".phobos-exec-shell-output").textContent, /\/work/);
   assert.equal(activity.dataset.commandState, "exited");
   assert.match(activity.textContent, /Shell/);
   assert.match(activity.textContent, /Success/);
@@ -311,13 +311,13 @@ test("process listings, run inspection and continuation receipts are operations,
   assert.equal(dynamicToolPresentation(processList, {}).family, "tool");
   await show([ask("u"), processList]);
   await openGroups();
-  assert.equal(container.querySelector(".octopus-exec-shell, .glyph-terminal"), null);
+  assert.equal(container.querySelector(".phobos-exec-shell, .glyph-terminal"), null);
   const inspected = tool("inspect", { namespace: "formed_interfaces", tool: "run_list", call_id: "inspect", arguments: {}, status: "completed",
     body: { source_run: { run_id: "run-a" }, declared_peer_interfaces: ["peer-interface"] } });
   await show([ask("u"), inspected]);
-  assert.ok(container.querySelector(".octopus-agent-activity-header .glyph-plugins"), "Octopus interface operations carry the plugin mark");
+  assert.ok(container.querySelector(".phobos-agent-activity-header .glyph-plugins"), "Phobos interface operations carry the plugin mark");
   await openGroups();
-  const operation = rows()[0].querySelector(".octopus-agent-activity-toggle");
+  const operation = rows()[0].querySelector(".phobos-agent-activity-toggle");
   assert.match(operation.getAttribute("aria-label"), /^Inspected run/);
   assert.equal(operation.getAttribute("aria-expanded"), "false");
   assert.doesNotMatch(rows()[0].textContent, /peer-interface/);
@@ -341,9 +341,9 @@ test("process listings, run inspection and continuation receipts are operations,
   for (const eventData of [continued, refused]) {
     await show([ask("u"), tool("continue", eventData)]);
     await openGroups();
-    rows()[0].querySelector(".octopus-agent-activity-toggle").click(); await settle();
+    rows()[0].querySelector(".phobos-agent-activity-toggle").click(); await settle();
     const text = rows()[0].textContent;
-    assert.equal(rows()[0].querySelector(".glyph-terminal, .octopus-exec-shell, [data-testid='multi-agent-action-rows']"), null);
+    assert.equal(rows()[0].querySelector(".glyph-terminal, .phobos-exec-shell, [data-testid='multi-agent-action-rows']"), null);
     assert.doesNotMatch(text, /Arguments|Operation|work_completed/);
     assert.match(text, eventData === refused ? /Peer did not admit continuation/ : /Admission[\s\S]*Accepted[\s\S]*Recipient action[\s\S]*Not confirmed[\s\S]*Work[\s\S]*Not completed/);
   }
@@ -367,9 +367,9 @@ test("web searches read as searches whether the provider or a tool performs them
     assert.deepEqual(summaries(), ["Searching the web for requirements | example.org"]);
     await show([ask("u"), started, ended]);
     assert.deepEqual(summaries(), ["Searched the web"]);
-    assert.ok(container.querySelector(".octopus-agent-activity-header .glyph-search"));
+    assert.ok(container.querySelector(".phobos-agent-activity-header .glyph-search"));
     await openGroups();
-    const searchActivity = () => container.querySelector(".octopus-turn-activity .octopus-inline-activity").outerHTML;
+    const searchActivity = () => container.querySelector(".phobos-turn-activity .phobos-inline-activity").outerHTML;
     const viaTool = searchActivity();
     assert.equal(viaTool.split("requirements").length - 1, 1);
     await show([ask("u"), event("native-search", "web_search", { status: "completed", query, action: { kind: "search", query } })]);
@@ -387,15 +387,15 @@ test("a group names each kind of work it settled and run operations keep their p
   await show([ask("u"), { ...runCreate, eventData: { ...runCreate.eventData, status: "started" } }], { streaming: true });
   assert.deepEqual(summaries(), ["Run create"]);
   await show([ask("u"), runCreate]);
-  assert.ok(container.querySelector(".octopus-agent-activity-header .glyph-plugins"));
+  assert.ok(container.querySelector(".phobos-agent-activity-header .glyph-plugins"));
   const { dynamicToolPresentation, dynamicToolGlyph } = await ui;
   assert.equal(dynamicToolPresentation({ eventData: { tool: "custom_tool", arguments: { command: "pwd" } } }, {}).family, "tool");
   assert.equal(dynamicToolGlyph(dynamicToolPresentation({ eventData: { namespace: "formed_interfaces", tool: "run_list", arguments: {} } }, {})), "plugins");
 });
 
 test("Thinking shows only while nothing else reports progress", async () => {
-  const progress = () => all(".octopus-thinking-fallback").map(spoken);
-  const activeGroups = () => all(".octopus-turn-activity-content > .octopus-agent-activity[data-state='active']").length;
+  const progress = () => all(".phobos-thinking-fallback").map(spoken);
+  const activeGroups = () => all(".phobos-turn-activity-content > .phobos-agent-activity[data-state='active']").length;
   const commentary = event("commentary", "commentary", { status: "completed" }, { text: "Progress explained" });
   const settledTool = tool("settled", { tool: "run_list", call_id: "settled", arguments: {}, status: "completed" });
   const request = event("approval", "approval", {}, { text: "Allow?" });
@@ -428,8 +428,8 @@ test("commands report every outcome from their own evidence", async () => {
   const ran = await shown(success);
   assert.equal(execSummary(ran), "Ran arbitrary executable for 1s");
   assert.equal(ran.dataset.commandState, "exited");
-  assert.equal(ran.querySelector(".octopus-exec-shell-label").textContent, "Shell");
-  assert.match(ran.querySelector(".octopus-exec-shell-success").textContent, /Success/);
+  assert.equal(ran.querySelector(".phobos-exec-shell-label").textContent, "Shell");
+  assert.match(ran.querySelector(".phobos-exec-shell-success").textContent, /Success/);
   button("Copy output", ran).click(); await settle();
   assert.equal(copies.at(-1), "exact output\n");
   const nonzero = custom("nonzero", { completed: true, output: { exit_code: 7, stdout: { text: "prefix\n" } } });
@@ -449,7 +449,7 @@ test("commands report every outcome from their own evidence", async () => {
   await openGroups();
   assert.equal(rows()[0].dataset.state, "complete", "the status read completed; the process remains explicitly running at its last observation");
   assert.match(execSummary(exec()[0]), /^Command running at last check$/);
-  assert.equal(exec()[0].querySelector(".octopus-cadenced-shimmer"), null, "a returned process snapshot does not pretend to be live telemetry");
+  assert.equal(exec()[0].querySelector(".phobos-cadenced-shimmer"), null, "a returned process snapshot does not pretend to be live telemetry");
   assert.doesNotMatch(exec()[0].textContent, /Exit code|Success/);
   const controlled = custom("controlled", { ...yielded.eventData.body, control: { action: "interrupt", delivered: true } });
   assert.equal(commandActivityModel(controlled).phase, "running");

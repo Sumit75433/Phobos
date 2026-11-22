@@ -1,0 +1,24 @@
+[package]
+name = "phobos-context-projection"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "phobos-context-projection-life"
+path = "src/bin/life.rs"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-run-authoring = { path = "../../../system_interface_authoring/packages/phobos-run-authoring" }
+phobos-util-string = { path = "../../../world_provider_codex/packages/phobos-util-string" }
+phobos-world-pyecho-life-runtime = { path = "../../../world_pyecho/packages/phobos-world-pyecho-life-runtime" }
+
+[dev-dependencies]
+tempfile = "3.23.0"

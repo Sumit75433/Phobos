@@ -8,8 +8,8 @@ module.exports = { fixtureFilePublisher, fixtureDirectoryPublisher, withFixtureP
 
 function withFixturePublisher(options) {
   return { ...options,
-    publication: Object.hasOwn(options, "publication") ? options.publication : fixtureDirectoryPublisher(options.octopusHomeRoot),
-    publishFiles: Object.hasOwn(options, "publishFiles") ? options.publishFiles : fixtureFilePublisher(options.octopusHomeRoot) };
+    publication: Object.hasOwn(options, "publication") ? options.publication : fixtureDirectoryPublisher(options.phobosHomeRoot),
+    publishFiles: Object.hasOwn(options, "publishFiles") ? options.publishFiles : fixtureFilePublisher(options.phobosHomeRoot) };
 }
 
 function fixtureFilePublisher(home) {
@@ -27,7 +27,7 @@ function fixtureFilePublisher(home) {
         continue;
       }
       if (request.condition && !checked) {
-        assert.equal(request.condition.octopus_home, await fs.realpath(home));
+        assert.equal(request.condition.phobos_home, await fs.realpath(home));
         if (await fs.stat(path.join(home, "state/fixture-runtime-owned")).then(() => true, error => { if (error.code !== "ENOENT") throw error; return false; })) {
           return { receipts, error: "fixture stopped ownership is busy" };
         }
@@ -72,7 +72,7 @@ function fixtureDirectoryPublisher(home) {
       const current = path.join(directory, relative);
       for (const name of (await fs.readdir(current)).sort((a, b) => Buffer.compare(Buffer.from(a), Buffer.from(b)))) {
         const child = path.join(current, name), stat = await fs.lstat(child);
-        if (name === ".octopus-publication") { assert.ok(stat.isDirectory() && !stat.isSymbolicLink() && !(stat.mode & 0o077)); continue; }
+        if (name === ".phobos-publication") { assert.ok(stat.isDirectory() && !stat.isSymbolicLink() && !(stat.mode & 0o077)); continue; }
         const member = relative ? `${relative}/${name}` : name;
         const kind = stat.isSymbolicLink() ? "symlink" : stat.isDirectory() ? "directory" : "file";
         const bytes = kind === "directory" ? null : kind === "symlink" ? await fs.readlink(child, { encoding: "buffer" }) : await fs.readFile(child);

@@ -39,7 +39,7 @@ export function AccountRailButton({ accessProfile, runtimeHost, onLogOut, onOpen
     document.getElementById("settings-search")?.focus({ preventScroll: true });
   }, [open]);
   const name = accessProfile === "lab" ? "Test" : "Administrator";
-  const accountLabel = accessProfile !== "live" ? "Octopus OS" : state.loading && !account ? "Checking ChatGPT…" : account?.signedIn
+  const accountLabel = accessProfile !== "live" ? "Phobos OS" : state.loading && !account ? "Checking ChatGPT…" : account?.signedIn
     ? `ChatGPT${account.planType ? ` ${accountPlanLabel(account.planType)}` : ""}${account.workspaceName ? ` · ${account.workspaceName}` : ""}`
     : account ? "ChatGPT disconnected" : "ChatGPT unavailable";
   const usageWindow = usage.value ? accountUsageGroups(usage.value)[0]?.windows.find((row) => row.reported && row.remaining !== null) : undefined;
@@ -66,7 +66,7 @@ export function AccountRailButton({ accessProfile, runtimeHost, onLogOut, onOpen
           aria-expanded={open}
           aria-haspopup="menu"
           aria-label={`Account: ${name}`}
-          className="oc-octopus-icon-control no-drag"
+          className="oc-phobos-icon-control no-drag"
           data-appearance="rail"
           data-state={open ? "open" : "closed"}
           onClick={() => setOpen(!open)}
@@ -101,7 +101,7 @@ export function AccountRailButton({ accessProfile, runtimeHost, onLogOut, onOpen
         {accessProfile === "live" && account?.signedIn ? <OcMenuItem label="Usage" leadingIcon="usage" onClick={() => openSettings("account")} role="menuitem"
           trailing={usageWindow ? <span className="whitespace-nowrap text-token-description-foreground">{accountRemainingLabel(usageWindow.remaining)}</span> : undefined} /> : null}
         <div className="account-menu-separator" role="separator" />
-        <OcMenuItem label="Lock Octopus" leadingIcon="logOut" onClick={onLogOut} role="menuitem" />
+        <OcMenuItem label="Lock Phobos" leadingIcon="logOut" onClick={onLogOut} role="menuitem" />
       </OcDropdown>
     </div>
   );

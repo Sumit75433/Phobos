@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import type { FingerCurls } from "./airHandEngine";
 import { clientCommands, dispatchClientCommand, type ClientCommandId } from "./clientActions";
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 import { subscribeGestureState } from "./gestureRecognition";
 import { clientDialogOwnsCommands } from "./keyboardShortcuts";
 
@@ -13,7 +13,7 @@ export type CustomGesture = Readonly<{
   curls: FingerCurls;
 }>;
 
-const STORAGE_KEY = "octopus.custom-gestures.v2";
+const STORAGE_KEY = "phobos.custom-gestures.v2";
 const MATCH_THRESHOLD = 0.34;
 const HOLD_MS = 260;
 const RELEASE_DISTANCE = 0.5;
@@ -21,13 +21,13 @@ const CURL_KEYS: readonly (keyof FingerCurls)[] = ["thumb", "index", "middle", "
 
 type CustomGestureStore = {
   current: CustomGesture[];
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
   subscribers: Set<() => void>;
 };
 
-const stores = new Map<OctopusClientAccessProfile, CustomGestureStore>();
+const stores = new Map<PhobosClientAccessProfile, CustomGestureStore>();
 
-export function useCustomGestures(profile: OctopusClientAccessProfile) {
+export function useCustomGestures(profile: PhobosClientAccessProfile) {
   const store = customGestureStore(profile);
   const gestures = useSyncExternalStore(
     (subscriber) => subscribeStore(store, subscriber),
@@ -59,7 +59,7 @@ export function useCustomGestures(profile: OctopusClientAccessProfile) {
   return useMemo(() => ({ gestures, add, update, remove, restore }), [add, gestures, remove, restore, update]);
 }
 
-export function useCustomGestureDispatch(profile: OctopusClientAccessProfile, enabled: boolean): void {
+export function useCustomGestureDispatch(profile: PhobosClientAccessProfile, enabled: boolean): void {
   const store = customGestureStore(profile);
   useEffect(() => {
     if (!enabled) return;
@@ -120,7 +120,7 @@ function bestMatch(gestures: CustomGesture[], curls: FingerCurls): { gesture: Cu
   return best;
 }
 
-function customGestureStore(profile: OctopusClientAccessProfile): CustomGestureStore {
+function customGestureStore(profile: PhobosClientAccessProfile): CustomGestureStore {
   const existing = stores.get(profile);
   if (existing) return existing;
   const created: CustomGestureStore = { current: readGestures(profile), profile, subscribers: new Set() };
@@ -145,7 +145,7 @@ function writeStore(store: CustomGestureStore, gestures: CustomGesture[]): void 
   for (const subscriber of [...store.subscribers]) subscriber();
 }
 
-function readGestures(profile: OctopusClientAccessProfile): CustomGesture[] {
+function readGestures(profile: PhobosClientAccessProfile): CustomGesture[] {
   try {
     const raw = window.localStorage.getItem(storageKey(profile));
     if (!raw) return [];
@@ -168,7 +168,7 @@ function isCustomGesture(value: unknown): value is CustomGesture {
     && CURL_KEYS.every((key) => typeof curls?.[key] === "number");
 }
 
-function storageKey(profile: OctopusClientAccessProfile): string {
+function storageKey(profile: PhobosClientAccessProfile): string {
   return profile === "live" ? STORAGE_KEY : `${STORAGE_KEY}.test`;
 }
 

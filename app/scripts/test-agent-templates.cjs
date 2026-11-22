@@ -4,21 +4,21 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const { readClientAgentCatalog } = require("../electron/clientAgentCatalog.cjs");
-const { mutateOctopusOsWorkspace } = require("../electron/projection.cjs");
+const { mutatePhobosOsWorkspace } = require("../electron/projection.cjs");
 const { operatorChatContextProjection } = require("../electron/projection/operatorChatContext.cjs");
 
 async function main(rootScope = false) {
-  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-agent-template-test-"));
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-agent-template-test-"));
   try {
-    const octopusHomeRoot = path.join(temporary, "home");
-    const registryRoot = path.join(octopusHomeRoot, "registry");
+    const phobosHomeRoot = path.join(temporary, "home");
+    const registryRoot = path.join(phobosHomeRoot, "registry");
     const interfaceRoot = path.join(registryRoot, "interface");
     const eeTemplateRoot = path.join(registryRoot, "ee_template");
-    const eeInstanceRoot = path.join(octopusHomeRoot, "state", "ee_instances");
-    const sourceWorkerInterfaceId = "system_worker_octopus_development";
+    const eeInstanceRoot = path.join(phobosHomeRoot, "state", "ee_instances");
+    const sourceWorkerInterfaceId = "system_worker_phobos_development";
     const homeInterfaceId = "world_operator_chat_home";
     const rootEeId = "ee_root";
-    const projectEeId = rootScope ? rootEeId : "ee_octopus";
+    const projectEeId = rootScope ? rootEeId : "ee_phobos";
     await fs.mkdir(path.join(interfaceRoot, sourceWorkerInterfaceId), { recursive: true });
     await fs.mkdir(path.join(interfaceRoot, homeInterfaceId), { recursive: true });
     const sourceInterface = {
@@ -26,11 +26,11 @@ async function main(rootScope = false) {
       interface_type: "system",
       role: "worker",
       direction: "bidirectional",
-      source_names: ["octopus_development"],
+      source_names: ["phobos_development"],
     };
     const sourcePolicy = {
       id: sourceWorkerInterfaceId,
-      role_artifacts: ["artifact-octopus-project-role"],
+      role_artifacts: ["artifact-phobos-project-role"],
       ceiling: {
         interfaces: ["world_provider_codex", "system_exec_env"],
         tools: ["exec.run"],
@@ -44,8 +44,8 @@ async function main(rootScope = false) {
       worker_choice_interface: sourceWorkerInterfaceId,
       door_host_slots: {},
     };
-    const homeSidecarPath = path.join(interfaceRoot, homeInterfaceId, "octopus_os.json");
-    const agentCatalogPath = path.join(octopusHomeRoot, "client", "agents", "catalog.json");
+    const homeSidecarPath = path.join(interfaceRoot, homeInterfaceId, "phobos_os.json");
+    const agentCatalogPath = path.join(phobosHomeRoot, "client", "agents", "catalog.json");
     const rootTemplatePath = path.join(eeTemplateRoot, "operator_space", "ee_template.json");
     const projectTemplatePath = rootScope ? rootTemplatePath : path.join(eeTemplateRoot, "project", "ee_template.json");
     const rootEePath = path.join(eeInstanceRoot, `${rootEeId}.json`);
@@ -66,13 +66,13 @@ async function main(rootScope = false) {
       ee_id: projectEeId,
       template_name: "project",
       parent_ee_id: rootEeId,
-      goal: "Octopus Development",
+      goal: "Phobos Development",
       config: {},
       policy_narrowing: { allowed_interfaces: [sourceWorkerInterfaceId] },
     });
     await writeJson(homeSidecarPath, {
       schema_version: 1,
-      workspace: "octopus_os",
+      workspace: "phobos_os",
       interface: homeInterfaceId,
       owner_interface: homeInterfaceId,
       component: "client",
@@ -86,12 +86,12 @@ async function main(rootScope = false) {
       },
       task_authoring_profiles: [taskProfile],
       presentation: {
-        name: "Octopus OS",
-        projects: rootScope ? [] : [{ ee_id: projectEeId, name: "Octopus", icon: "code", color: "violet" }],
+        name: "Phobos OS",
+        projects: rootScope ? [] : [{ ee_id: projectEeId, name: "Phobos", icon: "code", color: "violet" }],
       },
     });
     await writeJson(agentCatalogPath, {
-      schema: "octopus.client.agent_catalog",
+      schema: "phobos.client.agent_catalog",
       schema_version: 1,
       project_sources: [{ project_ee_id: projectEeId, source_worker_interface: sourceWorkerInterfaceId }],
       agents: [],
@@ -118,7 +118,7 @@ async function main(rootScope = false) {
       },
       projectEeId,
       sourceWorkerInterfaceId,
-      name: "Octopus Development",
+      name: "Phobos Development",
       icon: "glasses",
       providerInterfaceId: "world_provider_codex",
       providerModel: "catalog-model-a",
@@ -151,20 +151,20 @@ async function main(rootScope = false) {
       return { cleanupWarnings: [] };
     };
     await assert.rejects(
-      mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, { ...request, projectEeId: "ee_foreign" }, { commitClientAuthoring, chatContexts }),
+      mutatePhobosOsWorkspace(registryRoot, phobosHomeRoot, scope, { ...request, projectEeId: "ee_foreign" }, { commitClientAuthoring, chatContexts }),
       /outside the workspace scope/,
     );
     await assert.rejects(
-      mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, { ...request, providerModel: "not-admitted" }, { commitClientAuthoring, chatContexts }),
+      mutatePhobosOsWorkspace(registryRoot, phobosHomeRoot, scope, { ...request, providerModel: "not-admitted" }, { commitClientAuthoring, chatContexts }),
       /not admitted by worker template/,
     );
     await assert.rejects(
-      mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, scope, { ...request, providerModel: "" }, { commitClientAuthoring, chatContexts }),
+      mutatePhobosOsWorkspace(registryRoot, phobosHomeRoot, scope, { ...request, providerModel: "" }, { commitClientAuthoring, chatContexts }),
       /explicit Agent provider model/,
     );
-    const created = await mutateOctopusOsWorkspace(
+    const created = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       scope,
       request,
       { commitClientAuthoring, chatContexts },
@@ -195,10 +195,10 @@ async function main(rootScope = false) {
     for (const file of [rootEePath, projectEePath]) {
       assert.deepEqual((await readJson(file)).policy_narrowing.allowed_interfaces, [sourceWorkerInterfaceId]);
     }
-    let catalog = await readClientAgentCatalog(octopusHomeRoot);
+    let catalog = await readClientAgentCatalog(phobosHomeRoot);
     assert.deepEqual(catalog.document.agents, [{
       id: created.agentId,
-      name: "Octopus Development",
+      name: "Phobos Development",
       icon: "glasses",
       project_ee_id: projectEeId,
       worker_interface: created.workerInterfaceId,
@@ -227,9 +227,9 @@ async function main(rootScope = false) {
     });
     request.workspace.expectedHomeSidecarDigest = nextScope.home_sidecar_digest;
     request.workspace.expectedAgentCatalogDigest = nextScope.agent_catalog_digest;
-    const repeated = await mutateOctopusOsWorkspace(
+    const repeated = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       nextScope,
       request,
       { commitClientAuthoring, chatContexts },
@@ -238,7 +238,7 @@ async function main(rootScope = false) {
     clonedPolicy.ceiling.tools.push("unexpected.tool");
     await writeJson(path.join(interfaceRoot, created.workerInterfaceId, "policy.json"), clonedPolicy);
     await assert.rejects(
-      mutateOctopusOsWorkspace(registryRoot, octopusHomeRoot, nextScope, request, { commitClientAuthoring, chatContexts }),
+      mutatePhobosOsWorkspace(registryRoot, phobosHomeRoot, nextScope, request, { commitClientAuthoring, chatContexts }),
       /belongs to another authoring operation/,
     );
     clonedPolicy.ceiling.tools.pop();
@@ -248,7 +248,7 @@ async function main(rootScope = false) {
       agentId: created.agentId,
       projectEeId,
       workerInterfaceId: created.workerInterfaceId,
-      name: "Octopus Core Development",
+      name: "Phobos Core Development",
       icon: "hardhat",
       providerInterfaceId: "world_provider_codex",
       providerModel: "catalog-model-b",
@@ -258,22 +258,22 @@ async function main(rootScope = false) {
       expectedClientTemplateDigest: created.clientTemplateDigest,
       expectedAgentCatalogDigest: catalog.digest,
     };
-    const configured = await mutateOctopusOsWorkspace(
+    const configured = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       nextScope,
       configureRequest,
       { commitClientAuthoring, chatContexts },
     );
     assert.equal(configured.changed, true);
     assert.equal((await readJson(clonedClientTemplatePath)).provider_model, "catalog-model-b");
-    catalog = await readClientAgentCatalog(octopusHomeRoot);
-    assert.equal(catalog.document.agents[0].name, "Octopus Core Development");
+    catalog = await readClientAgentCatalog(phobosHomeRoot);
+    assert.equal(catalog.document.agents[0].name, "Phobos Core Development");
     assert.equal(catalog.document.agents[0].icon, "hardhat");
     const configuredScope = { ...nextScope, agent_catalog_digest: catalog.digest, agent_presentations: catalog.document.agents };
-    const repeatedConfiguration = await mutateOctopusOsWorkspace(
+    const repeatedConfiguration = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       configuredScope,
       {
         ...configureRequest,
@@ -297,9 +297,9 @@ async function main(rootScope = false) {
     await writeJson(path.join(interfaceRoot, sourceWorkerInterfaceId, "policy.json"), sourcePolicy);
     const widened = projectedAgent();
     assert.deepEqual(widened.row.applications, [{ id: "world_mail", selected_by_default: false }]);
-    const reformed = await mutateOctopusOsWorkspace(
+    const reformed = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       configuredScope,
       {
         ...configureRequest,
@@ -312,10 +312,10 @@ async function main(rootScope = false) {
     assert.equal(reformed.changed, true);
     assert.deepEqual(await readJson(agentPolicyPath), { ...sourcePolicy, id: created.workerInterfaceId });
     assert.deepEqual((await readJson(clonedClientTemplatePath)).application_ids, ["world_mail"]);
-    catalog = await readClientAgentCatalog(octopusHomeRoot);
-    const deleted = await mutateOctopusOsWorkspace(
+    catalog = await readClientAgentCatalog(phobosHomeRoot);
+    const deleted = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       { ...configuredScope, agent_catalog_digest: catalog.digest, agent_presentations: catalog.document.agents },
       {
         action: "delete_agent_template",
@@ -329,7 +329,7 @@ async function main(rootScope = false) {
     );
     assert.equal(deleted.changed, true);
     assert.equal(await optionalDigest(clonedClientTemplatePath), null);
-    catalog = await readClientAgentCatalog(octopusHomeRoot);
+    catalog = await readClientAgentCatalog(phobosHomeRoot);
     assert.ok(catalog.document.agents[0].deleted_at_ms > 0);
   } finally {
     await fs.rm(temporary, { recursive: true, force: true });
@@ -372,7 +372,7 @@ async function projectedScope({
     home_sidecar_digest: await digest(homeSidecarPath),
     agent_catalog_path: agentCatalogPath,
     agent_catalog_digest: await digest(agentCatalogPath),
-    agent_project_sources: [{ project_ee_id: projectEeId, source_worker_interface: "system_worker_octopus_development" }],
+    agent_project_sources: [{ project_ee_id: projectEeId, source_worker_interface: "system_worker_phobos_development" }],
     agent_presentations: agentPresentations,
     environments: [
       {

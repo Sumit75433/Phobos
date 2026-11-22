@@ -1,7 +1,7 @@
 import { normalizeArtifactFilesTarget } from "../files/artifactFilesTarget";
 import { clientCommands, type ClientCommandId } from "../../clientActions";
 import type { SelectionRef } from "../../data/topology";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { useRuntimeTopology } from "../../runtimeTopology";
 import {
   profileStorageKey,
@@ -41,7 +41,7 @@ export type StoredSecondaryPaneState = {
   layout?: WorkspacePaneLayout;
 };
 
-const SECONDARY_PANE_STATE_STORAGE_KEY = "octopus.home.secondary-pane.v1";
+const SECONDARY_PANE_STATE_STORAGE_KEY = "phobos.home.secondary-pane.v1";
 
 export function isSidebarOnlySurface(surface: Pick<ClientSurfaceDescriptor, "id">): boolean {
   return false;
@@ -81,7 +81,7 @@ export function sameClientDestination(left: ClientDestination, right: ClientDest
 
 export function initializeSurfaceNavigation(
   startupSurface: string,
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   startupRunId = "",
   windowScope = "main",
 ): SurfaceNavigation {
@@ -125,7 +125,7 @@ export function resolveSelection(
   return firstEnvironment ? { kind: "environment", id: firstEnvironment.id } : null;
 }
 
-export function secondaryPaneStorageKey(profile: OctopusClientAccessProfile, homeRunId: string, windowScope = "main", paneScope = ""): string {
+export function secondaryPaneStorageKey(profile: PhobosClientAccessProfile, homeRunId: string, windowScope = "main", paneScope = ""): string {
   return clientWindowStateKey(
     windowScope,
     profileStorageKey(`${SECONDARY_PANE_STATE_STORAGE_KEY}.${homeRunId.trim()}${paneScope ? `.${paneScope}` : ""}`, profile),
@@ -133,7 +133,7 @@ export function secondaryPaneStorageKey(profile: OctopusClientAccessProfile, hom
 }
 
 export function readSecondaryPaneState(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   homeRunId: string,
   windowScope = "main",
   paneScope = "",
@@ -173,7 +173,7 @@ export function readSecondaryPaneStateAtKey(windowScope: string, key: string): S
 }
 
 export function writeSecondaryPaneState(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   homeRunId: string,
   windowScope: string,
   state: Pick<StoredSecondaryPaneState, "activeTabId" | "open" | "tabs" | "layout">,
@@ -227,7 +227,7 @@ function normalizeSecondaryPaneTab(value: unknown): SecondaryPaneTabState | null
 function normalizeWorkspacePaneTarget(value: unknown): SecondaryPaneTabState["target"] | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const row = value as Record<string, unknown>;
-  const workspaceKey = row.workspaceKey === "dashboard" || row.workspaceKey === "octopus-os"
+  const workspaceKey = row.workspaceKey === "dashboard" || row.workspaceKey === "phobos-os"
     ? row.workspaceKey
     : null;
   if (!workspaceKey) return null;

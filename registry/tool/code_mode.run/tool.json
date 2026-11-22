@@ -5,7 +5,7 @@
     "operation": "run"
   },
   "process": {
-    "bin": "target/debug/octopus-code-mode-room-tool",
+    "bin": "target/debug/phobos-code-mode-room-tool",
     "authority": {
       "read_root_slots": [],
       "write_root_slots": [],

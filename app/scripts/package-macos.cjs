@@ -17,14 +17,14 @@ const registryRoot = path.join(repoRoot, "registry");
 const distributionRoot = path.join(appRoot, "distribution");
 const baselineManifestPath = path.join(distributionRoot, "system-baseline.json");
 const buildRoot = path.join(appRoot, "build");
-const bundleRoot = packageBundleRoot(process.env.OCTOPUS_PACKAGE_BUNDLE);
+const bundleRoot = packageBundleRoot(process.env.PHOBOS_PACKAGE_BUNDLE);
 const minimumSystemVersion = "14.0";
 const nativeRuntime = require("../native/runtime.cjs");
 const clientRuntime = nativeRuntime.clientRuntime();
-const ownedEngineVerifier = require(path.join(registryRoot, "worker_environment_kind", "browser_session", "packages", "octopus-browser-session-env", "native", "macos", "engine-artifact.cjs"));
-const browserEnginePackage = require(path.join(registryRoot, "worker_environment_kind", "browser_session", "packages", "octopus-browser-session-env", "native", "engine-mode.cjs"));
+const ownedEngineVerifier = require(path.join(registryRoot, "worker_environment_kind", "browser_session", "packages", "phobos-browser-session-env", "native", "macos", "engine-artifact.cjs"));
+const browserEnginePackage = require(path.join(registryRoot, "worker_environment_kind", "browser_session", "packages", "phobos-browser-session-env", "native", "engine-mode.cjs"));
 const browserEngineMode = browserEnginePackage.packagingMode(process.argv.slice(2), process.env);
-const ownedEngineReceiptPath = process.env.OCTOPUS_OWNED_ELECTRON_RECEIPT;
+const ownedEngineReceiptPath = process.env.PHOBOS_OWNED_ELECTRON_RECEIPT;
 if (browserEngineMode === "owned") {
   const { foundation } = ownedEngineVerifier.sourceContract();
   if (foundation.electron.version !== clientRuntime.electron || foundation.node_version !== clientRuntime.node) {
@@ -34,7 +34,7 @@ if (browserEngineMode === "owned") {
 const ownedEngine = browserEngineMode === "owned"
   ? ownedEngineVerifier.verifyEngineArtifact(ownedEngineReceiptPath, process.arch)
   : null;
-const nativeHeaders = nativeRuntime.verifyNodeHeaders(process.env.OCTOPUS_NATIVE_NODE_HEADERS);
+const nativeHeaders = nativeRuntime.verifyNodeHeaders(process.env.PHOBOS_NATIVE_NODE_HEADERS);
 const electronBundle = ownedEngine ? ownedEngine.bundlePath : nativeRuntime.fetchElectron(process.arch);
 const browserElectronVersion = clientRuntime.electron;
 requireRebuiltTerminal();
@@ -43,26 +43,26 @@ const resourcesRoot = path.join(bundleRoot, "Contents", "Resources");
 const bundledAppRoot = path.join(resourcesRoot, "app");
 const macosRoot = path.join(bundleRoot, "Contents", "MacOS");
 const plistPath = path.join(bundleRoot, "Contents", "Info.plist");
-const icnsPath = path.join(appRoot, "public", "octopus.icns");
+const icnsPath = path.join(appRoot, "public", "phobos.icns");
 const openCodexOwnerRoot = path.join(
   registryRoot,
   "interface",
   "world_provider_codex",
   "packages",
-  "octopus-provider-codex",
+  "phobos-provider-codex",
 );
 const openCodexBridgeRoot = path.join(openCodexOwnerRoot, "opencodex-bridge");
 const managedCodexRoot = path.join(openCodexOwnerRoot, "managed-cli");
 const managedCodexDistribution = require(path.join(managedCodexRoot, "bootstrap.cjs"));
-const openCodexLifeBinary = "octopus-provider-opencodex-life";
-const inputIntakeLifeBinary = "octopus-input-intake-life";
+const openCodexLifeBinary = "phobos-provider-opencodex-life";
+const inputIntakeLifeBinary = "phobos-input-intake-life";
 const { captureProviderSigningInputs, sealProviderSigningInputs, signClientResources, bundleManagedCodex, copyRegistrySurface, copyLocalPackageDefinitions, copyRegistryBaseline, collectBundledBinaries, sharedBinaries, materializeProviderLife, validateOpenCodexOwnerAssets, copyBundledBinaries, registryExecutableOwnership, rewriteBundledExecutablePaths, stripExecutables, transformExecutableCopies, validateBundledLayout } =
   require("./runtime-package.cjs").createRuntimePackager({ repoRoot, appRoot, outputRoot: bundledAppRoot });
 
 for (const asset of [
   path.join(appRoot, "public", "favicon.png"),
-  path.join(appRoot, "public", "octopus-app-icon.png"),
-  path.join(appRoot, "public", "octopus-dev-dock-icon.png"),
+  path.join(appRoot, "public", "phobos-app-icon.png"),
+  path.join(appRoot, "public", "phobos-dev-dock-icon.png"),
   icnsPath,
 ]) {
   if (!fs.existsSync(asset)) throw new Error(`packaging asset is missing: ${asset}`);
@@ -71,8 +71,8 @@ const revision = spawnSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encodi
 const sourceStatus = spawnSync("git", ["status", "--porcelain", "--untracked-files=normal"], { cwd: repoRoot, encoding: "utf8" });
 run("npm", ["run", "build"], appRoot);
 buildOpenCodexBridge();
-const desktopNativeRoot = path.join(registryRoot, "worker_environment_kind", "desktop_session", "packages", "octopus-system-gui-env", "native");
-const desktopNativeExecutable = path.join(desktopNativeRoot, "bin", "octopus-desktop-native");
+const desktopNativeRoot = path.join(registryRoot, "worker_environment_kind", "desktop_session", "packages", "phobos-system-gui-env", "native");
+const desktopNativeExecutable = path.join(desktopNativeRoot, "bin", "phobos-desktop-native");
 assertDeclaredGeneratedOutput(desktopNativeExecutable, repoRoot, generatedOutputs);
 require(path.join(desktopNativeRoot, "build.cjs")).buildDesktopNative(desktopNativeExecutable);
 const pipBuilder = require(path.join(desktopNativeRoot, "pip", "build.cjs"));
@@ -80,7 +80,7 @@ const clientFilesystem = require("../native/build.cjs").buildClientFilesystem({ 
 const pipCompiler = fs.realpathSync(capture("xcrun", ["--find", "clang++"]));
 const pipSwiftCompiler = fs.realpathSync(capture("xcrun", ["--find", "swiftc"]));
 const pipSdk = fs.realpathSync(capture("xcrun", ["--sdk", "macosx", "--show-sdk-path"]));
-const pipOutput = fs.realpathSync(fs.mkdtempSync(path.join(require("node:os").tmpdir(), "octopus-package-pip-")));
+const pipOutput = fs.realpathSync(fs.mkdtempSync(path.join(require("node:os").tmpdir(), "phobos-package-pip-")));
 process.once("exit", () => fs.rmSync(pipOutput, { recursive: true, force: true }));
 const pipReceipt = pipBuilder.build({ compiler: pipCompiler, swiftCompiler: pipSwiftCompiler, sdk: pipSdk, headers: nativeHeaders,
   outputRoot: pipOutput, architecture: process.arch, target: "addon", deploymentTarget: minimumSystemVersion,
@@ -97,9 +97,9 @@ copyTree(electronBundle, bundleRoot, { recursive: true, verbatimSymlinks: true }
 const ownedEngineCopy = ownedEngine ? ownedEngineVerifier.beginPackagedEngine(ownedEngine, bundleRoot) : null;
 
 const electronExecutable = path.join(macosRoot, "Electron");
-const octopusExecutable = path.join(macosRoot, "Octopus");
+const phobosExecutable = path.join(macosRoot, "Phobos");
 if (fs.existsSync(electronExecutable)) {
-  fs.renameSync(electronExecutable, octopusExecutable);
+  fs.renameSync(electronExecutable, phobosExecutable);
 }
 
 fs.rmSync(path.join(resourcesRoot, "default_app.asar"), { force: true });
@@ -150,19 +150,19 @@ for (const dependency of [
     filter: (candidate) => !candidate.split(path.sep).some((part) => part === "obj.target" || part === ".deps" || part === "prebuilds"),
   });
 }
-copyFile(icnsPath, path.join(resourcesRoot, "octopus.icns"));
+copyFile(icnsPath, path.join(resourcesRoot, "phobos.icns"));
 validateBundledLayout([bundledRegistryRoot, localPackageRegistryRoot], installationBinaries, ownerExecutables);
 
-setPlist("CFBundleName", "Octopus");
-setPlist("CFBundleDisplayName", "Octopus");
-setPlist("CFBundleExecutable", "Octopus");
-setPlist("CFBundleIdentifier", "com.octopus.desktop");
-setPlist("CFBundleIconFile", "octopus.icns");
+setPlist("CFBundleName", "Phobos");
+setPlist("CFBundleDisplayName", "Phobos");
+setPlist("CFBundleExecutable", "Phobos");
+setPlist("CFBundleIdentifier", "com.phobos.desktop");
+setPlist("CFBundleIconFile", "phobos.icns");
 setPlist("CFBundleShortVersionString", packageVersion);
 setPlist("CFBundleVersion", packageVersion);
 setPlist("LSMinimumSystemVersion", minimumSystemVersion);
-setPlist("NSMicrophoneUsageDescription", "Octopus uses the microphone for persistent voice conversations with your agent.");
-setPlist("NSCameraUsageDescription", "Octopus uses the camera locally to recognize hand gestures. Frames are not recorded or sent to the runtime.");
+setPlist("NSMicrophoneUsageDescription", "Phobos uses the microphone for persistent voice conversations with your agent.");
+setPlist("NSCameraUsageDescription", "Phobos uses the camera locally to recognize hand gestures. Frames are not recorded or sent to the runtime.");
 setPlistBoolean("NSCameraUseContinuityCameraDeviceType", true);
 
 const providerSigningInputs = captureProviderSigningInputs([bundledRegistryRoot, localPackageRegistryRoot]);
@@ -186,21 +186,21 @@ run("codesign", ["--verify", "--deep", "--strict", bundleRoot], appRoot);
 console.log(`Packaged ${bundleRoot}`);
 require("./build-space-notice.cjs").printBuildSpaceNotice();
 
-// OCTOPUS_PACKAGE_BUNDLE packages into another bundle beside the default one, so an
-// installation running from app/build/Octopus.app keeps its bundle during the build.
+// PHOBOS_PACKAGE_BUNDLE packages into another bundle beside the default one, so an
+// installation running from app/build/Phobos.app keeps its bundle during the build.
 function packageBundleRoot(requested) {
-  const standard = path.join(buildRoot, "Octopus.app");
+  const standard = path.join(buildRoot, "Phobos.app");
   if (requested === undefined || requested === "") return standard;
   const resolved = path.resolve(requested);
-  if (!path.isAbsolute(requested) || path.dirname(resolved) !== buildRoot || !/^Octopus(\.[A-Za-z0-9_-]+)?\.app$/.test(path.basename(resolved))) {
-    throw new Error(`OCTOPUS_PACKAGE_BUNDLE must be an absolute path to Octopus.app or Octopus.<name>.app directly inside ${buildRoot}`);
+  if (!path.isAbsolute(requested) || path.dirname(resolved) !== buildRoot || !/^Phobos(\.[A-Za-z0-9_-]+)?\.app$/.test(path.basename(resolved))) {
+    throw new Error(`PHOBOS_PACKAGE_BUNDLE must be an absolute path to Phobos.app or Phobos.<name>.app directly inside ${buildRoot}`);
   }
   return resolved;
 }
 
 function providerSigningReceiptName() {
   const name = path.basename(bundleRoot, ".app");
-  return name === "Octopus" ? "provider-signing.json" : `provider-signing.${name.slice("Octopus.".length)}.json`;
+  return name === "Phobos" ? "provider-signing.json" : `provider-signing.${name.slice("Phobos.".length)}.json`;
 }
 
 function requireRebuiltTerminal() {

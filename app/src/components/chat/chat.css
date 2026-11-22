@@ -22,44 +22,44 @@
   color: var(--color-text-user-message);
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content {
+[data-user-message-bubble="true"] .phobos-markdown-content {
   --markdown-line-height: calc(var(--markdown-font-size) * 1.5);
   --markdown-space: calc(var(--markdown-font-size) / 4);
   --text-primary: var(--color-text-user-message);
   color: var(--color-text-user-message);
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content :is(h4, h5, h6):not(:first-child) {
+[data-user-message-bubble="true"] .phobos-markdown-content :is(h4, h5, h6):not(:first-child) {
   margin-block-start: calc(var(--markdown-space) * 4);
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content :is(h4, h5, h6):not(:last-child) {
+[data-user-message-bubble="true"] .phobos-markdown-content :is(h4, h5, h6):not(:last-child) {
   margin-block-end: calc(var(--markdown-space) * 4);
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content blockquote {
+[data-user-message-bubble="true"] .phobos-markdown-content blockquote {
   margin-block: calc(var(--markdown-space) * 4) !important;
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content > blockquote:first-child,
-[data-user-message-bubble="true"] .octopus-markdown-content blockquote > blockquote:first-child {
+[data-user-message-bubble="true"] .phobos-markdown-content > blockquote:first-child,
+[data-user-message-bubble="true"] .phobos-markdown-content blockquote > blockquote:first-child {
   margin-block-start: 0 !important;
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content > blockquote:last-child,
-[data-user-message-bubble="true"] .octopus-markdown-content blockquote > blockquote:last-child {
+[data-user-message-bubble="true"] .phobos-markdown-content > blockquote:last-child,
+[data-user-message-bubble="true"] .phobos-markdown-content blockquote > blockquote:last-child {
   margin-block-end: 0 !important;
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content > :is(p, ul, ol) + :is(ul, ol),
-[data-user-message-bubble="true"] .octopus-markdown-content > :is(ul, ol) + p,
-[data-user-message-bubble="true"] .octopus-markdown-content :is(li, blockquote) > :is(p, ul, ol, blockquote) + :is(p, ul, ol, blockquote),
-[data-user-message-bubble="true"] .octopus-markdown-content li:has(> p) + li {
+[data-user-message-bubble="true"] .phobos-markdown-content > :is(p, ul, ol) + :is(ul, ol),
+[data-user-message-bubble="true"] .phobos-markdown-content > :is(ul, ol) + p,
+[data-user-message-bubble="true"] .phobos-markdown-content :is(li, blockquote) > :is(p, ul, ol, blockquote) + :is(p, ul, ol, blockquote),
+[data-user-message-bubble="true"] .phobos-markdown-content li:has(> p) + li {
   margin-block-start: calc(var(--markdown-space) * 4) !important;
 }
 
-[data-user-message-bubble="true"] .octopus-markdown-content :is(ul, ol) > li,
-[data-user-message-bubble="true"] .octopus-markdown-content :is(li, blockquote) > p {
+[data-user-message-bubble="true"] .phobos-markdown-content :is(ul, ol) > li,
+[data-user-message-bubble="true"] .phobos-markdown-content :is(li, blockquote) > p {
   margin-block: 0 !important;
 }
 
@@ -949,7 +949,7 @@
   padding: 0 12px 12px;
 }
 
-.quick-task-composer [data-octopus-composer-root] {
+.quick-task-composer [data-phobos-composer-root] {
   max-width: none;
 }
 
@@ -1514,7 +1514,7 @@
   background: transparent;
   color: var(--color-token-foreground);
   font: inherit;
-  font-size: var(--octopus-chat-font-size, 16px);
+  font-size: var(--phobos-chat-font-size, 16px);
   line-height: 1.45;
 }
 
@@ -1758,7 +1758,7 @@
   opacity: .35;
 }
 
-mark.octopus-thread-find-match {
+mark.phobos-thread-find-match {
   margin: 0;
   padding: 0;
   border: 0;
@@ -1772,7 +1772,7 @@ mark.octopus-thread-find-match {
   word-spacing: inherit;
 }
 
-mark.octopus-thread-find-active {
+mark.phobos-thread-find-active {
   background: var(--vscode-charts-orange, #d18616);
 }
 
@@ -1787,7 +1787,7 @@ mark.octopus-thread-find-active {
   outline: 0;
 }
 
-.octopus-chat-scroll {
+.phobos-chat-scroll {
   flex: 1 1 0%;
   min-width: 0;
   min-height: 0;
@@ -1804,11 +1804,11 @@ mark.octopus-thread-find-active {
   background: transparent;
 }
 
-.octopus-chat-home {
+.phobos-chat-home {
   position: relative;
 }
 
-.octopus-chat-backdrop {
+.phobos-chat-backdrop {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -1816,7 +1816,7 @@ mark.octopus-thread-find-active {
   pointer-events: none;
 }
 
-.octopus-chat-scroll.is-drag-over::after {
+.phobos-chat-scroll.is-drag-over::after {
   position: fixed;
   z-index: 20;
   inset: 64px 24px 148px calc(var(--sidebar-w, 272px) + 24px);
@@ -1831,20 +1831,20 @@ mark.octopus-thread-find-active {
   pointer-events: none;
 }
 
-.octopus-chat-error {
+.phobos-chat-error {
   color: var(--vscode-errorForeground, #ff6764);
 }
 
-.octopus-markdown-content p {
+.phobos-markdown-content p {
   white-space: pre-wrap;
 }
 
-.octopus-markdown-content a {
+.phobos-markdown-content a {
   color: var(--color-token-text-accent, var(--vscode-textLink-foreground));
   text-decoration: none;
 }
 
-.octopus-markdown-content a:hover {
+.phobos-markdown-content a:hover {
   text-decoration: underline;
 }
 
@@ -1925,17 +1925,17 @@ mark.octopus-thread-find-active {
   background-color: var(--color-background-elevated-primary-opaque);
 }
 
-.composer-multiline-surface:where([data-octopus-window-type="electron"] *) {
+.composer-multiline-surface:where([data-phobos-window-type="electron"] *) {
   box-shadow: 0 0 0 1px #0000000a, 0 2px 8px 0 #0000000a, 0 4px 80px 8px #00000006;
 }
 
 @media (width < 40rem) {
-  .composer-multiline-surface:where([data-octopus-window-type="electron"] *) {
+  .composer-multiline-surface:where([data-phobos-window-type="electron"] *) {
     box-shadow: 0 0 0 1px #0000000a, 0 2px 8px 0 #0000000a, 0 4px 40px 8px #00000006;
   }
 }
 
-:is([data-theme="dark"], .dark, .electron-dark) .composer-multiline-surface:where([data-octopus-window-type="electron"] *) {
+:is([data-theme="dark"], .dark, .electron-dark) .composer-multiline-surface:where([data-phobos-window-type="electron"] *) {
   box-shadow: inset 0 0 1px 0 #fff3;
 }
 
@@ -2028,7 +2028,7 @@ mark.octopus-thread-find-active {
   margin: 0 8px;
   padding: 2px 10px;
   color: var(--color-token-description-foreground);
-  font-size: var(--octopus-chat-font-size);
+  font-size: var(--phobos-chat-font-size);
   line-height: 20px;
 }
 
@@ -2169,7 +2169,7 @@ mark.octopus-thread-find-active {
   padding-block: 0;
 }
 
-.octopus-composer-button {
+.phobos-composer-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2178,7 +2178,7 @@ mark.octopus-thread-find-active {
   color: var(--color-token-text-tertiary);
 }
 
-.octopus-composer-button:hover {
+.phobos-composer-button:hover {
   background: var(--color-token-list-hover-background);
   color: var(--color-token-text-primary);
 }
@@ -2242,7 +2242,7 @@ mark.octopus-thread-find-active {
   font-weight: 400;
 }
 
-.octopus-provider-picker {
+.phobos-provider-picker {
   display: contents;
 }
 
@@ -2273,7 +2273,7 @@ mark.octopus-thread-find-active {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .octopus-chat-scroll.is-drag-over::after {
+  .phobos-chat-scroll.is-drag-over::after {
     inset-inline: 12px;
   }
 }
@@ -2391,7 +2391,7 @@ mark.octopus-thread-find-active {
   color: var(--color-token-foreground);
 }
 
-.octopus-turn-activity {
+.phobos-turn-activity {
   width: 100%;
   --color-token-conversation-header: color-mix(in oklab, var(--color-token-foreground) 30%, transparent);
   --color-token-conversation-body: color-mix(in oklab, var(--color-token-foreground) 60%, transparent);
@@ -2399,18 +2399,18 @@ mark.octopus-thread-find-active {
   --color-token-conversation-summary-trailing: color-mix(in oklab, var(--color-token-foreground) 40%, transparent);
   --color-token-description-foreground: color-mix(in srgb, var(--color-token-foreground) 70%, transparent);
   --color-token-text-secondary: color-mix(in srgb, var(--color-token-foreground) 65%, transparent);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
 }
 
-.octopus-turn-activity-content {
+.phobos-turn-activity-content {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: var(--conversation-item-gap, 16px);
 }
 
-.octopus-agent-activity {
+.phobos-agent-activity {
   position: relative;
   display: flex;
   min-width: 0;
@@ -2418,7 +2418,7 @@ mark.octopus-thread-find-active {
   overflow: visible;
 }
 
-.octopus-agent-activity-header {
+.phobos-agent-activity-header {
   position: relative;
   display: inline-flex;
   min-width: 0;
@@ -2435,7 +2435,7 @@ mark.octopus-thread-find-active {
   outline: none;
 }
 
-.octopus-agent-activity-toggle {
+.phobos-agent-activity-toggle {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -2445,12 +2445,12 @@ mark.octopus-thread-find-active {
   padding: 0;
 }
 
-.octopus-agent-activity-toggle:focus-visible {
+.phobos-agent-activity-toggle:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 1px var(--color-token-focus-border);
 }
 
-.octopus-agent-activity-leading {
+.phobos-agent-activity-leading {
   position: relative;
   z-index: 1;
   display: inline-flex;
@@ -2463,16 +2463,16 @@ mark.octopus-thread-find-active {
   pointer-events: none;
 }
 
-.octopus-agent-activity-leading > svg {
+.phobos-agent-activity-leading > svg {
   color: var(--color-token-conversation-body);
 }
 
-.octopus-agent-activity-header:has(.octopus-agent-activity-toggle):hover:not(:has([data-agent-activity-file-link]:hover)),
-.octopus-agent-activity-header:has(.octopus-agent-activity-toggle:focus-visible) {
+.phobos-agent-activity-header:has(.phobos-agent-activity-toggle):hover:not(:has([data-agent-activity-file-link]:hover)),
+.phobos-agent-activity-header:has(.phobos-agent-activity-toggle:focus-visible) {
   color: var(--color-token-foreground);
 }
 
-.octopus-agent-activity-summary {
+.phobos-agent-activity-summary {
   display: flex;
   min-width: 0;
   max-width: 100%;
@@ -2484,7 +2484,7 @@ mark.octopus-thread-find-active {
   white-space: nowrap;
 }
 
-.octopus-agent-activity-summary-value {
+.phobos-agent-activity-summary-value {
   display: flex;
   min-height: 16px;
   min-width: 0;
@@ -2495,12 +2495,12 @@ mark.octopus-thread-find-active {
   white-space: nowrap;
 }
 
-.octopus-agent-activity-header:has(.octopus-agent-activity-toggle):hover:not(:has([data-agent-activity-file-link]:hover)) .octopus-agent-activity-summary,
-.octopus-agent-activity-header:has(.octopus-agent-activity-toggle:focus-visible) .octopus-agent-activity-summary {
+.phobos-agent-activity-header:has(.phobos-agent-activity-toggle):hover:not(:has([data-agent-activity-file-link]:hover)) .phobos-agent-activity-summary,
+.phobos-agent-activity-header:has(.phobos-agent-activity-toggle:focus-visible) .phobos-agent-activity-summary {
   color: var(--color-token-foreground);
 }
 
-.octopus-agent-activity-chevron-wrap {
+.phobos-agent-activity-chevron-wrap {
   position: relative;
   z-index: 1;
   display: flex;
@@ -2508,7 +2508,7 @@ mark.octopus-thread-find-active {
   pointer-events: none;
 }
 
-.octopus-agent-activity-chevron {
+.phobos-agent-activity-chevron {
   flex: 0 0 auto;
   color: var(--color-token-conversation-body);
   opacity: 0;
@@ -2517,22 +2517,22 @@ mark.octopus-thread-find-active {
     opacity var(--transition-duration-basic) var(--ease-basic);
 }
 
-.octopus-agent-activity-header:hover:not(:has([data-agent-activity-file-link]:hover)) .octopus-agent-activity-chevron,
-.octopus-agent-activity-header:has(.octopus-agent-activity-toggle:focus-visible) .octopus-agent-activity-chevron,
-.octopus-agent-activity-chevron.is-expanded {
+.phobos-agent-activity-header:hover:not(:has([data-agent-activity-file-link]:hover)) .phobos-agent-activity-chevron,
+.phobos-agent-activity-header:has(.phobos-agent-activity-toggle:focus-visible) .phobos-agent-activity-chevron,
+.phobos-agent-activity-chevron.is-expanded {
   opacity: 1;
 }
 
-.octopus-agent-activity-chevron.is-expanded {
+.phobos-agent-activity-chevron.is-expanded {
   transform: rotate(0deg);
 }
 
-.octopus-agent-activity-body {
+.phobos-agent-activity-body {
   min-width: 0;
   overflow: hidden;
 }
 
-.octopus-agent-activity-viewport {
+.phobos-agent-activity-viewport {
   --conversation-patch-file-gap: var(--conversation-grouped-item-gap, 4px);
   display: flex;
   min-width: 0;
@@ -2543,33 +2543,33 @@ mark.octopus-thread-find-active {
   font-family: var(--font-sans);
 }
 
-.octopus-agent-activity-list {
+.phobos-agent-activity-list {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: var(--conversation-grouped-item-gap, 4px);
 }
 
-.octopus-agent-activity-row {
+.phobos-agent-activity-row {
   display: block;
   min-width: 0;
 }
 
-.octopus-multi-agent-rows {
+.phobos-multi-agent-rows {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: var(--conversation-grouped-item-gap, 4px);
 }
 
-.octopus-multi-agent-row {
+.phobos-multi-agent-row {
   min-width: 0;
   color: var(--color-token-conversation-body);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
 }
 
-.octopus-multi-agent-row-nowrap {
+.phobos-multi-agent-row-nowrap {
   display: flex;
   min-width: 0;
   align-items: baseline;
@@ -2578,13 +2578,13 @@ mark.octopus-thread-find-active {
   white-space: nowrap;
 }
 
-.octopus-multi-agent-name {
+.phobos-multi-agent-name {
   flex: 0 0 auto;
   color: var(--color-token-conversation-body);
   font-weight: 500;
 }
 
-.octopus-multi-agent-prompt {
+.phobos-multi-agent-prompt {
   min-width: 0;
   flex: 1 1 auto;
   overflow: hidden;
@@ -2593,19 +2593,19 @@ mark.octopus-thread-find-active {
   white-space: nowrap;
 }
 
-.octopus-multi-agent-input {
+.phobos-multi-agent-input {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
-.octopus-subagent-activity-group {
+.phobos-subagent-activity-group {
   min-width: 0;
   color: var(--color-token-conversation-body);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 20px;
 }
 
-.octopus-subagent-chip {
+.phobos-subagent-chip {
   display: inline-flex;
   width: auto;
   max-width: 12rem;
@@ -2621,11 +2621,11 @@ mark.octopus-thread-find-active {
   vertical-align: middle;
 }
 
-.octopus-subagent-chip:first-child {
+.phobos-subagent-chip:first-child {
   margin-left: -6px;
 }
 
-.octopus-subagent-avatar {
+.phobos-subagent-avatar {
   display: inline-flex;
   width: 16px;
   height: 16px;
@@ -2636,35 +2636,35 @@ mark.octopus-thread-find-active {
   color: var(--color-token-conversation-body);
 }
 
-.octopus-subagent-chip-name {
+.phobos-subagent-chip-name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.octopus-subagent-group-status {
+.phobos-subagent-group-status {
   vertical-align: middle;
 }
 
-.octopus-agent-activity-empty-detail {
+.phobos-agent-activity-empty-detail {
   color: var(--color-token-description-foreground);
 }
 
-.octopus-agent-activity-detail-item,
-.octopus-agent-activity-detail-item > * {
+.phobos-agent-activity-detail-item,
+.phobos-agent-activity-detail-item > * {
   min-width: 0;
 }
 
-.octopus-agent-activity-detail-item > * {
+.phobos-agent-activity-detail-item > * {
   width: 100%;
 }
 
-.octopus-agent-activity-detail-item {
+.phobos-agent-activity-detail-item {
   color: color-mix(in srgb, var(--color-token-description-foreground) 80%, transparent);
 }
 
-.octopus-thinking-fallback {
+.phobos-thinking-fallback {
   display: inline-flex;
   width: fit-content;
   min-width: 0;
@@ -2674,37 +2674,37 @@ mark.octopus-thread-find-active {
   line-height: 1.5;
 }
 
-.octopus-thinking-fallback > span {
+.phobos-thinking-fallback > span {
   min-width: 0;
 }
 
-.octopus-thinking-fallback-label {
+.phobos-thinking-fallback-label {
   flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.octopus-reasoning-detail {
+.phobos-reasoning-detail {
   min-width: 0;
   color: color-mix(in srgb, var(--color-token-description-foreground) 80%, transparent);
   overflow-wrap: anywhere;
 }
 
-.octopus-reasoning-activity .octopus-agent-activity-summary {
+.phobos-reasoning-activity .phobos-agent-activity-summary {
   color: var(--color-token-conversation-header);
 }
 
-.octopus-reasoning-detail + .octopus-agent-activity-list:not(:empty) {
+.phobos-reasoning-detail + .phobos-agent-activity-list:not(:empty) {
   margin-top: var(--conversation-grouped-item-gap, 4px);
 }
 
-.octopus-assistant-commentary {
+.phobos-assistant-commentary {
   color: var(--color-token-conversation-body);
   line-height: 1.55;
 }
 
-.octopus-turn-error {
+.phobos-turn-error {
   position: relative;
   isolation: isolate;
   display: flex;
@@ -2721,31 +2721,31 @@ mark.octopus-thread-find-active {
   box-shadow: var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 4%));
 }
 
-.electron-light .octopus-turn-error,
-.electron-dark .octopus-turn-error {
+.electron-light .phobos-turn-error,
+.electron-dark .phobos-turn-error {
   border: 0;
   box-shadow: 0 0 0 .5px var(--color-token-border-heavy), var(--shadow-xs, 0 1px 2px rgb(0 0 0 / 4%));
 }
 
-.octopus-turn-error-background {
+.phobos-turn-error-background {
   position: absolute;
   z-index: -1;
   inset: 0;
   background: var(--color-token-input-background);
 }
 
-.octopus-turn-error-icon {
+.phobos-turn-error-icon {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   align-self: center;
 }
 
-.octopus-turn-error-icon > svg {
+.phobos-turn-error-icon > svg {
   color: currentColor;
 }
 
-.octopus-turn-error-content {
+.phobos-turn-error-content {
   display: flex;
   min-width: 0;
   flex: 1 1 auto;
@@ -2753,19 +2753,19 @@ mark.octopus-thread-find-active {
   gap: 6px;
 }
 
-.octopus-turn-error-copy {
+.phobos-turn-error-copy {
   min-width: 0;
   flex: 1 1 auto;
   line-height: 1.625;
   overflow-wrap: anywhere;
 }
 
-.octopus-turn-error .octopus-markdown-content,
-.octopus-turn-error [class*="markdownContent"] {
+.phobos-turn-error .phobos-markdown-content,
+.phobos-turn-error [class*="markdownContent"] {
   color: var(--color-token-conversation-body);
 }
 
-.octopus-stream-error-details {
+.phobos-stream-error-details {
   margin-top: var(--conversation-grouped-item-gap, 4px);
   min-width: 0;
   white-space: pre-wrap;
@@ -2773,7 +2773,7 @@ mark.octopus-thread-find-active {
   color: color-mix(in srgb, var(--color-token-description-foreground) 80%, transparent);
 }
 
-.octopus-worked-for-toggle {
+.phobos-worked-for-toggle {
   display: inline-flex;
   max-width: 100%;
   align-items: center;
@@ -2786,44 +2786,44 @@ mark.octopus-thread-find-active {
   outline: none;
 }
 
-.octopus-worked-for-toggle:hover,
-.octopus-worked-for-toggle:focus-visible {
+.phobos-worked-for-toggle:hover,
+.phobos-worked-for-toggle:focus-visible {
   color: var(--color-token-foreground);
 }
 
-.octopus-worked-for-toggle:hover > span,
-.octopus-worked-for-toggle:focus-visible > span,
-.octopus-worked-for-toggle:hover .octopus-worked-for-chevron,
-.octopus-worked-for-toggle:focus-visible .octopus-worked-for-chevron {
+.phobos-worked-for-toggle:hover > span,
+.phobos-worked-for-toggle:focus-visible > span,
+.phobos-worked-for-toggle:hover .phobos-worked-for-chevron,
+.phobos-worked-for-toggle:focus-visible .phobos-worked-for-chevron {
   color: var(--color-token-foreground);
 }
 
-.octopus-worked-for-toggle:focus-visible {
+.phobos-worked-for-toggle:focus-visible {
   box-shadow: 0 0 0 2px var(--color-token-focus-border);
 }
 
-.octopus-worked-for-chevron {
+.phobos-worked-for-chevron {
   flex: 0 0 auto;
   color: var(--color-token-conversation-summary-trailing, var(--color-token-description-foreground));
   transform: rotate(-90deg);
   transition: transform var(--transition-duration-basic) var(--ease-basic);
 }
 
-.octopus-worked-for-chevron.is-expanded {
+.phobos-worked-for-chevron.is-expanded {
   transform: rotate(0deg);
 }
 
-.octopus-worked-for-rule {
+.phobos-worked-for-rule {
   width: 100%;
   margin-top: 4px;
   border-top: 1px solid var(--color-token-border);
 }
 
-.octopus-turn-history {
+.phobos-turn-history {
   min-width: 0;
 }
 
-.octopus-worked-for-boundary {
+.phobos-worked-for-boundary {
   display: flex;
   min-height: 0;
   flex-direction: column;
@@ -2831,29 +2831,29 @@ mark.octopus-thread-find-active {
   gap: 8px;
   overflow: hidden;
   color: var(--color-token-text-secondary);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
 }
 
-.octopus-worked-for-toggle {
+.phobos-worked-for-toggle {
   font-variant-numeric: tabular-nums;
 }
 
-.octopus-worked-for-boundary > div {
+.phobos-worked-for-boundary > div {
   width: 100%;
   border-top: 1px solid var(--color-token-border);
 }
 
-.octopus-agent-activity-standalone[data-tone="warning"] {
+.phobos-agent-activity-standalone[data-tone="warning"] {
   color: var(--color-token-warning, #d5a34a);
 }
 
-.octopus-agent-activity-standalone[data-tone="danger"] {
+.phobos-agent-activity-standalone[data-tone="danger"] {
   color: var(--color-token-error-foreground);
 }
 
-.octopus-assistant-streaming {
+.phobos-assistant-streaming {
   min-width: 0;
 }
 
@@ -2862,10 +2862,10 @@ mark.octopus-thread-find-active {
     animation: none;
   }
 
-  .octopus-turn-activity [class*="transition"],
-  .octopus-agent-activity-chevron,
+  .phobos-turn-activity [class*="transition"],
+  .phobos-agent-activity-chevron,
   .activity-code-block-chevron,
-  .octopus-exec-activity-chevron {
+  .phobos-exec-activity-chevron {
     animation-duration: 0ms !important;
     transition-duration: 0ms !important;
   }
@@ -3180,7 +3180,7 @@ mark.octopus-thread-find-active {
   overflow: clip;
   border-radius: var(--radius-lg);
   color: color-mix(in srgb, var(--color-token-description-foreground) 80%, transparent);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
 }
 
@@ -3244,7 +3244,7 @@ mark.octopus-thread-find-active {
   display: inline-flex;
   flex: 0 0 auto;
   gap: 6px;
-  font-size: calc(var(--octopus-chat-font-size, 14px) - 1px);
+  font-size: calc(var(--phobos-chat-font-size, 14px) - 1px);
   white-space: nowrap;
 }
 
@@ -3317,7 +3317,7 @@ mark.octopus-thread-find-active {
   padding: 8px 10px;
   color: var(--color-token-description-foreground);
   font-family: var(--font-mono);
-  font-size: var(--octopus-chat-code-font-size, 12px);
+  font-size: var(--phobos-chat-code-font-size, 12px);
   line-height: 1.6;
   white-space: pre;
 }
@@ -3341,7 +3341,7 @@ mark.octopus-thread-find-active {
   padding: 0 16px;
   color: var(--color-token-foreground);
   background: var(--color-token-dropdown-background);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 18px;
 }
 
@@ -3461,7 +3461,7 @@ mark.octopus-thread-find-active {
   padding: 0;
   color: color-mix(in srgb, var(--color-token-description-foreground) 80%, transparent);
   font: inherit;
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   text-align: left;
 }
 
@@ -3525,7 +3525,7 @@ mark.octopus-thread-find-active {
   align-items: flex-start;
   gap: 8px;
   color: var(--color-token-description-foreground);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
 }
 
@@ -3556,28 +3556,28 @@ mark.octopus-thread-find-active {
   color: var(--color-token-error-foreground);
 }
 
-.octopus-inline-activity {
+.phobos-inline-activity {
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 4px;
   overflow: hidden;
   color: var(--color-token-conversation-body);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
 }
 
-.octopus-inline-activity > span {
+.phobos-inline-activity > span {
   min-width: 0;
 }
 
-.octopus-inline-activity > svg:first-child,
-.octopus-activity-action,
-.octopus-activity-detail {
+.phobos-inline-activity > svg:first-child,
+.phobos-activity-action,
+.phobos-activity-detail {
   color: inherit;
 }
 
-.octopus-activity-file-target {
+.phobos-activity-file-target {
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
@@ -3591,12 +3591,12 @@ mark.octopus-thread-find-active {
   white-space: nowrap;
 }
 
-.chat-tooltip-trigger.is-activity-target:hover .octopus-activity-file-target,
-.chat-tooltip-trigger.is-activity-target:focus-visible .octopus-activity-file-target {
+.chat-tooltip-trigger.is-activity-target:hover .phobos-activity-file-target,
+.chat-tooltip-trigger.is-activity-target:focus-visible .phobos-activity-file-target {
   color: var(--color-token-foreground);
 }
 
-.octopus-exec-activity {
+.phobos-exec-activity {
   position: relative;
   display: flex;
   width: 100%;
@@ -3605,7 +3605,7 @@ mark.octopus-thread-find-active {
   overflow: clip;
 }
 
-.octopus-exec-activity-header {
+.phobos-exec-activity-header {
   position: relative;
   display: inline-flex;
   min-width: 0;
@@ -3614,12 +3614,12 @@ mark.octopus-thread-find-active {
   align-items: center;
   gap: 4px;
   color: color-mix(in srgb, var(--color-token-description-foreground) 80%, transparent);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
   text-align: left;
 }
 
-.octopus-exec-activity-toggle {
+.phobos-exec-activity-toggle {
   position: absolute;
   inset: 0;
   border: 0;
@@ -3628,12 +3628,12 @@ mark.octopus-thread-find-active {
   padding: 0;
 }
 
-.octopus-exec-activity-toggle:focus-visible {
+.phobos-exec-activity-toggle:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 1px var(--color-token-focus-border);
 }
 
-.octopus-exec-activity-visual {
+.phobos-exec-activity-visual {
   position: relative;
   display: inline-flex;
   overflow: hidden;
@@ -3644,15 +3644,15 @@ mark.octopus-thread-find-active {
   pointer-events: none;
 }
 
-.octopus-exec-activity-visual > svg:first-child {
+.phobos-exec-activity-visual > svg:first-child {
   color: var(--color-token-input-placeholder-foreground, var(--color-token-text-tertiary));
 }
 
-.octopus-exec-activity-header:hover {
+.phobos-exec-activity-header:hover {
   color: var(--color-token-foreground);
 }
 
-.octopus-exec-activity-summary {
+.phobos-exec-activity-summary {
   overflow: hidden;
   min-width: 0;
   flex: 1 1 0;
@@ -3661,19 +3661,19 @@ mark.octopus-thread-find-active {
   white-space: nowrap;
 }
 
-.octopus-exec-activity-header:hover .octopus-exec-activity-summary,
-.octopus-exec-activity-header:has(.octopus-exec-activity-toggle:focus-visible) .octopus-exec-activity-summary {
+.phobos-exec-activity-header:hover .phobos-exec-activity-summary,
+.phobos-exec-activity-header:has(.phobos-exec-activity-toggle:focus-visible) .phobos-exec-activity-summary {
   color: var(--color-token-foreground);
 }
 
-.octopus-exec-activity-chevron-wrap {
+.phobos-exec-activity-chevron-wrap {
   position: relative;
   display: flex;
   flex: 0 0 auto;
   pointer-events: none;
 }
 
-.octopus-exec-activity-chevron {
+.phobos-exec-activity-chevron {
   flex: 0 0 auto;
   color: var(--color-token-conversation-body);
   opacity: 0;
@@ -3682,26 +3682,26 @@ mark.octopus-thread-find-active {
     opacity var(--transition-duration-basic) var(--ease-basic);
 }
 
-.octopus-exec-activity-header:hover .octopus-exec-activity-chevron,
-.octopus-exec-activity-header:has(.octopus-exec-activity-toggle:focus-visible) .octopus-exec-activity-chevron,
-.octopus-exec-activity-chevron.is-expanded {
+.phobos-exec-activity-header:hover .phobos-exec-activity-chevron,
+.phobos-exec-activity-header:has(.phobos-exec-activity-toggle:focus-visible) .phobos-exec-activity-chevron,
+.phobos-exec-activity-chevron.is-expanded {
   opacity: 1;
 }
 
-.octopus-exec-activity-chevron.is-expanded {
+.phobos-exec-activity-chevron.is-expanded {
   transform: rotate(0deg);
 }
 
-.octopus-exec-activity-body {
+.phobos-exec-activity-body {
   min-width: 0;
 }
 
-.octopus-exec-activity-body-inner {
+.phobos-exec-activity-body-inner {
   min-width: 0;
   padding: 8px 0 4px;
 }
 
-.octopus-exec-shell {
+.phobos-exec-shell {
   display: flex;
   width: 100%;
   min-width: 0;
@@ -3712,7 +3712,7 @@ mark.octopus-thread-find-active {
   background: var(--color-token-text-code-block-background, color-mix(in srgb, var(--color-token-foreground) 4%, transparent));
 }
 
-.octopus-exec-shell-label {
+.phobos-exec-shell-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3725,32 +3725,32 @@ mark.octopus-thread-find-active {
   user-select: none;
 }
 
-.octopus-exec-shell-command-row,
-.octopus-exec-shell-output-row {
+.phobos-exec-shell-command-row,
+.phobos-exec-shell-output-row {
   position: relative;
   min-width: 0;
 }
 
-.octopus-exec-shell-command-row {
+.phobos-exec-shell-command-row {
   display: flex;
   align-items: flex-start;
   padding: 8px 8px 0;
 }
 
-.octopus-exec-shell-command-row:hover .octopus-exec-shell-copy-anchor,
-.octopus-exec-shell-output-row:hover .octopus-exec-shell-copy-anchor,
-.octopus-exec-shell-copy-anchor:focus-within {
+.phobos-exec-shell-command-row:hover .phobos-exec-shell-copy-anchor,
+.phobos-exec-shell-output-row:hover .phobos-exec-shell-copy-anchor,
+.phobos-exec-shell-copy-anchor:focus-within {
   opacity: 1;
 }
 
-.octopus-exec-shell-copy-anchor {
+.phobos-exec-shell-copy-anchor {
   position: absolute;
   z-index: 1;
   opacity: 0;
   transition: opacity var(--transition-duration-basic) var(--ease-basic);
 }
 
-.octopus-exec-shell-copy {
+.phobos-exec-shell-copy {
   display: inline-flex;
   width: 24px;
   height: 24px;
@@ -3764,28 +3764,28 @@ mark.octopus-thread-find-active {
   transition: color var(--transition-duration-basic) var(--ease-basic);
 }
 
-.octopus-exec-shell-command-row .octopus-exec-shell-copy-anchor {
+.phobos-exec-shell-command-row .phobos-exec-shell-copy-anchor {
   top: 8px;
   right: 8px;
 }
 
-.octopus-exec-shell-output-row .octopus-exec-shell-copy-anchor {
+.phobos-exec-shell-output-row .phobos-exec-shell-copy-anchor {
   top: 0;
   right: 10px;
 }
 
-.octopus-exec-shell-copy:hover,
-.octopus-exec-shell-copy:focus-visible {
+.phobos-exec-shell-copy:hover,
+.phobos-exec-shell-copy:focus-visible {
   background: var(--color-token-list-hover-background);
   color: var(--color-token-foreground);
 }
 
-.octopus-exec-shell-copy:focus-visible {
+.phobos-exec-shell-copy:focus-visible {
   outline: 1px solid var(--color-token-focus-border);
   outline-offset: -1px;
 }
 
-.octopus-exec-shell pre {
+.phobos-exec-shell pre {
   min-width: 0;
   margin: 0;
   color: var(--color-token-text-secondary);
@@ -3796,7 +3796,7 @@ mark.octopus-thread-find-active {
   white-space: pre;
 }
 
-.octopus-exec-shell-command {
+.phobos-exec-shell-command {
   display: flex;
   width: 100%;
   min-width: 0;
@@ -3811,12 +3811,12 @@ mark.octopus-thread-find-active {
   text-align: left;
 }
 
-.octopus-exec-shell-command > span {
+.phobos-exec-shell-command > span {
   flex: 0 0 auto;
   color: var(--color-token-text-tertiary);
 }
 
-.octopus-exec-shell-command > code {
+.phobos-exec-shell-command > code {
   display: -webkit-box;
   overflow: hidden;
   min-width: 0;
@@ -3826,19 +3826,19 @@ mark.octopus-thread-find-active {
   overflow-wrap: anywhere;
 }
 
-.octopus-exec-shell-command[data-expanded] > code {
+.phobos-exec-shell-command[data-expanded] > code {
   display: block;
   overflow: visible;
   -webkit-line-clamp: unset;
   white-space: pre-wrap;
 }
 
-.octopus-exec-shell-input {
+.phobos-exec-shell-input {
   padding: 2px 8px;
   color: var(--color-token-description-foreground);
 }
 
-.octopus-exec-shell-output {
+.phobos-exec-shell-output {
   box-sizing: border-box;
   display: flex;
   min-height: 20px;
@@ -3850,41 +3850,41 @@ mark.octopus-thread-find-active {
   --edge-fade-distance: 2rem;
 }
 
-.octopus-exec-shell-footer {
+.phobos-exec-shell-footer {
   display: flex;
   min-height: 20px;
   align-items: center;
   gap: 8px;
   padding: 2px 10px 4px;
   color: var(--color-token-input-placeholder-foreground, var(--color-token-text-tertiary));
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
 }
 
-.octopus-exec-shell-footer > span {
+.phobos-exec-shell-footer > span {
   margin-left: auto;
 }
 
-.octopus-exec-shell-success {
+.phobos-exec-shell-success {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.octopus-chat-event {
+.phobos-chat-event {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
   color: var(--color-token-description-foreground);
-  font-size: var(--octopus-chat-font-size, 14px);
+  font-size: var(--phobos-chat-font-size, 14px);
   line-height: 1.5;
 }
 
-.octopus-chat-event > div:first-child {
+.phobos-chat-event > div:first-child {
   color: var(--color-token-conversation-body);
 }
 
-.octopus-chat-event > div + div {
+.phobos-chat-event > div + div {
   white-space: pre-wrap;
   color: var(--color-token-foreground);
 }
@@ -3895,7 +3895,7 @@ mark.octopus-thread-find-active {
   flex-direction: column;
   align-items: flex-end;
   gap: calc(var(--spacing) * 1);
-  font-size: var(--octopus-chat-font-size);
+  font-size: var(--phobos-chat-font-size);
 }
 
 .collapsible-message-body {
@@ -3963,7 +3963,7 @@ mark.octopus-thread-find-active {
   }
 }
 
-.octopus-message-attachments {
+.phobos-message-attachments {
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
@@ -3971,7 +3971,7 @@ mark.octopus-thread-find-active {
   margin-top: 10px;
 }
 
-.octopus-message-attachment-more {
+.phobos-message-attachment-more {
   align-self: center;
   border-radius: var(--radius-md);
   padding: 4px 6px;
@@ -3980,8 +3980,8 @@ mark.octopus-thread-find-active {
   cursor: pointer;
 }
 
-.octopus-message-attachment-more:hover,
-.octopus-message-attachment-more:focus-visible {
+.phobos-message-attachment-more:hover,
+.phobos-message-attachment-more:focus-visible {
   background: var(--color-token-list-hover-background);
   color: var(--color-token-foreground);
 }
@@ -3997,23 +3997,23 @@ mark.octopus-thread-find-active {
   }
 }
 
-::highlight(octopus-pinned-context-reveal) {
+::highlight(phobos-pinned-context-reveal) {
   color: inherit;
   background: color-mix(in srgb, var(--color-token-foreground) 14%, transparent);
 }
 
-@keyframes octopus-message-search-reveal {
+@keyframes phobos-message-search-reveal {
   0%, 100% { background-color: transparent; }
   18%, 68% { background-color: color-mix(in srgb, var(--color-token-focus-border, var(--color-token-foreground)) 14%, transparent); }
 }
 
-.octopus-message-search-reveal {
+.phobos-message-search-reveal {
   border-radius: var(--radius-xl);
-  animation: octopus-message-search-reveal 1.5s cubic-bezier(.23, 1, .32, 1);
+  animation: phobos-message-search-reveal 1.5s cubic-bezier(.23, 1, .32, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .octopus-message-search-reveal { animation-duration: .01ms; }
+  .phobos-message-search-reveal { animation-duration: .01ms; }
 }
 
 .composer-utility-bar,
@@ -4031,7 +4031,7 @@ mark.octopus-thread-find-active {
   padding-inline: calc(var(--spacing) * 1.5);
 }
 
-.octopus-markdown-task-list-item [role="checkbox"] {
+.phobos-markdown-task-list-item [role="checkbox"] {
   width: 15px;
   height: 15px;
   border-radius: 5px;
@@ -4040,14 +4040,14 @@ mark.octopus-thread-find-active {
   box-shadow: none;
 }
 
-.octopus-markdown-task-list-item [role="checkbox"][data-state="checked"] {
+.phobos-markdown-task-list-item [role="checkbox"][data-state="checked"] {
   border-color: transparent;
   background: var(--color-token-foreground);
   color: var(--color-token-main-surface-primary);
 }
 
-.octopus-markdown-task-list-item [role="checkbox"][data-state="checked"] + span,
-.octopus-markdown-task-list-item [role="checkbox"][data-state="checked"] ~ p {
+.phobos-markdown-task-list-item [role="checkbox"][data-state="checked"] + span,
+.phobos-markdown-task-list-item [role="checkbox"][data-state="checked"] ~ p {
   color: var(--color-token-text-secondary);
 }
 .archived-task-footer { display: flex; width: 100%; max-width: var(--thread-content-max-width); align-items: center; gap: 12px; margin: 0 auto; padding: 12px 16px; color: var(--color-text-tertiary); }

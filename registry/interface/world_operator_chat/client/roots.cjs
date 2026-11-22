@@ -92,12 +92,12 @@ function resolvePackageExecutable(config, installationRoot, registryRoot, name) 
   return executable;
 }
 
-async function resolveEeInstancesRoot(octopusHome, options = {}) {
+async function resolveEeInstancesRoot(phobosHome, options = {}) {
   if (typeof options.eeInstancesRoot === "function") {
     return absolutePath(options.eeInstancesRoot(), "ee_instances_root");
   }
-  const host = await readJsonIfPresent(path.join(octopusHome, "host.json"));
+  const host = await readJsonIfPresent(path.join(phobosHome, "host.json"));
   const configured = stringValue(host?.root_refs?.ee_instances_root);
-  const root = configured || path.join(octopusHome, "state", "ee_instances");
+  const root = configured || path.join(phobosHome, "state", "ee_instances");
   return absolutePath(root, "ee_instances_root");
 }

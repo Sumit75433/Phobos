@@ -8,7 +8,7 @@ const { planClientMaintenanceEe } = require("./client-maintenance-ee.cjs");
 async function requestComposerPrediction(options, input) {
   const config = JSON.parse(await fs.readFile(path.join(__dirname, "composer-predictions.json"), "utf8"));
   if (!config.enabled) return null;
-  const home = options.octopusHome();
+  const home = options.phobosHome();
   const runId = segment(input?.runId);
   return options.withRunLock(`prediction_${runId}`, async () => {
     const source = await options.readSource(runId);

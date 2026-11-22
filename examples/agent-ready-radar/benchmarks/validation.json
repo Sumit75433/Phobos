@@ -1,11 +1,11 @@
 {
-  "card_validation": "PASS: jsonschema Draft202012Validator against saved live Octopus client schema",
+  "card_validation": "PASS: jsonschema Draft202012Validator against saved live Phobos client schema",
   "cohorts": 6,
   "python": "3.12.16",
   "report_reproducibility": "byte-identical regeneration from raw JSON",
   "scan_domains": 60,
   "scan_probes": 420,
-  "schema_sha256": "547399241f0a33e2ffe8410d9ba6ac61a27529970f904a4e6d52591bc3a41b20",
+  "schema_sha256": "903b1a32a6ae6f8ff34ff52ceb2fffccdae22061bbf5d2d55bfabb2915bb1e14",
   "statistics": {
     "any_verified_artifact": 35,
     "by_path": {

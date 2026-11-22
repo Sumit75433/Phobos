@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { recordClientExperimentSignal, useClientExperiment } from "../../clientExperiments";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { subscribeAirHandGestures, useGestureShortcutPreferences } from "../../gestureShortcuts";
 import { gestureCommandActivity } from "./GestureLivePreview";
 import "./gesturePreview.css";
 
 const HUD_MS = 1_600;
 
-export function GestureCommandHud({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
+export function GestureCommandHud({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
   const preferences = useGestureShortcutPreferences(accessProfile);
   const enabled = useClientExperiment(accessProfile, "gesture_feedback") && preferences.enabled;
   const [shown, setShown] = useState<{ label: string; at: number } | null>(null);

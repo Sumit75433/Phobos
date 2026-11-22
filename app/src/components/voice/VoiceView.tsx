@@ -22,7 +22,7 @@ import { OperatorRequestSurface } from "../chat/OperatorRequestSurface";
 import { MessageContent } from "../chat/MessageContent";
 import { conversationTraceAdmission } from "../chat/conversationTrace";
 import type { ChatAttachmentView, ChatRenderMessage, ChatToolPresentationIndex } from "../chat/types";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { Glyph, type GlyphName } from "../IconGlyphs";
 import { ShellTooltip } from "../shell/ShellTooltip";
 import { ChatComposer } from "../chat/ChatComposer";
@@ -33,7 +33,7 @@ import { projectHomeVoiceContext } from "./voiceCallArtifacts";
 import { isVoiceCallActive, voicePresentation } from "./voicePresentation";
 import { useAppearance } from "../../appearance";
 import { VoiceOrbScene } from "./VoiceOrbScene";
-import { OctopusOceanScene } from "./OctopusOceanScene";
+import { PhobosOceanScene } from "./PhobosOceanScene";
 import type { VoiceSession } from "./useVoiceSession";
 import {
   buildVoiceWidgetDocuments,
@@ -44,13 +44,13 @@ import {
 } from "./voiceWidgetDocuments";
 import type { HomeRunActivity } from "./useHomeActivityWorkspace";
 import { chatProductError } from "../chat/chatProductError";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 import "../chat/chat.css";
 import "./voice.css";
 
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   activity: HomeRunActivity;
   builtinWidgetSources: Record<string, ClientSurfaceHostSource[]>;
   commandsActive?: boolean;
@@ -76,10 +76,10 @@ type ProjectionTarget = {
 
 type ProjectionItem = VoiceWidgetItem;
 
-const VOICE_TITLE_KEY = "octopus.voice.session-title.v1";
-const VOICE_RECORDING_KEY = "octopus.voice.save-audio.v1";
-const VOICE_SPEAKER_KEY = "octopus.voice.speaker-enabled.v1";
-const VOICE_HIDDEN_SURFACES_KEY = "octopus.voice.hidden-surfaces.v1";
+const VOICE_TITLE_KEY = "phobos.voice.session-title.v1";
+const VOICE_RECORDING_KEY = "phobos.voice.save-audio.v1";
+const VOICE_SPEAKER_KEY = "phobos.voice.speaker-enabled.v1";
+const VOICE_HIDDEN_SURFACES_KEY = "phobos.voice.hidden-surfaces.v1";
 const FORMING_DELIVERY_WINDOW_MS = 15_000;
 const FORMING_HOLD_MS = 1_600;
 const LEAVING_HOLD_MS = 420;
@@ -143,7 +143,7 @@ export function VoiceView({ accessProfile, activity, builtinWidgetSources, comma
     );
   const target = useMemo(() => findProjectionTarget(topology, boundRunId), [boundRunId, topology]);
   const projectedFileSources = useMemo<ProjectedFileSource[]>(() => {
-    if (accessProfile !== "live" || !window.octopusTransport?.readWorkerEnvironmentFileAttachment || !target.run) return [];
+    if (accessProfile !== "live" || !window.phobosTransport?.readWorkerEnvironmentFileAttachment || !target.run) return [];
     const environments = target.run.workerEnvironments.length
       ? target.run.workerEnvironments
       : target.run.workerEnvironment.id
@@ -233,7 +233,7 @@ export function VoiceView({ accessProfile, activity, builtinWidgetSources, comma
   callActiveRef.current = callActive;
   const callState = voicePresentation(session.phase);
   const [callSceneReady, setCallSceneReady] = useState(callActive);
-  const { octopuses: oceanScene } = useAppearance();
+  const { phoboses: oceanScene } = useAppearance();
   const replyHidden = callActive || callSceneReady;
   const voiceStartDisabledReason = !homeRunId
     ? "Home is not available yet."
@@ -487,7 +487,7 @@ export function VoiceView({ accessProfile, activity, builtinWidgetSources, comma
   if (!callActive && homeProjectionLoading) {
     return (
       <section className="voice-view is-loading">
-        <OctopusLoadingState className="surface-content-loading-state" label="Opening Home" />
+        <PhobosLoadingState className="surface-content-loading-state" label="Opening Home" />
       </section>
     );
   }
@@ -496,7 +496,7 @@ export function VoiceView({ accessProfile, activity, builtinWidgetSources, comma
     <section className={`voice-view is-${session.phase} is-${viewMode} has-home-composer`} ref={viewRef}>
       <div aria-hidden="true" className="voice-home-scene">
         <VoiceOrbScene activity={orbActivity} ambient={!callActive || !callSceneReady} onDispersed={() => { if (!callActiveRef.current) setCallSceneReady(false); }} phase={callSceneReady ? session.phase : "idle"} quietField={oceanScene} sceneSurface={stageMainRef} formationSurface={viewRef} rippleSurface={oceanScene ? undefined : viewRef} sizeProbe={orbProbeRef} />
-        {oceanScene ? <OctopusOceanScene activity={orbActivity} calling={callActive} orbProbe={orbProbeRef} rippleSurface={viewRef} /> : null}
+        {oceanScene ? <PhobosOceanScene activity={orbActivity} calling={callActive} orbProbe={orbProbeRef} rippleSurface={viewRef} /> : null}
       </div>
       <header className="voice-session-heading" data-ocean-obstacle="" data-voice-placement-obstacle="">
         <VoiceSessionTitle
@@ -798,13 +798,13 @@ function HomeResponseStage({ operatorRequests, onOperatorRequestResponse, replyH
     >
       <span aria-live="polite" className="sr-only">
         {submitting
-          ? "Sending to Octopus."
+          ? "Sending to Phobos."
           : turnFailed
             ? "The latest Home turn failed. Review the error banner."
             : working
               ? ""
               : finalVisible
-                ? "Octopus replied."
+                ? "Phobos replied."
                 : ""}
       </span>
       <motion.div
@@ -830,7 +830,7 @@ function HomeResponseStage({ operatorRequests, onOperatorRequestResponse, replyH
             {operatorRequests.map((message) => <OperatorRequestSurface key={message.id} message={message} onRespond={onOperatorRequestResponse} />)}
             {responseStreaming || finalVisible ? (
               <article
-                className={`home-response-output${responseStreaming ? " home-response-output--streaming octopus-assistant-streaming" : ""}`}
+                className={`home-response-output${responseStreaming ? " home-response-output--streaming phobos-assistant-streaming" : ""}`}
                 data-ocean-obstacle=""
                 data-voice-placement-obstacle=""
                 key="assistant-response"
@@ -1013,7 +1013,7 @@ function HomeCommandDock({ awaitingClientResult, callActive, commandsActive, onV
 }
 
 function HomeWidgetsControl({ accessProfile, errors, hasHiddenSurfaces, onOpenChange, onShowAll, onSurfaceVisibleChange, open, surfaceVisible, surfaces }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   errors: readonly string[];
   hasHiddenSurfaces: boolean;
   onOpenChange: (open: boolean) => void;
@@ -1348,7 +1348,7 @@ function readStoredStringSet(key: string): Set<string> | null {
   return new Set(value);
 }
 
-function voiceStorageKeys(accessProfile: OctopusClientAccessProfile) {
+function voiceStorageKeys(accessProfile: PhobosClientAccessProfile) {
   return {
     title: `${VOICE_TITLE_KEY}.${accessProfile}`,
     recording: `${VOICE_RECORDING_KEY}.${accessProfile}`,

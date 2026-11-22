@@ -10,9 +10,9 @@ AirHand is a macOS prototype for controlling the cursor with an iPhone or webcam
 The app uses AVFoundation for camera input, Vision hand-pose landmarks for tracking,
 and Quartz/AppKit events for cursor, click, and scroll output.
 
-## Why this is an Octopus interface
+## Why this is a Phobos interface
 
-AirHand can operate its native pointer controls locally. Its separate Octopus
+AirHand can operate its native pointer controls locally. Its separate Phobos
 boundary makes it observable and callable by a bound run:
 
 ```text
@@ -33,7 +33,7 @@ Command results return as `hand_gesture_control.command.result` artifacts.
 The interface life runs when live bindings require it. The native cursor
 movement and scrolling do not make a runtime round trip on every camera frame.
 
-The Octopus desktop client's **Settings → Gestures** is a separate local
+The Phobos desktop client's **Settings → Gestures** is a separate local
 camera-to-UI path. It uses client events for shortcuts and widget manipulation;
 it does not use this bridge to switch tabs. See the
 [client guide](../../../docs/client.md#experimental-interaction-and-test).

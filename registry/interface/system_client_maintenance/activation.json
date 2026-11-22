@@ -6,7 +6,7 @@
       "activation_driver_ref": "app_server_transport",
       "config": {
         "bind_interface_socket_when_env_unset": true,
-        "listen_env": "OCTOPUS_CLIENT_MAINTENANCE_SOCK"
+        "listen_env": "PHOBOS_CLIENT_MAINTENANCE_SOCK"
       }
     }
   ]

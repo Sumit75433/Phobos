@@ -39,11 +39,11 @@ for (const file of cssFiles) {
     if (!radiusTokens.has(match[1])) failures.push(`${path.relative(path.resolve(__dirname, ".."), file)}: undefined corner radius ${match[1]}`);
   }
 }
-if (!foundationCss.includes("@layer octopus-foundation, properties, theme, base, components, utilities;")) {
+if (!foundationCss.includes("@layer phobos-foundation, properties, theme, base, components, utilities;")) {
   failures.push("src/foundation.css: components must remain after base in the global cascade layer order");
 }
 const entryHtml = fs.readFileSync(path.resolve(__dirname, "../index.html"), "utf8");
-const cascadeOrder = entryHtml.indexOf("@layer octopus-foundation, properties, theme, base, components, utilities;");
+const cascadeOrder = entryHtml.indexOf("@layer phobos-foundation, properties, theme, base, components, utilities;");
 const firstStylesheet = entryHtml.search(/<link\b[^>]*rel=["']stylesheet["']|<script\b[^>]*type=["']module["']/);
 if (cascadeOrder < 0 || (firstStylesheet >= 0 && cascadeOrder > firstStylesheet)) {
   failures.push("index.html: register the global cascade before stylesheets and module dependencies");

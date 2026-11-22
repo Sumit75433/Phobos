@@ -14,7 +14,7 @@ async function emailWatchProjection(projection, descriptor, interfaceId) {
   const mailboxes = config?.intake?.mailboxes;
   if (!Array.isArray(mailboxes) || !mailboxes.length || !mailboxes.every(name => typeof name === "string" && name.trim())
     || new Set(mailboxes).size !== mailboxes.length) throw new Error("Email watch mailboxes are invalid");
-  const file = path.join(projection.octopusHome, "interfaces", interfaceId, "mailbox-state.json");
+  const file = path.join(projection.phobosHome, "interfaces", interfaceId, "mailbox-state.json");
   let saved;
   try {
     saved = await readOptionalRegularJsonDocument(file, "email mailbox state");

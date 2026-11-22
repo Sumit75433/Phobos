@@ -19,7 +19,7 @@ const saved = [];
 const streamListeners = new Set();
 let activeAttempt;
 const streamedAudio = [];
-w.octopusTransport = {
+w.phobosTransport = {
   startDictationStream: async ({ attemptId }) => { activeAttempt = attemptId; return { ok: true, value: null }; },
   appendDictationAudio: (attemptId, bytes) => streamedAudio.push({ attemptId, bytes }),
   finishDictationStream: async () => {
@@ -240,10 +240,10 @@ test("a failed dictation opens its exact recording in Voice settings and retries
   assert.match(query(".composer-voice-recovery").textContent, /Dictation stopped/);
   const destinations = [];
   const receive = (event) => destinations.push(event.detail);
-  w.addEventListener("octopus:client-command", receive);
+  w.addEventListener("phobos:client-command", receive);
   [...container.querySelectorAll("button")].find((button) => button.textContent === "View recording").click();
   await settle();
-  w.removeEventListener("octopus:client-command", receive);
+  w.removeEventListener("phobos:client-command", receive);
   assert.deepEqual(destinations, [{ id: "open_settings", source: "surface", settingsDestination: { sectionId: "voice-audio", dictationRecordingId: saved.at(-1).entry.id } }]);
   assert.equal(document.querySelector('[role="dialog"]'), null);
   assert.equal(query('button[aria-label="Dictation recordings"]'), null);
@@ -303,7 +303,7 @@ test("recent recordings render inline in Voice settings with exact-record recove
   assert.ok(query(".dictation-recording-text.is-selected"));
   assert.equal(document.querySelector('[role="dialog"], audio, [role="switch"]'), null);
   const copied = [];
-  w.octopusTransport.copyText = async (text) => { copied.push(text); };
+  w.phobosTransport.copyText = async (text) => { copied.push(text); };
   await press("Copy dictation");
   assert.deepEqual(copied, [entry.text]);
   assert.ok(query('button[aria-label="Copy dictation"] .glyph-check'));

@@ -114,7 +114,7 @@ attacker-controlled ledger. No signatures, remote attestation or sandbox.
 distinction using executable policy oracles. Our five local spoofing scenarios,
 movement schema and timings are our own; this is not that paper's reproduction
 or a model training benchmark. This source snapshot is distributed in the
-[Octopus examples collection](../README.md), not as a separate package release.
+[Phobos examples collection](../README.md), not as a separate package release.
 
 ## Reproduce
 

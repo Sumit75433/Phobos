@@ -59,7 +59,7 @@ async function descriptors(registry, config, identity, sourceProvider) {
 const titleRequests = new Map();
 
 function requestTaskTitle(options, input) {
-  const key = JSON.stringify([options.octopusHome(), segment(input?.runId)]);
+  const key = JSON.stringify([options.phobosHome(), segment(input?.runId)]);
   if (titleRequests.has(key)) return titleRequests.get(key);
   const operation = generateTaskTitle(options, input).finally(() => {
     if (titleRequests.get(key) === operation) titleRequests.delete(key);
@@ -70,7 +70,7 @@ function requestTaskTitle(options, input) {
 
 async function generateTaskTitle(options, input) {
   const config = await json(path.join(__dirname, "task-titles.json"));
-  const home = options.octopusHome(), runId = segment(input?.runId), registry = path.join(home, "registry");
+  const home = options.phobosHome(), runId = segment(input?.runId), registry = path.join(home, "registry");
   const source = await options.readSource(runId);
   if (!source) return null;
   const sourcePath = path.join(home, "state", "runs", `${runId}.json`);
@@ -157,7 +157,7 @@ async function generateTaskTitle(options, input) {
       || !title.trim() || [...title].length > 80 || /[\r\n\u0000-\u001f]/.test(title)) throw new Error("Generated task title is malformed");
   const latest = await options.readSource(runId);
   if (!latest || latest.input.artifact_id !== source.input.artifact_id) return null;
-  const sidecar = path.join(registry, "interface", segment(latest.chat.chat_interface_id), "octopus_os.json");
+  const sidecar = path.join(registry, "interface", segment(latest.chat.chat_interface_id), "phobos_os.json");
   const before = await fs.readFile(sidecar, "utf8"), next = JSON.parse(before);
   if (next.presentation?.name) return null;
   next.presentation = { projects: [], ...next.presentation, name: title.trim() };

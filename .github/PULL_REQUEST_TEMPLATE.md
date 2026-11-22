@@ -23,7 +23,7 @@ assets. Delete this section when the change does not affect the UI. -->
 ## Use and need (new packages, applications, extensions, or drivers)
 
 <!-- Delete this section for other changes. For a new addition, explain who needs
-it and why existing options are not enough. Describe your own use inside Octopus:
+it and why existing options are not enough. Describe your own use inside Phobos:
 what you installed, a real task it completed, your setup, and what remains untested.
 Include a short, redacted result; for visual extensions, complete Client UI evidence.
 A build, mocked test, or tool listing alone does not establish practical use. -->
@@ -33,7 +33,7 @@ A build, mocked test, or tool listing alone does not establish practical use. --
 <!-- Delete this section for changes that preserve the existing architecture.
 If this changes architectural responsibilities, contracts, or mechanisms:
 read docs/architecture.md and the relevant docs/contracts/ pages, name what
-you read, and explain in 2–3 sentences why this belongs in Octopus as a whole.
+you read, and explain in 2–3 sentences why this belongs in Phobos as a whole.
 Could existing descriptors, interfaces, or client behavior solve it more simply?
 Explain why the proposed approach is needed. -->
 

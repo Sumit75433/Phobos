@@ -5,9 +5,9 @@ const path = require("node:path");
 const { after, beforeEach, test } = require("node:test");
 const { createApplicationConnectionHost, createRegistryConnectionTargets } = require("../electron/applicationConnection.cjs");
 const { parseApplicationManifest } = require("../electron/projection/sidecars.cjs");
-const { publishServerTools } = require("../../registry/interface/world_mcp_example/packages/octopus-mcp-client/server_operations.cjs");
+const { publishServerTools } = require("../../registry/interface/world_mcp_example/packages/phobos-mcp-client/server_operations.cjs");
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-application-connection-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-application-connection-"));
 after(() => fs.rmSync(root, { recursive: true, force: true }));
 const registry = path.join(root, "registry");
 const home = path.join(root, "home");
@@ -16,7 +16,7 @@ const opened = [];
 const host = createApplicationConnectionHost({
   resolveTargets: createRegistryConnectionTargets({
     registryRoot: () => registry,
-    octopusHome: () => home,
+    phobosHome: () => home,
     launchEnvironment: () => ({ DEMO_REGION: "eu-west", HOME: "/Users/someone" }),
     openExternal: async (url) => { opened.push(url); },
   }),

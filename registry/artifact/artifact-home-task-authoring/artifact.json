@@ -295,7 +295,7 @@
         }
       }
     },
-    "validation_source": "crates/octopus-runtime/src/run_record.rs::RunRecord::validate_artifact_arrival_shape",
+    "validation_source": "crates/phobos-runtime/src/run_record.rs::RunRecord::validate_artifact_arrival_shape",
     "derivation": "document is an exact copy of the generated source schema. The exporter includes the status and nonblank run/checkpoint trace constraints enforced by validation_source. Cross-record identity, active checkpoint bindings, policy and registry references are validated by the actual candidate validator."
   }
 }

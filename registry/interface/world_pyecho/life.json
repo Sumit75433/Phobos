@@ -12,7 +12,7 @@
     ],
     "required_files": [
       "registry/interface/world_pyecho/pyecho_life.py",
-      "registry/interface/world_pyecho/octopus_content_hash.py"
+      "registry/interface/world_pyecho/phobos_content_hash.py"
     ],
     "inherit_env": ["PATH"],
     "authority": {

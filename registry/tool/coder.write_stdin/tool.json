@@ -10,7 +10,7 @@
     "max_input_bytes": 65536
   },
   "process": {
-    "bin": "target/debug/octopus-coder-exec-tool",
+    "bin": "target/debug/phobos-coder-exec-tool",
     "interrupted_effect_recovery": "reinvoke_exact_artifact",
     "inherit_env": ["HOME", "PATH"],
     "authority": {

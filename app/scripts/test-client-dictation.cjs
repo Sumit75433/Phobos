@@ -13,7 +13,7 @@ const audio = () => {
 };
 
 test("dictation audio survives reopening, respects explicit off, stays profile-local and retains twenty recordings", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-dictation-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-dictation-test-"));
   try {
     let store = createClientDictationRecordings(root);
     assert.equal((await store.state("live")).enabled, true);
@@ -41,7 +41,7 @@ test("dictation audio survives reopening, respects explicit off, stays profile-l
 });
 
 test("transcription exposes empty speech, authorization, timeout and cancellation as safe typed failures", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-dictation-provider-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-dictation-provider-test-"));
   try {
     const executable = path.join(root, "fixture-provider");
     await fs.writeFile(executable, `#!/usr/bin/env node

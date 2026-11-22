@@ -9,7 +9,7 @@ import {
   type Ref,
   type ReactNode,
 } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type {
   ClientExtensionCategory,
   ClientExtensionCredentialCheck,
@@ -43,8 +43,8 @@ import {
 } from "../catalog";
 import { Glyph } from "../IconGlyphs";
 import { ConnectLogoRow } from "../applications/ApplicationLogo";
-import { OctopusLoadingState } from "../navigation/OctopusLoadingState";
-import { OctopusSpinner } from "../navigation/OctopusSpinner";
+import { PhobosLoadingState } from "../navigation/PhobosLoadingState";
+import { PhobosSpinner } from "../navigation/PhobosSpinner";
 import { SettingsHeading } from "./SettingsHeading";
 
 const CATEGORY_COPY: Record<ClientExtensionCategory, { title: string }> = {
@@ -72,7 +72,7 @@ export function ExtensionsSection({
   onOpenDestination,
   registry,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   onOpenDestination: (destination: ClientExtensionDestination) => void;
   registry: ClientExtensionRegistryState;
 }) {
@@ -436,7 +436,7 @@ function ExtensionBrowseView({
             Open folder
           </OcButton>
         )}
-        description="Add focused capabilities to Home and other parts of Octopus. Extensions stay local to this app."
+        description="Add focused capabilities to Home and other parts of Phobos. Extensions stay local to this app."
         title="Extensions"
       />
       <ExtensionCatalogSearch
@@ -570,7 +570,7 @@ function ExtensionManageView({
       <div className="flex flex-col gap-8 pt-3">
         {!registry.mutable ? <ExtensionReadOnlyNotice /> : null}
         {registry.loading ? (
-          <OctopusLoadingState>Loading installed extensions…</OctopusLoadingState>
+          <PhobosLoadingState>Loading installed extensions…</PhobosLoadingState>
         ) : registry.errors.length && registry.extensions.length === 0 ? (
           <OcEmptyState detail={registry.errors.join("\n")} glyph="warning" size="compact" title="Extensions could not be loaded" tone="danger" />
         ) : extensions.length === 0 ? (
@@ -844,7 +844,7 @@ function ExtensionDetail({ busy, extension, mutable, onBack, onInstall, onOpenDe
                 variant="primary"
               >
                 <span className="flex items-center gap-2">
-                  {busy ? <OctopusSpinner className="icon-xs" /> : null}
+                  {busy ? <PhobosSpinner className="icon-xs" /> : null}
                   {extensionInstallActionLabel(extension, busy)}
                 </span>
               </OcButton>
@@ -928,7 +928,7 @@ function ExtensionSetupDialog({
   onRemoveCredential,
   onSave,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   busy: boolean;
   extension: ClientExtensionRecord | null;
   installAfterSave: boolean;
@@ -958,7 +958,7 @@ function ExtensionSetupDialog({
   }, [extension]);
 
   async function choosePath(sourceId: string, mode: "file" | "directory", label: string) {
-    const select = window.octopusTransport?.selectClientDirectory;
+    const select = window.phobosTransport?.selectClientDirectory;
     if (!select) {
       setLocalError("Source selection requires the desktop client.");
       return;
@@ -974,8 +974,8 @@ function ExtensionSetupDialog({
 
   async function requestDevice(sourceId: string, device: "camera" | "microphone") {
     try {
-      if (device === "camera") await window.octopusTransport?.requestCameraAccess?.();
-      else await window.octopusTransport?.requestMicrophoneAccess?.();
+      if (device === "camera") await window.phobosTransport?.requestCameraAccess?.();
+      else await window.phobosTransport?.requestMicrophoneAccess?.();
       if (extension) setDevices(await loadDevices(extension));
       setLocalError("");
       const candidates = (await navigator.mediaDevices.enumerateDevices()).filter((candidate) => candidate.kind === (device === "camera" ? "videoinput" : "audioinput"));
@@ -1109,7 +1109,7 @@ function ExtensionSetupDialog({
               ))}
               <ExtensionDisclosure>
                 <ExtensionDisclosureSection title="Stays on this device">
-                  <div className="text-xs text-secondary">These sources are saved privately in this Octopus Home and are available only to {extension.manifest.name}.</div>
+                  <div className="text-xs text-secondary">These sources are saved privately in this Phobos Home and are available only to {extension.manifest.name}.</div>
                 </ExtensionDisclosureSection>
               </ExtensionDisclosure>
               {localError ? <div className="text-center text-sm text-token-error-foreground" role="alert">{localError}</div> : null}
@@ -1123,7 +1123,7 @@ function ExtensionSetupDialog({
             variant="primary"
           >
             <span className="flex items-center gap-2">
-              {busy ? <OctopusSpinner className="icon-xs" /> : null}
+              {busy ? <PhobosSpinner className="icon-xs" /> : null}
               {busy ? "Saving…" : installAfterSave && extension.admission !== "pending" ? `Install ${extension.manifest.name}` : "Save"}
             </span>
           </OcButton>
@@ -1146,7 +1146,7 @@ function ExtensionUninstallDialog({ busy, extension, onCancel, onConfirm }: {
         <div className="flex flex-col gap-6 p-6">
           <div className="flex flex-col gap-2">
             <h2 className="heading-dialog m-0 font-semibold text-default" id={titleId}>Uninstall {extension.manifest.name}?</h2>
-            <p className="m-0 text-sm leading-5 text-secondary">This removes it from Octopus. Its setup is kept so you can install it again later.</p>
+            <p className="m-0 text-sm leading-5 text-secondary">This removes it from Phobos. Its setup is kept so you can install it again later.</p>
           </div>
           <div className="flex justify-end gap-2">
             <OcButton disabled={busy} onClick={onCancel} variant="ghost">Cancel</OcButton>
@@ -1199,7 +1199,7 @@ function ExtensionInstallDialog({ busy, extension, onCancel, onConfirm }: {
                 <ExtensionDisclosureSection title="Includes">
                   <div className="text-sm text-secondary">
                     {extension.manifest.category === "repair"
-                      ? "A guided repair that appears only when Octopus recognizes the matching problem and still waits for your confirmation."
+                      ? "A guided repair that appears only when Phobos recognizes the matching problem and still waits for your confirmation."
                       : `${extensionDestinationLabel(extension.manifest.category)}. ${sources.length ? "It uses only these sources:" : "It needs no setup."}`}
                   </div>
                   {sources.length ? (
@@ -1211,7 +1211,7 @@ function ExtensionInstallDialog({ busy, extension, onCancel, onConfirm }: {
               )}
               {pending && !invalid ? (
                 <ExtensionDisclosureSection title="New local revision">
-                  <div className="text-sm text-secondary">Octopus found a new local package revision. Review this exact version before installing it.</div>
+                  <div className="text-sm text-secondary">Phobos found a new local package revision. Review this exact version before installing it.</div>
                   <div className="min-w-0 truncate font-mono text-xs text-tertiary" title={extension.sourceDigest}>{extension.sourceDigest}</div>
                 </ExtensionDisclosureSection>
               ) : null}
@@ -1220,7 +1220,7 @@ function ExtensionInstallDialog({ busy, extension, onCancel, onConfirm }: {
           <div className="flex w-full flex-col gap-2">
             <OcButton className="w-full justify-center rounded-full! px-5 py-2 text-base" disabled={busy || invalid} onClick={onConfirm} size="md" variant="primary">
               <span className="flex items-center gap-2">
-                {busy ? <OctopusSpinner className="icon-xs" /> : null}
+                {busy ? <PhobosSpinner className="icon-xs" /> : null}
                 {busy ? updating ? `Updating ${name}` : `Installing ${name}` : updating ? `Update ${name}` : `Install ${name}`}
               </span>
             </OcButton>
@@ -1378,7 +1378,7 @@ function extensionReadyCopy(category: ClientExtensionCategory): string {
   if (category === "widget") return "It is on Home now. Move it or hide it there whenever you like.";
   if (category === "tab") return "Find it in the sidebar. You can always hide it from Settings.";
   if (category === "input") return "It works alongside the controls you already use.";
-  return "It waits until Octopus recognizes the matching problem.";
+  return "It waits until Phobos recognizes the matching problem.";
 }
 
 function extensionSourceSummary(extension: ClientExtensionRecord, source: ClientExtensionSource): string {

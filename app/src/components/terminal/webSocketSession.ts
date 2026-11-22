@@ -1,8 +1,8 @@
-import type { OctopusTerminalSession, OctopusTerminalSessionHandlers } from "./OctopusTerminal";
+import type { PhobosTerminalSession, PhobosTerminalSessionHandlers } from "./PhobosTerminal";
 import type {
-  OctopusProcessViewerActionRequest,
-  OctopusProcessViewerEvent,
-  OctopusProcessViewerState,
+  PhobosProcessViewerActionRequest,
+  PhobosProcessViewerEvent,
+  PhobosProcessViewerState,
 } from "../../electron";
 
 export type WebSocketTerminalState = {
@@ -13,9 +13,9 @@ export type WebSocketTerminalState = {
 export function createWebSocketTerminalSession(
   socketUrl: string,
   onState: (state: WebSocketTerminalState) => void,
-): OctopusTerminalSession {
+): PhobosTerminalSession {
   let socket: WebSocket | null = null;
-  let handlers: OctopusTerminalSessionHandlers | null = null;
+  let handlers: PhobosTerminalSessionHandlers | null = null;
   let disposed = false;
   let opened = false;
   let failed = false;
@@ -93,8 +93,8 @@ export function createWebSocketTerminalSession(
   };
 }
 
-export function createTranscriptTerminalSession(content: string): OctopusTerminalSession {
-  let handlers: OctopusTerminalSessionHandlers | null = null;
+export function createTranscriptTerminalSession(content: string): PhobosTerminalSession {
+  let handlers: PhobosTerminalSessionHandlers | null = null;
   return {
     async open() {
       handlers?.onInitLog(content || "\u001b[2mNo output yet\u001b[0m");
@@ -112,10 +112,10 @@ export function createTranscriptTerminalSession(content: string): OctopusTermina
 
 export type ProcessViewerTerminalState = {
   sessionId: string;
-  state: OctopusProcessViewerState;
+  state: PhobosProcessViewerState;
 };
 
-export type ProcessViewerTerminalSession = OctopusTerminalSession & {
+export type ProcessViewerTerminalSession = PhobosTerminalSession & {
   interrupt(): void;
   terminate(): void;
   restart(): void;
@@ -132,21 +132,21 @@ export function createProcessViewerTerminalSession(
   surfaceId: string,
   onState: (state: ProcessViewerTerminalState | null, error?: string) => void,
 ): ProcessViewerTerminalSession {
-  let handlers: OctopusTerminalSessionHandlers | null = null;
+  let handlers: PhobosTerminalSessionHandlers | null = null;
   let snapshot: ProcessViewerTerminalState | null = null;
   const bufferedOutput: string[] = [];
-  const earlyEvents: OctopusProcessViewerEvent[] = [];
+  const earlyEvents: PhobosProcessViewerEvent[] = [];
   let lastDimensions = { cols: 80, rows: 24 };
   let disposed = false;
   let unsubscribe: (() => void) | null = null;
 
   const perform = async (request: ProcessViewerCommand): Promise<boolean> => {
-    if (!snapshot || disposed || !window.octopusTransport) return false;
+    if (!snapshot || disposed || !window.phobosTransport) return false;
     try {
-      const outcome = await window.octopusTransport.processViewerAction({
+      const outcome = await window.phobosTransport.processViewerAction({
         ...request,
         sessionId: snapshot.sessionId,
-      } as OctopusProcessViewerActionRequest);
+      } as PhobosProcessViewerActionRequest);
       if (!disposed && snapshot) {
         snapshot = { ...snapshot, state: outcome.state };
         onState(snapshot);
@@ -161,7 +161,7 @@ export function createProcessViewerTerminalSession(
   return {
     async open(dimensions) {
       lastDimensions = { ...dimensions };
-      const transport = window.octopusTransport;
+      const transport = window.phobosTransport;
       if (!transport) throw new Error("Process viewer bridge is unavailable.");
       unsubscribe = transport.onProcessViewerEvent((message) => {
         if (disposed) return;
@@ -225,7 +225,7 @@ export function createProcessViewerTerminalSession(
         disposed = true;
         unsubscribe?.();
         unsubscribe = null;
-        if (snapshot) void window.octopusTransport?.closeProcessViewer({ sessionId: snapshot.sessionId });
+        if (snapshot) void window.phobosTransport?.closeProcessViewer({ sessionId: snapshot.sessionId });
         snapshot = null;
       };
     },
@@ -233,8 +233,8 @@ export function createProcessViewerTerminalSession(
 }
 
 function deliverProcessViewerEvent(
-  message: OctopusProcessViewerEvent,
-  handlers: OctopusTerminalSessionHandlers | null,
+  message: PhobosProcessViewerEvent,
+  handlers: PhobosTerminalSessionHandlers | null,
   bufferedOutput: string[],
   snapshot: ProcessViewerTerminalState,
   update: (state: ProcessViewerTerminalState) => void,

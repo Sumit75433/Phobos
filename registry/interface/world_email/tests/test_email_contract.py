@@ -20,9 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import email_contract as contract
-import octopus_operation_catalog as catalog
+import phobos_operation_catalog as catalog
 import email_wire
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 
 PEM = dict(re.findall(r"const TEST_(\w+) = `([^`]+)`", (ROOT / "tests" / "tls_fixture.js").read_text(encoding="utf-8")))
@@ -221,7 +221,7 @@ class FakeRuntime:
         manifest_bytes = Path(manifest_path).read_bytes()
         manifest = json.loads(manifest_bytes)
         artifact_id = evidence[0]["artifact_id"]
-        assert artifact_id == f"{manifest['label']}:{octopus_content_hash(manifest_bytes)}"
+        assert artifact_id == f"{manifest['label']}:{phobos_content_hash(manifest_bytes)}"
         if self.refuse_next:
             reason, self.refuse_next = self.refuse_next, None
             raise self.life.DeliveryRefused({"refused": {"reason": reason, "detail": {}}})
@@ -230,7 +230,7 @@ class FakeRuntime:
         self.seq += 1
         self.admitted[artifact_id] = self.seq
         self.handed.append((manifest["label"], json.loads(Path(manifest["payload_path"]).read_bytes())))
-        with open(os.environ["OCTOPUS_MOVEMENTS_JSONL"], "a", encoding="utf-8") as handle:
+        with open(os.environ["PHOBOS_MOVEMENTS_JSONL"], "a", encoding="utf-8") as handle:
             handle.write(json.dumps({"seq": self.seq, "kind": "InterfaceArrival", "from": {"Interface": "world_email"}, "artifact": {"id": artifact_id}}) + "\n")
         return self.seq
 
@@ -350,14 +350,14 @@ class EmailLifeTests(unittest.TestCase):
         self.smtp = FakeSmtp(server_tls, self.imap)
         self.patches = [
             mock.patch.dict(os.environ, {
-                "OCTOPUS_INTERFACE_ID": "world_email",
-                "OCTOPUS_INTERFACE_DIR": str(ROOT),
-                "OCTOPUS_VAR_DIR": str(root / "var"),
-                "OCTOPUS_MOVEMENTS_JSONL": str(root / "movements.jsonl"),
-                "OCTOPUS_BLOBS_DIR": str(root / "blobs"),
-                "OCTOPUS_LEDGER_INDEX_SQLITE": str(root / "ledger-index.sqlite"),
-                "OCTOPUS_INTERFACE_HOST_IO_LIMITS": json.dumps({"max_control_frame_bytes": 1048576, "max_manifest_bytes": 1048576, "max_payload_bytes": 67108864, "max_stderr_bytes": 262144}),
-                "OCTOPUS_ROOT_SLOTS_JSON": json.dumps({"interface_hand_in_root": str(root / "hand-in")}),
+                "PHOBOS_INTERFACE_ID": "world_email",
+                "PHOBOS_INTERFACE_DIR": str(ROOT),
+                "PHOBOS_VAR_DIR": str(root / "var"),
+                "PHOBOS_MOVEMENTS_JSONL": str(root / "movements.jsonl"),
+                "PHOBOS_BLOBS_DIR": str(root / "blobs"),
+                "PHOBOS_LEDGER_INDEX_SQLITE": str(root / "ledger-index.sqlite"),
+                "PHOBOS_INTERFACE_HOST_IO_LIMITS": json.dumps({"max_control_frame_bytes": 1048576, "max_manifest_bytes": 1048576, "max_payload_bytes": 67108864, "max_stderr_bytes": 262144}),
+                "PHOBOS_ROOT_SLOTS_JSON": json.dumps({"interface_hand_in_root": str(root / "hand-in")}),
                 "EMAIL_ADDRESS": "owner@example.test",
                 "EMAIL_APP_PASSWORD": PASSWORD,
                 "EMAIL_IMAP_SERVER": f"localhost:{self.imap.port}",
@@ -400,15 +400,15 @@ class EmailLifeTests(unittest.TestCase):
 
     def request(self, seq, operation, arguments, label="email.operation.request"):
         payload = json.dumps({"operation": operation, "arguments": arguments, "correlation_id": f"call-{seq}"}).encode("utf-8")
-        manifest = json.dumps({"label": label, "payload_content_hash": octopus_content_hash(payload)}).encode("utf-8")
+        manifest = json.dumps({"label": label, "payload_content_hash": phobos_content_hash(payload)}).encode("utf-8")
         for blob in (payload, manifest):
-            (Path(os.environ["OCTOPUS_BLOBS_DIR"]) / octopus_content_hash(blob)).write_bytes(blob)
+            (Path(os.environ["PHOBOS_BLOBS_DIR"]) / phobos_content_hash(blob)).write_bytes(blob)
         movement = {
             "seq": seq, "kind": "InterfaceOutbound", "from": {"Interface": "world_provider_test"}, "to": {"Interface": "world_email"},
             "invocation_metadata": {"runtime": {"run": "run_mail", "ee": "ee_mail", "worker": "system_worker_operator_task", "checkpoint": "cp_mail", "interface": "world_email", "epoch": 0}},
-            "artifact": {"content": list(bytes.fromhex(octopus_content_hash(manifest)))},
+            "artifact": {"content": list(bytes.fromhex(phobos_content_hash(manifest)))},
         }
-        with open(os.environ["OCTOPUS_MOVEMENTS_JSONL"], "a", encoding="utf-8") as handle:
+        with open(os.environ["PHOBOS_MOVEMENTS_JSONL"], "a", encoding="utf-8") as handle:
             handle.write(json.dumps(movement) + "\n")
         outbound = self.life.Outbound(self.mailbox)
         for row in self.life.OutboundReader().read(seq):

@@ -4,7 +4,7 @@ import {
   type ChatRunEventKind,
   type ChatRunMessage,
 } from "../../chatRuns";
-import type { OctopusOperatorChatArtifact } from "../../electron";
+import type { PhobosOperatorChatArtifact } from "../../electron";
 import type {
   ChatRenderMessage,
   ChatToolPresentationIndex,
@@ -109,7 +109,7 @@ export function liveToolCallOriginIndex(messages: ChatRunMessage[]): Map<string,
 }
 
 export function liveArtifactMessage(
-  artifact: OctopusOperatorChatArtifact,
+  artifact: PhobosOperatorChatArtifact,
   toolCallOrigins: Map<string, ActivityOrigin>,
   turnStartedAtMs = 0,
 ): ChatRunMessage {

@@ -213,7 +213,7 @@ export type ClientSurfaceRender =
     };
 
 export type ClientSurfaceDocument = {
-  schema: "octopus.client_surface";
+  schema: "phobos.client_surface";
   schema_version: 1;
   release_channel: "lab" | "stable";
   id: string;
@@ -240,7 +240,7 @@ export type ClientSurfaceAdmissionVerdict = {
   passed: boolean;
   details: {
     verifier: "client_surface_document_v1";
-    contract: "octopus.client_surface@1";
+    contract: "phobos.client_surface@1";
     document_id: string | null;
     revision: number | null;
     source_digest: string;

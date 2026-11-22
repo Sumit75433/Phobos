@@ -8,12 +8,12 @@ import tailwindcss from "@tailwindcss/vite";
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 const require = createRequire(import.meta.url);
-const COOKIE_NAME = "octopus_client_access";
+const COOKIE_NAME = "phobos_client_access";
 const APP_DIR = path.dirname(new URL(import.meta.url).pathname);
 
-function octopusClientServer(): Plugin {
+function phobosClientServer(): Plugin {
   return {
-    name: "octopus-client-server",
+    name: "phobos-client-server",
     configureServer(server: ViteDevServer) {
       const { createClientAccessController } = require("./electron/clientAccess.cjs");
       const { createClientProjectionStore } = require("./electron/clientDataSource.cjs");
@@ -21,22 +21,22 @@ function octopusClientServer(): Plugin {
       const { createClientSurfaceDocumentStore, filterClientSurfaceSnapshot } = require("./electron/surfaceDocuments.cjs");
       const appDir = APP_DIR;
       const repoRoot = path.resolve(appDir, "..");
-      const octopusHome = (process.env.OCTOPUS_HOME ?? "").trim() || path.join(os.homedir(), ".octopus");
+      const phobosHome = (process.env.PHOBOS_HOME ?? "").trim() || path.join(os.homedir(), ".phobos");
       const installationRoot = (() => {
-        const configured = (process.env.OCTOPUS_INSTALLATION_ROOT ?? "").trim();
+        const configured = (process.env.PHOBOS_INSTALLATION_ROOT ?? "").trim();
         if (!configured) return repoRoot;
-        if (!path.isAbsolute(configured)) throw new Error("OCTOPUS_INSTALLATION_ROOT must be absolute");
+        if (!path.isAbsolute(configured)) throw new Error("PHOBOS_INSTALLATION_ROOT must be absolute");
         return configured;
       })();
       const localPackageRegistryRoot = configuredAbsolutePath(
-        process.env.OCTOPUS_LOCAL_PACKAGE_REGISTRY,
+        process.env.PHOBOS_LOCAL_PACKAGE_REGISTRY,
         path.join(repoRoot, "registry"),
-        "OCTOPUS_LOCAL_PACKAGE_REGISTRY",
+        "PHOBOS_LOCAL_PACKAGE_REGISTRY",
       );
       const localPackageLibraryRoot = configuredAbsolutePath(
-        process.env.OCTOPUS_LOCAL_PACKAGE_LIBRARY,
+        process.env.PHOBOS_LOCAL_PACKAGE_LIBRARY,
         path.join(repoRoot, "app", "distribution", "local-packages"),
-        "OCTOPUS_LOCAL_PACKAGE_LIBRARY",
+        "PHOBOS_LOCAL_PACKAGE_LIBRARY",
       );
       const {
         assertOperatorChatArtifactBatch,
@@ -46,12 +46,12 @@ function octopusClientServer(): Plugin {
       const operatorChatClientLoader = createOperatorChatClientLoader({
         packageRoots: () => ({
           sourceRegistryRoot: localPackageRegistryRoot,
-          activeRegistryRoot: path.join(octopusHome, "registry"),
+          activeRegistryRoot: path.join(phobosHome, "registry"),
           libraryRoot: localPackageLibraryRoot,
-          stateRoot: path.join(octopusHome, "client", "package-state"),
+          stateRoot: path.join(phobosHome, "client", "package-state"),
         }),
         clientPath: () => path.join(
-          octopusHome,
+          phobosHome,
           "registry",
           "interface",
           "world_operator_chat",
@@ -68,7 +68,7 @@ function octopusClientServer(): Plugin {
       let surfaceStore: ReturnType<typeof createClientSurfaceDocumentStore> | null = null;
       let artifactStreamStore: any = null;
       const clientArtifactsRoot = (interfaceId: string) => path.join(
-        octopusHome,
+        phobosHome,
         "interface-hand-in",
         interfaceId,
         "client",
@@ -84,7 +84,7 @@ function octopusClientServer(): Plugin {
         if (store) return store;
         store = createClientProjectionStore(profile, {
           resolveRepoRoot: () => fsSync.existsSync(path.join(repoRoot, "registry", "interface")) ? repoRoot : "",
-          octopusHome: () => octopusHome,
+          phobosHome: () => phobosHome,
           onChange: (generation: number, kind: string) => {
             for (const client of projectionClients.get(profile) ?? []) {
               client.write(`data: ${JSON.stringify({
@@ -128,7 +128,7 @@ function octopusClientServer(): Plugin {
         artifactStreamStore = createClientArtifactStreamStore({
           clientArtifactsRoot,
           projectionStore: () => getStore("live"),
-          handInArtifact: (input: Record<string, unknown>) => handInArtifact({ ...input, octopusHome }),
+          handInArtifact: (input: Record<string, unknown>) => handInArtifact({ ...input, phobosHome }),
           authorizeSubmission: authorizeClientInterfaceArtifactSubmission,
         });
         return artifactStreamStore;
@@ -139,11 +139,11 @@ function octopusClientServer(): Plugin {
         void artifactStreamStore?.abortAll();
       });
 
-      server.middlewares.use("/__octopus/access", (req, res) => {
+      server.middlewares.use("/__phobos/access", (req, res) => {
         void handleAccess(req, res, access);
       });
 
-      server.middlewares.use("/__octopus/projection", (req, res) => {
+      server.middlewares.use("/__phobos/projection", (req, res) => {
         void withAccess(req, res, access, ["live", "lab"], async (session) => {
           if (req.method !== "POST") return sendJson(res, 405, { error: "projection reads require POST" });
           const request = await readJson(req);
@@ -151,15 +151,15 @@ function octopusClientServer(): Plugin {
         });
       });
 
-      server.middlewares.use("/__octopus/providers", (req, res) => {
+      server.middlewares.use("/__phobos/providers", (req, res) => {
         void withAccess(req, res, access, ["live", "lab"], async (session) => {
-          const registryRoot = session.profile === "live" ? path.join(octopusHome, "registry") : "";
+          const registryRoot = session.profile === "live" ? path.join(phobosHome, "registry") : "";
           const { providers } = await getStore(session.profile).read(projectionReadRequest("projection.operator.providers.list"));
           sendJson(res, 200, { repoRoot: session.profile === "live" ? repoRoot : null, registryRoot: registryRoot || null, providers });
         });
       });
 
-      server.middlewares.use("/__octopus/operator-chat-artifacts", (req, res) => {
+      server.middlewares.use("/__phobos/operator-chat-artifacts", (req, res) => {
         void withAccess(req, res, access, ["live"], async () => {
           if (req.method !== "POST") {
             return sendJson(res, 405, { error: "operator chat artifact reads require POST" });
@@ -168,17 +168,17 @@ function octopusClientServer(): Plugin {
           const { readOperatorChatArtifacts } = await operatorChatClientLoader.load();
           const { readContentAddressedArtifactPayload } = require("./electron/contentAddressedArtifact.cjs");
           const batch = await readOperatorChatArtifacts({
-            octopusHome: () => octopusHome,
+            phobosHome: () => phobosHome,
             readArtifactPayload: (input: Record<string, unknown>) => readContentAddressedArtifactPayload({
               ...input,
-              blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+              blobsRoot: path.join(phobosHome, "ledger", "blobs"),
             }),
           }, request);
           sendJson(res, 200, assertOperatorChatArtifactBatch(batch));
         });
       });
 
-      server.middlewares.use("/__octopus/operator-turn-control", (req, res) => {
+      server.middlewares.use("/__phobos/operator-turn-control", (req, res) => {
         void withAccess(req, res, access, ["live"], async () => {
           if (req.method !== "POST") {
             return sendJson(res, 405, { error: "operator turn control requires POST" });
@@ -187,25 +187,25 @@ function octopusClientServer(): Plugin {
           const { submitOperatorTurnControl } = await operatorChatClientLoader.load();
           const { captureArtifactDelivery } = require("./electron/interfaceTransport.cjs");
           sendJson(res, 200, await captureArtifactDelivery((deliver: (input: Record<string, unknown>) => Promise<unknown>) => submitOperatorTurnControl({
-            octopusHome: () => octopusHome,
+            phobosHome: () => phobosHome,
             clientArtifactsRoot,
-            handInArtifact: (input: Record<string, unknown>) => deliver({ ...input, octopusHome }),
+            handInArtifact: (input: Record<string, unknown>) => deliver({ ...input, phobosHome }),
           }, request)));
         });
       });
 
-      server.middlewares.use("/__octopus/validate-endpoint", (req, res) => {
+      server.middlewares.use("/__phobos/validate-endpoint", (req, res) => {
         void withAccess(req, res, access, ["live"], async () => {
           if (req.method !== "POST") return sendJson(res, 405, { valid: false, endpoint: "", error: "endpoint validation requires POST" });
           const request = await readJson(req);
           const endpoint = typeof request?.endpoint === "string" ? request.endpoint : "";
           const { validateArtifactEndpoint } = require("./electron/interfaceTransport.cjs");
-          const normalized = validateArtifactEndpoint(endpoint, octopusHome, "world_operator_chat");
+          const normalized = validateArtifactEndpoint(endpoint, phobosHome, "world_operator_chat");
           sendJson(res, 200, { valid: true, endpoint: normalized });
         });
       });
 
-      server.middlewares.use("/__octopus/submit", (req, res) => {
+      server.middlewares.use("/__phobos/submit", (req, res) => {
         void withAccess(req, res, access, ["live", "lab"], async (session) => {
           if (req.method !== "POST") return sendJson(res, 405, { error: "submit requires POST" });
           const request = await readJson(req);
@@ -216,20 +216,20 @@ function octopusClientServer(): Plugin {
             const { handInArtifact, normalizedEndpoint } = require("./electron/interfaceTransport.cjs");
             const { readContentAddressedArtifactPayload } = require("./electron/contentAddressedArtifact.cjs");
             const { submitOperatorTurn } = await operatorChatClientLoader.load();
-            const defaultChatEndpoint = normalizedEndpoint(process.env.OCTOPUS_APP_LISTEN, octopusHome, "world_operator_chat");
+            const defaultChatEndpoint = normalizedEndpoint(process.env.PHOBOS_APP_LISTEN, phobosHome, "world_operator_chat");
             const outcome = await submitOperatorTurn({
               clientArtifactsRoot,
-              octopusHome: () => octopusHome,
+              phobosHome: () => phobosHome,
               installationRoot: () => installationRoot,
-              registryRoot: () => path.join(octopusHome, "registry"),
+              registryRoot: () => path.join(phobosHome, "registry"),
               handInArtifact: (input: Record<string, unknown>) => handInArtifact({
                 ...input,
                 endpoint: typeof input.endpoint === "string" && input.endpoint.trim() !== "unix://" ? input.endpoint : defaultChatEndpoint,
-                octopusHome,
+                phobosHome,
               }),
               readArtifactPayload: (input: Record<string, unknown>) => readContentAddressedArtifactPayload({
                 ...input,
-                blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+                blobsRoot: path.join(phobosHome, "ledger", "blobs"),
               }),
               readProjection: (method: string) => getStore("live").read(projectionReadRequest(method)),
             }, {
@@ -250,7 +250,7 @@ function octopusClientServer(): Plugin {
         });
       });
 
-      server.middlewares.use("/__octopus/chat-steer", (req, res) => {
+      server.middlewares.use("/__phobos/chat-steer", (req, res) => {
         void withAccess(req, res, access, ["live", "lab"], async (session) => {
           if (req.method !== "POST") return sendJson(res, 405, { error: "chat steer requires POST" });
           const request = await readJson(req);
@@ -263,20 +263,20 @@ function octopusClientServer(): Plugin {
           const { handInArtifact, normalizedEndpoint } = require("./electron/interfaceTransport.cjs");
           const { readContentAddressedArtifactPayload } = require("./electron/contentAddressedArtifact.cjs");
           const { submitOperatorTurn } = await operatorChatClientLoader.load();
-          const defaultChatEndpoint = normalizedEndpoint(process.env.OCTOPUS_APP_LISTEN, octopusHome, "world_operator_chat");
+          const defaultChatEndpoint = normalizedEndpoint(process.env.PHOBOS_APP_LISTEN, phobosHome, "world_operator_chat");
           const outcome = await submitOperatorTurn({
             clientArtifactsRoot,
-            octopusHome: () => octopusHome,
+            phobosHome: () => phobosHome,
             installationRoot: () => installationRoot,
-            registryRoot: () => path.join(octopusHome, "registry"),
+            registryRoot: () => path.join(phobosHome, "registry"),
             handInArtifact: (input: Record<string, unknown>) => handInArtifact({
               ...input,
               endpoint: typeof input.endpoint === "string" && input.endpoint.trim() !== "unix://" ? input.endpoint : defaultChatEndpoint,
-              octopusHome,
+              phobosHome,
             }),
             readArtifactPayload: (input: Record<string, unknown>) => readContentAddressedArtifactPayload({
               ...input,
-              blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+              blobsRoot: path.join(phobosHome, "ledger", "blobs"),
             }),
             readProjection: (method: string) => getStore("live").read(projectionReadRequest(method)),
           }, { ...request, attachments: [] });
@@ -293,7 +293,7 @@ function octopusClientServer(): Plugin {
         });
       });
 
-      server.middlewares.use("/__octopus/chat-pins", (req, res) => {
+      server.middlewares.use("/__phobos/chat-pins", (req, res) => {
         void withAccess(req, res, access, ["live", "lab"], async (session) => {
           if (req.method !== "POST") return sendJson(res, 405, { error: "chat pin updates require POST" });
           const request = await readJson(req);
@@ -302,14 +302,14 @@ function octopusClientServer(): Plugin {
           }
           const { updateOperatorChatPins } = await operatorChatClientLoader.load();
           const outcome = await updateOperatorChatPins({
-            octopusHome: () => octopusHome,
+            phobosHome: () => phobosHome,
             installationRoot: () => installationRoot,
           }, request);
           sendJson(res, 200, outcome);
         });
       });
 
-      server.middlewares.use("/__octopus/interface-artifact", (req, res) => {
+      server.middlewares.use("/__phobos/interface-artifact", (req, res) => {
         void withAccess(req, res, access, ["live"], async () => {
           if (req.method !== "POST") return sendJson(res, 405, { error: "interface artifact submit requires POST" });
           const request = await readJson(req);
@@ -318,14 +318,14 @@ function octopusClientServer(): Plugin {
           const outcome = await submitClientInterfaceArtifact({
             clientArtifactsRoot,
             projectionStore: () => getStore("live"),
-            handInArtifact: (input: Record<string, unknown>) => handInArtifact({ ...input, octopusHome }),
+            handInArtifact: (input: Record<string, unknown>) => handInArtifact({ ...input, phobosHome }),
             authorizeSubmission: authorizeClientInterfaceArtifactSubmission,
           }, request);
           sendJson(res, 200, outcome);
         });
       });
 
-      server.middlewares.use("/__octopus/artifact-stream", (req, res, next) => {
+      server.middlewares.use("/__phobos/artifact-stream", (req, res, next) => {
         const operation = String(req.url ?? "").split("?")[0].replace(/^\/+/, "");
         if (operation !== "begin" && operation !== "append" && operation !== "finalize" && operation !== "abort") return next();
         void withAccess(req, res, access, ["live"], async () => {
@@ -344,14 +344,14 @@ function octopusClientServer(): Plugin {
         });
       });
 
-      server.middlewares.use("/__octopus/client-surfaces", (req, res) => {
+      server.middlewares.use("/__phobos/client-surfaces", (req, res) => {
         void withAccess(req, res, access, ["live", "lab"], async (session) => {
           if (req.method !== "GET") return sendJson(res, 405, { error: "client surface documents require GET" });
           sendJson(res, 200, filterClientSurfaceSnapshot(await getSurfaceStore().snapshot(), session.profile));
         });
       });
 
-      server.middlewares.use("/__octopus/client-surface-events", (req, res) => {
+      server.middlewares.use("/__phobos/client-surface-events", (req, res) => {
         const session = requireHttpAccess(req, res, access, ["lab"]);
         if (!session) return;
         const store = getSurfaceStore();
@@ -361,7 +361,7 @@ function octopusClientServer(): Plugin {
         req.on("close", () => surfaceClients.delete(res));
       });
 
-      server.middlewares.use("/__octopus/events", (req, res) => {
+      server.middlewares.use("/__phobos/events", (req, res) => {
         const session = requireHttpAccess(req, res, access, ["live", "lab"]);
         if (!session) return;
         const store = getStore(session.profile);
@@ -515,7 +515,7 @@ function formatError(error: unknown) {
 
 export default defineConfig({
   base: "./",
-  plugins: [tailwindcss(), react(), octopusClientServer(), {
+  plugins: [tailwindcss(), react(), phobosClientServer(), {
     name: "support-development-csp",
     transformIndexHtml(html, context) {
       return context.server && context.filename === path.resolve(APP_DIR, "support.html")

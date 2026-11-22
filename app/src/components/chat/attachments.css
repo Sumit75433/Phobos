@@ -86,14 +86,14 @@
 .chat-attachment-remove:focus-visible,
 .chat-attachment-lightbox button:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 0; }
 .chat-attachment-strip,
-.chat-attachment-strip.octopus-message-attachments { display: flex; min-width: 0; max-width: 100%; flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 8px; }
+.chat-attachment-strip.phobos-message-attachments { display: flex; min-width: 0; max-width: 100%; flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 8px; }
 .chat-attachment-strip.is-composer { width: 100%; }
 .chat-attachment-scroll { display: flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 .chat-attachment-scroll::-webkit-scrollbar { display: none; }
 .chat-attachment-row { display: flex; min-width: max-content; align-items: flex-end; gap: 8px; }
 .chat-attachment-scroll.is-files .chat-attachment-row { align-items: center; }
-.chat-attachment-strip.octopus-message-attachments.is-user { align-items: flex-end; margin-top: 0; }
-.octopus-message-attachments.is-user .chat-attachment-scroll { flex-direction: row-reverse; align-self: flex-end; }
+.chat-attachment-strip.phobos-message-attachments.is-user { align-items: flex-end; margin-top: 0; }
+.phobos-message-attachments.is-user .chat-attachment-scroll { flex-direction: row-reverse; align-self: flex-end; }
 .chat-attachment-scroll.is-files,
 .chat-attachment-scroll.is-composer { padding: 1px; }
 .chat-attachment-scroll.is-composer { width: 100%; }

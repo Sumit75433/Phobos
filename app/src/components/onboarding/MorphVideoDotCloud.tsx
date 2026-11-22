@@ -451,7 +451,7 @@ export function MorphVideoDotCloud({ srcs, videoSrc, progressRef, frameScales, p
     };
   }, [srcs, videoSrc, progressRef, frameScales, particleScale, monochrome, sparkle]);
 
-  return <canvas ref={canvasRef} className={`octopus-cloud ${className}`.trim()} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`phobos-cloud ${className}`.trim()} aria-hidden="true" />;
 }
 
 function loadFrame(src: string, scale: number): Promise<CloudFrame & { aspect: number }> {

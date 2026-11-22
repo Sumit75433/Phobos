@@ -2,13 +2,13 @@ module.exports = { operatorOsProjection };
 
 const { clientAgentCatalogPath } = require("../clientAgentCatalog.cjs");
 const { applicationTaskCapabilityReferences } = require("./applicationPackages.cjs");
-const { applicationPrivateConfigurationProjection, descendantEnvironmentIds, descriptorRows, eeInstanceRows, environmentLineage, lowestCommonEnvironment, octopusOsInterfaceSidecars, operatorOsProjectRows, projectedRunInterfaceIds, projectionMemo, runRows, workerEnvironmentRows } = require("./registryRows.cjs");
+const { applicationPrivateConfigurationProjection, descendantEnvironmentIds, descriptorRows, eeInstanceRows, environmentLineage, lowestCommonEnvironment, phobosOsInterfaceSidecars, operatorOsProjectRows, projectedRunInterfaceIds, projectionMemo, runRows, workerEnvironmentRows } = require("./registryRows.cjs");
 const { arrayValue, isPlainRecord, numberValue, objectOrEmpty, stringValue } = require("./values.cjs");
 
 function operatorOsProjection(store) {
   function operatorOsScope(projection) {
     return projectionMemo(projection, "structure", "operatorOsScope", () => {
-    const sidecars = octopusOsInterfaceSidecars(projection);
+    const sidecars = phobosOsInterfaceSidecars(projection);
     const clientInterfaces = new Map([...sidecars].filter(([, sidecar]) => sidecar.component === "client"));
     const errors = [];
     if (projection.eePolicyProjectionError) {
@@ -26,7 +26,7 @@ function operatorOsProjection(store) {
       ])].filter((interfaceId) => clientInterfaces.has(interfaceId)
         && record.interface_state?.[interfaceId]?.client_surface_role !== undefined);
       if (matches.length > 1) {
-        errors.push(`run '${record.run_id}' projects more than one exact Octopus OS client interface`);
+        errors.push(`run '${record.run_id}' projects more than one exact Phobos OS client interface`);
         continue;
       }
       const interfaceId = matches[0];
@@ -41,7 +41,7 @@ function operatorOsProjection(store) {
       const authoringProfile = sidecar.authoring_profile ?? null;
       if (authoringProfile && stringValue(authoringProfile.worker_choice_interface)
         !== stringValue(sidecar.worker_choice_interface)) {
-        errors.push(`Octopus OS authoring profile '${interfaceId}' conflicts with run '${record.run_id}'`);
+        errors.push(`Phobos OS authoring profile '${interfaceId}' conflicts with run '${record.run_id}'`);
       }
       clientRuns.push({
         run_id: stringValue(record.run_id),
@@ -68,7 +68,7 @@ function operatorOsProjection(store) {
         client_interface_ids: [],
         client_runs: [],
         task_authoring_profiles: [],
-        agent_catalog_path: clientAgentCatalogPath(store.octopusHome()),
+        agent_catalog_path: clientAgentCatalogPath(store.phobosHome()),
         agent_catalog_digest: "",
         agent_project_sources: [],
         agent_presentations: [],
@@ -92,7 +92,7 @@ function operatorOsProjection(store) {
     const homeCandidates = scopedClientRuns.filter((row) => row.surface_role === "home");
     let homeRun = null;
     if (homeCandidates.length > 1) {
-      errors.push(`Octopus OS scope '${rootEeId}' projects more than one Home run`);
+      errors.push(`Phobos OS scope '${rootEeId}' projects more than one Home run`);
     } else if (homeCandidates.length === 1) {
       if (homeCandidates[0].ee_id !== rootEeId) {
         errors.push(`Home run '${homeCandidates[0].run_id}' is not directly inside OS root EE '${rootEeId}'`);
@@ -111,11 +111,11 @@ function operatorOsProjection(store) {
       const profileWorkerId = stringValue(profile.worker_choice_interface);
       const worker = projection.descriptorIndexes?.interface?.get(profileWorkerId);
       if (!scopeEeIds.has(profileEeId)) {
-        errors.push(`Octopus OS task authoring profile references EE '${profileEeId}' outside workspace scope '${rootEeId}'`);
+        errors.push(`Phobos OS task authoring profile references EE '${profileEeId}' outside workspace scope '${rootEeId}'`);
       }
       if (stringValue(worker?.interface_type).toLowerCase() !== "system"
         || stringValue(worker?.role).toLowerCase() !== "worker") {
-        errors.push(`Octopus OS task authoring profile references missing worker '${profileWorkerId}'`);
+        errors.push(`Phobos OS task authoring profile references missing worker '${profileWorkerId}'`);
       }
     }
     const clientRunIds = new Set(scopedClientRuns.map((row) => row.run_id));
@@ -139,7 +139,7 @@ function operatorOsProjection(store) {
             && record.interface_state[interfaceId]?.client_surface_role === clientInterfaces.get(interfaceId).surface_role)
           .sort();
         if (recordedClientInterfaces.length > 1) {
-          errors.push(`read-only run '${runId}' records more than one exact Octopus OS client interface`);
+          errors.push(`read-only run '${runId}' records more than one exact Phobos OS client interface`);
           return [];
         }
         const interfaceId = recordedClientInterfaces[0] ?? "";
@@ -208,13 +208,13 @@ function operatorOsProjection(store) {
     for (const presentation of projectPresentations) {
       if (!projectEeIds.has(stringValue(presentation.ee_id))) {
         errors.push(
-          `Octopus OS Home presentation references project EE '${stringValue(presentation.ee_id)}' outside scope '${rootEeId}'`,
+          `Phobos OS Home presentation references project EE '${stringValue(presentation.ee_id)}' outside scope '${rootEeId}'`,
         );
       }
     }
     const presentationIds = projectPresentations.map((presentation) => stringValue(presentation?.ee_id)).filter(Boolean);
     if (new Set(presentationIds).size !== presentationIds.length) {
-      errors.push("Octopus OS Home repeats a Project presentation");
+      errors.push("Phobos OS Home repeats a Project presentation");
     }
     const agentCatalog = projection.clientAgentCatalog?.document ?? null;
     const agentProjectSources = arrayValue(agentCatalog?.project_sources);
@@ -270,7 +270,7 @@ function operatorOsProjection(store) {
       client_interface_ids: scopedClientRuns.map((row) => row.interface_id).sort(),
       client_runs: scopedClientRuns,
       task_authoring_profiles: taskAuthoringProfiles,
-      agent_catalog_path: projection.clientAgentCatalog?.file ?? clientAgentCatalogPath(store.octopusHome()),
+      agent_catalog_path: projection.clientAgentCatalog?.file ?? clientAgentCatalogPath(store.phobosHome()),
       agent_catalog_digest: projection.clientAgentCatalog?.digest ?? "",
       agent_project_sources: agentProjectSources,
       agent_presentations: agentPresentations,
@@ -424,7 +424,7 @@ function operatorOsProjection(store) {
             && (allowedTools === null || capabilityTools.every((toolId) => allowedTools.has(toolId)))
             && (allowedKinds === null || capabilityKinds.every((kind) => allowedKinds.has(kind)));
           const defaults = new Set(arrayValue(
-            objectOrEmpty(objectOrEmpty(environment.config).octopus_os).application_defaults,
+            objectOrEmpty(objectOrEmpty(environment.config).phobos_os).application_defaults,
           ).map(stringValue).filter(Boolean));
           return {
             ee_id: stringValue(environment.ee_id),
@@ -465,7 +465,7 @@ function operatorOsProjection(store) {
         const removalBlockReason = !installed
           ? "Application is not installed."
           : managed
-            ? "This application is supplied by the Octopus installation and cannot be removed independently."
+            ? "This application is supplied by the Phobos installation and cannot be removed independently."
             : stringValue(localPackage?.receipt_state) !== "valid"
               ? "This application has no valid local install receipt and must be repaired before removal."
             : referencedRunIds.length
@@ -611,9 +611,9 @@ function operatorOsProjection(store) {
           const ceilingKinds = Array.isArray(ceiling.allowed_worker_environment_kinds)
             ? new Set(ceiling.allowed_worker_environment_kinds.map(stringValue).filter(Boolean))
             : null;
-          const octopusOsConfig = objectOrEmpty(objectOrEmpty(environment.config).octopus_os);
+          const phobosOsConfig = objectOrEmpty(objectOrEmpty(environment.config).phobos_os);
           const defaults = new Set(arrayValue(
-            octopusOsConfig.driver_defaults,
+            phobosOsConfig.driver_defaults,
           ).map(stringValue).filter(Boolean));
           return {
             ee_id: stringValue(environment.ee_id),
@@ -622,7 +622,7 @@ function operatorOsProjection(store) {
             ceiling_allowed: ceilingKinds === null || ceilingKinds.has(name),
             selected_by_default: defaults.has(name),
             record_digest: stringValue(environment.record_digest),
-            host_slots: objectOrEmpty(objectOrEmpty(octopusOsConfig.driver_host_slots)[name]),
+            host_slots: objectOrEmpty(objectOrEmpty(phobosOsConfig.driver_host_slots)[name]),
           };
         });
         const projectConfigured = projectStates.some((state) => (
@@ -697,7 +697,7 @@ function operatorOsProjection(store) {
         root_ee_id: stringValue(scope.root_ee_id),
         host_root_refs: objectOrEmpty(projection.hostRootRefs),
         host_manifest_ready: !projection.hostManifestError,
-        octopus_home: projection.octopusHome,
+        phobos_home: projection.phobosHome,
         drivers,
         projects: operatorOsProjectRows(scope, environments),
         errors: [

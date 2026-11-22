@@ -31,8 +31,8 @@ function chatIdentityFromRunRecord(config, runId, record) {
   };
 }
 
-async function operatorChatLiveContext(config, octopusHome, runId, interfaceId) {
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+async function operatorChatLiveContext(config, phobosHome, runId, interfaceId) {
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const record = await readJsonIfPresent(path.join(runsDir, `${runId}.json`));
   if (!record) throw new Error(`operator chat run '${runId}' does not exist`);
   const identity = chatIdentityFromRunRecord(config, runId, record);
@@ -50,14 +50,14 @@ async function operatorChatLiveContext(config, octopusHome, runId, interfaceId) 
   if (!isObject(record.interface_state?.[providerInterfaceId])) {
     throw new Error(`operator chat run '${runId}' has no state for provider '${providerInterfaceId}'`);
   }
-  const providerRole = await readExactInterfaceRole(octopusHome, providerInterfaceId);
+  const providerRole = await readExactInterfaceRole(phobosHome, providerInterfaceId);
   if (providerRole !== "provider") {
     throw new Error(`operator chat run '${runId}' provider '${providerInterfaceId}' is not a provider interface`);
   }
   return {
     providerInterfaceId,
     providerRole,
-    streamsRoot: path.join(octopusHome, "interfaces", providerInterfaceId, "streams"),
+    streamsRoot: path.join(phobosHome, "interfaces", providerInterfaceId, "streams"),
   };
 }
 
@@ -239,7 +239,7 @@ function authoredInterfaceBindingId(value) {
   return interfaceId;
 }
 
-async function resolveContinuationState({ config, octopusHome, requestedRunId, request }) {
+async function resolveContinuationState({ config, phobosHome, requestedRunId, request }) {
   if (request === undefined || request === null) return null;
   if (requestedRunId) throw new Error("continuation is only valid when creating a new run");
   if (!isObject(request)) throw new Error("continuation must be an object");
@@ -250,12 +250,12 @@ async function resolveContinuationState({ config, octopusHome, requestedRunId, r
   if (unknown.length > 0) throw new Error(`continuation contains unknown fields: ${unknown.join(", ")}`);
   const sourceRunId = safeSegment(request.sourceRunId, "continuation.sourceRunId");
   const sourceArtifactId = requiredString(request.sourceArtifactId, "continuation.sourceArtifactId");
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const sourceDocument = await readJsonDocumentIfPresent(path.join(runsDir, `${sourceRunId}.json`));
   if (!sourceDocument) throw new Error(`continuation source run '${sourceRunId}' does not exist`);
   const sourceIdentity = chatIdentityFromRunRecord(config, sourceRunId, sourceDocument.value);
   await assertRunOwnsArtifact({
-    octopusHome,
+    phobosHome,
     runId: sourceRunId,
     interfaceId: sourceIdentity.interfaceId,
     artifactId: sourceArtifactId,
@@ -287,7 +287,7 @@ async function resolveContinuationState({ config, octopusHome, requestedRunId, r
 }
 
 async function assertRunOwnsArtifact({
-  octopusHome,
+  phobosHome,
   runId,
   interfaceId,
   artifactId,
@@ -298,7 +298,7 @@ async function assertRunOwnsArtifact({
     && !allowedArtifactLabels.some((label) => artifactIdHasLabel(artifactId, label))) {
     throw new Error(`artifact '${artifactId}' is not a terminal operator chat snapshot`);
   }
-  const movementsPath = path.join(octopusHome, "ledger", "movements.jsonl");
+  const movementsPath = path.join(phobosHome, "ledger", "movements.jsonl");
   const ledger = await readCompleteLedgerTail(movementsPath, 0);
   for (let index = ledger.lines.length - 1; index >= 0; index -= 1) {
     let movement;
@@ -318,7 +318,7 @@ async function assertRunOwnsArtifact({
 }
 
 async function readConversationState({
-  octopusHome,
+  phobosHome,
   existing,
   runId,
   interfaceId,
@@ -352,7 +352,7 @@ async function readConversationState({
   const continuedFrom = priorState.continued_from === undefined
     ? continuation?.continuedFrom ?? null
     : priorState.continued_from;
-  const movementsPath = path.join(octopusHome, "ledger", "movements.jsonl");
+  const movementsPath = path.join(phobosHome, "ledger", "movements.jsonl");
   if (!existing) {
     const retainedSnapshot = continuation?.artifactBindings?.at(-1) ?? null;
     return {
@@ -364,7 +364,7 @@ async function readConversationState({
     };
   }
   const fold = await foldConversationLedger({
-    octopusHome,
+    phobosHome,
     movementsPath,
     runId,
     interfaceId,
@@ -402,8 +402,8 @@ function conversationArrivalKey(checkpoint, epoch) {
   return `${requiredString(checkpoint, "operator message checkpoint")}@${nonNegativeInteger(epoch, "operator message epoch")}`;
 }
 
-function conversationFoldPath(octopusHome, interfaceId) {
-  return path.join(octopusHome, "interfaces", interfaceId, "conversation-fold.client.json");
+function conversationFoldPath(phobosHome, interfaceId) {
+  return path.join(phobosHome, "interfaces", interfaceId, "conversation-fold.client.json");
 }
 
 function emptyConversationFold(runId, priorOffset) {
@@ -423,7 +423,7 @@ function usableConversationFold(saved, runId, priorOffset, ledgerLength) {
 }
 
 async function foldConversationLedger({
-  octopusHome,
+  phobosHome,
   movementsPath,
   runId,
   interfaceId,
@@ -433,7 +433,7 @@ async function foldConversationLedger({
   operatorMessageArtifactLabel,
   currentArrivalKey,
 }) {
-  const foldPath = conversationFoldPath(octopusHome, interfaceId);
+  const foldPath = conversationFoldPath(phobosHome, interfaceId);
   const ledgerLength = await fs.stat(movementsPath).then((stat) => stat.size, (error) => {
     if (error?.code === "ENOENT") return 0;
     throw error;

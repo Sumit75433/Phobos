@@ -1,18 +1,18 @@
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 import { appToast } from "./toasts";
 
-const RECOVERY_KEY = "__octopus.client-settings-recovery.v1";
+const RECOVERY_KEY = "__phobos.client-settings-recovery.v1";
 const RECOVERY_LIFETIME_MS = 60_000;
 
 type ClientSettingsRecovery = {
   createdAt: number;
   entries: Array<[string, string]>;
   message: string;
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
   version: 1;
 };
 
-export function clientProfileStorageEntries(accessProfile: OctopusClientAccessProfile): Array<[string, string]> {
+export function clientProfileStorageEntries(accessProfile: PhobosClientAccessProfile): Array<[string, string]> {
   const entries: Array<[string, string]> = [];
   for (let index = 0; index < window.localStorage.length; index += 1) {
     const key = window.localStorage.key(index);
@@ -23,13 +23,13 @@ export function clientProfileStorageEntries(accessProfile: OctopusClientAccessPr
   return entries.sort(([left], [right]) => left.localeCompare(right));
 }
 
-export function clientProfileOwnsStorageKey(key: string, accessProfile: OctopusClientAccessProfile): boolean {
-  if (!key.startsWith("octopus.")) return false;
-  const testOwned = key.endsWith(".test") || key.endsWith(".lab") || key.startsWith("octopus.test.");
+export function clientProfileOwnsStorageKey(key: string, accessProfile: PhobosClientAccessProfile): boolean {
+  if (!key.startsWith("phobos.")) return false;
+  const testOwned = key.endsWith(".test") || key.endsWith(".lab") || key.startsWith("phobos.test.");
   return (accessProfile === "lab") === testOwned;
 }
 
-export function clearClientProfileStorageWithRecovery(accessProfile: OctopusClientAccessProfile): void {
+export function clearClientProfileStorageWithRecovery(accessProfile: PhobosClientAccessProfile): void {
   replaceClientProfileStorageWithRecovery(
     accessProfile,
     [],
@@ -39,7 +39,7 @@ export function clearClientProfileStorageWithRecovery(accessProfile: OctopusClie
 }
 
 export function replaceClientProfileStorageWithRecovery(
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   entries: ReadonlyArray<readonly [string, string]>,
   mode: "merge" | "replace",
   message: string,
@@ -78,7 +78,7 @@ export function replaceClientProfileStorageWithRecovery(
   window.location.reload();
 }
 
-export function offerClientProfileStorageRecovery(accessProfile: OctopusClientAccessProfile): void {
+export function offerClientProfileStorageRecovery(accessProfile: PhobosClientAccessProfile): void {
   const recovery = readRecovery(accessProfile);
   if (!recovery) return;
   const expiresIn = Math.max(RECOVERY_LIFETIME_MS - (Date.now() - recovery.createdAt), 0);
@@ -116,7 +116,7 @@ export function offerClientProfileStorageRecovery(accessProfile: OctopusClientAc
   }, expiresIn);
 }
 
-function readRecovery(accessProfile: OctopusClientAccessProfile): ClientSettingsRecovery | null {
+function readRecovery(accessProfile: PhobosClientAccessProfile): ClientSettingsRecovery | null {
   try {
     const raw = window.sessionStorage.getItem(RECOVERY_KEY);
     if (!raw || raw.length > 5_000_000) return null;
@@ -140,7 +140,7 @@ function readRecovery(accessProfile: OctopusClientAccessProfile): ClientSettings
 }
 
 function replaceClientProfileStorageExact(
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   entries: ReadonlyArray<readonly [string, string]>,
 ): void {
   const desired = [...entries]

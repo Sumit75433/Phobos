@@ -8,7 +8,7 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const tick = () => new Promise((resolve) => setImmediate(resolve));
-const signedIn = { signedIn: true, authType: "chatgpt", email: "first@example.test", planType: "pro", workspaceName: null, credentialHome: "/native", octopusHome: "/home" };
+const signedIn = { signedIn: true, authType: "chatgpt", email: "first@example.test", planType: "pro", workspaceName: null, credentialHome: "/native", phobosHome: "/home" };
 const signedOut = { ...signedIn, signedIn: false, authType: null, email: null, planType: null };
 const limit = { limitId: "core", limitName: "Core", primary: { usedPercent: 25, windowDurationMins: 300, resetsAt: 2000000000 }, secondary: null, credits: null, individualLimit: null, planType: "pro", rateLimitReachedType: null, spendControlReached: null };
 
@@ -104,7 +104,7 @@ function nativeFixture(env = {}) {
     process: { env }, URL, setTimeout, clearTimeout,
   });
   const client = module.exports.createChatgptSignIn({ codexBinary: () => "/fixture/codex", codexHome: () => home,
-    octopusHome: () => "/home", version: () => "test", openExternal: async () => {}, onAccountChanged: () => { changes += 1; } });
+    phobosHome: () => "/home", version: () => "test", openExternal: async () => {}, onAccountChanged: () => { changes += 1; } });
   return { client, control, children, calls, get changes() { return changes; },
     externalAccount(account) { persisted = account; stamp += 1n; }, changeHome(value) { home = value; },
     complete(loginId, account, success = true) {
@@ -122,7 +122,7 @@ test("native account discovery owns its client identity and credential Home", as
     await fixture.client.account();
     const env = fixture.children[0].spawnEnv;
     assert.equal(env.CODEX_HOME, "/native");
-    assert.equal(env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE, "octopus_desktop");
+    assert.equal(env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE, "phobos_desktop");
     assert.equal(env.HTTPS_PROXY, inherited.HTTPS_PROXY);
     assert.equal(inherited.CODEX_INTERNAL_ORIGINATOR_OVERRIDE, "other-client");
     assert.equal(fixture.calls.find((call) => call.method === "initialize").params.clientInfo.name, env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE);
@@ -291,7 +291,7 @@ test("account sessions list workspaces and switch them in the shared credential 
 test("workspace switching replaces the observation, drops stale workspace lists and discloses the shared sign-in", async () => {
   const { createChatgptAccountState } = accountStateModule;
   const team = { ...signedIn, workspaceName: "Team" };
-  const sessions = (selected) => ({ activeSessionId: "session-1", credentialHome: "/native", octopusHome: "/home", sessions: [{ sessionId: "session-1",
+  const sessions = (selected) => ({ activeSessionId: "session-1", credentialHome: "/native", phobosHome: "/home", sessions: [{ sessionId: "session-1",
     email: signedIn.email, displayName: null, active: true, selectedWorkspaceId: selected,
     workspaces: [{ accountId: "personal-1", name: null, kind: "personal" }, { accountId: "team-1", name: "Team", kind: "workspace" }] }] });
   let account = signedIn, listed = 0, switchResult;
@@ -390,7 +390,7 @@ test("client clears native signed-out identity and rejects stale reads and stale
   assert.match(controller.getSnapshot().signInStatusError, /Status IPC unavailable/);
   const accountHook = { useChatgptAccount: () => ({ ...controller.getSnapshot(), retrySignInStatus: controller.retrySignInStatus }) };
   const { ChatGptSignInGate } = loadTs("components/onboarding/ChatGptSignInGate.tsx", {
-    "../../account/useChatgptAccount": accountHook, "../OctopusLoadingLogo": { OctopusLoadingState: () => null },
+    "../../account/useChatgptAccount": accountHook, "../PhobosLoadingLogo": { PhobosLoadingState: () => null },
     "../../assets/openai-logo.svg?raw": { default: "" },
   });
   const { AccountSettingsSection } = loadTs("components/settings/AccountSettingsSection.tsx", {
@@ -520,7 +520,7 @@ test("sign-in copy completion belongs to the current URL and mounted attempt", a
   let state = { account: signedOut, loading: false, error: "", signInStatusError: "", action: "waiting", signInUrl: "", cancel: async () => {} };
   const { ChatGptSignInGate } = loadTs("components/onboarding/ChatGptSignInGate.tsx", {
     "../../account/useChatgptAccount": { useChatgptAccount: () => state },
-    "../OctopusLoadingLogo": { OctopusLoadingState: () => null }, "../../assets/openai-logo.svg?raw": { default: "" },
+    "../PhobosLoadingLogo": { PhobosLoadingState: () => null }, "../../assets/openai-logo.svg?raw": { default: "" },
   });
   const { createRoot } = require("react-dom/client"), root = createRoot(document.getElementById("root"));
   let mounted = true;
@@ -588,7 +588,7 @@ test("reopened setup displays committed progress before workspace discovery and 
     },
     "../../projectionLive": { useProjectionStructureGeneration: () => 0 }, "../../design-system/components": ui,
     "../../toasts": { appToast: { danger: () => ({ close() {} }) } },
-    "../OctopusLoadingLogo": { OctopusLoadingState: () => "Opening Octopus", OctopusLoadingLogo: () => null },
+    "../PhobosLoadingLogo": { PhobosLoadingState: () => "Opening Phobos", PhobosLoadingLogo: () => null },
     "./WorkspaceSetupOverlay": { WorkspaceSetupProgress: progressView, WorkspaceSetupOverlay: progressView, createDefaultWorkspaceSetupDraft: () => ({}) },
   });
   const root = require("react-dom/client").createRoot(document.getElementById("root"));
@@ -598,7 +598,7 @@ test("reopened setup displays committed progress before workspace discovery and 
     await show();
     assert.equal(document.querySelector("[data-progress]").dataset.progress, "45");
     assert.match(document.body.textContent, /Checking Home and projects/);
-    assert.doesNotMatch(document.body.textContent, /Opening Octopus|Sign in|Shell/);
+    assert.doesNotMatch(document.body.textContent, /Opening Phobos|Sign in|Shell/);
     workspace = { status: "not_configured", errors: [], receipt: null };
     await act(() => releaseWorkspace(workspace));
     assert.equal(resumeCalls, 1);
@@ -697,7 +697,7 @@ test("local expiry returns to unlock before Home verification and ignores stale 
 
 test("completed Home uses checked local receipts offline and cancels proof across Home targets", { timeout: 10000 }, async () => {
   const fsp = require("node:fs/promises"), crypto = require("node:crypto");
-  const temporary = await fsp.mkdtemp(path.join(require("node:os").tmpdir(), "octopus-home-gate-"));
+  const temporary = await fsp.mkdtemp(path.join(require("node:os").tmpdir(), "phobos-home-gate-"));
   const stable = value => value && typeof value === "object" && !Array.isArray(value)
     ? `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stable(value[key])}`).join(",")}}`
     : Array.isArray(value) ? `[${value.map(stable).join(",")}]` : JSON.stringify(value);
@@ -727,7 +727,7 @@ test("completed Home uses checked local receipts offline and cancels proof acros
   let releaseInitialAccount;
   let home = "/home", accountResult = new Promise(resolve => { releaseInitialAccount = resolve; }), accountChanged;
   let currentSetup = () => store.readCurrent(), configured = true, scopeHome = "home_run", catalogReads = 0, setupWrites = 0, workspaceError = "";
-  window.octopusTransport = {
+  window.phobosTransport = {
     chatgptAccount: async () => { const result = await accountResult; if (result instanceof Error) throw result; return result; },
     onChatgptAccountChanged: callback => { accountChanged = callback; return () => { accountChanged = null; }; },
   };
@@ -735,9 +735,9 @@ test("completed Home uses checked local receipts offline and cancels proof acros
   const accountHook = loadTs("account/useChatgptAccount.ts", {
     "./chatgptAccountState": loadTs("account/chatgptAccountState.ts"), "../onboarding/chatgptSignIn": onboarding,
   });
-  const logo = { OctopusLoadingState: ({ label }) => label, OctopusLoadingLogo: () => null };
+  const logo = { PhobosLoadingState: ({ label }) => label, PhobosLoadingLogo: () => null };
   const { ChatGptSignInGate } = loadTs("components/onboarding/ChatGptSignInGate.tsx", {
-    "../../account/useChatgptAccount": accountHook, "../OctopusLoadingLogo": logo, "../../assets/openai-logo.svg?raw": { default: "" },
+    "../../account/useChatgptAccount": accountHook, "../PhobosLoadingLogo": logo, "../../assets/openai-logo.svg?raw": { default: "" },
   });
   const { AccountSettingsSection } = loadTs("components/settings/AccountSettingsSection.tsx", {
     "../../design-system/LoadingSkeleton": loadingViews,
@@ -768,7 +768,7 @@ test("completed Home uses checked local receipts offline and cancels proof acros
     },
     "../../projectionLive": { useProjectionStructureGeneration: () => 0 }, "../../design-system/components": ui,
     "../../toasts": { appToast: { danger: () => ({ close() {} }) } },
-    "../OctopusLoadingLogo": logo, "./WorkspaceSetupOverlay": { WorkspaceSetupOverlay: () => "Review setup", createDefaultWorkspaceSetupDraft: () => ({}) },
+    "../PhobosLoadingLogo": logo, "./WorkspaceSetupOverlay": { WorkspaceSetupOverlay: () => "Review setup", createDefaultWorkspaceSetupDraft: () => ({}) },
   });
   const { App } = loadTs("App.tsx", {
     "./useClientAccess": { useClientAccess: () => ({ access: { configured: true, authenticated: true, profile: "live" } }) },
@@ -818,13 +818,13 @@ test("completed Home uses checked local receipts offline and cancels proof acros
     accountResult = new Error("workspace routing discovery timed out"); currentSetup = async () => null;
     await act(() => releaseNew(null)); await waitFor(() => document.body.textContent.includes("ChatGPT account unavailable"));
     assert.equal(catalogReads, 0); assert.equal(shell(), null);
-    accountResult = { ...signedOut, octopusHome: home }; await act(() => accountChanged());
+    accountResult = { ...signedOut, phobosHome: home }; await act(() => accountChanged());
     assert.match(document.body.textContent, /Sign in to ChatGPT/); assert.doesNotMatch(document.body.textContent, /ChatGPT account unavailable/);
     accountResult = signedIn; await act(() => accountChanged());
     assert.match(document.body.textContent, /observation belongs to another Home/); assert.equal(catalogReads, 0);
-    accountResult = { ...signedIn, octopusHome: home }; await act(() => accountChanged());
+    accountResult = { ...signedIn, phobosHome: home }; await act(() => accountChanged());
     await waitFor(() => document.body.textContent.includes("Review setup")); assert.equal(shell(), null); assert.equal(catalogReads, 1);
-    configured = true; home = "/missing-aggregate"; accountResult = { ...signedIn, octopusHome: home }; await show();
+    configured = true; home = "/missing-aggregate"; accountResult = { ...signedIn, phobosHome: home }; await show();
     await waitFor(() => document.body.textContent.includes("Workspace verification is incomplete")); assert.equal(shell(), null);
     assert.equal(setupWrites, 0);
   } finally {

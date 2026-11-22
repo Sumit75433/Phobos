@@ -62,7 +62,7 @@ function fixture() {
     if (ts.isFunctionDeclaration(node)) return ["startClientQuitCleanup", "currentClientWindowCloseSender", "requireClientLockWindow", "nativeDesktopAccessEntries"].includes(node.name?.text);
     if (!ts.isExpressionStatement(node) || !ts.isCallExpression(node.expression)) return false;
     const call = node.expression, owner = call.expression.getText(main), channel = call.arguments[0]?.text;
-    return owner === "app.on" && channel === "before-quit" || owner === "ipcMain.handle" && (channel?.startsWith("octopus:client-window-close-") || channel === "octopus:access-lock" || channel === "octopus:client-relaunch");
+    return owner === "app.on" && channel === "before-quit" || owner === "ipcMain.handle" && (channel?.startsWith("phobos:client-window-close-") || channel === "phobos:access-lock" || channel === "phobos:client-relaunch");
   });
   assert.equal(statements.length, 11);
   const integration = Function(...Object.keys(dependencies), `let quitCleanupStarted = false, quitReady = false, relaunchRequested = false;\n${statements.map((n) => n.getText(main)).join("\n")}\nreturn { host: clientWindowClose, state: () => ({quitCleanupStarted,quitReady}) };`)(...Object.values(dependencies));
@@ -74,12 +74,12 @@ function fixture() {
     win.invocations = [];
     ipc.invoke = async (channel, passedToken, ...args) => {
       win.invocations.push({ channel, token: passedToken });
-      if (channel === "octopus:runtime-events-unsubscribe") { subscriptions.delete(id); return; }
-      if (channel === "octopus:access-status") return status(passedToken);
+      if (channel === "phobos:runtime-events-unsubscribe") { subscriptions.delete(id); return; }
+      if (channel === "phobos:access-status") return status(passedToken);
       return handlers.get(channel)({ sender: win.webContents, senderFrame: win.webContents.mainFrame }, passedToken, ...args);
     };
     let bridge;
-    Function("require", "process", readFileSync(path.join(__dirname, "../electron/preload.cjs"), "utf8"))(() => ({ ipcRenderer: ipc, contextBridge: { exposeInMainWorld: (_name, value) => { bridge = value; } } }), { argv: ["--octopus-access-claim=test"] });
+    Function("require", "process", readFileSync(path.join(__dirname, "../electron/preload.cjs"), "utf8"))(() => ({ ipcRenderer: ipc, contextBridge: { exposeInMainWorld: (_name, value) => { bridge = value; } } }), { argv: ["--phobos-access-claim=test"] });
     win.bridge = bridge; win.token = token;
     if (guarded) win.guard = integration.host.register(win.webContents, token);
     bridge.onClientAccessLocked((value) => { win.lockedStatus = value; });
@@ -100,7 +100,7 @@ test("a pending quit keeps account reads alive until approved resource cleanup",
   assert.equal(declarations.length, 2);
   const lifecycle = Function("app", "createChatgptSignIn", `
     let chatgptSignIn = null;
-    const resolveOperatorCodexHome = () => "/fixture/codex", resolveOctopusHome = () => "/fixture/home";
+    const resolveOperatorCodexHome = () => "/fixture/codex", resolvePhobosHome = () => "/fixture/home";
     const clearGlobalDictationShortcut = () => {};
     const cdpViewerManager = null, processViewerManager = null, clientSurfaceDocumentStore = null,
       clientExtensionStore = null, clientArtifactStreamStore = null, clientAttachmentStagingStore = null,
@@ -124,7 +124,7 @@ test("actual preload and main handlers bind single-use close to exact sender, to
   a.guard = await a.bridge.registerClientWindowCloseGuard(); assert.equal(a.guard.generation, 1);
   const seen = []; const unsubscribe = a.bridge.onClientWindowCloseRequested((request) => seen.push(request));
   assert.equal(a.close().defaultPrevented, true); a.close(); assert.equal(seen.length, 1);
-  const request = seen[0], value = { ...request, allowClose: true }, handler = f.handlers.get("octopus:client-window-close-resolve");
+  const request = seen[0], value = { ...request, allowClose: true }, handler = f.handlers.get("phobos:client-window-close-resolve");
   assert.deepEqual(await b.bridge.resolveClientWindowClose(value), { accepted: false });
   for (const [sender, senderFrame, token, input] of [[a.webContents, {}, a.token, value], [{ ...a.webContents }, a.webContents.mainFrame, a.token, value], [a.webContents, a.webContents.mainFrame, "wrong", value], [a.webContents, a.webContents.mainFrame, a.token, { ...value, generation: 99 }], [a.webContents, a.webContents.mainFrame, a.token, { ...value, requestId: "wrong" }]]) assert.deepEqual(handler({ sender, senderFrame }, token, input), { accepted: false });
   assert.deepEqual(await reply(a, false), { accepted: true }); assert.equal(a.dead, false); assert.equal(a.cancellations().at(-1).reason, "cancelled");

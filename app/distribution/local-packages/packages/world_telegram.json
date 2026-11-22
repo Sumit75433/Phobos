@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_telegram",
   "version": "3.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Telegram",
     "description": "Message the tasks you connect to Telegram from your phone, and let them answer you there.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "message"
   },

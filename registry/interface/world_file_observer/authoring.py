@@ -14,7 +14,7 @@ def observer_package(interface, files, *, read_roots, poll_interval_ms=500):
         "args": [{"repository_file": f"{owner}/file_observer_life.py"},
                  {"repository_file": f"{dependency}/pyecho_life.py"}],
         "required_files": [f"{owner}/file_observer_life.py", f"{owner}/file_observer.py",
-                           f"{dependency}/pyecho_life.py", f"{dependency}/octopus_content_hash.py"],
+                           f"{dependency}/pyecho_life.py", f"{dependency}/phobos_content_hash.py"],
         "env": {"PYTHONDONTWRITEBYTECODE": "1"},
         "inherit_env": ["PATH"],
         "io_limits": {"max_control_frame_bytes": 1048576, "max_stderr_bytes": 262144,

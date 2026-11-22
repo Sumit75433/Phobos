@@ -9,43 +9,43 @@ const appRoot = path.resolve(__dirname, "..");
 const dom = new JSDOM("<!doctype html><html><body></body></html>");
 const { document } = dom.window;
 after(() => dom.window.close());
-const applicationSheets = ["src/foundation.css", "src/octopus-owned-components.css", "src/styles.css", "src/theme.css", "src/shell.css", "src/components/shell/paneTabs.css", "src/components/chat/chat.css", "src/components/chat/messageTooltip.css", "src/components/chat/queue.css", "src/components/voice/voice.css"];
+const applicationSheets = ["src/foundation.css", "src/phobos-owned-components.css", "src/styles.css", "src/theme.css", "src/shell.css", "src/components/shell/paneTabs.css", "src/components/chat/chat.css", "src/components/chat/messageTooltip.css", "src/components/chat/queue.css", "src/components/voice/voice.css"];
 const application = stylesheetCascade(applicationSheets);
 const fixture = (markup) => { document.body.innerHTML = markup; return (selector) => document.body.querySelector(selector); };
 const state = (element, name) => { for (let current = element; current; current = current.parentElement) current.setAttribute(`data-${name}`, ""); };
 
 test("an activity row toggles from anywhere on its header while its file link stays its own target", () => {
-  const $ = fixture(`<div class="octopus-agent-activity"><div class="octopus-agent-activity-header"><button class="octopus-agent-activity-toggle"></button>
-    <span class="octopus-agent-activity-leading"><span class="octopus-agent-activity-summary">Read <span class="chat-tooltip-trigger is-activity-target" data-agent-activity-file-link="true">notes.md</span></span></span>
-    <span class="octopus-agent-activity-chevron-wrap"><svg class="octopus-agent-activity-chevron"></svg></span></div></div>`);
-  const toggle = $(".octopus-agent-activity-toggle");
+  const $ = fixture(`<div class="phobos-agent-activity"><div class="phobos-agent-activity-header"><button class="phobos-agent-activity-toggle"></button>
+    <span class="phobos-agent-activity-leading"><span class="phobos-agent-activity-summary">Read <span class="chat-tooltip-trigger is-activity-target" data-agent-activity-file-link="true">notes.md</span></span></span>
+    <span class="phobos-agent-activity-chevron-wrap"><svg class="phobos-agent-activity-chevron"></svg></span></div></div>`);
+  const toggle = $(".phobos-agent-activity-toggle");
   assert.equal(application.value(toggle, "position"), "absolute");
   assert.deepEqual(["top", "right", "bottom", "left"].map((side) => application.value(toggle, side)), ["0", "0", "0", "0"]);
-  assert.notEqual(application.value($(".octopus-agent-activity-header"), "position") ?? "static", "static", "the toggle covers its own header");
-  assert.equal(application.value($(".octopus-agent-activity-summary"), "pointer-events"), "none");
-  assert.equal(application.value($(".octopus-agent-activity-chevron"), "pointer-events"), "none");
+  assert.notEqual(application.value($(".phobos-agent-activity-header"), "position") ?? "static", "static", "the toggle covers its own header");
+  assert.equal(application.value($(".phobos-agent-activity-summary"), "pointer-events"), "none");
+  assert.equal(application.value($(".phobos-agent-activity-chevron"), "pointer-events"), "none");
   assert.equal(application.value($("[data-agent-activity-file-link]"), "pointer-events"), "auto");
-  const resting = application.value($(".octopus-agent-activity-summary"), "color");
-  state($(".octopus-agent-activity-summary"), "hover");
-  const rowHover = application.value($(".octopus-agent-activity-summary"), "color");
+  const resting = application.value($(".phobos-agent-activity-summary"), "color");
+  state($(".phobos-agent-activity-summary"), "hover");
+  const rowHover = application.value($(".phobos-agent-activity-summary"), "color");
   assert.notEqual(rowHover, resting, "hovering the row highlights its summary");
   state($("[data-agent-activity-file-link]"), "hover");
-  assert.equal(application.value($(".octopus-agent-activity-summary"), "color"), resting, "hovering the file link leaves the row unhighlighted");
+  assert.equal(application.value($(".phobos-agent-activity-summary"), "color"), resting, "hovering the file link leaves the row unhighlighted");
 });
 
 test("an expanding activity body carries no block spacing and its detail is never height-capped", () => {
-  const $ = fixture(`<div class="octopus-agent-activity"><div class="octopus-agent-activity-body"><div class="octopus-agent-activity-viewport"><div class="octopus-reasoning-detail"></div></div></div></div>`);
-  assert.deepEqual(application.properties($(".octopus-agent-activity-body")).filter((property) => /padding|margin|gap|height/.test(property)), []);
-  for (const selector of [".octopus-agent-activity-viewport", ".octopus-reasoning-detail"]) assert.equal(application.value($(selector), "max-height") ?? "none", "none", selector);
+  const $ = fixture(`<div class="phobos-agent-activity"><div class="phobos-agent-activity-body"><div class="phobos-agent-activity-viewport"><div class="phobos-reasoning-detail"></div></div></div></div>`);
+  assert.deepEqual(application.properties($(".phobos-agent-activity-body")).filter((property) => /padding|margin|gap|height/.test(property)), []);
+  for (const selector of [".phobos-agent-activity-viewport", ".phobos-reasoning-detail"]) assert.equal(application.value($(selector), "max-height") ?? "none", "none", selector);
 });
 
 test("thread content and the floating summary clear the toolbar only in a standalone thread", () => {
   const thread = (embedded) => `<div class="chat-view${embedded ? " is-embedded" : ""}" style="--height-toolbar: 77px"><div class="chat-thread">
     <div class="task-summary-surface"><div class="task-summary-surface-inner"><div class="task-summary-motion"></div></div></div>
-    <div class="octopus-chat-scroll thread-scroll-container"></div></div></div>`;
+    <div class="phobos-chat-scroll thread-scroll-container"></div></div></div>`;
   for (const embedded of [false, true]) {
     const $ = fixture(thread(embedded));
-    for (const [element, property] of [[$(".task-summary-surface"), "top"], [$(".octopus-chat-scroll"), "--thread-content-top-inset"]]) {
+    for (const [element, property] of [[$(".task-summary-surface"), "top"], [$(".phobos-chat-scroll"), "--thread-content-top-inset"]]) {
       const resolved = application.value(element, property);
       assert.ok(resolved, property);
       assert.equal(resolved.includes("77px"), !embedded, `${property} ${resolved}`);
@@ -99,9 +99,9 @@ test("surface loading states cover their surface", () => {
 test("the chat scroll container neither anchors positioned overlays nor scrolls smoothly", () => {
   for (const media of [{}, { "prefers-reduced-motion": "reduce" }]) {
     const sheets = stylesheetCascade(applicationSheets, { media });
-    const $ = fixture(`<div class="chat-view"><div class="octopus-chat-scroll thread-scroll-container"><div data-thread-scroll-footer="true"></div></div></div>`);
-    assert.equal(sheets.value($(".octopus-chat-scroll"), "position") ?? "static", "static");
-    assert.notEqual(sheets.value($(".octopus-chat-scroll"), "scroll-behavior"), "smooth");
+    const $ = fixture(`<div class="chat-view"><div class="phobos-chat-scroll thread-scroll-container"><div data-thread-scroll-footer="true"></div></div></div>`);
+    assert.equal(sheets.value($(".phobos-chat-scroll"), "position") ?? "static", "static");
+    assert.notEqual(sheets.value($(".phobos-chat-scroll"), "scroll-behavior"), "smooth");
   }
 });
 

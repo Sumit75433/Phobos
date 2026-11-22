@@ -1,4 +1,4 @@
-module.exports = { applicationPrivateConfigurationProjection, baseInterfaceRows, bindingRows, descendantEnvironmentIds, descriptorInventoryRows, descriptorKindRows, descriptorRows, eeInstanceRows, eeTemplateDescriptorRows, eeTemplateRows, envelopeRows, environmentLineage, filterInterfaces, goalRows, interfaceActivationEntries, isExactGitWorktreeRoot, isOperatorChatProviderFailureRow, isOperatorChatProviderMovement, lowestCommonEnvironment, markKindRows, markRows, normalizeDescriptorRow, octopusOsInterfaceSidecars, operatorOsProjectRows, policyRows, preserveProjectionEvidenceError, projectedFilesystemRootSurfaces, projectedGitSurfaces, projectedRunInterfaceIds, projectedWorktreeStatusSurfaces, projectionMemo, projectionSnapshot, projectionTruthChange, readEeInstanceRecords, readHostRootRefs, readRunRecords, recordCheckpointRowsFor, requiredVerifiedArtifactOutcome, requiredVerifiedArtifactOutcomeIndex, rootSlotLabel, runCheckpointRows, runRows, toolRows, unavailableViewerSurface, validAddressWithProtocols, validHttpAddress, validWebSocketAddress, validWorkerEnvironmentLiveState, validateEeInstancePolicyNarrowing, validateEePolicyProjectionSnapshot, validateProjectedEePolicy, validateProjectedRunRecordSemantics, validateProjectedWorkerInterfacePolicies, verifierRows, withoutRawProjectionEvidence, workerEnvironmentCapabilities, workerEnvironmentLiveAvailable, workerEnvironmentRows, workerEnvironmentSession, workerEnvironmentWorkspace, workerRows };
+module.exports = { applicationPrivateConfigurationProjection, baseInterfaceRows, bindingRows, descendantEnvironmentIds, descriptorInventoryRows, descriptorKindRows, descriptorRows, eeInstanceRows, eeTemplateDescriptorRows, eeTemplateRows, envelopeRows, environmentLineage, filterInterfaces, goalRows, interfaceActivationEntries, isExactGitWorktreeRoot, isOperatorChatProviderFailureRow, isOperatorChatProviderMovement, lowestCommonEnvironment, markKindRows, markRows, normalizeDescriptorRow, phobosOsInterfaceSidecars, operatorOsProjectRows, policyRows, preserveProjectionEvidenceError, projectedFilesystemRootSurfaces, projectedGitSurfaces, projectedRunInterfaceIds, projectedWorktreeStatusSurfaces, projectionMemo, projectionSnapshot, projectionTruthChange, readEeInstanceRecords, readHostRootRefs, readRunRecords, recordCheckpointRowsFor, requiredVerifiedArtifactOutcome, requiredVerifiedArtifactOutcomeIndex, rootSlotLabel, runCheckpointRows, runRows, toolRows, unavailableViewerSurface, validAddressWithProtocols, validHttpAddress, validWebSocketAddress, validWorkerEnvironmentLiveState, validateEeInstancePolicyNarrowing, validateEePolicyProjectionSnapshot, validateProjectedEePolicy, validateProjectedRunRecordSemantics, validateProjectedWorkerInterfacePolicies, verifierRows, withoutRawProjectionEvidence, workerEnvironmentCapabilities, workerEnvironmentLiveAvailable, workerEnvironmentRows, workerEnvironmentSession, workerEnvironmentWorkspace, workerRows };
 
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -696,12 +696,12 @@ function preserveProjectionEvidenceError(error) {
   if (error instanceof ProjectionEvidenceError) throw error;
 }
 
-function octopusOsInterfaceSidecars(projection) {
-  return projectionMemo(projection, "structure", "octopusOsInterfaceSidecars", () => new Map(
+function phobosOsInterfaceSidecars(projection) {
+  return projectionMemo(projection, "structure", "phobosOsInterfaceSidecars", () => new Map(
     descriptorRows(projection, "interface").flatMap((descriptor) => {
     const interfaceId = stringValue(descriptor.id ?? descriptor.rule_id);
-    const sidecar = objectOrEmpty(descriptor.octopus_os_sidecar);
-    return interfaceId && sidecar.workspace === "octopus_os"
+    const sidecar = objectOrEmpty(descriptor.phobos_os_sidecar);
+    return interfaceId && sidecar.workspace === "phobos_os"
       ? [[interfaceId, sidecar]]
       : [];
     }),
@@ -739,7 +739,7 @@ function environmentLineage(eeId, eeById, errors) {
     seen.add(cursor);
     const row = eeById.get(cursor);
     if (!row) {
-      errors.push(`Octopus OS client binding references missing EE '${cursor}'`);
+      errors.push(`Phobos OS client binding references missing EE '${cursor}'`);
       return [];
     }
     lineage.push(cursor);
@@ -901,7 +901,7 @@ function projectionSnapshot(projection) {
         generated_at: projection.generatedAt,
         generation: projection.generation,
         repo_root: projection.repoRoot,
-        octopus_home: projection.octopusHome,
+        phobos_home: projection.phobosHome,
         registry_root: projection.registryRoot,
         state_root: projection.stateRoot,
         runs_root: projection.runRecordsRoot,

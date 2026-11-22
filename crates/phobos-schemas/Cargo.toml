@@ -1,0 +1,19 @@
+[package]
+name = "phobos-schemas"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+schemars.workspace = true
+serde_json.workspace = true
+phobos-interfaces = { path = "../phobos-interfaces" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-marks = { path = "../phobos-marks" }
+phobos-run-record = { path = "../phobos-run-record" }
+phobos-verifiers = { path = "../phobos-verifiers" }
+
+[[bin]]
+name = "phobos-emit-schemas"
+path = "src/main.rs"

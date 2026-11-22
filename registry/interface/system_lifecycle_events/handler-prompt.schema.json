@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "octopus://system_lifecycle_events/lifecycle.handler.prompt",
+  "$id": "phobos://system_lifecycle_events/lifecycle.handler.prompt",
   "type": "object",
   "additionalProperties": false,
   "required": [

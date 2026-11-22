@@ -11,7 +11,7 @@ type BuiltinManifestSource = {
 };
 
 if (
-  builtinCatalog.schema !== "octopus.builtin_client_extension_catalog"
+  builtinCatalog.schema !== "phobos.builtin_client_extension_catalog"
   || builtinCatalog.schema_version !== 1
   || !Array.isArray(builtinCatalog.extensions)
 ) {

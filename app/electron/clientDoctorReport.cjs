@@ -12,7 +12,7 @@ const REGISTRY_KINDS = new Set(["interface", "worker_environment_kind", "tool", 
 
 async function createClientDoctorReport(options) {
   const report = {
-    schema: "octopus.configuration_diagnostic",
+    schema: "phobos.configuration_diagnostic",
     schema_version: 1,
     scope: options.packageId ? "package" : "registry_file",
     disclosure: options.includePaths === true ? "relative_names_and_pointers" : "names_omitted",
@@ -54,8 +54,8 @@ async function inspectRegistryFile(options) {
   const [source, active, manifest, identity] = await Promise.all([
     readJsonSnapshot(sourceRegistryRoot, relative),
     readJsonSnapshot(activeRegistryRoot, relative),
-    readJsonSnapshot(activeRegistryRoot, ".octopus-source-manifest.json"),
-    readJsonSnapshot(sourceRegistryRoot, ".octopus-source.json"),
+    readJsonSnapshot(activeRegistryRoot, ".phobos-source-manifest.json"),
+    readJsonSnapshot(sourceRegistryRoot, ".phobos-source.json"),
   ]);
   let baselineState = manifest.state, baseline = null, identityMatches = null;
   if (manifest.state === "present") {

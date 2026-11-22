@@ -1,71 +1,71 @@
 // The client reads the projection — there is no "bridge" concept in the architecture.
 // Two equal readers of the same engine (electron/projection.cjs):
-//   - the desktop app serves it over IPC (window.octopusTransport),
+//   - the desktop app serves it over IPC (window.phobosTransport),
 //   - the vite dev server serves it over HTTP for the browser preview.
 // Same methods, same rows, same truth.
 
 import type {
-  OctopusChatTurnRequest,
-  OctopusChatTurnResponse,
-  OctopusChatSteerRequest,
-  OctopusChatSteerResponse,
-  OctopusChatPinsRequest,
-  OctopusChatPinsResponse,
-  OctopusArtifactStreamAbortOutcome,
-  OctopusArtifactStreamAbortRequest,
-  OctopusArtifactStreamAppendRequest,
-  OctopusArtifactStreamBeginRequest,
-  OctopusArtifactStreamFinalizeRequest,
-  OctopusArtifactStreamHandle,
-  OctopusArtifactStreamOutcome,
-  OctopusArtifactStreamProgress,
-  OctopusInterfaceArtifactRequest,
-  OctopusInterfaceArtifactResponse,
-  OctopusDictationRequest,
-  OctopusDictationResponse,
-  OctopusProviderInterfacesResponse,
-  OctopusProviderModelsRefreshRequest,
-  OctopusProviderModelsRefreshResponse,
-  OctopusProviderRateLimits,
-  OctopusProviderRateLimitWindow,
-  OctopusOperatorChatArtifactsRequest,
-  OctopusOperatorChatArtifactsResponse,
-  OctopusOperatorTurnControlRequest,
-  OctopusOperatorTurnControlResponse,
-  OctopusScheduledMutationOutcome,
-  OctopusScheduledMutationRequest,
-  OctopusOsWorkspaceMutationOutcome,
-  OctopusOsWorkspaceMutationRequest,
-  OctopusApplicationLifecycleProgress,
-  OctopusApplicationPrivateConfigurationMutation,
-  OctopusApplicationPrivateConfigurationOutcome,
-  OctopusApplicationConnectionProbe,
-  OctopusApplicationConnectionProgress,
-  OctopusApplicationConnectionRequest,
-  OctopusApplicationConnectionState,
-  OctopusWorkspaceSetupProgress,
-  OctopusWorkspaceSetupState,
-  OctopusClientSetupBeginRequest,
-  OctopusClientSetupProgress,
-  OctopusClientSetupState,
+  PhobosChatTurnRequest,
+  PhobosChatTurnResponse,
+  PhobosChatSteerRequest,
+  PhobosChatSteerResponse,
+  PhobosChatPinsRequest,
+  PhobosChatPinsResponse,
+  PhobosArtifactStreamAbortOutcome,
+  PhobosArtifactStreamAbortRequest,
+  PhobosArtifactStreamAppendRequest,
+  PhobosArtifactStreamBeginRequest,
+  PhobosArtifactStreamFinalizeRequest,
+  PhobosArtifactStreamHandle,
+  PhobosArtifactStreamOutcome,
+  PhobosArtifactStreamProgress,
+  PhobosInterfaceArtifactRequest,
+  PhobosInterfaceArtifactResponse,
+  PhobosDictationRequest,
+  PhobosDictationResponse,
+  PhobosProviderInterfacesResponse,
+  PhobosProviderModelsRefreshRequest,
+  PhobosProviderModelsRefreshResponse,
+  PhobosProviderRateLimits,
+  PhobosProviderRateLimitWindow,
+  PhobosOperatorChatArtifactsRequest,
+  PhobosOperatorChatArtifactsResponse,
+  PhobosOperatorTurnControlRequest,
+  PhobosOperatorTurnControlResponse,
+  PhobosScheduledMutationOutcome,
+  PhobosScheduledMutationRequest,
+  PhobosOsWorkspaceMutationOutcome,
+  PhobosOsWorkspaceMutationRequest,
+  PhobosApplicationLifecycleProgress,
+  PhobosApplicationPrivateConfigurationMutation,
+  PhobosApplicationPrivateConfigurationOutcome,
+  PhobosApplicationConnectionProbe,
+  PhobosApplicationConnectionProgress,
+  PhobosApplicationConnectionRequest,
+  PhobosApplicationConnectionState,
+  PhobosWorkspaceSetupProgress,
+  PhobosWorkspaceSetupState,
+  PhobosClientSetupBeginRequest,
+  PhobosClientSetupProgress,
+  PhobosClientSetupState,
 } from "./electron";
 import {
   PROJECTION_READ_CONTRACT_VERSION,
   type ProjectionReadMethod,
 } from "./generated/projectionReadContract";
 
-const DEV_PROJECTION_URL = "/__octopus/projection";
-const DEV_PROVIDERS_URL = "/__octopus/providers";
-const DEV_SUBMIT_URL = "/__octopus/submit";
-const DEV_OPERATOR_CHAT_ARTIFACTS_URL = "/__octopus/operator-chat-artifacts";
-const DEV_OPERATOR_TURN_CONTROL_URL = "/__octopus/operator-turn-control";
-const DEV_STEER_URL = "/__octopus/chat-steer";
-const DEV_CHAT_PINS_URL = "/__octopus/chat-pins";
-const DEV_INTERFACE_ARTIFACT_URL = "/__octopus/interface-artifact";
-const DEV_ARTIFACT_STREAM_URL = "/__octopus/artifact-stream";
+const DEV_PROJECTION_URL = "/__phobos/projection";
+const DEV_PROVIDERS_URL = "/__phobos/providers";
+const DEV_SUBMIT_URL = "/__phobos/submit";
+const DEV_OPERATOR_CHAT_ARTIFACTS_URL = "/__phobos/operator-chat-artifacts";
+const DEV_OPERATOR_TURN_CONTROL_URL = "/__phobos/operator-turn-control";
+const DEV_STEER_URL = "/__phobos/chat-steer";
+const DEV_CHAT_PINS_URL = "/__phobos/chat-pins";
+const DEV_INTERFACE_ARTIFACT_URL = "/__phobos/interface-artifact";
+const DEV_ARTIFACT_STREAM_URL = "/__phobos/artifact-stream";
 
 export function hasProjectionBridge(): boolean {
-  return Boolean(window.octopusTransport?.projectionRead) || import.meta.env.DEV;
+  return Boolean(window.phobosTransport?.projectionRead) || import.meta.env.DEV;
 }
 
 export function projectionTargetLabel(): string {
@@ -81,7 +81,7 @@ export async function readProjection<T = unknown, M extends ProjectionReadMethod
     method,
     ...(params === undefined ? {} : { params }),
   };
-  const bridge = window.octopusTransport;
+  const bridge = window.phobosTransport;
   if (bridge?.projectionRead) {
     return bridge.projectionRead(request) as Promise<T>;
   }
@@ -101,19 +101,19 @@ export async function readProjection<T = unknown, M extends ProjectionReadMethod
 }
 
 export function canMutateScheduledInterfaces(): boolean {
-  return Boolean(window.octopusTransport?.mutateScheduledInterface);
+  return Boolean(window.phobosTransport?.mutateScheduledInterface);
 }
 
-export async function mutateScheduledInterface(request: OctopusScheduledMutationRequest): Promise<OctopusScheduledMutationOutcome> {
-  const host = window.octopusTransport;
+export async function mutateScheduledInterface(request: PhobosScheduledMutationRequest): Promise<PhobosScheduledMutationOutcome> {
+  const host = window.phobosTransport;
   if (!host?.mutateScheduledInterface) throw new Error("Scheduled interface editing is available only in the live desktop client.");
   return host.mutateScheduledInterface(request);
 }
 
 export async function mutateApplicationPrivateConfiguration(
-  request: OctopusApplicationPrivateConfigurationMutation,
-): Promise<OctopusApplicationPrivateConfigurationOutcome> {
-  const host = window.octopusTransport;
+  request: PhobosApplicationPrivateConfigurationMutation,
+): Promise<PhobosApplicationPrivateConfigurationOutcome> {
+  const host = window.phobosTransport;
   if (!host?.mutateApplicationPrivateConfiguration) {
     throw new Error("Application configuration is available only in the live desktop client.");
   }
@@ -121,99 +121,99 @@ export async function mutateApplicationPrivateConfiguration(
 }
 
 export function canConnectApplications(): boolean {
-  return Boolean(window.octopusTransport?.applicationConnectionProbe);
+  return Boolean(window.phobosTransport?.applicationConnectionProbe);
 }
 
-export async function probeApplicationConnection(applicationId: string): Promise<OctopusApplicationConnectionProbe> {
-  const host = window.octopusTransport;
+export async function probeApplicationConnection(applicationId: string): Promise<PhobosApplicationConnectionProbe> {
+  const host = window.phobosTransport;
   if (!host?.applicationConnectionProbe) throw new Error("Connecting applications is available only in the desktop client.");
   return host.applicationConnectionProbe({ applicationId });
 }
 
-export async function connectApplicationInterface(request: OctopusApplicationConnectionRequest): Promise<OctopusApplicationConnectionState> {
-  const host = window.octopusTransport;
+export async function connectApplicationInterface(request: PhobosApplicationConnectionRequest): Promise<PhobosApplicationConnectionState> {
+  const host = window.phobosTransport;
   if (!host?.applicationConnectionConnect) throw new Error("Connecting applications is available only in the desktop client.");
   return host.applicationConnectionConnect(request);
 }
 
 export async function cancelApplicationConnection(operationId: string): Promise<{ cancelled: boolean }> {
-  const host = window.octopusTransport;
+  const host = window.phobosTransport;
   if (!host?.applicationConnectionCancel) return { cancelled: false };
   return host.applicationConnectionCancel({ operationId });
 }
 
-export async function disconnectApplicationInterface(applicationId: string, interfaceId: string): Promise<OctopusApplicationConnectionState> {
-  const host = window.octopusTransport;
+export async function disconnectApplicationInterface(applicationId: string, interfaceId: string): Promise<PhobosApplicationConnectionState> {
+  const host = window.phobosTransport;
   if (!host?.applicationConnectionDisconnect) throw new Error("Connecting applications is available only in the desktop client.");
   return host.applicationConnectionDisconnect({ applicationId, interfaceId });
 }
 
-export function onApplicationConnectionProgress(listener: (progress: OctopusApplicationConnectionProgress) => void): () => void {
-  return window.octopusTransport?.onApplicationConnectionProgress?.(listener) ?? (() => {});
+export function onApplicationConnectionProgress(listener: (progress: PhobosApplicationConnectionProgress) => void): () => void {
+  return window.phobosTransport?.onApplicationConnectionProgress?.(listener) ?? (() => {});
 }
 
-export async function mutateOctopusOsWorkspace(request: OctopusOsWorkspaceMutationRequest): Promise<OctopusOsWorkspaceMutationOutcome> {
-  const host = window.octopusTransport;
-  if (!host?.mutateOctopusOsWorkspace) throw new Error("Octopus OS workspace editing is available only in the live desktop client.");
-  return host.mutateOctopusOsWorkspace(request);
+export async function mutatePhobosOsWorkspace(request: PhobosOsWorkspaceMutationRequest): Promise<PhobosOsWorkspaceMutationOutcome> {
+  const host = window.phobosTransport;
+  if (!host?.mutatePhobosOsWorkspace) throw new Error("Phobos OS workspace editing is available only in the live desktop client.");
+  return host.mutatePhobosOsWorkspace(request);
 }
 
 export async function saveSetupFile(request: { text: string; suggestedName: string }): Promise<{ saved: false } | { saved: true; name: string }> {
-  const host = window.octopusTransport;
+  const host = window.phobosTransport;
   if (!host?.saveSetupFile) throw new Error("Exporting a setup is available only in the live desktop client.");
   return host.saveSetupFile(request);
 }
 
 export async function openSetupFile(): Promise<{ opened: false } | { opened: true; name: string; text: string }> {
-  const host = window.octopusTransport;
+  const host = window.phobosTransport;
   if (!host?.openSetupFile) throw new Error("Importing a setup is available only in the live desktop client.");
   return host.openSetupFile();
 }
 
-export async function readWorkspaceSetupState(): Promise<OctopusWorkspaceSetupState> {
-  const host = window.octopusTransport;
+export async function readWorkspaceSetupState(): Promise<PhobosWorkspaceSetupState> {
+  const host = window.phobosTransport;
   if (!host?.workspaceSetupState) throw new Error("Workspace setup state is available only in the live desktop client.");
   return host.workspaceSetupState();
 }
 
-export async function readClientSetup(operationId: string): Promise<OctopusClientSetupState | null> {
-  const host = window.octopusTransport;
+export async function readClientSetup(operationId: string): Promise<PhobosClientSetupState | null> {
+  const host = window.phobosTransport;
   if (!host?.clientSetupRead) throw new Error("Client setup state is available only in the live desktop client.");
   return host.clientSetupRead({ operationId });
 }
 
-export async function readCurrentClientSetup(): Promise<OctopusClientSetupState | null> {
-  const host = window.octopusTransport;
+export async function readCurrentClientSetup(): Promise<PhobosClientSetupState | null> {
+  const host = window.phobosTransport;
   if (!host?.clientSetupReadCurrent) throw new Error("Current client setup state is available only in the live desktop client.");
   return host.clientSetupReadCurrent();
 }
 
-export async function beginClientSetup(request: OctopusClientSetupBeginRequest): Promise<OctopusClientSetupState> {
-  const host = window.octopusTransport;
+export async function beginClientSetup(request: PhobosClientSetupBeginRequest): Promise<PhobosClientSetupState> {
+  const host = window.phobosTransport;
   if (!host?.clientSetupBegin) throw new Error("Client setup is available only in the live desktop client.");
   return host.clientSetupBegin(request);
 }
 
-export async function resumeClientSetup(operationId: string, options: { allowSignIn?: boolean } = {}): Promise<OctopusClientSetupState> {
-  const host = window.octopusTransport;
+export async function resumeClientSetup(operationId: string, options: { allowSignIn?: boolean } = {}): Promise<PhobosClientSetupState> {
+  const host = window.phobosTransport;
   if (!host?.clientSetupResume) throw new Error("Client setup is available only in the live desktop client.");
   return host.clientSetupResume({ operationId, ...(options.allowSignIn ? {} : { stopBefore: "provider" as const }) });
 }
 
-export function onApplicationLifecycleProgress(listener: (progress: OctopusApplicationLifecycleProgress) => void): () => void {
-  return window.octopusTransport?.onApplicationLifecycleProgress?.(listener) ?? (() => {});
+export function onApplicationLifecycleProgress(listener: (progress: PhobosApplicationLifecycleProgress) => void): () => void {
+  return window.phobosTransport?.onApplicationLifecycleProgress?.(listener) ?? (() => {});
 }
 
-export function onWorkspaceSetupProgress(listener: (progress: OctopusWorkspaceSetupProgress) => void): () => void {
-  return window.octopusTransport?.onWorkspaceSetupProgress?.(listener) ?? (() => {});
+export function onWorkspaceSetupProgress(listener: (progress: PhobosWorkspaceSetupProgress) => void): () => void {
+  return window.phobosTransport?.onWorkspaceSetupProgress?.(listener) ?? (() => {});
 }
 
-export function onClientSetupProgress(listener: (progress: OctopusClientSetupProgress) => void): () => void {
-  return window.octopusTransport?.onClientSetupProgress?.(listener) ?? (() => {});
+export function onClientSetupProgress(listener: (progress: PhobosClientSetupProgress) => void): () => void {
+  return window.phobosTransport?.onClientSetupProgress?.(listener) ?? (() => {});
 }
 
-export async function readRuntimeProviderInterfaces(): Promise<OctopusProviderInterfacesResponse> {
-  const bridge = window.octopusTransport;
+export async function readRuntimeProviderInterfaces(): Promise<PhobosProviderInterfacesResponse> {
+  const bridge = window.phobosTransport;
   if (bridge?.providerInterfaces) {
     return bridge.providerInterfaces();
   }
@@ -223,12 +223,12 @@ export async function readRuntimeProviderInterfaces(): Promise<OctopusProviderIn
     if (!httpResponse.ok) {
       throw new Error(typeof payload?.error === "string" ? payload.error : `provider read failed: ${httpResponse.status}`);
     }
-    return payload as OctopusProviderInterfacesResponse;
+    return payload as PhobosProviderInterfacesResponse;
   }
   return { repoRoot: null, providers: [], error: "no projection reader is available" };
 }
 
-export async function readProviderInterfaceRateLimits(): Promise<Map<string, OctopusProviderRateLimits>> {
+export async function readProviderInterfaceRateLimits(): Promise<Map<string, PhobosProviderRateLimits>> {
   const status = await readProjection<{ providers?: unknown[] }>("projection.operator.providers.status");
   return new Map(
     (status.providers ?? []).flatMap((row) => {
@@ -238,7 +238,7 @@ export async function readProviderInterfaceRateLimits(): Promise<Map<string, Oct
   );
 }
 
-export async function readProviderInterfaces(): Promise<OctopusProviderInterfacesResponse> {
+export async function readProviderInterfaces(): Promise<PhobosProviderInterfacesResponse> {
   const response = await readRuntimeProviderInterfaces();
   if (response.error || response.providers.length === 0) return response;
   try {
@@ -258,7 +258,7 @@ export async function readProviderInterfaces(): Promise<OctopusProviderInterface
   }
 }
 
-function normalizeProviderRateLimits(value: unknown): { providerInterfaceId: string; rateLimits: OctopusProviderRateLimits } | null {
+function normalizeProviderRateLimits(value: unknown): { providerInterfaceId: string; rateLimits: PhobosProviderRateLimits } | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const row = value as Record<string, unknown>;
   const providerInterfaceId = stringField(row.provider_interface_id);
@@ -282,7 +282,7 @@ function normalizeProviderRateLimits(value: unknown): { providerInterfaceId: str
   };
 }
 
-function normalizeRateLimitWindow(value: unknown): OctopusProviderRateLimitWindow | null {
+function normalizeRateLimitWindow(value: unknown): PhobosProviderRateLimitWindow | null {
   const row = objectField(value);
   if (!row) return null;
   return {
@@ -292,7 +292,7 @@ function normalizeRateLimitWindow(value: unknown): OctopusProviderRateLimitWindo
   };
 }
 
-function normalizeProviderCredits(value: unknown): OctopusProviderRateLimits["credits"] {
+function normalizeProviderCredits(value: unknown): PhobosProviderRateLimits["credits"] {
   const row = objectField(value);
   if (!row) return null;
   return {
@@ -302,7 +302,7 @@ function normalizeProviderCredits(value: unknown): OctopusProviderRateLimits["cr
   };
 }
 
-function normalizeIndividualLimit(value: unknown): OctopusProviderRateLimits["individualLimit"] {
+function normalizeIndividualLimit(value: unknown): PhobosProviderRateLimits["individualLimit"] {
   const row = objectField(value);
   if (!row) return null;
   return {
@@ -334,11 +334,11 @@ function nullableNumberField(value: unknown): number | null {
 }
 
 export function canSubmitOperatorTurn(): boolean {
-  return Boolean(window.octopusTransport?.submitChatTurn) || import.meta.env.DEV;
+  return Boolean(window.phobosTransport?.submitChatTurn) || import.meta.env.DEV;
 }
 
-export async function submitOperatorTurn(request: OctopusChatTurnRequest): Promise<OctopusChatTurnResponse> {
-  const bridge = window.octopusTransport;
+export async function submitOperatorTurn(request: PhobosChatTurnRequest): Promise<PhobosChatTurnResponse> {
+  const bridge = window.phobosTransport;
   if (bridge?.submitChatTurn) {
     return bridge.submitChatTurn(request);
   }
@@ -377,15 +377,15 @@ export async function submitOperatorTurn(request: OctopusChatTurnRequest): Promi
     if (!response.ok) {
       throw new Error(typeof payload?.error === "string" ? payload.error : `submit failed: ${response.status}`);
     }
-    return payload as OctopusChatTurnResponse;
+    return payload as PhobosChatTurnResponse;
   }
   throw new Error("no local writer is available for the operator turn: open the desktop app or the dev server");
 }
 
 export async function readOperatorChatArtifacts(
-  request: OctopusOperatorChatArtifactsRequest,
-): Promise<OctopusOperatorChatArtifactsResponse> {
-  const bridge = window.octopusTransport;
+  request: PhobosOperatorChatArtifactsRequest,
+): Promise<PhobosOperatorChatArtifactsResponse> {
+  const bridge = window.phobosTransport;
   if (bridge?.readOperatorChatArtifacts) {
     return bridge.readOperatorChatArtifacts(request);
   }
@@ -403,16 +403,16 @@ export async function readOperatorChatArtifacts(
           : `operator chat artifact read failed: ${response.status}`,
       );
     }
-    return payload as OctopusOperatorChatArtifactsResponse;
+    return payload as PhobosOperatorChatArtifactsResponse;
   }
   throw new Error("no exact operator chat artifact reader is available");
 }
 
 export async function submitOperatorTurnControl(
-  request: OctopusOperatorTurnControlRequest,
-): Promise<OctopusOperatorTurnControlResponse> {
-  if (window.octopusTransport?.submitOperatorTurnControl) {
-    return window.octopusTransport.submitOperatorTurnControl(request);
+  request: PhobosOperatorTurnControlRequest,
+): Promise<PhobosOperatorTurnControlResponse> {
+  if (window.phobosTransport?.submitOperatorTurnControl) {
+    return window.phobosTransport.submitOperatorTurnControl(request);
   }
   if (!import.meta.env.DEV) return { deliveryError: { stage: "not-sent", message: "No local operator turn-control writer is available." } };
   const response = await fetch(DEV_OPERATOR_TURN_CONTROL_URL, {
@@ -427,15 +427,15 @@ export async function submitOperatorTurnControl(
       message: typeof payload?.error === "string" ? payload.error : `operator turn control failed: ${response.status}`,
     } };
   }
-  return payload as OctopusOperatorTurnControlResponse;
+  return payload as PhobosOperatorTurnControlResponse;
 }
 
 export function canSubmitOperatorSteer(): boolean {
-  return Boolean(window.octopusTransport?.submitChatSteer) || import.meta.env.DEV;
+  return Boolean(window.phobosTransport?.submitChatSteer) || import.meta.env.DEV;
 }
 
-export async function submitOperatorSteer(request: OctopusChatSteerRequest): Promise<OctopusChatSteerResponse> {
-  const host = window.octopusTransport;
+export async function submitOperatorSteer(request: PhobosChatSteerRequest): Promise<PhobosChatSteerResponse> {
+  const host = window.phobosTransport;
   if (host?.submitChatSteer) return host.submitChatSteer(request);
   if (!import.meta.env.DEV) throw new Error("No local writer is available for an in-flight operator message.");
   if (request.attachments.length) throw new Error("Attachment submission requires the desktop attachment staging host.");
@@ -462,11 +462,11 @@ export async function submitOperatorSteer(request: OctopusChatSteerRequest): Pro
   if (!response.ok) {
     throw new Error(typeof payload?.error === "string" ? payload.error : `steer failed: ${response.status}`);
   }
-  return payload as OctopusChatSteerResponse;
+  return payload as PhobosChatSteerResponse;
 }
 
-export async function updateOperatorChatPins(request: OctopusChatPinsRequest): Promise<OctopusChatPinsResponse> {
-  const bridge = window.octopusTransport;
+export async function updateOperatorChatPins(request: PhobosChatPinsRequest): Promise<PhobosChatPinsResponse> {
+  const bridge = window.phobosTransport;
   if (bridge?.updateChatPins) return bridge.updateChatPins(request);
   if (!import.meta.env.DEV) throw new Error("no local operator chat editor is available");
   const response = await fetch(DEV_CHAT_PINS_URL, {
@@ -478,22 +478,22 @@ export async function updateOperatorChatPins(request: OctopusChatPinsRequest): P
   if (!response.ok) {
     throw new Error(typeof payload?.error === "string" ? payload.error : `pin update failed: ${response.status}`);
   }
-  return payload as OctopusChatPinsResponse;
+  return payload as PhobosChatPinsResponse;
 }
 
 export async function refreshProviderModels(
-  request: OctopusProviderModelsRefreshRequest,
-): Promise<OctopusProviderModelsRefreshResponse> {
-  const host = window.octopusTransport;
+  request: PhobosProviderModelsRefreshRequest,
+): Promise<PhobosProviderModelsRefreshResponse> {
+  const host = window.phobosTransport;
   if (!host?.refreshProviderModels) {
     throw new Error("Provider model refresh is available only in the live desktop client.");
   }
   return host.refreshProviderModels(request);
 }
 
-export async function submitInterfaceArtifact(request: OctopusInterfaceArtifactRequest): Promise<OctopusInterfaceArtifactResponse> {
-  if (window.octopusTransport?.submitInterfaceArtifact) {
-    return window.octopusTransport.submitInterfaceArtifact(request);
+export async function submitInterfaceArtifact(request: PhobosInterfaceArtifactRequest): Promise<PhobosInterfaceArtifactResponse> {
+  if (window.phobosTransport?.submitInterfaceArtifact) {
+    return window.phobosTransport.submitInterfaceArtifact(request);
   }
   if (!import.meta.env.DEV) throw new Error("No interface artifact writer is available.");
   const response = await fetch(DEV_INTERFACE_ARTIFACT_URL, {
@@ -505,36 +505,36 @@ export async function submitInterfaceArtifact(request: OctopusInterfaceArtifactR
   if (!response.ok) {
     throw new Error(typeof payload?.error === "string" ? payload.error : `interface artifact submit failed: ${response.status}`);
   }
-  return payload as OctopusInterfaceArtifactResponse;
+  return payload as PhobosInterfaceArtifactResponse;
 }
 
-export async function transcribeDictation(request: OctopusDictationRequest): Promise<OctopusDictationResponse> {
-  const bridge = window.octopusTransport;
-  if (!bridge?.transcribeDictation) throw new Error("Dictation requires the Octopus desktop interface host.");
+export async function transcribeDictation(request: PhobosDictationRequest): Promise<PhobosDictationResponse> {
+  const bridge = window.phobosTransport;
+  if (!bridge?.transcribeDictation) throw new Error("Dictation requires the Phobos desktop interface host.");
   return bridge.transcribeDictation(request);
 }
 
-export async function beginInterfaceArtifactStream(request: OctopusArtifactStreamBeginRequest): Promise<OctopusArtifactStreamHandle> {
-  if (window.octopusTransport?.beginInterfaceArtifactStream) return window.octopusTransport.beginInterfaceArtifactStream(request);
-  return artifactStreamRequest<OctopusArtifactStreamHandle>("begin", request);
+export async function beginInterfaceArtifactStream(request: PhobosArtifactStreamBeginRequest): Promise<PhobosArtifactStreamHandle> {
+  if (window.phobosTransport?.beginInterfaceArtifactStream) return window.phobosTransport.beginInterfaceArtifactStream(request);
+  return artifactStreamRequest<PhobosArtifactStreamHandle>("begin", request);
 }
 
-export async function appendInterfaceArtifactStream(request: OctopusArtifactStreamAppendRequest): Promise<OctopusArtifactStreamProgress> {
-  if (window.octopusTransport?.appendInterfaceArtifactStream) return window.octopusTransport.appendInterfaceArtifactStream(request);
-  return artifactStreamRequest<OctopusArtifactStreamProgress>("append", {
+export async function appendInterfaceArtifactStream(request: PhobosArtifactStreamAppendRequest): Promise<PhobosArtifactStreamProgress> {
+  if (window.phobosTransport?.appendInterfaceArtifactStream) return window.phobosTransport.appendInterfaceArtifactStream(request);
+  return artifactStreamRequest<PhobosArtifactStreamProgress>("append", {
     streamId: request.streamId,
     base64: bytesToBase64(request.bytes),
   });
 }
 
-export async function finalizeInterfaceArtifactStream(request: OctopusArtifactStreamFinalizeRequest): Promise<OctopusArtifactStreamOutcome> {
-  if (window.octopusTransport?.finalizeInterfaceArtifactStream) return window.octopusTransport.finalizeInterfaceArtifactStream(request);
-  return artifactStreamRequest<OctopusArtifactStreamOutcome>("finalize", request);
+export async function finalizeInterfaceArtifactStream(request: PhobosArtifactStreamFinalizeRequest): Promise<PhobosArtifactStreamOutcome> {
+  if (window.phobosTransport?.finalizeInterfaceArtifactStream) return window.phobosTransport.finalizeInterfaceArtifactStream(request);
+  return artifactStreamRequest<PhobosArtifactStreamOutcome>("finalize", request);
 }
 
-export async function abortInterfaceArtifactStream(request: OctopusArtifactStreamAbortRequest): Promise<OctopusArtifactStreamAbortOutcome> {
-  if (window.octopusTransport?.abortInterfaceArtifactStream) return window.octopusTransport.abortInterfaceArtifactStream(request);
-  return artifactStreamRequest<OctopusArtifactStreamAbortOutcome>("abort", request);
+export async function abortInterfaceArtifactStream(request: PhobosArtifactStreamAbortRequest): Promise<PhobosArtifactStreamAbortOutcome> {
+  if (window.phobosTransport?.abortInterfaceArtifactStream) return window.phobosTransport.abortInterfaceArtifactStream(request);
+  return artifactStreamRequest<PhobosArtifactStreamAbortOutcome>("abort", request);
 }
 
 async function artifactStreamRequest<T>(operation: "begin" | "append" | "finalize" | "abort", request: unknown): Promise<T> {

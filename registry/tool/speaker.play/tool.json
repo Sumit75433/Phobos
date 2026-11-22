@@ -2,7 +2,7 @@
   "id": "speaker.play",
   "interface": "system_speaker",
   "process": {
-    "bin": "target/debug/octopus-audio-device-session-tool",
+    "bin": "target/debug/phobos-audio-device-session-tool",
     "args": [],
     "authority": {
       "read_root_slots": [],

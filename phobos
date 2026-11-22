@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+phobos_checkout=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "${PHOBOS_NODE:-node}" "$phobos_checkout/app/cli/index.cjs" "$@"

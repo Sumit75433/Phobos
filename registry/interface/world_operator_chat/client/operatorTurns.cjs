@@ -36,7 +36,7 @@ async function submitOperatorTurn(options, request) {
   );
   const cycle = randomToken(24);
   const timeoutMs = numberValue(request?.timeoutMs, 120_000);
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const runPrefix = requiredString(config.run.run_prefix, "client.run.run_prefix");
   const requestedRunId = stringValue(request?.runId);
   const edit = await readMessageRevision(options, request, config.artifact_labels.message).catch(error => {
@@ -46,12 +46,12 @@ async function submitOperatorTurn(options, request) {
   const continuation = requestedRunId
     ? await resolveContinuationState({
       config,
-      octopusHome,
+      phobosHome,
       requestedRunId,
       request: request?.continuation,
     })
     : null;
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   let runId;
   let chatId;
   let chatInterfaceId;
@@ -89,7 +89,7 @@ async function submitOperatorTurn(options, request) {
       },
     );
     existingConversationState = await readConversationState({
-      octopusHome,
+      phobosHome,
       existing: existingRunDocument.value,
       runId,
       interfaceId: chatInterfaceId,
@@ -123,7 +123,7 @@ async function submitOperatorTurn(options, request) {
       label: config.artifact_labels.message,
       messageId,
       modelInterfaceId: stableExistingSubmission?.modelInterfaceId ?? providerReference,
-      octopusHome,
+      phobosHome,
       recoverPreparedMessage,
       requestedText: text,
       replacesMessage: edit?.revision,
@@ -221,7 +221,7 @@ async function submitOperatorTurn(options, request) {
         messageId,
         messagePath: envelope.messagePath,
         modelInterfaceId: stableExistingSubmission.modelInterfaceId,
-        octopusHome,
+        phobosHome,
         outboundCursorOffset: existingConversationState.ledgerOffset,
         runId,
         workerInterfaceId: stableExistingSubmission.workerInterfaceId,
@@ -280,7 +280,7 @@ async function submitOperatorTurn(options, request) {
         clientSurfaceRole,
         continuation: request?.continuation,
       });
-      await validatePlannedHostBindings({ octopusHome, registryRoot: resolveRegistryRoot(options), plan });
+      await validatePlannedHostBindings({ phobosHome, registryRoot: resolveRegistryRoot(options), plan });
       return {
         submission: {
           modelInterfaceId: plan.modelInterfaceId,
@@ -311,7 +311,7 @@ async function submitOperatorTurn(options, request) {
         config.artifact_labels.message,
       );
       const conversationState = await readConversationState({
-        octopusHome,
+        phobosHome,
         existing: existingChat,
         runId,
         interfaceId: chatInterfaceId,
@@ -352,7 +352,7 @@ async function submitOperatorTurn(options, request) {
       const changesClientConfiguration = (filePath) => path.dirname(filePath) === clientDirectory
         && path.extname(filePath) === ".json";
       const previousSocket = providerSelectionWrites.some((write) => changesClientConfiguration(write.filePath))
-        ? await interfaceSocketIdentity(octopusHome, chatInterfaceId) : null;
+        ? await interfaceSocketIdentity(phobosHome, chatInterfaceId) : null;
       const clientWrites = [...revisionWrites, ...await commitClientWrites(providerSelectionWrites, options)];
       return {
         submission: activeRun,
@@ -366,13 +366,13 @@ async function submitOperatorTurn(options, request) {
   });
   const preparation = await (requestedRunId
     ? authorSubmission()
-    : withOperatorWorkspaceTopologyLock(octopusHome, authorSubmission)).catch((error) => {
+    : withOperatorWorkspaceTopologyLock(phobosHome, authorSubmission)).catch((error) => {
       error.deliveryState = "not_sent";
       throw error;
     });
   const { submission, clientWrites, outboundCursorOffset, previousClientSocket } = preparation;
 
-  await waitForInterfaceSocket(octopusHome, chatInterfaceId, timeoutMs, previousClientSocket);
+  await waitForInterfaceSocket(phobosHome, chatInterfaceId, timeoutMs, previousClientSocket);
   const messageAdmission = await withOperatorMessageAdmissionLock(
     chatInterfaceId,
     messageId,
@@ -385,7 +385,7 @@ async function submitOperatorTurn(options, request) {
       messageId,
       messagePath: envelope.messagePath,
       modelInterfaceId: submission.modelInterfaceId,
-      octopusHome,
+      phobosHome,
       outboundCursorOffset,
       runId,
       timeoutMs,
@@ -420,12 +420,12 @@ async function prepareOperatorPayloadArtifactBindings(options, input) {
   let sidecarPath = null;
   let previous = [];
   if (input.existingRunDocument) {
-    sidecarPath = path.join(resolveRegistryRoot(options), "interface", input.chatInterfaceId, "octopus_os.json");
+    sidecarPath = path.join(resolveRegistryRoot(options), "interface", input.chatInterfaceId, "phobos_os.json");
     sidecar = await readJsonDocumentIfPresent(sidecarPath);
     const value = requiredObject(sidecar?.value, "operator payload authoring sidecar");
     const profile = requiredObject(value.authoring_profile, "operator payload authoring profile");
     const state = requiredObject(input.existingRunDocument.value.interface_state?.[input.chatInterfaceId], "operator payload client state");
-    if (value.schema_version !== 1 || value.workspace !== "octopus_os" || value.component !== "client"
+    if (value.schema_version !== 1 || value.workspace !== "phobos_os" || value.component !== "client"
       || value.interface !== input.chatInterfaceId || value.owner_interface !== input.chatInterfaceId
       || value.surface_role !== input.clientSurfaceRole
       || profile.worker_choice_interface !== state.worker_choice_interface) {
@@ -513,9 +513,9 @@ async function assertPreparedOperatorPayloadSelection(prepared, currentRunDocume
 
 async function planExistingProviderSelection(options, input) {
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const registryRoot = resolveRegistryRoot(options);
-  const eeInstancesRoot = await resolveEeInstancesRoot(octopusHome, options);
+  const eeInstancesRoot = await resolveEeInstancesRoot(phobosHome, options);
   const clientState = requiredObject(
     requiredObject(input.currentRunDocument.value.interface_state, "run.interface_state")[input.chatInterfaceId],
     `run.interface_state.${input.chatInterfaceId}`,
@@ -555,7 +555,7 @@ async function planExistingProviderSelection(options, input) {
     registryRoot,
     "interface",
     input.chatInterfaceId,
-    "octopus_os.json",
+    "phobos_os.json",
   );
   const retainedPhases = await operatorInputRevisionPhases(input.artifactRoot, input.messageId);
   const retainedRevision = retainedPhases.definition || retainedPhases.rearm;
@@ -587,7 +587,7 @@ async function planExistingProviderSelection(options, input) {
     }
     if (input.preparedPayloadSelection) {
       await assertPreparedOperatorPayloadSelection(input.preparedPayloadSelection,
-        await readJsonDocumentIfPresent(path.join(await resolveRunRecordsRoot(octopusHome), `${input.runId}.json`)));
+        await readJsonDocumentIfPresent(path.join(await resolveRunRecordsRoot(phobosHome), `${input.runId}.json`)));
     }
   }
   const payloadArtifactBindings = input.payloadArtifactBindings === undefined
@@ -608,7 +608,7 @@ async function planExistingProviderSelection(options, input) {
   if (payloadArtifactBindings.length) expectedProfile.payload_artifact_bindings = payloadArtifactBindings;
   else delete expectedProfile.payload_artifact_bindings;
   const topologyPlan = await planOperatorChatTopology({
-    octopusHome,
+    phobosHome,
     topologyPlanner: resolvePackageExecutable(
       config,
       resolveInstallationRoot(options),
@@ -670,7 +670,7 @@ async function planExistingProviderSelection(options, input) {
   if (providerSelectionChanged && !providerWrite) {
     throw new Error("operator chat provider selection produced no exact provider write");
   }
-  if (plannedAdditionalRunWrites(topologyPlan, await resolveRunRecordsRoot(octopusHome), registryRoot).length > 0) {
+  if (plannedAdditionalRunWrites(topologyPlan, await resolveRunRecordsRoot(phobosHome), registryRoot).length > 0) {
     throw new Error("operator input revision cannot create undeclared replacement writer Runs");
   }
   const selectedWrites = [];
@@ -735,13 +735,13 @@ async function operatorInputRevisionPhases(artifactRoot, messageId) {
 async function applyOperatorInputRevision(options, input) {
   if (input.desiredInputs === null && !input.rearm) return [];
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const registryRoot = resolveRegistryRoot(options);
   const planner = resolvePackageExecutable(config, resolveInstallationRoot(options), registryRoot, "topology_planner");
-  const runPath = path.join(await resolveRunRecordsRoot(octopusHome), `${input.runId}.json`);
+  const runPath = path.join(await resolveRunRecordsRoot(phobosHome), `${input.runId}.json`);
   const scope = { registry_root: registryRoot, run_path: runPath,
-    ledger_root: path.join(octopusHome, "ledger"), artifact_root: input.artifactRoot,
-    interface_hand_in_root: path.join(octopusHome, "interface-hand-in"),
+    ledger_root: path.join(phobosHome, "ledger"), artifact_root: input.artifactRoot,
+    interface_hand_in_root: path.join(phobosHome, "interface-hand-in"),
     provider: input.providerInterfaceId, source: input.chatInterfaceId };
   const operations = [];
   if (input.desiredInputs !== null) operations.push(["definition", { kind: "owner_inputs", desired_inputs: input.desiredInputs }]);
@@ -781,11 +781,11 @@ async function applyOperatorInputRevision(options, input) {
         if (checked.status === "ready" && !sent) {
           const source = safeSegment(checked.source_interface, "checked writer source");
           const manifest = requiredObject(checked.manifest, "checked writer manifest");
-          await waitForInterfaceSocket(octopusHome, source, Math.max(1, deadline - Date.now()));
+          await waitForInterfaceSocket(phobosHome, source, Math.max(1, deadline - Date.now()));
           sent = true;
           try {
             const verdict = await requiredFunction(options.handInArtifact, "handInArtifact")({
-              endpoint: interfaceEndpoint(octopusHome, source), interfaceId: source,
+              endpoint: interfaceEndpoint(phobosHome, source), interfaceId: source,
               manifest, timeoutMs: Math.max(1, deadline - Date.now()),
             });
             assertAdmitted(verdict, requiredString(manifest.label, "checked writer artifact label"));

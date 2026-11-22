@@ -13,7 +13,7 @@ const unavailable = { ...EMPTY_CHATGPT_ACCOUNT_STATE, loading: false, error: "Th
 const noopSubscribe = () => () => {};
 
 function accountConnection(home?: string) {
-  const bridge = window.octopusTransport;
+  const bridge = window.phobosTransport;
   if (!bridge?.chatgptAccount) return null;
   if (!connection || home !== undefined && connection.home !== home) {
     connection?.controller.dispose();

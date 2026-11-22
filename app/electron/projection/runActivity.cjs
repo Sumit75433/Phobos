@@ -5,7 +5,7 @@ const fs = require("node:fs/promises");
 const { ProjectionEvidenceError } = require("./constants.cjs");
 const { compareMovementOrder, indexedUnsignedInteger, ledgerRowsForRun, movementBelongsToRun, movementBoundaryInterface, movementEndpoint, movementKindText, normalizeIndexedProjectionMovement, openValidatedLedgerIndex, optionalActivityAfterSeq, optionalUnsignedInteger, projectionLedgerSourceCursor } = require("./movementRows.cjs");
 const { activityDirection, operatorChatActivityPayload, operatorChatEventData } = require("./operatorChatEvents.cjs");
-const { baseInterfaceRows, octopusOsInterfaceSidecars } = require("./registryRows.cjs");
+const { baseInterfaceRows, phobosOsInterfaceSidecars } = require("./registryRows.cjs");
 const { arrayValue, contentHashHex, endpointId, ledgerArtifactId, ledgerArtifactLabel, numberValue, objectOrEmpty, rowTimeMs, stringValue } = require("./values.cjs");
 
 function runActivityProjection(store) {
@@ -190,7 +190,7 @@ function runActivityProjection(store) {
     );
     const selected = indexed.rows;
     const resolvedPayloads = await store.resolveLedgerArtifactPayloadResults(selected, { projection: protocol.artifactReadProjection });
-    const sidecars = octopusOsInterfaceSidecars(projection);
+    const sidecars = phobosOsInterfaceSidecars(projection);
     const interfaceRoles = new Map(baseInterfaceRows(projection).map((descriptor) => [
       stringValue(descriptor.rule_id ?? descriptor.id),
       stringValue(descriptor.role),

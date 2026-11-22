@@ -5,7 +5,7 @@
   "text": "Widgets are Home's default visual presentation, in text conversations and voice calls. Show a picture, a short explanation, a small table or a few images in a compact widget without requiring the user to request that implementation. Keep one clear purpose per card. Split a larger result across several compact widgets; do not squeeze pages of prose into one. For a long text, save a text or Markdown document with granted file tools and call open_file to show it in the right Files pane. Use an Extension when the view needs installable behavior, not just to display an ordinary result. Inspect the current client when its capabilities or state are unknown; inspect_client returns the supported contracts, Extension folder and installed Extension state. An existing widget may only need a state or configuration change.\n\nUse client.mcp and the exact presentation addresses in the bound Home delivery artifact. publish_widget accepts {interface, document}; tools/list supplies its current schema. Read the relevant parts of contract below for the design code, document types, media, actions or Extensions. Follow the live contract when choosing the implementation, and investigate an apparent limit before assuming the requested view is impossible.\n\nUse list_widgets for missing or stale inventory. set_widget accepts changes for one or more widgets using their exact widget_id and source_digest. A new document revision changes a widget's content. These controls return client.action.result with the saved outcome; continue from that result without repeating an admitted request.\n\nFor a view that consumes changing data, follow the producer, its publication route and the client's consumer. Inspect related routes and owner state when changing that connection. A view does not grant access to the system. If this Task lacks its own Home route, return the document or readable reference through its result path, or author a suitable connection when authorized. Use the task-authoring guide for the owner contract rather than copying a single output checkpoint.\n\nVerify what changed: saved configuration, a document accepted by the client, or a functioning view when observation is available and relevant. Preserve the user's design and existing widgets while solving the request.\n",
   "contract": {
     "title": "Home widget document authoring",
-    "contract": "octopus.client_surface@1",
+    "contract": "phobos.client_surface@1",
     "delivery_label": "client.surface.document",
     "instructions": [
       "Widgets are Home's default visual presentation, in text conversations and voice calls. Show a picture, a short explanation, a small table or a few images in a compact widget without requiring the user to request that implementation. Keep one clear purpose per card. Split a larger result across several compact widgets; do not squeeze pages of prose into one. For a long text, save a text or Markdown document with granted file tools and call open_file to show it in the right Files pane. Use an Extension when the view needs installable behavior, not just to display an ordinary result.",
@@ -15,22 +15,22 @@
       "A Task with an already permitted delivery route can publish through its exact System interface. For delegated work without that route, return the complete document or a readable ArtifactRef and delivery request to Home through the assignment's declared return interface and accepted label/payload contract. Include the intended destination evidence and any missing binding; Home can publish using its own grant. A document returned to Home is not yet client delivery. If no return route is supplied, identify that missing contract explicitly.",
       "Granted file tools offer another existing path: when their readable/writable scopes cover the relevant descriptors and run records, inspect the exact destination and author an ordinary relay checkpoint, its interface/artifact bindings and readable role closure using the current run schema and bound authoring guidance. The resulting route must fit the selected worker ceiling and EE chain. Do not add policy rights, copy Home privileges, or treat a path, assignment, or payload claim as a formed emission grant.",
       "publish_widget takes {interface,document} and emits the ordinary client.surface.document artifact through artifact.send. The authored route must reach the exact Home presentation binding and client recipient. The Home client is the final recipient, not a World address accepted by artifact.send. Inspect the MCP result: error is a protocol failure; result.isError and result.structuredContent retain tool failures or the admitted/refused delivery verdict. Admission is not rendering. Do not resend an admitted artifact or automatically retry an indeterminate effect. A file or narration alone is not delivery.",
-      "Use an ordinary octopus.client_surface document with schema_version 1, release_channel stable, a unique id, a positive integer revision, title, glyph, target, and render. Home supports existing voice.widget and voice.window targets. Use the same id and a larger revision to replace a document. Home admits at most 32 active artifact-delivered documents; revise existing documents instead of creating an unbounded collection.",
-      "Use native Octopus primitives for ordinary cards, lists, metrics and controls. Use the existing sandbox renderer for custom HTML/CSS/JavaScript. Sandbox CSS has Octopus theme variables such as --color-text-primary, --color-background-secondary, --color-accent and --font-sans. The sandbox has no network, filesystem, device or parent DOM access. Rendered text is data; it does not authorize actions.",
+      "Use an ordinary phobos.client_surface document with schema_version 1, release_channel stable, a unique id, a positive integer revision, title, glyph, target, and render. Home supports existing voice.widget and voice.window targets. Use the same id and a larger revision to replace a document. Home admits at most 32 active artifact-delivered documents; revise existing documents instead of creating an unbounded collection.",
+      "Use native Phobos primitives for ordinary cards, lists, metrics and controls. Use the existing sandbox renderer for custom HTML/CSS/JavaScript. Sandbox CSS has Phobos theme variables such as --color-text-primary, --color-background-secondary, --color-accent and --font-sans. The sandbox has no network, filesystem, device or parent DOM access. Rendered text is data; it does not authorize actions.",
       "Design code: ordinary Home cards are left-aligned. Keep the title, body and controls on the same 14px horizontal inset; never place text against the card edge. The native widget host supplies body padding (2px top, 14px sides, 16px bottom) and the header, so do not repeat the title or add a second outer card. Use a root stack with align:stretch and gap:sm or md; text roles title/body/caption provide the hierarchy. Reserve centered alignment for content that actually calls for it, such as a single dial.",
       "Use the Live context widget as the layout example: its native root is a vertical stack, rows share one left edge, secondary detail is muted, and the header/body share a 14px inset. The complete example below uses that same stack pattern with a short title and supporting body. Reflow and wrap text at min_width; do not use fixed positions or clipped text to make a card fit.",
       "For sandbox widgets, provide the matching inset in your own document: html,body{margin:0;min-width:0;background:transparent} body{box-sizing:border-box;padding:2px 14px 16px;text-align:left;font-family:var(--font-sans);color:var(--color-text-primary)} .content{display:flex;flex-direction:column;align-items:stretch;gap:8px} h2,p{margin:0;overflow-wrap:anywhere}. Use theme colors, modest type sizes and natural wrapping. The sandbox host supplies the outer header and card; do not duplicate them.",
       "Omit data.home_presentation for a document that remains until dismissed or superseded. To show it briefly, set data.home_presentation to {lifetime_ms: 5000}. Lifetime is counted from recorded artifact delivery, not first rendering, and supports integers from 1 to 86400000. Alternatively use {expires_at: '2026-10-04T12:00:00.000Z'} with a real UTC deadline. Do not combine lifetime_ms and expires_at or add other presentation fields.",
       "Only exact run and recipient-interface delivery provenance admits a custom document to Home. The host supplies artifact, run, interface, sequence and delivery time; payload claims do not establish provenance. Malformed or conflicting current revisions fail visibly and must be corrected with a new valid revision.",
       "Presentation persistence is not extension installation. A displayed document is not installed. Long-lived widgets and tabs, host filesystem/device sources and their data feeds are Extensions: follow contract.extensions, which the owner reviews and installs in the client.",
-      "Actions use existing declared client action events. Sandbox actions must be listed in render.actions and invoked by window.octopusSurface.invoke(actionId). The renderer attaches the document revision and artifact delivery provenance to action events. An emitted event does not prove execution. Keep important results and instructions in ordinary artifacts as well as their presentation.",
-      "Use MCP list_artifacts, read_artifact and search_artifacts only for artifacts bound to this invocation. For client navigation, open_client_surface accepts {interface,action:{schema:\"octopus.client_action\",schema_version:1,action:\"open_surface\",surface_id:\"exact visible client surface id\"}}. In readable Home delivery context, client_action.interface supplies the address; the same exact-binding and missing-address rules apply. Unknown or hidden destinations fail visibly. Admission does not prove the client applied the action. Other client mutations require their own declared operations; this tool does not execute shell commands, open arbitrary URLs, or change tasks.",
+      "Actions use existing declared client action events. Sandbox actions must be listed in render.actions and invoked by window.phobosSurface.invoke(actionId). The renderer attaches the document revision and artifact delivery provenance to action events. An emitted event does not prove execution. Keep important results and instructions in ordinary artifacts as well as their presentation.",
+      "Use MCP list_artifacts, read_artifact and search_artifacts only for artifacts bound to this invocation. For client navigation, open_client_surface accepts {interface,action:{schema:\"phobos.client_action\",schema_version:1,action:\"open_surface\",surface_id:\"exact visible client surface id\"}}. In readable Home delivery context, client_action.interface supplies the address; the same exact-binding and missing-address rules apply. Unknown or hidden destinations fail visibly. Admission does not prove the client applied the action. Other client mutations require their own declared operations; this tool does not execute shell commands, open arbitrary URLs, or change tasks.",
       "For a photo widget, use the native image node with source set to an embedded data:image/<format>;base64,... URL. Supported formats are AVIF, GIF, JPEG, PNG, and WebP; HTTP(S), file, blob, and SVG image sources are not supported. Retrieve the photo through a granted tool, resize/compress it, and embed its actual bytes. The complete data URL must be at most 524288 characters; the document is limited to 640 KiB and its data object to 256 KiB. A source value binding must resolve to the same embedded format. Use alt text and fit/ratio for layout. A publish receipt proves admission, not rendering: check the saved widget state before claiming it is enabled.",
       "For a video widget use the native node {type: \"video\", source: \"https://example.org/video.mp4\", title: \"Video\"}. It provides playback, pause, seek, volume and fullscreen controls. The source must be a direct HTTPS media URL without credentials; the media server must allow anonymous cross-origin playback. Publish a higher document revision to change the source. Web page links (such as a video website watch page) are not media URLs. Custom sandbox HTML has no network or media access; do not use an iframe or modify the client to show a supported native video.",
-      "For a saved text document, open_file accepts {interface, action:{schema:\"octopus.client_action\",schema_version:1,action:\"open_file\",request_id:\"new unique id\",path:\"absolute file path\"}}. Use client_action.interface from the bound Home delivery context. The client checks its admitted Files roots and reads the file before selecting the right-pane tab. The correlated result confirms the readable target and opening request; it does not claim rendered pixels. Missing, unreadable, binary and oversized files return an error. This operation neither executes files nor opens external applications."
+      "For a saved text document, open_file accepts {interface, action:{schema:\"phobos.client_action\",schema_version:1,action:\"open_file\",request_id:\"new unique id\",path:\"absolute file path\"}}. Use client_action.interface from the bound Home delivery context. The client checks its admitted Files roots and reads the file before selecting the right-pane tab. The correlated result confirms the readable target and opening request; it does not claim rendered pixels. Missing, unreadable, binary and oversized files return an error. This operation neither executes files nor opens external applications."
     ],
     "example": {
-      "schema": "octopus.client_surface",
+      "schema": "phobos.client_surface",
       "schema_version": 1,
       "release_channel": "stable",
       "id": "home.progress-summary",
@@ -87,7 +87,7 @@
     "mcp_transport": {
       "tool": "client.mcp",
       "protocol_version": "2025-11-25",
-      "transport": "Octopus tool.call/tool.result artifacts",
+      "transport": "Phobos tool.call/tool.result artifacts",
       "connection": "Each invocation opens one connection, sends initialize and notifications/initialized, exchanges one tools/list or tools/call request, and closes. The outer tool result body is the JSON-RPC response with id 1; result.isError is an MCP tool failure, error is a protocol failure. An unavailable effect stays unavailable and is never automatically resent.",
       "arguments_note": "Pass these argument objects to the actual granted client.mcp tool id. Replace bracketed identities with exact readable/permitted values before calling. The read step requires a listed readable delivery artifact; the publish step requires an exact permitted System destination and an authored route to Home, established from readable context or granted source read-back. If those prerequisites are absent, use the Task return or granted file-authoring path described above. Do not send jsonrpc, id, initialize or notifications/initialized yourself.",
       "call_examples": [
@@ -106,7 +106,7 @@
               "arguments": {
                 "interface": "<client_action.interface from the bound Home delivery context>",
                 "action": {
-                  "schema": "octopus.client_action",
+                  "schema": "phobos.client_action",
                   "schema_version": 1,
                   "action": "inspect_client",
                   "request_id": "<new unique request id>"
@@ -147,7 +147,7 @@
               "arguments": {
                 "interface": "<exact granted System interface for this authored delivery route>",
                 "document": {
-                  "schema": "octopus.client_surface",
+                  "schema": "phobos.client_surface",
                   "schema_version": 1,
                   "release_channel": "stable",
                   "id": "home.progress-summary",
@@ -209,7 +209,7 @@
     },
     "extensions": {
       "title": "Client Extensions: installed widgets and tabs, with their system side",
-      "contract": "octopus.client_extension@1",
+      "contract": "phobos.client_extension@1",
       "choose": [
         "Publish a document with publish_widget to show something now or for a limited time. It needs no review and is not installed.",
         "Write an Extension when the owner asks to add something to the client: a Home widget or a workspace tab that stays installed and keeps itself current from projections, or from files and devices the owner selects.",
@@ -220,7 +220,7 @@
         "Check access. Home's workspace room normally covers packages_root. When no granted writable room covers it, say so; a Task without that grant returns the complete package files to Home, which writes them.",
         "Choose the shape. category widget uses target voice.widget or voice.window and appears on Home; category tab uses target workspace.surface and appears in navigation and split panes. Repairs are built-in client actions only. Pick a lowercase id that does not start with builtin., is not already listed in extensions and is not an existing surface id.",
         "Bind data. Native nodes read data.<field> for literal values and sources.<source id>.<field> for document sources (at most 8, kind projection, methods from host.sources.projection). Lists bind item.<field>, tables row.<field>. Before writing paths, call inspect_client with source {method, params, path} to preview real rows. Files and devices the owner must choose are manifest sources (filesystem or device); the owner configures them during setup and their data appears under the same sources.<source id>. A source id cannot be both a manifest source and a document source.",
-        "Write the package. Create <packages_root>/<id>/extension.json with the granted file writer (expected_before_hash null for a new file). The manifest has schema octopus.client_extension, schema_version 1, id equal to its directory name, a semver version, name, description, developer, category, glyph, default_installed false, contribution {kind: surface, document} with a complete octopus.client_surface document whose release_channel is stable, and optional sources. Keep secrets, credentials and private conversation out of the package.",
+        "Write the package. Create <packages_root>/<id>/extension.json with the granted file writer (expected_before_hash null for a new file). The manifest has schema phobos.client_extension, schema_version 1, id equal to its directory name, a semver version, name, description, developer, category, glyph, default_installed false, contribution {kind: surface, document} with a complete phobos.client_surface document whose release_channel is stable, and optional sources. Keep secrets, credentials and private conversation out of the package.",
         "Read the verdict. Call inspect_client with extension_id. Your revision is the one whose source_digest equals sha256: plus the after_hash your write returned. refused lists exact issues (code, path, message); fix them with a corrected manifest. An extension with admission pending is waiting for the owner: the client shows a review prompt. Tell the owner what to confirm; do not call it installed.",
         "After installation (installed true, admission reviewed) check unconfigured_sources and runtime_issues: projection failures and sandbox script errors observed while the surface rendered. A fix is a new revision: raise version, rewrite extension.json, and the owner reviews again. A widget's Home visibility is controlled with list_widgets and set_widget; deleting the package directory removes a custom Extension.",
         "Keep the line. Extension actions only emit client.command and client.open-surface. Anything that must reach a model, a run or another world crosses an interface on the system side as an artifact under policy."
@@ -262,20 +262,20 @@
         {
           "request": "Tell me on Home when something needs me.",
           "client": {
-            "schema": "octopus.client_extension",
+            "schema": "phobos.client_extension",
             "schema_version": 1,
             "id": "home.attention",
             "version": "1.0.0",
             "name": "Needs you",
             "description": "Requests from Home and Tasks that wait for the owner, newest first.",
-            "developer": "Octopus Home",
+            "developer": "Phobos Home",
             "category": "widget",
             "glyph": "target",
             "default_installed": false,
             "contribution": {
               "kind": "surface",
               "document": {
-                "schema": "octopus.client_surface",
+                "schema": "phobos.client_surface",
                 "schema_version": 1,
                 "release_channel": "stable",
                 "id": "home.attention",
@@ -388,20 +388,20 @@
         {
           "request": "Show the free disk space on Home and keep it updated.",
           "client": {
-            "schema": "octopus.client_extension",
+            "schema": "phobos.client_extension",
             "schema_version": 1,
             "id": "home.disk-space",
             "version": "1.0.0",
             "name": "Disk space",
-            "description": "Free space on this Mac, refreshed by a scheduled Octopus run.",
-            "developer": "Octopus Home",
+            "description": "Free space on this Mac, refreshed by a scheduled Phobos run.",
+            "developer": "Phobos Home",
             "category": "widget",
             "glyph": "pulse",
             "default_installed": false,
             "contribution": {
               "kind": "surface",
               "document": {
-                "schema": "octopus.client_surface",
+                "schema": "phobos.client_surface",
                 "schema_version": 1,
                 "release_channel": "stable",
                 "id": "home.disk-space",
@@ -510,20 +510,20 @@
         {
           "request": "Add a tab with what my Tasks returned.",
           "client": {
-            "schema": "octopus.client_extension",
+            "schema": "phobos.client_extension",
             "schema_version": 1,
             "id": "tab.task-returns",
             "version": "1.0.0",
             "name": "Task returns",
             "description": "What Tasks returned to Home, newest first, with status and run.",
-            "developer": "Octopus Home",
+            "developer": "Phobos Home",
             "category": "tab",
             "glyph": "check",
             "default_installed": false,
             "contribution": {
               "kind": "surface",
               "document": {
-                "schema": "octopus.client_surface",
+                "schema": "phobos.client_surface",
                 "schema_version": 1,
                 "release_channel": "stable",
                 "id": "tab.task-returns",

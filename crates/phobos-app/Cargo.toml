@@ -1,0 +1,48 @@
+[package]
+name = "phobos-app"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "phobos"
+path = "src/main.rs"
+
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-file-storage = { path = "../phobos-file-storage" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-ledger-index = { path = "../phobos-ledger-index" }
+phobos-ledger-store = { path = "../phobos-ledger-store", default-features = false }
+phobos-marks = { path = "../phobos-marks" }
+phobos-policy = { path = "../phobos-policy" }
+phobos-interfaces = { path = "../phobos-interfaces" }
+phobos-runtime = { path = "../phobos-runtime" }
+phobos-run-record = { path = "../phobos-run-record" }
+phobos-ee = { path = "../phobos-ee" }
+phobos-app-server = { path = "../phobos-app-server" }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "sync", "io-std", "io-util", "net", "process", "signal", "time"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+phobos-interface-transport = { path = "../phobos-interface-transport" }
+phobos-interface-projection = { path = "../phobos-interface-projection" }
+phobos-tool-registry = { path = "../phobos-tool-registry" }
+phobos-verifiers = { path = "../phobos-verifiers" }
+fs2 = "0.4"
+notify.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1", features = ["fs", "process", "stdio"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "time", "net"] }
+tempfile = "3"
+phobos-worker-env = { path = "../phobos-worker-env" }
+
+[lints.rust]
+unsafe_code = "forbid"

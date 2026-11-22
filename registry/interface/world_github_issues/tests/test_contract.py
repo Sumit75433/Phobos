@@ -37,9 +37,9 @@ LIMITS = {"max_control_frame_bytes": 1048576, "max_manifest_bytes": 1048576,
 
 
 def environment(root):
-    return dict(os.environ, OCTOPUS_INTERFACE_ID="world_github_issues",
-                OCTOPUS_VAR_DIR=str(root), OCTOPUS_MOVEMENTS_JSONL=str(root / "movements"),
-                OCTOPUS_INTERFACE_HOST_IO_LIMITS=json.dumps(LIMITS),
+    return dict(os.environ, PHOBOS_INTERFACE_ID="world_github_issues",
+                PHOBOS_VAR_DIR=str(root), PHOBOS_MOVEMENTS_JSONL=str(root / "movements"),
+                PHOBOS_INTERFACE_HOST_IO_LIMITS=json.dumps(LIMITS),
                 PYTHONDONTWRITEBYTECODE="1")
 
 
@@ -325,7 +325,7 @@ class Contract(unittest.TestCase):
             "interface_driver_config": {"private_config": dict(CONFIG, port=port, retry_seconds=1)}}))
         self.b.atomic_bytes(str(self.root / "webhook.secret"), SECRET)
         env = environment(self.root)
-        env["OCTOPUS_INTERFACE_DIR"] = str(interface)
+        env["PHOBOS_INTERFACE_DIR"] = str(interface)
         p = subprocess.Popen([sys.executable, "-B", str(HERE / "github_issues_life.py"), str(BOUNDARY)],
                              env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         def frame():
@@ -401,7 +401,7 @@ class Contract(unittest.TestCase):
         (interface / "interface.json").write_text(json.dumps({
             "interface_driver_config": {"private_config": dict(CONFIG, enabled=False)}}))
         env = environment(self.root)
-        env["OCTOPUS_INTERFACE_DIR"] = str(interface)
+        env["PHOBOS_INTERFACE_DIR"] = str(interface)
         p = subprocess.Popen([sys.executable, "-B", str(HERE / "github_issues_life.py"), str(BOUNDARY)],
                              env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:

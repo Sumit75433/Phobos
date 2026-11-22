@@ -8,11 +8,11 @@ const REFUSED_CONNECTION_RETRY_STEP_MS = 50;
 
 function handInArtifact(request) {
   const interfaceId = safeSegment(request?.interfaceId, "interfaceId");
-  const octopusHome = absolutePath(request?.octopusHome, "octopusHome");
+  const phobosHome = absolutePath(request?.phobosHome, "phobosHome");
   const manifest = artifactManifest(request?.manifest);
   const endpoint = validateArtifactEndpoint(
     request?.endpoint,
-    octopusHome,
+    phobosHome,
     interfaceId,
   );
   const timeoutMs = positiveNumber(request?.timeoutMs, 120_000);
@@ -132,18 +132,18 @@ async function captureArtifactDelivery(operation) {
   }
 }
 
-function defaultInterfaceEndpoint(octopusHome, interfaceId) {
+function defaultInterfaceEndpoint(phobosHome, interfaceId) {
   return `unix://${path.join(
-    absolutePath(octopusHome, "octopusHome"),
+    absolutePath(phobosHome, "phobosHome"),
     "app-server-control",
     `${crypto.createHash("sha256").update(safeSegment(interfaceId, "interfaceId")).digest("hex").slice(0, 24)}.sock`,
   )}`;
 }
 
-function normalizedEndpoint(value, octopusHome, interfaceId) {
+function normalizedEndpoint(value, phobosHome, interfaceId) {
   const configured = stringValue(value);
   if (!configured || configured === "unix://") {
-    return defaultInterfaceEndpoint(octopusHome, interfaceId);
+    return defaultInterfaceEndpoint(phobosHome, interfaceId);
   }
   if (configured.startsWith("/")) return `unix://${configured}`;
   if (configured.startsWith("http://")) return `ws://${configured.slice("http://".length)}`;
@@ -162,8 +162,8 @@ function connectionTarget(endpoint) {
   return { kind: "websocket", url: url.toString() };
 }
 
-function validateArtifactEndpoint(value, octopusHome, interfaceId) {
-  const endpoint = normalizedEndpoint(value, octopusHome, interfaceId);
+function validateArtifactEndpoint(value, phobosHome, interfaceId) {
+  const endpoint = normalizedEndpoint(value, phobosHome, interfaceId);
   connectionTarget(endpoint);
   return endpoint;
 }

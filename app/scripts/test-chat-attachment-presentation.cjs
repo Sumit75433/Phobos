@@ -70,7 +70,7 @@ const click = (selector, surface = document) => React.act(async () => { const el
 const created = [], revoked = [];
 URL.createObjectURL = () => { const url = "blob:preview-" + created.length; created.push(url); return url; };
 URL.revokeObjectURL = (url) => revoked.push(url);
-window.octopusTransport = {
+window.phobosTransport = {
   readClientAttachmentPreview: async (request) => { stagedReads.push(request); return { base64: bytes.base64, mimeType: file.type, contentHash: hash, size: file.size }; },
   openClientFile: async (request) => { opens.push(request); }, saveClientFile: async (request) => { saves.push(request); },
 };
@@ -192,7 +192,7 @@ window.octopusTransport = {
   const message = { ...scope, id: "message", role: "user", text: "Attached message", attachments: [...gallery, ...docs].map((data) => data.file) };
   const renderMessage = (text) => React.act(async () => tree.render(React.createElement(layout.UserMessage, { message: { ...message, text } })));
   await renderMessage(message.text);
-  const attachments = container.querySelector(".octopus-message-attachments.is-user"), bubble = container.querySelector("[data-user-message-bubble]");
+  const attachments = container.querySelector(".phobos-message-attachments.is-user"), bubble = container.querySelector("[data-user-message-bubble]");
   assert.equal(attachments.closest("[data-user-message-bubble]"), null); assert.ok(attachments.compareDocumentPosition(bubble) & Node.DOCUMENT_POSITION_FOLLOWING);
   assert.equal(attachments.querySelectorAll(".chat-attachment-card").length, 8); assert.equal(attachments.querySelectorAll(".chat-attachment-scroll").length, 2);
   const galleryReads = imageReads; await click('button[aria-label="View image.png"]', container); await click('button[aria-label="Next image"]');

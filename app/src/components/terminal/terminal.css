@@ -24,22 +24,22 @@
   line-height: 17px;
 }
 
-.launch-scene-terminal [data-octopus-xterm] .xterm-viewport {
+.launch-scene-terminal [data-phobos-xterm] .xterm-viewport {
   scrollbar-width: thin;
   scrollbar-color: var(--color-token-scrollbar-slider-background) transparent;
 }
 
-.launch-scene-terminal [data-octopus-xterm] .xterm-viewport::-webkit-scrollbar {
+.launch-scene-terminal [data-phobos-xterm] .xterm-viewport::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.launch-scene-terminal [data-octopus-xterm] .xterm-viewport::-webkit-scrollbar-track,
-.launch-scene-terminal [data-octopus-xterm] .xterm-viewport::-webkit-scrollbar-corner {
+.launch-scene-terminal [data-phobos-xterm] .xterm-viewport::-webkit-scrollbar-track,
+.launch-scene-terminal [data-phobos-xterm] .xterm-viewport::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-.launch-scene-terminal [data-octopus-xterm] .xterm-viewport::-webkit-scrollbar-thumb {
+.launch-scene-terminal [data-phobos-xterm] .xterm-viewport::-webkit-scrollbar-thumb {
   border: 1px solid transparent;
   background: var(--color-token-scrollbar-slider-background);
   background-clip: padding-box;

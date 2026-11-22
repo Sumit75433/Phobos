@@ -3,13 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useClientPreferences, useSetClientPreferences, type DictationProvider } from "../../clientPreferences";
 import { OcButton, OcCard, OcGroup, OcSelect, OcSettingsRow, OcStatus, OcSwitch, OcTextField } from "../../design-system/components";
 import { Glyph } from "../IconGlyphs";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { appToast, useAppErrorToast } from "../../toasts";
 import { SettingsHeading } from "./SettingsHeading";
 import { formatKeyboardShortcuts, useKeyboardShortcuts } from "../../keyboardShortcuts";
 import { DictationRecordings } from "../chat/DictationRecordings";
 
-export function VoiceAudioSection({ accessProfile, recordingId, onShowAllRecordings }: { accessProfile: OctopusClientAccessProfile; recordingId?: string; onShowAllRecordings?: () => void }) {
+export function VoiceAudioSection({ accessProfile, recordingId, onShowAllRecordings }: { accessProfile: PhobosClientAccessProfile; recordingId?: string; onShowAllRecordings?: () => void }) {
   const preferences = useClientPreferences();
   const setClientPreferences = useSetClientPreferences();
   const keyboardShortcuts = useKeyboardShortcuts(accessProfile);
@@ -156,7 +156,7 @@ export function VoiceAudioSection({ accessProfile, recordingId, onShowAllRecordi
                 value={preferences.dictationProvider}
               />
             )}
-            description="Uses the ChatGPT session already authorized in the local Codex app. Octopus stores no separate speech API key."
+            description="Uses the ChatGPT session already authorized in the local Codex app. Phobos stores no separate speech API key."
             label="Transcription provider"
           />
           <OcSettingsRow {...settingsTargetProps("voice.toggle-dictation")}
@@ -173,7 +173,7 @@ export function VoiceAudioSection({ accessProfile, recordingId, onShowAllRecordi
                 onCheckedChange={(globalQuickDictation) => setClientPreferences({ globalQuickDictation })}
               />
             )}
-            description="Bring Octopus forward, open the active task, and start the existing composer dictation from anywhere."
+            description="Bring Phobos forward, open the active task, and start the existing composer dictation from anywhere."
             label="Global quick dictation"
             meta={(keyboardShortcuts.start_dictation ?? []).length ? "Only active while this profile is unlocked." : "Assign Toggle dictation first."}
           />

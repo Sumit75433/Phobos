@@ -162,19 +162,19 @@ class LineReader:
 
 
 class ReaderMixin:
-    octopus_literal_limit = MAX_LINE
+    phobos_literal_limit = MAX_LINE
 
     def open(self, host="", port=None, timeout=None):
         super().open(host, port, timeout)
-        self.octopus_reader = LineReader(self.sock)
+        self.phobos_reader = LineReader(self.sock)
 
     def read(self, size):
-        if size > self.octopus_literal_limit:
-            raise self.error(f"got a {size}-byte literal above the {self.octopus_literal_limit}-byte limit")
-        return self.octopus_reader.read(size)
+        if size > self.phobos_literal_limit:
+            raise self.error(f"got a {size}-byte literal above the {self.phobos_literal_limit}-byte limit")
+        return self.phobos_reader.read(size)
 
     def readline(self):
-        line = self.octopus_reader.readline(MAX_LINE)
+        line = self.phobos_reader.readline(MAX_LINE)
         if len(line) > MAX_LINE:
             raise self.error(f"got more than {MAX_LINE} bytes")
         return line
@@ -187,14 +187,14 @@ class TlsImap(ReaderMixin, imaplib.IMAP4_SSL):
 class PlainImap(ReaderMixin, imaplib.IMAP4):
     def start_tls(self, context):
         if "STARTTLS" not in self.capabilities:
-            raise MailError("tls", f"{self.host} does not offer STARTTLS on port {self.port}; Octopus never signs in without encryption")
+            raise MailError("tls", f"{self.host} does not offer STARTTLS on port {self.port}; Phobos never signs in without encryption")
         kind, data = self._simple_command("STARTTLS")
         if kind != "OK":
             raise MailError("tls", f"{self.host} refused to start TLS", server_text=server_text(data))
-        if self.octopus_reader.buffer:
+        if self.phobos_reader.buffer:
             raise MailError("tls", f"{self.host} sent data before TLS started")
         self.sock = context.wrap_socket(self.sock, server_hostname=self.host)
-        self.octopus_reader = LineReader(self.sock)
+        self.phobos_reader = LineReader(self.sock)
         self._get_capabilities()
 
 
@@ -313,7 +313,7 @@ class ImapSession:
         if "ID" not in self.capabilities:
             return
         try:
-            self.imap.xatom("ID", '("name" "Octopus")')
+            self.imap.xatom("ID", '("name" "Phobos")')
         except imaplib.IMAP4.error:
             pass
 
@@ -402,11 +402,11 @@ class ImapSession:
         return result
 
     def limited_uid(self, literal_limit, *args):
-        self.imap.octopus_literal_limit = max(MAX_LINE, literal_limit)
+        self.imap.phobos_literal_limit = max(MAX_LINE, literal_limit)
         try:
             return self.uid(*args)
         finally:
-            self.imap.octopus_literal_limit = MAX_LINE
+            self.imap.phobos_literal_limit = MAX_LINE
 
     def fetch_summary(self, uid, header_fields, header_limit):
         labels = " X-GM-LABELS" if self.has("X-GM-EXT-1") else ""
@@ -471,7 +471,7 @@ class ImapSession:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break
-            if not imap.octopus_reader.has_data():
+            if not imap.phobos_reader.has_data():
                 ready, _, _ = select.select([imap.sock], [], [], remaining)
                 if not ready:
                     break
@@ -572,7 +572,7 @@ class SmtpSession:
                 smtp = smtplib.SMTP(host, port, local_hostname="localhost", timeout=connect_timeout)
                 smtp.ehlo()
                 if not smtp.has_extn("starttls"):
-                    raise MailError("tls", f"{host} does not offer STARTTLS on port {port}; Octopus never signs in without encryption")
+                    raise MailError("tls", f"{host} does not offer STARTTLS on port {port}; Phobos never signs in without encryption")
                 smtp.starttls(context=tls_context())
             smtp.ehlo()
             smtp.sock.settimeout(command_timeout)

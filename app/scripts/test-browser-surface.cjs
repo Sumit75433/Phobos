@@ -11,18 +11,18 @@ const rustBrowserToolEvidence = {
   "crate_version": "0.1.0",
   "receipt_sha256": "48d60fd491802d247e8be7b9ad3870e7ed054a16f37eda316f5f217fd8392176",
   "source_abi": {
-    "crates/octopus-tool-registry/src/lib.rs": "ae3ee84f5ce0f282df49c9af80d75368b8523d843c237f5cdcc054ca5b85097a",
-    "crates/octopus-descriptors/src/process_authority.rs": "555cffef87f28ffb2e58e01a2f6b2980c460a7f59bbee69e3f4f0408baa3e037",
-    "crates/octopus-descriptors/src/lib.rs": "cd7b628f8b5c293df0fbaa6707dba87790e35d21e0b74a80f2e195601ba51423",
-    "crates/octopus-worker-env/src/formation.rs": "52a72e240780e32e412abeb943109fc8a4dc21425570ea4a9ff7c08ca7e76f32",
-    "registry/worker_environment_kind/browser_session/packages/octopus-browser-session-env/src/lib.rs": "1305469ffead6a52f33167113753404f656b23aca5e5fc23126b424ece540a7a",
-    "registry/worker_environment_kind/browser_session/packages/octopus-browser-session-env/src/tests.rs": "6288ad4e85f0b84a213e9b83528e7f212eb0a111766cc1abea7be5ec5f5fc7e4"
+    "crates/phobos-tool-registry/src/lib.rs": "ae3ee84f5ce0f282df49c9af80d75368b8523d843c237f5cdcc054ca5b85097a",
+    "crates/phobos-descriptors/src/process_authority.rs": "555cffef87f28ffb2e58e01a2f6b2980c460a7f59bbee69e3f4f0408baa3e037",
+    "crates/phobos-descriptors/src/lib.rs": "cd7b628f8b5c293df0fbaa6707dba87790e35d21e0b74a80f2e195601ba51423",
+    "crates/phobos-worker-env/src/formation.rs": "52a72e240780e32e412abeb943109fc8a4dc21425570ea4a9ff7c08ca7e76f32",
+    "registry/worker_environment_kind/browser_session/packages/phobos-browser-session-env/src/lib.rs": "1305469ffead6a52f33167113753404f656b23aca5e5fc23126b424ece540a7a",
+    "registry/worker_environment_kind/browser_session/packages/phobos-browser-session-env/src/tests.rs": "6288ad4e85f0b84a213e9b83528e7f212eb0a111766cc1abea7be5ec5f5fc7e4"
   },
   "pairs": [
     {
       "source_id": "browser.screenshot",
       "source_path": "registry/tool/browser.screenshot/tool.json",
-      "source_sha256": "4fc25594f9c8c36a84cdcce60d16055bf3173c6a9c102b5caed5c2c4756ab16d",
+      "source_sha256": "9b69930d9cf65923dc95f8d3919c0087149b8272e5229aa1968c5a7f919a2905",
       "exact_id": "browser.screenshot__chat_fixture",
       "door": "system_browser__chat_fixture",
       "formation_pin": "0e713f801a4cfbef9680f52a71c50cf405f58045f75ff7bb822ddb920e7dd964",
@@ -33,7 +33,7 @@ const rustBrowserToolEvidence = {
     {
       "source_id": "browser.download_wait",
       "source_path": "registry/tool/browser.download_wait/tool.json",
-      "source_sha256": "a3de19dbac731972d3834e03471076f6ce06bd7acc0758f04f1e44bf849f7364",
+      "source_sha256": "4b735a98b8dcd3dfceebeabf87adf5655a348863650c054db0981fcc6f20e2a5",
       "exact_id": "browser.download_wait__chat_fixture",
       "door": "door",
       "formation_pin": "1b388aa7197e6e6a6a5a48b0330cb3ae223061af9af696984b78185949f0fab4",
@@ -139,13 +139,13 @@ async function adapterChecks() {
 
 function packagedEngineChecks() {
   const crypto = require("node:crypto"), os = require("node:os");
-  const file = path.resolve(__dirname, "../../registry/worker_environment_kind/browser_session/packages/octopus-browser-session-env/native/macos/engine-artifact.cjs");
+  const file = path.resolve(__dirname, "../../registry/worker_environment_kind/browser_session/packages/phobos-browser-session-env/native/macos/engine-artifact.cjs");
   const verifier = require(file), contract = verifier.sourceContract();
   const sha = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
-  const temporary = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "octopus-package-proof-fixture-")));
+  const temporary = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phobos-package-proof-fixture-")));
   try {
     const bundle = path.join(temporary, "Fixture.app"), resources = path.join(bundle, "Contents/Resources");
-    const executable = path.join(bundle, "Contents/MacOS/Octopus"), native = path.join(bundle, "Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework");
+    const executable = path.join(bundle, "Contents/MacOS/Phobos"), native = path.join(bundle, "Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework");
     for (const directory of [resources, path.dirname(executable), path.dirname(native)]) fs.mkdirSync(directory, { recursive: true });
     fs.writeFileSync(executable, "injected launcher fixture"); fs.writeFileSync(native, "injected engine bytes; never loaded");
     const retained = verifier.inventory(bundle, ["Contents/Frameworks"]);
@@ -155,11 +155,11 @@ function packagedEngineChecks() {
       manifest_sha256: contract.manifest_sha256, production_manifest_sha256: contract.production_sha256,
       download_history_patch_sha256: contract.history.patch.sha256, download_history_manifest_sha256: contract.history_sha256,
       navigation_history_patch_sha256: contract.navigation.patch.sha256, navigation_history_manifest_sha256: contract.navigation_sha256 };
-    const record = { schema_version: 2, producer: "octopus.browser.engine-package", producer_sha256: sha(fs.readFileSync(file)),
+    const record = { schema_version: 2, producer: "phobos.browser.engine-package", producer_sha256: sha(fs.readFileSync(file)),
       engine_api: "electron.ownedGuest.v1", history_api: "electron.ownedNavigationHistory.v1", readiness: "native-accepted", architecture: "arm64", source,
       source_receipt_sha256: "a".repeat(64), source_inventory_sha256: "b".repeat(64), native_acceptance_sha256: "c".repeat(64),
       retained_engine: { root: "Contents/Frameworks", sha256: retained.sha256, member_count: retained.members.length },
-      client_transformation: { executable: "Contents/MacOS/Octopus", source_executable: "Contents/MacOS/Electron", engine_frameworks: "preserve-byte-identical", signing: "client-resources-and-outer-bundle-only" } };
+      client_transformation: { executable: "Contents/MacOS/Phobos", source_executable: "Contents/MacOS/Electron", engine_frameworks: "preserve-byte-identical", signing: "client-resources-and-outer-bundle-only" } };
     const receipt = path.join(resources, "owned-browser-engine.json");
     const options = { resourcesRoot: resources, executablePath: executable, isPackaged: true, architecture: "arm64", nodeVersion: source.node_version, electronVersion: source.electron_version };
     fs.writeFileSync(receipt, JSON.stringify(record));
@@ -194,7 +194,7 @@ async function startupChecks() {
   const installation = { available: true, installed: true, receipt_state: "valid", receipt_digest: "a".repeat(64), member_states: [{ registry_kind: "worker_environment_kind", owner: "browser_session", materialized: true, source_digest: "b".repeat(64), installed_digest: "b".repeat(64) }] };
   let guard, engineAvailable = false;
   const engineProof = Object.freeze({ receipt: "packaged-source-proof" });
-  const context = vm.createContext({ path, console, process: { resourcesPath: "/client/Octopus.app/Contents/Resources", execPath: "/client/Octopus.app/Contents/MacOS/Octopus", arch: "arm64", versions: { node: clientRuntime.node, electron: clientRuntime.electron } }, resolveOctopusHome: () => "/test/home", initializeRuntimeHost: async () => {}, app: { whenReady: async () => {}, isPackaged: true }, clientSetupPackageRoots: () => ({ activeRegistryRoot: "/test/home/registry", stateRoot: "/test/home/client/package-state" }),
+  const context = vm.createContext({ path, console, process: { resourcesPath: "/client/Phobos.app/Contents/Resources", execPath: "/client/Phobos.app/Contents/MacOS/Phobos", arch: "arm64", versions: { node: clientRuntime.node, electron: clientRuntime.electron } }, resolvePhobosHome: () => "/test/home", initializeRuntimeHost: async () => {}, app: { whenReady: async () => {}, isPackaged: true }, clientSetupPackageRoots: () => ({ activeRegistryRoot: "/test/home/registry", stateRoot: "/test/home/client/package-state" }),
     registerLocalPackageMutationGuard({ guard: callback }) { calls.push("guard"); guard = callback; return () => {}; },
     async withLocalPackageInstallation(_options, callback) { return callback(installation); },
     fs: { promises: { async lstat() { return { isFile: () => true, isSymbolicLink: () => false, size: 256 }; }, async readFile(file) { return JSON.stringify(file.endsWith("host.json") ? machine : door); }, async realpath(file) { return file; } } },
@@ -203,8 +203,8 @@ async function startupChecks() {
       if (modulePath === "electron") return {};
       calls.push(modulePath);
       if (modulePath.endsWith("engine-mode.cjs")) return { verifyBrowserEngine(options) {
-        assert.equal(options.executablePath, "/client/Octopus.app/Contents/MacOS/Octopus"); assert.equal(options.isPackaged, true);
-        assert.equal(options.resourcesRoot, "/client/Octopus.app/Contents/Resources"); assert.equal(Object.hasOwn(options, "receiptPath"), false);
+        assert.equal(options.executablePath, "/client/Phobos.app/Contents/MacOS/Phobos"); assert.equal(options.isPackaged, true);
+        assert.equal(options.resourcesRoot, "/client/Phobos.app/Contents/Resources"); assert.equal(Object.hasOwn(options, "receiptPath"), false);
         if (!engineAvailable) throw new Error("Packaged engine proof unavailable"); return { mode: "owned", engineProof };
       } };
       if (modulePath.endsWith("setup-host.cjs")) return { planBrowserNativeHost: async (request) => ({ request }) };
@@ -231,12 +231,12 @@ async function startupChecks() {
   assert.equal(calls.filter((call) => call === "start").length, 1);
   assert.equal(calls.filter((call) => call === "guard").length, 1);
   assert.ok(calls.includes("/test/custom-native-host"));
-  const observed = vm.runInContext("nativeBrowserTargetsForProjection({octopusHome:'/test/home',worker_environment_id:'room',formation_pin:'pin',engine_handle:'engine',host_generation:'generation',browser_context_id:'context'})", context);
+  const observed = vm.runInContext("nativeBrowserTargetsForProjection({phobosHome:'/test/home',worker_environment_id:'room',formation_pin:'pin',engine_handle:'engine',host_generation:'generation',browser_context_id:'context'})", context);
   assert.equal(observed.targets.length, 0, "empty live inventory must remain authoritative");
   assert.equal(calls.at(-1).protocol, "browser.native.v1");
-  assert.equal(Object.hasOwn(calls.at(-1), "octopusHome"), false);
+  assert.equal(Object.hasOwn(calls.at(-1), "phobosHome"), false);
   assert.equal(Object.hasOwn(calls.at(-1), "target_id"), false, "closed seed target must not prevent room inventory");
-  assert.throws(() => vm.runInContext("nativeBrowserTargetsForProjection({octopusHome:'/another/home'})", context), /another Octopus Home/);
+  assert.throws(() => vm.runInContext("nativeBrowserTargetsForProjection({phobosHome:'/another/home'})", context), /another Phobos Home/);
   assert.throws(() => guard(["driver.browser_session"]), /Restart/);
   installation.member_states[0].installed_digest = "c".repeat(64);
   installation.member_states[0].materialized = false;
@@ -293,7 +293,7 @@ async function browserPreviewChecks() {
 }
 
 async function rendererChecks(mode = "owned") {
-  const { engineInfo } = require("../../registry/worker_environment_kind/browser_session/packages/octopus-browser-session-env/native/engine-mode.cjs");
+  const { engineInfo } = require("../../registry/worker_environment_kind/browser_session/packages/phobos-browser-session-env/native/engine-mode.cjs");
   const engine = engineInfo(mode);
   const { JSDOM } = require("jsdom");
   const React = require("react");
@@ -318,7 +318,7 @@ async function rendererChecks(mode = "owned") {
     dom.window.HTMLElement.prototype.adoptOwnedGuest = async function (token, generation) { assert.equal(token, "lease"); assert.equal(generation, 11); assert.equal(this.style.width, "640px"); assert.equal(this.style.height, "480px"); nativeAttached = true; calls.push(["native-adopt"]); };
     dom.window.HTMLElement.prototype.releaseOwnedGuest = function () { nativeAttached = false; calls.push(["native-release"]); };
   }
-  dom.window.octopusTransport = {
+  dom.window.phobosTransport = {
     showClientContextMenu(request) { calls.push(["menu", request]); return new Promise((resolve, reject) => menus.push({ request, resolve, reject })); },
     async cancelClientContextMenu(request) { calls.push(["menu-cancel", request]); return { cancelled: true }; },
     async prepareNativeBrowserViewer(request) { calls.push(["prepare", request]); if (mode === "owned") assert.equal(request.frameToken, "native-frame"); else assert.match(request.frameToken, /^[a-f0-9-]{36}$/); current = { engine, attachmentId: request.attachmentId, mountGeneration: 11, hostGeneration: "generation", protocol: "browser.native.v1", presentationProtocol: engine.presentationProtocol, presentationPhase: mode === "owned" ? "prepared" : "attached", viewportSequence: 0, modelViewport: { revision: 0, emulatedSize: null }, modelActive: false, modelTurnKey: "0", cursor: null, workerEnvironmentId: "room", run: "run", ee: "ee", surfaceId: "surface", targetId: "target", engineHandle: "engine", browserContextId: "context", connected: true, visible: false, readOnly: false, loading: false, url: data.url, title: "Page", canGoBack: true, canGoForward: false, zoomFactor: 1 }; return { adoptionToken: mode === "owned" ? "lease" : null, hostGeneration: "generation", mountGeneration: 11, state: current }; },
@@ -376,7 +376,7 @@ async function rendererChecks(mode = "owned") {
       : name.endsWith("projectionClient") ? { formatProjectionError: (error) => error.message }
       : name.endsWith("IconGlyphs") ? { Glyph: () => null }
       : name.endsWith("components") ? { OcIconButton: ({ label, glyph, appearance, ...props }) => React.createElement("button", { ...props, "aria-label": label }), OcButton: "button", OcMenuItem: ({ label, leadingIcon, ...props }) => React.createElement("button", props, label), OcMenuSurface: "div" }
-      : name.endsWith("OctopusSurface") ? { OctopusEmptyState: () => null }
+      : name.endsWith("PhobosSurface") ? { PhobosEmptyState: () => null }
       : { LiveSurfaceEmpty: ({ title }) => React.createElement("div", null, title), ManualRoomControlWarning: () => { throw new Error("Native viewing must not mount a manual gate"); }, dataText: (data, key) => typeof data[key] === "string" ? data[key] : "", isViewerUrl: (value) => /^https?:/.test(value) },
   });
   const root = createRoot(dom.window.document.getElementById("root"));
@@ -583,7 +583,7 @@ async function rendererChecks(mode = "owned") {
     assert.equal(cursorLayer.style.transform, "scale(0.6)");
     current = { ...current, modelActive: false, cursor: null };
     await React.act(async () => publishState());
-    assert.equal(Boolean(dom.window.document.querySelector(".we-browser-status")?.textContent.includes("Octopus is using this page")), false);
+    assert.equal(Boolean(dom.window.document.querySelector(".we-browser-status")?.textContent.includes("Phobos is using this page")), false);
     const record = { id: "download-one", targetId: "target", filename: "report.pdf", url: "https://page.test/report.pdf", status: "in_progress", receivedBytes: 512, totalBytes: 1024, startedAtMs: 1000, updatedAtMs: 2000, fileExists: false, canCancel: true, canPause: true, canResume: false, userInitiated: true, sequence: 1 };
     downloads = { ...downloads, sequence: 1, downloads: [record] };
     await React.act(async () => root.render(React.createElement(module.exports.BrowserSurface, { ...props, surface: { ...props.surface, data: { ...data, downloads: { sequence: 1 } } } })));

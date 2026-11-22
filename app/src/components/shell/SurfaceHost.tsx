@@ -8,9 +8,9 @@ import type { SelectionRef } from "../../data/topology";
 import type { DashboardFilters, DashboardScope, DashboardTopologyMode } from "../../uiState";
 import type { ClientSurfaceDescriptor } from "../../shell/surfaceTypes";
 import type { ChatWorkspace } from "../chat";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { FilesOpenTarget } from "../files/types";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 import { SurfaceLoadingState, SurfaceRenderBoundary } from "./SurfaceBoundary";
 import type { InboxSurfaceState } from "../activity/InboxSurface";
 
@@ -35,7 +35,7 @@ export type SurfaceHostProps = {
   inbox?: InboxSurfaceState;
   focusedMovement?: { id: string; sequence: number | null } | null;
   onClearMovement?: () => void;
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   surface: ClientSurfaceDescriptor;
   topology: RuntimeTopologyState;
   query: string;
@@ -111,7 +111,7 @@ function SurfaceContent({
       : <div className="inbox-summary" role="alert">Inbox activity is unavailable.</div>;
   }
   const surfaceFallback = surface.rendererKind === "builtin.chat" || surface.rendererKind === "builtin.voice"
-    ? <OctopusLoadingState className="surface-content-loading-state" label={surface.rendererKind === "builtin.chat" ? "Loading task" : "Opening Home"} />
+    ? <PhobosLoadingState className="surface-content-loading-state" label={surface.rendererKind === "builtin.chat" ? "Loading task" : "Opening Home"} />
     : <SurfaceLoadingState label={surfaceLoadingLabel(surface)} />;
   if (surface.rendererKind === "builtin.dashboard") {
     return (
@@ -165,7 +165,7 @@ function SurfaceContent({
 }
 
 function renderSurface(
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   surface: ClientSurfaceDescriptor,
   topology: RuntimeTopologyState,
   query: string,

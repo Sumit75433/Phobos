@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import codeThemeSeedData from "./design-system/code-theme-seeds.json";
-import octopusAccentProfile from "./design-system/accent-profile.json";
+import phobosAccentProfile from "./design-system/accent-profile.json";
 
 export type ThemeMode = "system" | "light" | "dark";
 export type AccentSource = "codex" | "custom";
@@ -147,10 +147,10 @@ export type AppearanceSettings = {
   density: Density;
   chatTextSize: ChatTextSize;
   cornerSoftness: CornerSoftness;
-  octopuses: boolean;
+  phoboses: boolean;
 };
 
-const STORAGE_KEY = "octopus.appearance.v3";
+const STORAGE_KEY = "phobos.appearance.v3";
 
 export const defaultAppearance: AppearanceSettings = {
   themeMode: "system",
@@ -187,7 +187,7 @@ export const defaultAppearance: AppearanceSettings = {
   density: "default",
   chatTextSize: "default",
   cornerSoftness: "default",
-  octopuses: false,
+  phoboses: false,
 };
 
 const densityScale: Record<Density, number> = { compact: 0.84, default: 1, comfortable: 1.16 };
@@ -277,7 +277,7 @@ function load(): AppearanceSettings {
       density: choice(parsed.density, ["compact", "default", "comfortable"], defaultAppearance.density),
       chatTextSize: choice(parsed.chatTextSize, ["small", "default", "large"], defaultAppearance.chatTextSize),
       cornerSoftness: choice(parsed.cornerSoftness, ["sharp", "default", "round"], defaultAppearance.cornerSoftness),
-      octopuses: booleanValue(parsed.octopuses, defaultAppearance.octopuses),
+      phoboses: booleanValue(parsed.phoboses, defaultAppearance.phoboses),
     };
   } catch {
     return { ...defaultAppearance };
@@ -293,7 +293,7 @@ function readAccentSource(value: Record<string, unknown>, mode: CodeThemeKind): 
 }
 
 export function appearanceAccentColor(settings: AppearanceSettings, mode: CodeThemeKind): string {
-  return settings[`${mode}AccentSource`] === "codex" ? octopusAccentProfile[mode].accent : settings[`${mode}Accent`];
+  return settings[`${mode}AccentSource`] === "codex" ? phobosAccentProfile[mode].accent : settings[`${mode}Accent`];
 }
 
 export function applyAppearance(settings: AppearanceSettings = current): void {
@@ -329,7 +329,7 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
   const reduced = shouldReduceMotion(settings);
   const uiScale = settings.uiFontSize / defaultAppearance.uiFontSize;
   const foregroundRgb = hexRgb(palette.foreground);
-  const octopusTheme = resolveOctopusTheme(theme, palette, settings[`${theme}AccentSource`] === "codex");
+  const phobosTheme = resolvePhobosTheme(theme, palette, settings[`${theme}AccentSource`] === "codex");
   const selectedCodeThemeId = theme === "dark" ? settings.darkCodeTheme : settings.lightCodeTheme;
   const codeThemes = theme === "dark" ? darkCodeThemes : lightCodeThemes;
   const selectedCodeTheme = codeThemes.find((candidate) => candidate.id === selectedCodeThemeId)
@@ -341,10 +341,10 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
   root.dataset.codeTheme = selectedCodeTheme.id;
   root.dataset.diffMarkerStyle = settings.diffMarkerStyle;
   root.dataset.density = settings.density;
-  root.dataset.octopusOs = "darwin";
-  root.dataset.octopusWindowType = "electron";
+  root.dataset.phobosOs = "darwin";
+  root.dataset.phobosWindowType = "electron";
   root.dataset.windowType = "electron";
-  root.dataset.octopusWindowChrome = "native";
+  root.dataset.phobosWindowChrome = "native";
   root.classList.toggle("electron-dark", theme === "dark");
   root.classList.toggle("electron-light", theme === "light");
   root.classList.toggle("reduce-motion", reduced);
@@ -352,11 +352,11 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
   root.classList.toggle("pointer-cursors", settings.pointerCursors);
   root.classList.toggle("font-smoothing", settings.fontSmoothing);
   root.classList.toggle("translucent-sidebar", palette.translucentSidebar);
-  window.octopusTransport?.setWindowAppearance({ theme, preference: settings.themeMode, translucent: palette.translucentSidebar });
+  window.phobosTransport?.setWindowAppearance({ theme, preference: settings.themeMode, translucent: palette.translucentSidebar });
   root.style.setProperty("--ui-font-scale", String(uiScale));
   root.style.setProperty("--chat-font-size", `${chatFontPx[settings.chatTextSize]}px`);
-  root.style.setProperty("--octopus-chat-font-size", `${chatFontPx[settings.chatTextSize]}px`);
-  root.style.setProperty("--octopus-chat-code-font-size", `${settings.codeFontSize}px`);
+  root.style.setProperty("--phobos-chat-font-size", `${chatFontPx[settings.chatTextSize]}px`);
+  root.style.setProperty("--phobos-chat-code-font-size", `${settings.codeFontSize}px`);
   root.style.setProperty("--vscode-chat-editor-font-size", `${chatFontPx[settings.chatTextSize]}px`);
   root.style.setProperty("--vscode-editor-font-size", `${settings.codeFontSize}px`);
   root.style.setProperty("--vscode-chat-font-size", `${chatFontPx[settings.chatTextSize]}px`);
@@ -403,8 +403,8 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
     if (palette.codeFont) element.style.setProperty("--vscode-editor-font-family", codeFont);
     else element.style.removeProperty("--vscode-editor-font-family");
   }
-  clearDerivedOctopusVariables(root);
-  for (const [name, value] of Object.entries(octopusTheme.variables)) {
+  clearDerivedPhobosVariables(root);
+  for (const [name, value] of Object.entries(phobosTheme.variables)) {
     root.style.setProperty(name, value);
   }
   root.style.setProperty("--code-theme-background", selectedCodeTheme.background);
@@ -412,17 +412,17 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
   root.style.setProperty("--code-theme-foreground", selectedCodeTheme.foreground);
   root.style.setProperty("--oc-color-canvas", palette.background);
   root.style.setProperty("--oc-color-sidebar", palette.background);
-  root.style.setProperty("--oc-color-surface", octopusTheme.elevatedSecondaryOpaque);
-  root.style.setProperty("--oc-color-card", octopusTheme.elevatedPrimaryOpaque);
-  root.style.setProperty("--oc-color-raised", octopusTheme.controlBackgroundOpaque);
-  root.style.setProperty("--oc-color-control", octopusTheme.buttonSecondaryBackground);
-  root.style.setProperty("--oc-color-control-hover", octopusTheme.buttonSecondaryBackgroundHover);
-  root.style.setProperty("--oc-color-control-active", octopusTheme.buttonSecondaryBackgroundActive);
-  root.style.setProperty("--oc-color-text", octopusTheme.textForeground);
-  root.style.setProperty("--oc-color-text-soft", octopusTheme.textForegroundSecondary);
-  root.style.setProperty("--oc-color-text-muted", octopusTheme.textForegroundTertiary);
-  root.style.setProperty("--oc-color-border", octopusTheme.border);
-  root.style.setProperty("--oc-color-border-strong", octopusTheme.borderHeavy);
+  root.style.setProperty("--oc-color-surface", phobosTheme.elevatedSecondaryOpaque);
+  root.style.setProperty("--oc-color-card", phobosTheme.elevatedPrimaryOpaque);
+  root.style.setProperty("--oc-color-raised", phobosTheme.controlBackgroundOpaque);
+  root.style.setProperty("--oc-color-control", phobosTheme.buttonSecondaryBackground);
+  root.style.setProperty("--oc-color-control-hover", phobosTheme.buttonSecondaryBackgroundHover);
+  root.style.setProperty("--oc-color-control-active", phobosTheme.buttonSecondaryBackgroundActive);
+  root.style.setProperty("--oc-color-text", phobosTheme.textForeground);
+  root.style.setProperty("--oc-color-text-soft", phobosTheme.textForegroundSecondary);
+  root.style.setProperty("--oc-color-text-muted", phobosTheme.textForegroundTertiary);
+  root.style.setProperty("--oc-color-border", phobosTheme.border);
+  root.style.setProperty("--oc-color-border-strong", phobosTheme.borderHeavy);
   root.style.setProperty("--oc-color-accent", palette.accent);
   root.style.setProperty("--oc-color-accent-hover", mixHex(palette.accent, palette.foreground, 0.12));
   root.style.setProperty("--oc-color-danger", theme === "dark" ? "#FF6764" : "#E02E2A");
@@ -437,18 +437,18 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
     ? colorAlpha(rgbColor(palette.background), 0.88)
     : palette.background);
   root.style.setProperty("--sidebar", palette.translucentSidebar
-    ? colorAlpha(octopusTheme.editorBackground, 0.78)
-    : rgbString(octopusTheme.editorBackground));
-  root.style.setProperty("--sidebar-soft", colorAlpha(octopusTheme.editorBackground, 0.78));
-  root.style.setProperty("--panel", octopusTheme.elevatedSecondaryOpaque);
-  root.style.setProperty("--panel-soft", octopusTheme.elevatedPrimaryOpaque);
-  root.style.setProperty("--panel-raised", octopusTheme.controlBackgroundOpaque);
+    ? colorAlpha(phobosTheme.editorBackground, 0.78)
+    : rgbString(phobosTheme.editorBackground));
+  root.style.setProperty("--sidebar-soft", colorAlpha(phobosTheme.editorBackground, 0.78));
+  root.style.setProperty("--panel", phobosTheme.elevatedSecondaryOpaque);
+  root.style.setProperty("--panel-soft", phobosTheme.elevatedPrimaryOpaque);
+  root.style.setProperty("--panel-raised", phobosTheme.controlBackgroundOpaque);
   root.style.setProperty("--field", rgba(foregroundRgb, 0.035));
   root.style.setProperty("--line", rgba(foregroundRgb, 0.084));
   root.style.setProperty("--line-light", rgba(foregroundRgb, 0.042));
   root.style.setProperty("--line-strong", rgba(foregroundRgb, 0.156));
   root.style.setProperty("--line-bright", rgba(foregroundRgb, 0.29));
-  root.style.setProperty("--text", octopusTheme.textForeground);
+  root.style.setProperty("--text", phobosTheme.textForeground);
   root.style.setProperty("--text-soft", rgba(foregroundRgb, 0.72));
   root.style.setProperty("--muted", rgba(foregroundRgb, 0.62));
   root.style.setProperty("--copy", rgba(foregroundRgb, 0.62));
@@ -465,14 +465,14 @@ export function applyAppearance(settings: AppearanceSettings = current): void {
   root.style.setProperty("--button-secondary-active", rgba(foregroundRgb, 0.12));
   root.style.setProperty("--row-hover", rgba(foregroundRgb, 0.055));
   root.style.setProperty("--row-active", rgba(foregroundRgb, 0.11));
-  root.style.setProperty("--surface-0", octopusTheme.surfaceUnder);
+  root.style.setProperty("--surface-0", phobosTheme.surfaceUnder);
   root.style.setProperty("--surface-1", palette.background);
-  root.style.setProperty("--surface-2", octopusTheme.elevatedSecondaryOpaque);
-  root.style.setProperty("--surface-3", octopusTheme.elevatedPrimaryOpaque);
+  root.style.setProperty("--surface-2", phobosTheme.elevatedSecondaryOpaque);
+  root.style.setProperty("--surface-3", phobosTheme.elevatedPrimaryOpaque);
   root.style.setProperty("--blue", palette.accent);
 }
 
-type OctopusPalette = {
+type PhobosPalette = {
   accent: string;
   background: string;
   foreground: string;
@@ -487,8 +487,8 @@ type OctopusPalette = {
 
 type RgbColor = { red: number; green: number; blue: number };
 
-function resolveOctopusTheme(theme: "light" | "dark", palette: OctopusPalette, linkedAccent = false) {
-  const contrast = octopusContrast(palette.contrast, theme);
+function resolvePhobosTheme(theme: "light" | "dark", palette: PhobosPalette, linkedAccent = false) {
+  const contrast = phobosContrast(palette.contrast, theme);
   const surface = rgbColor(palette.background);
   const ink = rgbColor(palette.foreground);
   const accent = rgbColor(palette.accent);
@@ -514,8 +514,8 @@ function resolveOctopusTheme(theme: "light" | "dark", palette: OctopusPalette, l
   const diffAdded = color(palette.diffAdded, theme === "light" ? "#00A240" : "#40C977").toLowerCase();
   const diffRemoved = color(palette.diffRemoved, theme === "light" ? "#BA2623" : "#FA423E").toLowerCase();
   const values = theme === "light"
-    ? octopusLightColors(surface, ink, accent, contrast)
-    : octopusDarkColors(surface, ink, accent, contrast);
+    ? phobosLightColors(surface, ink, accent, contrast)
+    : phobosDarkColors(surface, ink, accent, contrast);
   if (theme === "dark" && isDefaultDarkPalette(palette)) {
     values.textForeground = "var(--gray-150)";
   }
@@ -529,10 +529,10 @@ function resolveOctopusTheme(theme: "light" | "dark", palette: OctopusPalette, l
     "--color-text-user-message": "var(--color-text)",
     "--color-background-text-selection": "var(--color-background-info-soft)",
     "--color-background-attribution-highlight": "var(--color-background-info-soft)",
-    "--octopus-base-accent": accentHex,
-    "--octopus-base-contrast": String(palette.contrast),
-    "--octopus-base-ink": foregroundHex,
-    "--octopus-base-surface": surfaceHex,
+    "--phobos-base-accent": accentHex,
+    "--phobos-base-contrast": String(palette.contrast),
+    "--phobos-base-ink": foregroundHex,
+    "--phobos-base-surface": surfaceHex,
     "--color-accent-blue": accentHex,
     "--color-accent-purple": skill,
     "--color-background-accent": values.accentBackground,
@@ -593,7 +593,7 @@ function resolveOctopusTheme(theme: "light" | "dark", palette: OctopusPalette, l
     "--shadow-mode-toggle-selected": "var(--shadow-md)",
   };
   if (linkedAccent) {
-    const profile = octopusAccentProfile[theme];
+    const profile = phobosAccentProfile[theme];
     Object.assign(variables, {
       "--color-background-composer-primary": profile.submitBackground,
       "--color-text-composer-primary": profile.submitText,
@@ -612,7 +612,7 @@ function resolveOctopusTheme(theme: "light" | "dark", palette: OctopusPalette, l
   return { ...values, surfaceUnder, editorBackground, variables };
 }
 
-function isDefaultDarkPalette(palette: OctopusPalette): boolean {
+function isDefaultDarkPalette(palette: PhobosPalette): boolean {
   return palette.accent.toLowerCase() === defaultAppearance.darkAccent.toLowerCase()
     && palette.background.toLowerCase() === defaultAppearance.darkBackground.toLowerCase()
     && palette.foreground.toLowerCase() === defaultAppearance.darkForeground.toLowerCase()
@@ -625,7 +625,7 @@ function isDefaultDarkPalette(palette: OctopusPalette): boolean {
     && palette.skill.toLowerCase() === defaultAppearance.darkSkill.toLowerCase();
 }
 
-function clearDerivedOctopusVariables(root: HTMLElement): void {
+function clearDerivedPhobosVariables(root: HTMLElement): void {
   for (const name of Array.from(root.style)) {
     const derivedToken = name.startsWith("--color-token-");
     const derivedVscode = name.startsWith("--vscode-") && !inlineVscodeTypographyVariables.has(name);
@@ -633,7 +633,7 @@ function clearDerivedOctopusVariables(root: HTMLElement): void {
   }
 }
 
-function octopusLightColors(surface: RgbColor, ink: RgbColor, accent: RgbColor, contrast: number) {
+function phobosLightColors(surface: RgbColor, ink: RgbColor, accent: RgbColor, contrast: number) {
   const white = { red: 255, green: 255, blue: 255 };
   const control = mixRgb(surface, white, 0.09 + contrast * 0.04);
   const elevatedSecondary = mixRgb(surface, white, 0.08 + contrast * 0.08);
@@ -678,7 +678,7 @@ function octopusLightColors(surface: RgbColor, ink: RgbColor, accent: RgbColor, 
   };
 }
 
-function octopusDarkColors(surface: RgbColor, ink: RgbColor, accent: RgbColor, contrast: number) {
+function phobosDarkColors(surface: RgbColor, ink: RgbColor, accent: RgbColor, contrast: number) {
   const black = { red: 0, green: 0, blue: 0 };
   const white = { red: 255, green: 255, blue: 255 };
   const control = mixRgb(surface, ink, 0.06 + contrast * 0.05);
@@ -725,7 +725,7 @@ function octopusDarkColors(surface: RgbColor, ink: RgbColor, accent: RgbColor, c
   };
 }
 
-function octopusContrast(value: number, theme: "light" | "dark"): number {
+function phobosContrast(value: number, theme: "light" | "dark"): number {
   const baseline = theme === "dark" ? 60 : 45;
   const normalized = value / 100 + ((value - baseline) / 60) * 0.7;
   if (value <= baseline) return normalized;
@@ -871,7 +871,7 @@ function normalize(value: AppearanceSettings): AppearanceSettings {
     density: choice(value.density, ["compact", "default", "comfortable"], defaultAppearance.density),
     chatTextSize: choice(value.chatTextSize, ["small", "default", "large"], defaultAppearance.chatTextSize),
     cornerSoftness: choice(value.cornerSoftness, ["sharp", "default", "round"], defaultAppearance.cornerSoftness),
-    octopuses: booleanValue(value.octopuses, defaultAppearance.octopuses),
+    phoboses: booleanValue(value.phoboses, defaultAppearance.phoboses),
   };
 }
 

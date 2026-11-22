@@ -1,6 +1,6 @@
 # UX
 
-Octopus has to feel native - like an operating system, not like a research
+Phobos has to feel native - like an operating system, not like a research
 harness with a chat window attached. That is the main difference from other
 self-improving agent projects: the architecture exists so that the experience
 can be simple. Roughly three quarters of the experience follows Codex; one
@@ -33,7 +33,7 @@ routed through runtime policy for the sake of consistency.
 
 ## Built around a ChatGPT subscription
 
-Octopus is universal, but its experience is built on a ChatGPT subscription and
+Phobos is universal, but its experience is built on a ChatGPT subscription and
 on Codex. The Codex provider is the main provider. It keeps its place in the
 hierarchy - one interface, never the kernel - but the product is shaped around
 it.
@@ -45,7 +45,7 @@ provider is its own interface folder that reuses the Codex provider's OpenCodex
 driver, generated from one list so every provider follows the same OpenCodex
 release. A provider is reached with an API key, a signed-in CLI or a
 subscription account, and whichever one serves a task, the model receives
-Octopus's own instructions, history and tools. This is a quiet center of the
+Phobos's own instructions, history and tools. This is a quiet center of the
 UX: Codex stays the way you work, and the set of models behind it can grow.
 
 Earlier integrations borrowed from other agent projects are kept where they
@@ -103,7 +103,7 @@ the architecture.
 
 **Extensions** belong to the client alone: widgets, workspace tabs, and guided
 repairs. Codex has no equivalent. The closest relative is DeepSeek Harness and
-its everything-is-a-plugin design; in Octopus it is a whole category of the
+its everything-is-a-plugin design; in Phobos it is a whole category of the
 client.
 
 Everything else follows Codex: a sidebar, a working pane opened beside the
@@ -117,7 +117,7 @@ works the same way for everything it can do.
 
 - **The boundary is short.** Home's role says when a turn needs only an
   answer, when to start a task, set a trigger, show a widget, save knowledge,
-  change the client's own code, or change Octopus itself - and when to do none of
+  change the client's own code, or change Phobos itself - and when to do none of
   these. Short actions use Home's own granted tools immediately, including
   browser tools. Longer work starts a separate task so the conversation can
   continue. When the operator states a goal, Home starts the work instead of
@@ -161,7 +161,7 @@ in the way. You can just talk; when you want to see, you look.
 
 **The system is started, not just opened.** The client is separate from the
 system. When you open it, the system is not running yet: the embedded terminal
-prepares `octopus up`, and you start it yourself. The client never starts the
+prepares `phobos up`, and you start it yourself. The client never starts the
 system on its own. A local password guards the client. This is deliberate - it
 is the moment you feel that this is an operating system.
 
@@ -177,13 +177,13 @@ message stays the first message in Home.
 **A setup travels as a file.** The choices onboarding collects - the space,
 its project tree with names, goals, icons and colors, the capabilities and the
 projects each one serves, and optionally the Home model - export as one
-`*.octopus-setup.json` file (`"schema": "octopus.setup"`, version 1) and import
+`*.phobos-setup.json` file (`"schema": "phobos.setup"`, version 1) and import
 on another machine at the first step. Setup's review step exports its choices;
 **Settings → General → Setup file** exports a Home that is already running, as
 the client shows it: its projects, the capabilities installed, and the projects
 each one is available in. Importing fills the steps for review; it
 does not set anything up by itself. A file that names a component or a model
-this Octopus does not offer is refused with that name, never trimmed silently.
+this Phobos does not offer is refused with that name, never trimmed silently.
 The file carries no keys, accounts, runs or history.
 
 **States stay honest.** Available, installed, configured, available in a
@@ -192,7 +192,7 @@ presented as proof of the next.
 
 ## Where the interface is heading
 
-Codex is a workbench. Claude Code is a coder's environment. Octopus is an
+Codex is a workbench. Claude Code is a coder's environment. Phobos is an
 operating system you should not need to leave: make a widget to watch
 notifications, set up an automation, give the system an interface through
 which it tells you when something needs you.
@@ -207,7 +207,7 @@ chat or voice path.
 
 Elsewhere, a schedule runs something at a time, and Codex hooks react to its
 own session lifecycle - session start, a submitted prompt, before and after a
-tool call, stop. In Octopus a trigger is an interface with its own rules. An
+tool call, stop. In Phobos a trigger is an interface with its own rules. An
 interface can check anything and send anything whenever its conditions hold,
 so a trigger is simply a run with such an interface attached in JSON: at this
 time, or after this event, check this and change that.

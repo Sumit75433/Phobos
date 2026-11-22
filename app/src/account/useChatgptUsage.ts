@@ -1,13 +1,13 @@
 import { useEffect, useSyncExternalStore } from "react";
-import type { OctopusChatgptAccount } from "../electron";
+import type { PhobosChatgptAccount } from "../electron";
 import { accountUsageIdentity, createChatgptUsageState, EMPTY_CHATGPT_USAGE_STATE } from "./chatgptUsageState";
 
 let controller: ReturnType<typeof createChatgptUsageState> | null = null;
 const noopSubscribe = () => () => {};
 const unavailable = { ...EMPTY_CHATGPT_USAGE_STATE, error: "The native usage connection is unavailable." };
 
-export function useChatgptUsage(account: OctopusChatgptAccount | null, enabled = true) {
-  const bridge = window.octopusTransport;
+export function useChatgptUsage(account: PhobosChatgptAccount | null, enabled = true) {
+  const bridge = window.phobosTransport;
   if (enabled && bridge?.chatgptRateLimits) controller ??= createChatgptUsageState(bridge);
   const current = enabled ? controller : null;
   const snapshot = useSyncExternalStore(current?.subscribe ?? noopSubscribe,

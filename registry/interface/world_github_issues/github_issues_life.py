@@ -19,7 +19,7 @@ def main():
     os.umask(0o077)
     path = Path(sys.argv[1])
     sys.path.insert(0, str(path.parent))
-    spec = importlib.util.spec_from_file_location("octopus_pyecho_boundary", path)
+    spec = importlib.util.spec_from_file_location("phobos_pyecho_boundary", path)
     boundary = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(boundary)
     boundary.private_directory(boundary.VAR_DIR)
@@ -28,7 +28,7 @@ def main():
     lock = os.open(lock_path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     descriptor = json.loads(boundary.stable_read(
-        Path(os.environ["OCTOPUS_INTERFACE_DIR"]) / "interface.json",
+        Path(os.environ["PHOBOS_INTERFACE_DIR"]) / "interface.json",
         boundary.IO_LIMITS["max_control_frame_bytes"], "interface config"))
     config = validate_config(descriptor["interface_driver_config"]["private_config"])
     stop, fatal = threading.Event(), threading.Event()

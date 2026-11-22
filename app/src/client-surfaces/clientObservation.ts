@@ -1,4 +1,4 @@
-import type { OctopusClientContext } from "../electron";
+import type { PhobosClientContext } from "../electron";
 import type { ClientSurfaceDescriptor } from "../shell/surfaceTypes";
 import { readHomeWidgetInventory, type HomeWidgetControls } from "./homeWidgetControls";
 
@@ -7,7 +7,7 @@ export const CLIENT_OBSERVATION_BYTES = 4 * 1024;
 export function clientObservationContext(options: HomeWidgetControls & {
   availableSurfaces: readonly ClientSurfaceDescriptor[];
   ready: boolean;
-}): OctopusClientContext {
+}): PhobosClientContext {
   const surfaces = options.availableSurfaces.map(surface => ({
     surface_id: surface.id,
     title: surface.label,
@@ -24,7 +24,7 @@ export function clientObservationContext(options: HomeWidgetControls & {
     catch { widgetsStatus = "unavailable"; }
   }
   const snapshot = {
-    schema: "octopus.client_observation", schema_version: 1, authority: "observation_only",
+    schema: "phobos.client_observation", schema_version: 1, authority: "observation_only",
     surfaces: [] as typeof surfaces, widgets: [] as typeof widgets,
     widgets_status: widgetsStatus, omitted_surfaces: surfaces.length, omitted_widgets: widgets.length,
   };

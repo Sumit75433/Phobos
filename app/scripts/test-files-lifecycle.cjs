@@ -36,7 +36,7 @@ function pane(text = "base") {
   return key;
 }
 const roots = async () => ({ roots: [{ id: "source", path: "/test/root", label: "Source" }] });
-const transport = { osFileRoots: roots, writeOsFile: async (request) => ({ ...file(request.text), outsideOctopusEvidence: true }) };
+const transport = { osFileRoots: roots, writeOsFile: async (request) => ({ ...file(request.text), outsidePhobosEvidence: true }) };
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 function discard(key) { const state = lifecycle.readFilesPane(key); lifecycle.forgetFilesPane(key, state.snapshot); }
 
@@ -47,7 +47,7 @@ test("host and renderer snapshot parsers agree and preserve exact data", () => {
   const cases = [good, { ...good, revision: Number.MAX_SAFE_INTEGER }, { ...good, file: null, draft: "" }, { ...good, file: file(boundary), draft: boundary }];
   const readTarget = { kind: "artifact", artifactId: "read:exact", interfaceId: "provider", label: "self-improvement", runId: "run", previewText: '{"content":{"text":"line 1\\nline 2 · Ω"}}' };
   cases.push({ ...good, file: null, draft: "", target: readTarget });
-  assert.deepEqual(host.validateTransferableWorkspacePaneTarget({ kind: "files", workspaceKey: "octopus-os", openTarget: readTarget }).openTarget, readTarget);
+  assert.deepEqual(host.validateTransferableWorkspacePaneTarget({ kind: "files", workspaceKey: "phobos-os", openTarget: readTarget }).openTarget, readTarget);
   const firstInvalid = cases.length;
   for (const [field, value] of [["version", 2], ["id", ""], ["id", "  "], ["revision", -1], ["revision", 1.5], ["revision", Number.MAX_SAFE_INTEGER + 1], ["rootPath", ""], ["rootPath", "/test/\nroot"], ["draft", boundary + "é"], ["extra", true]]) cases.push({ ...good, [field]: value });
   for (const [field, value] of [["digest", "bad"], ["rootId", "elsewhere"], ["modifiedAt", "yesterday"], ["size", -1], ["truncated", true], ["kind", "other"], ["text", boundary + "é"]]) cases.push({ ...good, file: { ...good.file, [field]: value } });
@@ -60,7 +60,7 @@ test("host and renderer snapshot parsers agree and preserve exact data", () => {
     const decoded = snapshot.normalizeFilesPaneSnapshot(candidate);
     assert.equal(decoded !== null, index < firstInvalid || index >= afterInvalid);
     let native;
-    try { native = host.validateTransferableWorkspacePaneTarget({ kind: "files", workspaceKey: "octopus-os", snapshot: candidate }).snapshot; } catch { native = null; }
+    try { native = host.validateTransferableWorkspacePaneTarget({ kind: "files", workspaceKey: "phobos-os", snapshot: candidate }).snapshot; } catch { native = null; }
     assert.deepEqual(native, decoded);
   }
   assert.equal(snapshot.normalizeFilesPaneSnapshot(good).draft, "\n  trailing spaces  \n");
@@ -76,7 +76,7 @@ test("save retains CAS and newer edits; failure never approves close", async () 
   await tick();
   assert.throws(() => lifecycle.captureFilesPane(key), /Finish saving/);
   lifecycle.updateFilesPane(key, (s) => ({ ...s, draft: "newer" }));
-  finish({ ...file("first"), outsideOctopusEvidence: true });
+  finish({ ...file("first"), outsidePhobosEvidence: true });
   assert.equal(await saving, false);
   assert.equal(lifecycle.readFilesPane(key).snapshot.draft, "newer");
   assert.equal(lifecycle.readFilesPane(key).snapshot.file.text, "first");
@@ -92,7 +92,7 @@ test("save retains CAS and newer edits; failure never approves close", async () 
 });
 
 test("actual OS file reads and CAS writes retain a failed draft and recover with fresh evidence", async () => {
-  const temporary = fs.realpathSync(fs.mkdtempSync(path.join(require("node:os").tmpdir(), "octopus-files-contract-")));
+  const temporary = fs.realpathSync(fs.mkdtempSync(path.join(require("node:os").tmpdir(), "phobos-files-contract-")));
   const filename = path.join(temporary, "edit.txt"), original = "base\r\nα😀\t", draft = "unsaved\r\nα😀\t";
   const store = require("../electron/osFiles.cjs").createOsFileStore({ resolveRoots: async () => [{ id: "source", label: "Fixture", root: temporary }] });
   const key = lifecycle.filesPaneKey("live", crypto.randomUUID());
@@ -217,7 +217,7 @@ test("native close flush and final check refuse unfinished ownership", async () 
   const saving = lifecycle.saveFilesPane(key, { osFileRoots: roots, writeOsFile: () => new Promise((resolve) => { finish = resolve; }) });
   await tick();
   assert.equal(lifecycle.acquireFilesWindowClose("native-check"), false);
-  finish({ ...file("save"), outsideOctopusEvidence: true });
+  finish({ ...file("save"), outsidePhobosEvidence: true });
   assert.equal(await saving, true);
   assert.equal(lifecycle.acquireFilesWindowClose("native-check"), true);
   lifecycle.releaseFilesWindowClose("native-check");
@@ -246,7 +246,7 @@ test("native close abort owns only its dialogs and never discards a draft", asyn
   assert.equal(await pending, false);
   assert.equal(lifecycle.readFilesPane(key).saving, true);
   assert.equal(lifecycle.acquireFilesWindowClose("abort-save"), false);
-  finish({ ...file("unsaved"), outsideOctopusEvidence: true }); await save;
+  finish({ ...file("unsaved"), outsidePhobosEvidence: true }); await save;
   assert.equal(lifecycle.readFilesPane(key).closeRequested, false);
   assert.equal(lifecycle.readFilesPane(key).snapshot.file.text, "unsaved");
   lifecycle.forgetFilesPane(key);
@@ -261,7 +261,7 @@ test("actual Files leaf retains drafts and rejects stale file-read completions",
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   globalThis.ResizeObserver = class { observe() {} disconnect() {} };
   globalThis.requestAnimationFrame = (fn) => setTimeout(fn, 0); globalThis.cancelAnimationFrame = clearTimeout;
-  window.octopusTransport = { ...transport, listOsFiles: async ({ rootId, path: p }) => ({ rootId, path: p, entries: [] }) };
+  window.phobosTransport = { ...transport, listOsFiles: async ({ rootId, path: p }) => ({ rootId, path: p, entries: [] }) };
   const stub = (p, value) => stubs.set(path.resolve(root, `src/${p}`), value);
   const noop = () => null, node = ({ children }) => React.createElement("div", null, children);
   stub("appearance", { useShouldReduceMotion: () => false, useAppearance: () => ({ darkCodeTheme: "default", lightCodeTheme: "default", themeMode: "light", codeFontSize: 12 }) });
@@ -269,16 +269,16 @@ test("actual Files leaf retains drafts and rejects stale file-read completions",
   stub("design-system/OcDropdown", { OcDropdown: noop }); stub("runtimeFormat", { copyText: async () => true }); stub("toasts", { appToast: { danger() {}, success() {} } });
   stub("components/artifacts/ArtifactPreview", { ArtifactPreview: noop }); stub("components/artifacts/artifactFileOperations", { safeArtifactFilename: (s) => s });
   stub("components/files/filesPierreSetup", { adoptFilesStyles() {} });
-  stub("components/IconGlyphs", { Glyph: noop }); stub("components/navigation/OctopusSpinner", { OctopusSpinner: noop });
+  stub("components/IconGlyphs", { Glyph: noop }); stub("components/navigation/PhobosSpinner", { PhobosSpinner: noop });
   let openPath, treeMounted = false;
-  stub("components/OctopusSurface", { OctopusFileTree: (props) => { openPath = props.onOpenPath; return null; }, OctopusFilterField: noop, OctopusPanelNote: node, octopusTreeAncestors: () => [] });
+  stub("components/PhobosSurface", { PhobosFileTree: (props) => { openPath = props.onOpenPath; return null; }, PhobosFilterField: noop, PhobosPanelNote: node, phobosTreeAncestors: () => [] });
   stub("components/SetupDialogShell", { SetupDialogShell: noop });
   stub("components/shell/PanelResizeHandle", { PanelResizeHandle: noop, useAnimatedPanelSize: () => ({ mounted: treeMounted }) });
   stub("components/files/FilesBreadcrumb", { FilesBreadcrumb: noop });
-  stub("components/settings/octopusDiffThemes", { octopusDiffThemeName: () => "test" });
-  stubs.set("@octopus/files-diffs/edit", { Editor: class { setOptions() {} canUndo = false; canRedo = false; } });
+  stub("components/settings/phobosDiffThemes", { phobosDiffThemeName: () => "test" });
+  stubs.set("@phobos/files-diffs/edit", { Editor: class { setOptions() {} canUndo = false; canRedo = false; } });
   let edit;
-  stubs.set("@octopus/files-diffs", { EXTENSION_TO_FILE_FORMAT: { ts: "typescript", txt: "text" }, CodeView: class {
+  stubs.set("@phobos/files-diffs", { EXTENSION_TO_FILE_FORMAT: { ts: "typescript", txt: "text" }, CodeView: class {
     constructor(options) { this.options = options; } setup(container) { this.container = container; }
     setItems(items) { this.item = items[0]; } setOptions(options) { this.options = options; }
     render() { this.editor ??= this.options.createEditor("file", {}); edit = (text) => this.options.onItemEditChange({ editor: this.editor, file: { ...this.item.file, contents: text } }, this.item); }
@@ -317,7 +317,7 @@ test("actual Files leaf retains drafts and rejects stale file-read completions",
 
     const reads = [];
     treeMounted = true;
-    window.octopusTransport = { ...transport,
+    window.phobosTransport = { ...transport,
       osFileRoots: async () => ({ roots: [...(await roots()).roots, { id: "second", path: "/test/second", label: "Second" }] }),
       listOsFiles: async ({ rootId, path: p }) => ({ rootId, path: p, entries: [{ name: "edit.txt", path: "edit.txt", kind: "file", size: 4 }] }),
       readOsFile: (request) => new Promise((resolve, reject) => { reads.push({ ...request, resolve, reject }); }),

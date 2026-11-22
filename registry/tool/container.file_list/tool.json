@@ -2,7 +2,7 @@
   "id": "container.file_list",
   "interface": "system_container",
   "process": {
-    "bin": "target/debug/octopus-container-room-tool",
+    "bin": "target/debug/phobos-container-room-tool",
     "inherit_env": [
       "PATH"
     ],

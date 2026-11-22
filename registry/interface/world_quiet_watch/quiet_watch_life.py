@@ -9,14 +9,14 @@ import time
 import urllib.error
 import urllib.request
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-INTERFACE_DIR = os.path.abspath(os.environ["OCTOPUS_INTERFACE_DIR"])
-VAR_DIR = os.path.abspath(os.environ["OCTOPUS_VAR_DIR"])
-MOVEMENTS_JSONL = os.path.abspath(os.environ["OCTOPUS_MOVEMENTS_JSONL"])
-BLOBS_DIR = os.path.abspath(os.environ["OCTOPUS_BLOBS_DIR"])
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+INTERFACE_DIR = os.path.abspath(os.environ["PHOBOS_INTERFACE_DIR"])
+VAR_DIR = os.path.abspath(os.environ["PHOBOS_VAR_DIR"])
+MOVEMENTS_JSONL = os.path.abspath(os.environ["PHOBOS_MOVEMENTS_JSONL"])
+BLOBS_DIR = os.path.abspath(os.environ["PHOBOS_BLOBS_DIR"])
 WATCH_PATH = os.path.join(INTERFACE_DIR, "watch.json")
 TRIGGER_EVENT = "A new letter arrived in the owner's mailbox, and it contains words this trigger watches for. The trigger fires once."
 STARS_EVENT = "The repository {repository} reached {at_least} stars. The trigger fires once."
@@ -116,7 +116,7 @@ def require_hash(value, name):
 
 def load_io_limits():
     value = require_keys(
-        json.loads(os.environ["OCTOPUS_INTERFACE_HOST_IO_LIMITS"]),
+        json.loads(os.environ["PHOBOS_INTERFACE_HOST_IO_LIMITS"]),
         {"max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes"},
         set(),
         "host IO limits",
@@ -431,7 +431,7 @@ def content_hexdigest(content, name):
 
 def read_blob(digest, maximum, name):
     content = stable_read(os.path.join(BLOBS_DIR, digest), maximum, name)
-    if octopus_content_hash(content) != digest:
+    if phobos_content_hash(content) != digest:
         raise ValueError(f"{name} {digest} failed its content hash check")
     return content
 
@@ -509,7 +509,7 @@ def prepare_notice(watch, letter, matched):
     })
     if len(payload) > IO_LIMITS["max_payload_bytes"]:
         raise ValueError("the notice payload exceeds max_payload_bytes")
-    payload_hash = octopus_content_hash(payload)
+    payload_hash = phobos_content_hash(payload)
     payload_path = os.path.join(PAYLOADS_DIR, f"notice-{payload_hash}.payload")
     private_file(payload_path, payload, IO_LIMITS["max_payload_bytes"], "notice payload")
     manifest = canonical_json(
@@ -517,7 +517,7 @@ def prepare_notice(watch, letter, matched):
     )
     if len(manifest) > IO_LIMITS["max_manifest_bytes"]:
         raise ValueError("the notice manifest exceeds max_manifest_bytes")
-    manifest_hash = octopus_content_hash(manifest)
+    manifest_hash = phobos_content_hash(manifest)
     manifest_path = os.path.join(PAYLOADS_DIR, f"notice-{manifest_hash}.artifact.json")
     private_file(manifest_path, manifest, IO_LIMITS["max_manifest_bytes"], "notice manifest")
     return manifest_path, manifest_hash
@@ -550,13 +550,13 @@ def load_state():
 
 def verify_prepared(state):
     manifest = stable_read(state["manifest_path"], IO_LIMITS["max_manifest_bytes"], "prepared notice manifest", private=True)
-    if octopus_content_hash(manifest) != state["manifest_hash"]:
+    if phobos_content_hash(manifest) != state["manifest_hash"]:
         raise ValueError("the prepared notice manifest no longer matches its recorded hash")
     descriptor = require_keys(json.loads(manifest), {"label", "payload_path", "payload_content_hash"}, set(), "prepared notice manifest")
     if descriptor["label"] != state["label"]:
         raise ValueError("the prepared notice manifest label differs from its recorded label")
     payload = stable_read(descriptor["payload_path"], IO_LIMITS["max_payload_bytes"], "prepared notice payload", private=True)
-    if octopus_content_hash(payload) != descriptor["payload_content_hash"]:
+    if phobos_content_hash(payload) != descriptor["payload_content_hash"]:
         raise ValueError("the prepared notice payload no longer matches its recorded hash")
 
 
@@ -620,7 +620,7 @@ def deliver(state):
         "interface_id": INTERFACE_ID,
         "artifact_id": artifact_id,
         "label": EVIDENCE_LABEL,
-        "bytes": list(bytes.fromhex(octopus_content_hash(artifact_id.encode("utf-8")))),
+        "bytes": list(bytes.fromhex(phobos_content_hash(artifact_id.encode("utf-8")))),
     }]
     admitted = find_admitted_arrival_seq(artifact_id)
     delay = RETRY_FIRST_SECONDS
@@ -678,7 +678,7 @@ def process_outbound(movement, watch, armed_at):
 
 
 def read_stars(repository, etag):
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "octopus-quiet-watch"}
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "phobos-quiet-watch"}
     if etag:
         headers["If-None-Match"] = etag
     request = urllib.request.Request(GITHUB_API + repository, headers=headers)
@@ -695,7 +695,7 @@ def read_stars(repository, etag):
 
 
 def read_last_commit(repository, etag):
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "octopus-quiet-watch"}
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "phobos-quiet-watch"}
     if etag:
         headers["If-None-Match"] = etag
     request = urllib.request.Request(GITHUB_API + repository + "/commits?per_page=1", headers=headers)
@@ -788,11 +788,11 @@ def prepare_stars_notice(watch, observation):
     payload = canonical_json({"trigger": {"event": watch["event"], **observation}, "from_owner": watch["instructions"]})
     if len(payload) > IO_LIMITS["max_payload_bytes"]:
         raise ValueError("the notice payload exceeds max_payload_bytes")
-    payload_hash = octopus_content_hash(payload)
+    payload_hash = phobos_content_hash(payload)
     payload_path = os.path.join(PAYLOADS_DIR, f"notice-{payload_hash}.payload")
     private_file(payload_path, payload, IO_LIMITS["max_payload_bytes"], "notice payload")
     manifest = canonical_json({"label": watch["notice_label"], "payload_path": payload_path, "payload_content_hash": payload_hash})
-    manifest_hash = octopus_content_hash(manifest)
+    manifest_hash = phobos_content_hash(manifest)
     manifest_path = os.path.join(PAYLOADS_DIR, f"notice-{manifest_hash}.artifact.json")
     private_file(manifest_path, manifest, IO_LIMITS["max_manifest_bytes"], "notice manifest")
     return manifest_path, manifest_hash

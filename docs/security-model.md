@@ -1,6 +1,6 @@
 # Security model
 
-Octopus runs a model with tools on your machine. This page says what stands
+Phobos runs a model with tools on your machine. This page says what stands
 between a model's output and an effect, and what does not.
 
 ## Trust boundaries
@@ -28,7 +28,7 @@ default `sandbox_mode: "enforced"`, they run inside a deny-by-default OS sandbox
 
 - **macOS:** Seatbelt (`sandbox-exec`) with a generated process profile.
 - **Linux:** AppArmor with the 4.0 policy ABI, systemd, and cgroup v2. The
-  privileged `octopus-process-authority.service` confines the child before it
+  privileged `phobos-process-authority.service` confines the child before it
   executes and ties descendant cleanup to a lease. See
   [Process isolation on Linux](linux.md) for setup and requirements.
 
@@ -95,7 +95,7 @@ untrusted input unless you mean to.
 ### Credentials
 
 - Provider sign-in is held by Codex's own authentication, normally under
-  `~/.codex`. It is not contained in the Octopus Home. Octopus's Codex
+  `~/.codex`. It is not contained in the Phobos Home. Phobos's Codex
   provider, the managed Codex app-server and your own Codex CLI share it, and
   every token refresh and sign-out takes the store's `auth.lock`, the lock
   Codex itself uses, so they never rotate the refresh token over each other.
@@ -128,7 +128,7 @@ designed yet.
 
 ## Non-goals
 
-- Octopus is not a multi-tenant security boundary. One Home, one operator.
+- Phobos is not a multi-tenant security boundary. One Home, one operator.
 - A model capable enough to route around its own policy is acknowledged, not
   solved. Policy and marks are a control surface, not a proof of safety.
 - A replayable ledger does not make provider responses or external effects

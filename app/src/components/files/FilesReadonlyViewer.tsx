@@ -1,10 +1,10 @@
 import { adoptFilesStyles } from "./filesPierreSetup";
 import { createElement, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAppearance } from "../../appearance";
-import { DIFFS_TAG_NAME, Virtualizer as FileVirtualizer, VirtualizedFile as VirtualFile, type FileOptions as VirtualFileOptions, type FileContents as EditorFile } from "@octopus/files-diffs";
+import { DIFFS_TAG_NAME, Virtualizer as FileVirtualizer, VirtualizedFile as VirtualFile, type FileOptions as VirtualFileOptions, type FileContents as EditorFile } from "@phobos/files-diffs";
 import { readFileMetrics as readMetrics, equalFileMetrics as equalMetrics, fileLanguage, fileContentHash, type FileMetrics } from "./fileSupport";
 import { filesCodeSurfaceCss } from "./filesCodeStyles";
-import { octopusDiffThemeName } from "../settings/octopusDiffThemes";
+import { phobosDiffThemeName } from "../settings/phobosDiffThemes";
 
 export default function FilesReadonlyViewer({ documentId, filename, label, value, wordWrap }: {
   documentId: string;
@@ -25,7 +25,7 @@ export default function FilesReadonlyViewer({ documentId, filename, label, value
     disableFileHeader: true,
     enableLineSelection: true,
     overflow: wordWrap ? "wrap" : "scroll",
-    theme: { dark: octopusDiffThemeName("dark", appearance.darkCodeTheme), light: octopusDiffThemeName("light", appearance.lightCodeTheme) },
+    theme: { dark: phobosDiffThemeName("dark", appearance.darkCodeTheme), light: phobosDiffThemeName("light", appearance.lightCodeTheme) },
     themeType: appearance.themeMode,
     unsafeCSS: filesCodeSurfaceCss,
   }), [appearance.darkCodeTheme, appearance.lightCodeTheme, appearance.themeMode, wordWrap]);

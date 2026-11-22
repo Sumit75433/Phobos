@@ -50,7 +50,7 @@ function packageCliRuntime({ appRoot = path.resolve(__dirname, ".."), target = n
     const installationBinaries = packager.sharedBinaries(installationReferences);
     const sharedExecutables = packager.copyBundledBinaries(installationBinaries);
     packager.stripExecutables([...ownerExecutables, ...sharedExecutables]);
-    const managed = require(path.join(source, "interface/world_provider_codex/packages/octopus-provider-codex/managed-cli/bootstrap.cjs"));
+    const managed = require(path.join(source, "interface/world_provider_codex/packages/phobos-provider-codex/managed-cli/bootstrap.cjs"));
     const managedRoots = cli.components.managed_codex ? packager.bundleManagedCodex([baseline, packages]) : [];
     const providerSigning = packager.captureProviderSigningInputs([baseline, packages]);
     if (cli.components.code_signing) {
@@ -61,7 +61,7 @@ function packageCliRuntime({ appRoot = path.resolve(__dirname, ".."), target = n
     }
     packager.validateBundledLayout([baseline, packages], installationBinaries, ownerExecutables);
     const receipt = {
-      schema: "octopus.cli_runtime_distribution", schema_version: 1,
+      schema: "phobos.cli_runtime_distribution", schema_version: 1,
       package_version: JSON.parse(fs.readFileSync(path.join(appRoot, "package.json"), "utf8")).version,
       platform: cli.platform, architecture: cli.architecture, target: cli.triple, components: cli.components,
       binaries: installationBinaries.map((binary) => {

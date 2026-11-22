@@ -4,7 +4,7 @@ import { OcButton, OcIconButton, OcMenuItem, OcMenuSectionLabel } from "../../de
 import { OcDropdown } from "../../design-system/OcDropdown";
 import { Glyph } from "../IconGlyphs";
 import { MessageTooltip } from "../chat/MessageTooltip";
-import { OctopusNavItem, OctopusNavSection } from "../navigation/OctopusNav";
+import { PhobosNavItem, PhobosNavSection } from "../navigation/PhobosNav";
 import { describeSchedule, nextScheduledRunAtMs } from "./scheduleModel";
 import { ScheduledRunRows, ScheduledTaskRow, ShowMoreButton, scheduledRowStatus, type ScheduledRowStatus } from "./ScheduledRows";
 import type { ScheduledDelivery, ScheduledInterfaceProjection } from "./types";
@@ -77,7 +77,7 @@ export function ScheduledSidebar({ onNavigate, onSelectChat }: { onNavigate?: ()
 
   return (
     <div className="flex min-h-0 flex-1 flex-col select-none" data-scheduled-sidebar="">
-      <div className="octopus-sidebar-scroll sidebar-page-scroll vertical-scroll-fade-mask mb-(--sidebar-footer-height) flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto">
+      <div className="phobos-sidebar-scroll sidebar-page-scroll vertical-scroll-fade-mask mb-(--sidebar-footer-height) flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto">
         <div className="relative z-10 flex shrink-0 flex-col px-row-x">
           <div className="@container/navigation-header ms-2 flex h-[var(--sidebar-navigation-header-height,calc(var(--spacing)*8))] items-center pe-1">
             <h2 className="m-0 min-w-0 flex-1 truncate text-[18px] leading-6 font-semibold text-default">
@@ -112,7 +112,7 @@ export function ScheduledSidebar({ onNavigate, onSelectChat }: { onNavigate?: ()
             </div>
           ) : null}
           <div className="group/nav-list mt-2 mb-2 flex flex-col gap-px">
-            <OctopusNavItem
+            <PhobosNavItem
               disabled={Boolean(workspace.createUnavailableReason) || workspace.pending}
               glyph="plus"
               label="New trigger"
@@ -121,7 +121,7 @@ export function ScheduledSidebar({ onNavigate, onSelectChat }: { onNavigate?: ()
           </div>
         </div>
         <div className="flex flex-col gap-4 px-row-x pb-row-x">
-          <OctopusNavSection title={heading} titleActions={filter} titleRowClassName="ps-2 pe-1.5">
+          <PhobosNavSection title={heading} titleActions={filter} titleRowClassName="ps-2 pe-1.5">
             <div aria-label="Triggers" className="flex flex-col gap-px" role="list">
               {shown.map(({ task }) => (
                 <TriggerListItem
@@ -145,7 +145,7 @@ export function ScheduledSidebar({ onNavigate, onSelectChat }: { onNavigate?: ()
                   {query || !allStatuses ? "No matching triggers" : "No triggers"}
                 </div>
               ) : null}
-          </OctopusNavSection>
+          </PhobosNavSection>
         </div>
       </div>
     </div>

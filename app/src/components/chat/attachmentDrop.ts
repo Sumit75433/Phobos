@@ -1,12 +1,12 @@
-import type { OctopusClientAttachmentSelection, OctopusClientAttachmentStageHandle } from "../../electron";
+import type { PhobosClientAttachmentSelection, PhobosClientAttachmentStageHandle } from "../../electron";
 import { CLIENT_PANE_DRAG_MIME } from "../../shell/clientWindowModel";
 import { MAX_ATTACHMENT_BYTES } from "./constants";
 
 type DropEntry = { file: File; isDirectory: boolean };
-export type DroppedAttachment = File | OctopusClientAttachmentStageHandle;
+export type DroppedAttachment = File | PhobosClientAttachmentStageHandle;
 type DropTransport = {
-  stageDroppedAttachments(files: readonly File[]): Promise<OctopusClientAttachmentSelection & { fileIndices: number[] }>;
-  discardClientAttachmentStages(handles: readonly OctopusClientAttachmentStageHandle[]): Promise<void>;
+  stageDroppedAttachments(files: readonly File[]): Promise<PhobosClientAttachmentSelection & { fileIndices: number[] }>;
+  discardClientAttachmentStages(handles: readonly PhobosClientAttachmentStageHandle[]): Promise<void>;
 };
 
 export function isAttachmentDrop(transfer: DataTransfer): boolean {
@@ -39,7 +39,7 @@ export function validateAttachmentDrop(values: readonly DroppedAttachment[], rem
 }
 
 export async function discardAttachmentDrop(values: readonly DroppedAttachment[], transport?: DropTransport): Promise<void> {
-  const handles = values.filter((value): value is OctopusClientAttachmentStageHandle => !(value instanceof File));
+  const handles = values.filter((value): value is PhobosClientAttachmentStageHandle => !(value instanceof File));
   if (!handles.length) return;
   if (!transport?.discardClientAttachmentStages) throw new Error("Attachment cleanup is unavailable in this client host.");
   await transport.discardClientAttachmentStages(handles);

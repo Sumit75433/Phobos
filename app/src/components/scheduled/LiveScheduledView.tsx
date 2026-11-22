@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { OcButton, OcDialog, OcDialogFooter, OcDialogHeader, OcEmptyState } from "../../design-system/components";
 import { OcDropdown } from "../../design-system/OcDropdown";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 import { formatEvidenceTime } from "./scheduleModel";
 import { ScheduledDetail } from "./ScheduledDetail";
 import { ScheduledDialog } from "./ScheduledDialog";
@@ -52,7 +52,7 @@ export function LiveScheduledView({ searchFocusTick, navigationInPane = false, o
           task={selected}
         />
       ) : loading ? (
-        <OctopusLoadingState className="flex min-h-0 flex-1 items-center justify-center" label="Loading triggers" />
+        <PhobosLoadingState className="flex min-h-0 flex-1 items-center justify-center" label="Loading triggers" />
       ) : selectedId ? (
         <OcEmptyState
           action={<OcButton onClick={() => workspace.selectTask("")} size="sm" variant="secondary">Back to triggers</OcButton>}

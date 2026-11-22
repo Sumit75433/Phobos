@@ -37,7 +37,7 @@ export function useGestureTraceStatus(): GestureTraceStatus {
 
 export function startGestureTrace(durationMs: number, label: string): void {
   if (status.phase === "countdown" || status.phase === "recording" || status.phase === "saving") return;
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.saveGestureTrace) {
     setStatus({ phase: "error", message: "Saving gesture traces needs the desktop client." });
     return;
@@ -74,7 +74,7 @@ export function cancelGestureTrace(): void {
 }
 
 export async function revealGestureTrace(path: string): Promise<void> {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.revealGestureTrace) throw new Error("Revealing gesture traces needs the desktop client.");
   await transport.revealGestureTrace(path);
 }

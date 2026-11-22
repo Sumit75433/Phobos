@@ -9,7 +9,7 @@ const { ARTIFACT_PAYLOAD_READ_CONCURRENCY } = require("./constants.cjs");
 const { readConnectedApplicationIdsByRun } = require("./applicationPackages.cjs");
 const { compareMovementOrder, movementBoundaryInterface, openValidatedLedgerIndex, optionalUnsignedInteger, readIndexedTaskSearchCandidates, taskSearchSnippet } = require("./movementRows.cjs");
 const { operatorActivityAgent, operatorActivityMessage, operatorChatExpandedStreamRows, operatorChatResponseKey, operatorChatRunProvider, operatorChatSearchMessage, operatorChatTurnText } = require("./operatorChatEvents.cjs");
-const { eeInstanceRows, octopusOsInterfaceSidecars } = require("./registryRows.cjs");
+const { eeInstanceRows, phobosOsInterfaceSidecars } = require("./registryRows.cjs");
 const { arrayValue, contentHashHex, ledgerArtifactId, ledgerArtifactLabel, mapConcurrentOrdered, numberValue, objectOrEmpty, requiredString, rowTimeMs, stringValue } = require("./values.cjs");
 
 function operatorChatListProjection(store) {
@@ -35,7 +35,7 @@ function operatorChatListProjection(store) {
       .filter((row) => !entry.writable || ledgerArtifactLabel(row) === protocol.inputLabel)
       .sort((a, b) => rowTimeMs(a) - rowTimeMs(b))[0];
     if (firstInbound) {
-      const text = await cachedOperatorChatArtifactText({ home: projection.octopusHome, entry, row: firstInbound, protocol,
+      const text = await cachedOperatorChatArtifactText({ home: projection.phobosHome, entry, row: firstInbound, protocol,
         direction: "in", limit: 48, warnings: projection.warnings,
         resolve: (row, onVerifiedFiles) => store.resolveLedgerArtifactPayload(row, { projection: protocol.artifactReadProjection, onVerifiedFiles }) });
       if (text) return text;
@@ -57,7 +57,7 @@ function operatorChatListProjection(store) {
     const scope = store.operatorOsScope(projection);
     if (scope.status !== "ready") throw new Error("Control target lookup requires the current valid client scope");
     const scoped = new Map(scope.client_runs.map(row => [row.run_id, row]));
-    const sidecars = octopusOsInterfaceSidecars(projection);
+    const sidecars = phobosOsInterfaceSidecars(projection);
     const protocol = objectOrEmpty(projection.operatorChatProtocol);
     const rows = await Promise.all((await store.operatorChatRunIndex(projection)).filter(entry => scoped.has(entry.runId)).map(async entry => {
       const owner = scoped.get(entry.runId);
@@ -73,7 +73,7 @@ function operatorChatListProjection(store) {
 
   async function buildOperatorChatsList(projection) {
     const voiceRunsById = new Map(arrayValue(projection.runRecords).map((run) => [run.run_id, run]));
-    const clientSidecars = octopusOsInterfaceSidecars(projection);
+    const clientSidecars = phobosOsInterfaceSidecars(projection);
     const protocol = objectOrEmpty(projection.operatorChatProtocol);
     const projectColors = new Map(arrayValue(store.operatorOsScope(projection).project_presentations)
       .map((presentation) => [stringValue(presentation.ee_id), stringValue(presentation.color)]));
@@ -118,7 +118,7 @@ function operatorChatListProjection(store) {
         writable: entry.writable && !archived,
         archived,
         os_root_ee_id: entry.osRootEeId,
-        voice_context: projectHomeVoiceContext(record, octopusOsInterfaceSidecars(projection).get(chatInterfaceId), chatState, voiceRunsById),
+        voice_context: projectHomeVoiceContext(record, phobosOsInterfaceSidecars(projection).get(chatInterfaceId), chatState, voiceRunsById),
         turn_open: archived ? false : turn.open,
         turn_state: archived ? "idle" : turn.state,
         ee_id: eeId,
@@ -172,7 +172,7 @@ function operatorChatListProjection(store) {
     const artifactId = ledgerArtifactId(row);
     const movementSeq = numberValue(row?.seq, 0);
     if (!row || !artifactId || !movementSeq) return {};
-    const text = await cachedOperatorChatArtifactText({ home: store.octopusHome(), entry, row, protocol,
+    const text = await cachedOperatorChatArtifactText({ home: store.phobosHome(), entry, row, protocol,
       direction: "out", limit: 240, warnings,
       resolve: (row, onVerifiedFiles) => store.resolveLedgerArtifactPayload(row, { projection: protocol.artifactReadProjection, onVerifiedFiles }) });
     return {
@@ -324,7 +324,7 @@ function operatorChatListProjection(store) {
         next_before_seq: hasOlder ? cursor : -1,
         index_watermark: index.watermark,
         scope: {
-          kind: "octopus_os_task_transcripts",
+          kind: "phobos_os_task_transcripts",
           task_count: searchScope.taskCount,
           run_count: searchScope.targetsBySourceRun.size,
           message_classes: ["operator", "terminal_agent", "terminal_error"],

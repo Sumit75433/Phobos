@@ -126,7 +126,7 @@ async function closedPort() {
 }
 
 function connectionModule(configure) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-email-connection-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-email-connection-"));
   roots.push(root);
   fs.mkdirSync(path.join(root, "packages"));
   fs.copyFileSync(path.join(INTERFACE, "packages", "connection.cjs"), path.join(root, "packages", "connection.cjs"));
@@ -198,12 +198,12 @@ test("connect signs in to both servers, finds the submission port and saves what
   assert.deepEqual(await connection.probe(context().ctx), { state: "not_connected", message: "Enter your email address and app password to connect Email." });
   const split = await connection.probe(context({ values, launch: { [names.address_env]: "other@example.test" } }).ctx);
   assert.equal(split.state, "error");
-  assert.match(split.message, new RegExp(`^${names.address_env} is set in this Mac's environment and saved in Octopus with a different value`));
+  assert.match(split.message, new RegExp(`^${names.address_env} is set in this Mac's environment and saved in Phobos with a different value`));
 
   const cleared = context({ values });
   assert.deepEqual(await connection.disconnect(cleared.ctx), {
     state: "not_connected",
-    message: "Email is disconnected: Octopus removed Owner@example.test and its app password from this Mac. The app password itself keeps working until you revoke it in your mail provider's account settings.",
+    message: "Email is disconnected: Phobos removed Owner@example.test and its app password from this Mac. The app password itself keeps working until you revoke it in your mail provider's account settings.",
   });
   assert.deepEqual(cleared.saved, [Object.fromEntries(Object.values(names).map((name) => [name, null]))]);
   const google = await connection.disconnect(context({ values: { [names.address_env]: "owner@gmail.com", [names.password_env]: PASSWORD } }).ctx);
@@ -236,7 +236,7 @@ test("connect explains an app-password refusal and never signs in without encryp
   const unencrypted = context({ input: { ...input, [names.password_env]: PASSWORD, [names.imap_host_env]: `127.0.0.1:${working.port}` } });
   const blocked = await connection.connect(unencrypted.ctx);
   assert.equal(blocked.state, "error");
-  assert.match(blocked.message, /does not offer STARTTLS on port \d+; Octopus never signs in without encryption/);
+  assert.match(blocked.message, /does not offer STARTTLS on port \d+; Phobos never signs in without encryption/);
   assert.equal(plaintext.seen.plaintextAuth, false);
   assert.deepEqual(unencrypted.saved, []);
 

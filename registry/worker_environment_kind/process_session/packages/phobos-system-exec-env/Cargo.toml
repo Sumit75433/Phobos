@@ -1,0 +1,28 @@
+[package]
+name = "phobos-system-exec-env"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["net"] }
+tracing = "0.1.44"
+base64 = "0.22.1"
+blake3.workspace = true
+
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-process-session-tool-runtime = { path = "../phobos-process-session-tool-runtime" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+phobos-exec-substrate = { path = "../phobos-exec-substrate" }
+phobos-util-pathuri = { path = "../phobos-util-pathuri" }
+
+[dev-dependencies]
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

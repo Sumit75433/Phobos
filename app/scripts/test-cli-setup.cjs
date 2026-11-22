@@ -45,8 +45,8 @@ async function main() {
 
 async function resolution(root) {
   const userHome = path.join(root, "user"), selected = path.join(root, "selected"), explicit = path.join(root, "explicit");
-  await fs.mkdir(path.join(userHome, ".octopus"), { recursive: true });
-  await fs.writeFile(path.join(userHome, ".octopus", ".env"), `OCTOPUS_HOME=${selected}\nOCTOPUS_CLIENT_ADMIN_SECRET=private-test-administrator\n`, { mode: 0o600 });
+  await fs.mkdir(path.join(userHome, ".phobos"), { recursive: true });
+  await fs.writeFile(path.join(userHome, ".phobos", ".env"), `PHOBOS_HOME=${selected}\nPHOBOS_CLIENT_ADMIN_SECRET=private-test-administrator\n`, { mode: 0o600 });
   const options = { userHome, env: {}, repoRoot: path.resolve(__dirname, "../..") };
   const resolved = resolveEnvironment(options);
   assert.equal(resolved.home, selected);
@@ -55,13 +55,13 @@ async function resolution(root) {
   assert.equal(resolved.codexBinary, path.join(resolved.installationRoot, "bin/codex"));
   assert.ok(!JSON.stringify(resolved).includes("private-test-administrator"));
   await fs.mkdir(explicit, { recursive: true });
-  await fs.writeFile(path.join(explicit, ".env"), `OCTOPUS_HOME=${selected}\nCODEX_HOME=${path.join(root, "auth-owner")}\n`, { mode: 0o600 });
+  await fs.writeFile(path.join(explicit, ".env"), `PHOBOS_HOME=${selected}\nCODEX_HOME=${path.join(root, "auth-owner")}\n`, { mode: 0o600 });
   assert.equal(resolveEnvironment({ ...options, home: explicit }).home, explicit);
   assert.equal(resolveEnvironment({ ...options, home: explicit }).codexHome, path.join(root, "auth-owner"));
   assert.equal(resolveEnvironment({ ...options, home: "relative", cwd: root }).home, path.join(root, "relative"));
-  assert.equal(resolveEnvironment({ ...options, bundle: path.join(root, "Octopus.app") }).sourceRegistry,
-    path.join(root, "Octopus.app/Contents/Resources/app/registry"));
-  assert.throws(() => resolveEnvironment({ ...options, runtimeBinary: path.join(root, "target/debug/octopus") }), /release runtime/);
+  assert.equal(resolveEnvironment({ ...options, bundle: path.join(root, "Phobos.app") }).sourceRegistry,
+    path.join(root, "Phobos.app/Contents/Resources/app/registry"));
+  assert.throws(() => resolveEnvironment({ ...options, runtimeBinary: path.join(root, "target/debug/phobos") }), /release runtime/);
   assert.throws(() => resolveEnvironment({ ...options, env: { CODEX_HOME: "relative" } }), /CODEX_HOME must be an absolute/);
   assert.throws(() => resolveEnvironment({ ...options, home: `/${"a".repeat(140)}` }), /shorter --home/);
   await fs.chmod(path.join(explicit, ".env"), 0o644);
@@ -79,12 +79,12 @@ async function fixtureRuntime(root) {
   for (const directory of ["bin", "registry/interface", "local-packages/registry/interface", "local-packages/packages", "local-packages/packs"]) {
     await fs.mkdir(path.join(installationRoot, directory), { recursive: true });
   }
-  for (const file of ["registry/.octopus-source.json", "local-packages/registry/.octopus-source.json"]) await json(path.join(installationRoot, file), { schema_version: 1, id: "test-source" });
-  const binary = path.join(installationRoot, "bin/octopus");
+  for (const file of ["registry/.phobos-source.json", "local-packages/registry/.phobos-source.json"]) await json(path.join(installationRoot, file), { schema_version: 1, id: "test-source" });
+  const binary = path.join(installationRoot, "bin/phobos");
   await fs.writeFile(binary, `#!${process.execPath}\nconst fs=require('node:fs'),net=require('node:net'),path=require('node:path'),crypto=require('node:crypto');
 if(process.argv[2]==='project-ee-policies'){console.log(JSON.stringify({environments:[],issues:[]}));process.exit(0)}
 if(process.argv[2]!=='up')process.exit(64);
-const home=process.env.OCTOPUS_HOME, state=path.join(home,'state/runtime-instance'), now=Date.now();
+const home=process.env.PHOBOS_HOME, state=path.join(home,'state/runtime-instance'), now=Date.now();
 fs.mkdirSync(state,{recursive:true});fs.appendFileSync(path.join(home,'starts'),'start\\n');
 let phase='starting';function writeState(){fs.writeFileSync(path.join(state,'state.json'),JSON.stringify({schema_version:3,pid:process.pid,phase,started_at_unix_ms:now,updated_at_unix_ms:Date.now(),launch_owner:null}))}writeState();
 const folder=path.join(home,'app-server-control');fs.mkdirSync(folder,{recursive:true});
@@ -111,8 +111,8 @@ process.on('SIGTERM',()=>{let closed=0;const finish=()=>{if(++closed===2){fs.rmS
   const original = { id: "world_cli_fixture", interface_type: "world", role: "provider", direction: "bidirectional", source_names: ["fixture"], config: { model: "default" }, contract: 1 };
   await json(source, original);
   await json(path.join(first.packageRoots.libraryRoot, "packages", "cli.fixture.json"), {
-    schema: "octopus.local_package", schema_version: 1, id: "cli.fixture", version: "1.0.0", product_kind: "application", product_id: original.id, release_status: "optional",
-    display: { name: "Fixture", description: "CLI installed package isolation", developer: "Octopus", category: "provider" },
+    schema: "phobos.local_package", schema_version: 1, id: "cli.fixture", version: "1.0.0", product_kind: "application", product_id: original.id, release_status: "optional",
+    display: { name: "Fixture", description: "CLI installed package isolation", developer: "Phobos", category: "provider" },
     members: [{ registry_kind: "interface", owner: original.id, primary: true, configuration: [{ path: "interface.json", fields: [{ pointer: "/config/model", schema: { type: "string" } }] }] }],
   });
   const packageState = () => inspectLocalPackageInstallation({ ...first.packageRoots, packageId: "cli.fixture" });
@@ -172,7 +172,7 @@ process.on('SIGTERM',()=>{let closed=0;const finish=()=>{if(++closed===2){fs.rmS
 async function setupEvidence(root) {
   const home = path.join(root, "evidence"), registryRoot = path.join(home, "registry");
   for (const directory of [path.join(registryRoot, "interface"), path.join(registryRoot, "tool"), path.join(home, "state/runs"), path.join(home, "state/ee_instances")]) await fs.mkdir(directory, { recursive: true });
-  assert.equal((await readWorkspaceSetupState({ octopusHomeRoot: home, registryRoot })).status, "not_configured");
+  assert.equal((await readWorkspaceSetupState({ phobosHomeRoot: home, registryRoot })).status, "not_configured");
   const pack = { id: "test-pack", name: "Test Pack", manifest_digest: "a".repeat(64), components: [
     { package_id: "provider", source_digest: "b".repeat(64), selection: "included", product_kind: "application", product_id: "provider" },
   ], workspace_setup: { home: { provider_interface_id: "provider", worker_interface_id: "system_worker_test", context_artifact_bindings: [], selected_worker_environment_kinds: [] },

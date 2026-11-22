@@ -212,7 +212,7 @@ function operatorChatClientContractError(message) {
 
 function operatorChatClientRestartError() {
   return Object.assign(new Error(
-    "world_operator_chat cannot be changed after its client has loaded. Restart Octopus before changing this package.",
+    "world_operator_chat cannot be changed after its client has loaded. Restart Phobos before changing this package.",
   ), {
     code: "operator_chat_client_restart_required",
   });

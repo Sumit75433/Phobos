@@ -1,4 +1,4 @@
-import type { OctopusScheduledDraft } from "../../electron";
+import type { PhobosScheduledDraft } from "../../electron";
 import type { ChangeJournal, ChangeJournalEntry, InactivityState, ScheduledDelivery, ScheduledEditorDraft, ScheduledInterfaceProjection, ScheduledScopeOption } from "./types";
 
 export function normalizeScheduledInterface(value: unknown): ScheduledInterfaceProjection | null {
@@ -200,7 +200,7 @@ export function draftFromTemplate(source: ScheduledInterfaceProjection): Schedul
   };
 }
 
-export function mutationDraft(draft: ScheduledEditorDraft): OctopusScheduledDraft {
+export function mutationDraft(draft: ScheduledEditorDraft): PhobosScheduledDraft {
   return {
     type: draft.type,
     ...(draft.type === "inactivity" ? { inactivity: draft.inactivity } : draft.type === "interval" ? { intervalSeconds: draft.intervalSeconds } : draft.type === "once" ? { dueAt: draft.dueAt } : { cron: draft.cron }),

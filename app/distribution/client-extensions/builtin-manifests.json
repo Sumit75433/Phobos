@@ -1,17 +1,17 @@
 {
-  "schema": "octopus.builtin_client_extension_catalog",
+  "schema": "phobos.builtin_client_extension_catalog",
   "schema_version": 1,
   "extensions": [
     {
-      "source_digest": "sha256:d92c2abaa65b2afd9c582cc95fe754693ed4d144e6f1331cecaec3d3f5fba137",
+      "source_digest": "sha256:627df80903870b41d93f179e7be0e245f168a8e3b0e65cefe0a46558bfdae05f",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.metrics",
         "version": "1.0.0",
         "name": "Metrics",
-        "description": "Activity, throughput, distributions, and ledger trends from the read-only Octopus projection.",
-        "developer": "Octopus",
+        "description": "Activity, throughput, distributions, and ledger trends from the read-only Phobos projection.",
+        "developer": "Phobos",
         "category": "tab",
         "glyph": "metrics",
         "default_installed": true,
@@ -19,15 +19,15 @@
       }
     },
     {
-      "source_digest": "sha256:6637c0bddd125e6e3ae3c99eaf5aa10a4153f0bd3c164ba5bf86aa8be272e2f7",
+      "source_digest": "sha256:d5c1640e2f57d7d389eeb361188af785330026b7ee73958373f7a96c94e443c0",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.usage",
         "version": "1.0.0",
         "name": "Codex Usage",
         "description": "Token activity and API-equivalent cost across every local Codex transcript on this Mac.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "tab",
         "glyph": "dollar",
         "default_installed": false,
@@ -35,15 +35,15 @@
       }
     },
     {
-      "source_digest": "sha256:49f96dc0bd5eebf14c02ac18b514771e2c7fd71dd1b736b128c6b2d0df6a7057",
+      "source_digest": "sha256:a53c9c9f5bb0a81f9204ffb8ae2ad2ebbbd9d8e81a7be098cc9d3668d2b64608",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.provider-credential-repair",
         "version": "1.0.0",
         "name": "Codex sign-in check",
-        "description": "Checks the machine-wide Codex sign-in after an authentication failure without copying credentials or restarting Octopus.",
-        "developer": "Octopus",
+        "description": "Checks the machine-wide Codex sign-in after an authentication failure without copying credentials or restarting Phobos.",
+        "developer": "Phobos",
         "category": "repair",
         "glyph": "retry",
         "default_installed": false,
@@ -64,15 +64,15 @@
       }
     },
     {
-      "source_digest": "sha256:135a849e1539c2056d5839375a52a94db8c8de792d10863f21be75f7b377e724",
+      "source_digest": "sha256:621fcfc3a20e24cd64a8fe643e65b80a60fcbf9717041d457b465bd5149cf2ba",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.live-context",
         "version": "1.0.0",
         "name": "Live context",
         "description": "The active project, workspace, bound interfaces, and recent artifacts on Home.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "layers",
         "default_installed": true,
@@ -80,15 +80,15 @@
       }
     },
     {
-      "source_digest": "sha256:3f1ea8d9f9b4770b129c2506b5bd9e9b3e755e794ec73a0c649f8e097f071d24",
+      "source_digest": "sha256:63987bef35c65bd0508f9239abb7c37122277696feb4a1c2d1fbb961c0bd5bac",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.insights",
         "version": "1.0.0",
         "name": "Insights",
         "description": "A compact view of recent Home activity and change over the current run.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "insights",
         "default_installed": true,
@@ -96,15 +96,15 @@
       }
     },
     {
-      "source_digest": "sha256:05c479ffddc5cb70a1651bbb81f42584f9f92b400bcaf316db04dd7b97a62438",
+      "source_digest": "sha256:964687079c67a708b7ca54934b161ae4ecf9b17987c4d2014fd55c1286e7f854",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.task-progress",
         "version": "1.0.0",
         "name": "Task progress",
         "description": "Completed, running, waiting, and scheduled work across the current life area.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "progress",
         "default_installed": true,
@@ -112,15 +112,15 @@
       }
     },
     {
-      "source_digest": "sha256:bad7a09b8691b023378b0c5ecbaa004422d709a12d516db49c80c3323c66bbbb",
+      "source_digest": "sha256:40896110b46dcdc8db38bdca948f068c70e21ad3c43e9ef92f33ff8242f00b93",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.upcoming-scheduled",
         "version": "1.0.0",
         "name": "Upcoming scheduled",
         "description": "The next scheduled tasks projected for Home and its projects.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "scheduled",
         "default_installed": true,
@@ -128,15 +128,15 @@
       }
     },
     {
-      "source_digest": "sha256:5e91661082f2ed3fa9f7d0e425979a31ccd3d59ed675ba0ce843c424a9be75b5",
+      "source_digest": "sha256:9c105bbecf0a67a3e198006c60705f079b280ae30614740bb34fdccf21531b06",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.active-tools",
         "version": "1.0.0",
         "name": "Active tools",
         "description": "Tools projected from the worker environments attached to the active run.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "plugins",
         "default_installed": true,
@@ -144,15 +144,15 @@
       }
     },
     {
-      "source_digest": "sha256:0f2cc777abc7d6c0532ee602f09b7786588645035134554c88611d9d2f315df0",
+      "source_digest": "sha256:eb542e8522b83b3322966886bbfb06c8d70b064258268bf97747de2794e31aad",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.current-goals",
         "version": "1.0.0",
         "name": "Current goals",
         "description": "The active run and execution-environment goals projected into Home.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "target",
         "default_installed": true,
@@ -160,15 +160,15 @@
       }
     },
     {
-      "source_digest": "sha256:05f56b59ba3f6ff747df3672190dbb904fee3f6b79b2f395bbc634b70f7a3933",
+      "source_digest": "sha256:6a5ad52d1bdba16d8e69f56ff47d1a393b2e30b6b4203e47281f7e589d0b7e36",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.voice.memory",
         "version": "1.0.0",
         "name": "Memory",
         "description": "A Home widget for a user-selected filesystem knowledge source such as an Obsidian Vault.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "widget",
         "glyph": "memory",
         "default_installed": true,
@@ -188,15 +188,15 @@
       }
     },
     {
-      "source_digest": "sha256:a53ed2995ff1275456435a93e48516d248c383b529e7b3b8c783fa6ed901fb98",
+      "source_digest": "sha256:a4b86e00d902c7ed35b1d01d9c40562d10a3f552b19f2e517edab64b4580db15",
       "manifest": {
-        "schema": "octopus.client_extension",
+        "schema": "phobos.client_extension",
         "schema_version": 1,
         "id": "builtin.input.gesture-intent",
         "version": "0.1.0",
         "name": "Smart gestures",
         "description": "Lets a decision model read what your hand movement means and choose the client command for it. Uses your own OpenRouter key.",
-        "developer": "Octopus",
+        "developer": "Phobos",
         "category": "input",
         "glyph": "hand",
         "default_installed": false,

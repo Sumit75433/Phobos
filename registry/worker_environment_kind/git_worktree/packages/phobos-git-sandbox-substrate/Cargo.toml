@@ -1,0 +1,27 @@
+[package]
+name = "phobos-git-sandbox-substrate"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[lib]
+name = "phobos_git_sandbox"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+phobos-workspace-substrate = { path = "../../../filesystem_workspace/packages/phobos-workspace-substrate" }
+blake3.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing = { version = "0.1.44", features = ["log"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.182"
+
+[dev-dependencies]
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+tempfile = "3.23.0"
+tokio = { workspace = true, features = ["macros", "rt"] }

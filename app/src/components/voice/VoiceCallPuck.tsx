@@ -9,14 +9,14 @@ import { motion, useIsPresent } from "motion/react";
 import { useShouldReduceMotion } from "../../appearance";
 import { homeSurfaceFade } from "../../client-surfaces/homeSurfaceMotion";
 import "../icon-glyphs/voice";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { Glyph } from "../IconGlyphs";
 import { ShellTooltip } from "../shell/ShellTooltip";
 import type { VoiceSession } from "./useVoiceSession";
 import { formatCallDuration, voicePresentation } from "./voicePresentation";
 import "./voice.css";
 
-const PUCK_STORAGE_KEY = "octopus.voice-call-puck.v1";
+const PUCK_STORAGE_KEY = "phobos.voice-call-puck.v1";
 const PUCK_MARGIN = 8;
 const DRAG_THRESHOLD = 4;
 const VU_BAR_COUNT = 11;
@@ -38,7 +38,7 @@ export function VoiceCallPuck({
   onOpenHome,
   session,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   onOpenHome: () => void;
   session: VoiceSession;
 }) {
@@ -186,7 +186,7 @@ function VoiceCallWaveform({
   muted,
   session,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   muted: boolean;
   session: VoiceSession;
 }) {
@@ -309,11 +309,11 @@ function clampPosition(position: PuckPosition, root: HTMLElement | null): PuckPo
   };
 }
 
-function storageKey(profile: OctopusClientAccessProfile): string {
+function storageKey(profile: PhobosClientAccessProfile): string {
   return profile === "live" ? PUCK_STORAGE_KEY : `${PUCK_STORAGE_KEY}.test`;
 }
 
-function readStoredPosition(profile: OctopusClientAccessProfile): PuckPosition | null {
+function readStoredPosition(profile: PhobosClientAccessProfile): PuckPosition | null {
   try {
     const raw = window.localStorage.getItem(storageKey(profile));
     if (!raw) return null;
@@ -325,7 +325,7 @@ function readStoredPosition(profile: OctopusClientAccessProfile): PuckPosition |
   }
 }
 
-function writeStoredPosition(profile: OctopusClientAccessProfile, position: PuckPosition): void {
+function writeStoredPosition(profile: PhobosClientAccessProfile, position: PuckPosition): void {
   try {
     window.localStorage.setItem(storageKey(profile), JSON.stringify(position));
   } catch {

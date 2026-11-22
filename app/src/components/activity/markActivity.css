@@ -46,7 +46,7 @@
 .mark-activity-empty, .mark-activity-message { padding: calc(var(--spacing) * 2); font-size: var(--text-base); color: var(--color-text-description); text-align: start; user-select: none; }
 .mark-activity-empty { opacity: .5; }
 .mark-activity-message[role=alert] { color: var(--color-text-danger); }
-.octopus-sidebar-scroll[data-activity=true] {
+.phobos-sidebar-scroll[data-activity=true] {
   --sidebar-scroll-header-mask-distance: calc(var(--spacing) / 2);
 }
 @supports (animation-timeline: view(block)) {

@@ -14,7 +14,7 @@
         "registry/interface/world_file_observer/file_observer_life.py",
         "registry/interface/world_file_observer/file_observer.py",
         "registry/interface/world_pyecho/pyecho_life.py",
-        "registry/interface/world_pyecho/octopus_content_hash.py"
+        "registry/interface/world_pyecho/phobos_content_hash.py"
       ],
       "env": {
         "PYTHONDONTWRITEBYTECODE": "1"

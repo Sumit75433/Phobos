@@ -3,35 +3,35 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { parseArgs } = require("node:util");
 
-const HELP = `Octopus — your agentic operating system, in the terminal
+const HELP = `Phobos — your agentic operating system, in the terminal
 
-  octopus [prompt]                 Open the interactive client
-  octopus resume [task|last|home]  Continue an existing task
-  octopus exec <prompt>            Start a task and wait for its result
-  octopus send <task> <prompt>     Send a follow-up and wait
-  octopus watch <task>             Follow work already in progress
-  octopus tasks                   Show tasks from this Home
-  octopus history <task>           Read its transcript
-  octopus inspect <run-id>         Inspect recorded checkpoint and transfer evidence
-  octopus projects                Show Projects and Agents
-  octopus project create <name>   Create a Project with the parent's policy
-  octopus project folders <id> <folder>...  Set a Project's source folders (first is Primary)
-  octopus project policies        Show policies available to a parent Project
-  octopus project delete <id> --yes  Delete a Project
-  octopus agent create <name>     Create an Agent with an explicit model
-  octopus agent delete <id> --yes  Delete an Agent
-  octopus models                  Show available permitted models
-  octopus answer <task> <request>  Answer a pending question
-  octopus stop <task>              Ask the task to stop
-  octopus rename <task> <title>    Rename a task
-  octopus archive <task>           Archive a settled task
-  octopus restore <task>           Restore an archived task
-  octopus delete <task> --yes       Delete a settled task; retain recorded evidence
-  octopus export <task> <file>     Save a transcript (new file only)
-  octopus download <task> <attachment-id> <file>  Save an admitted attachment
-  octopus setup                    Set up a new Home interactively
-  octopus up                       Start or join the shared runtime
-  octopus status                   Inspect runtime and Home readiness
+  phobos [prompt]                 Open the interactive client
+  phobos resume [task|last|home]  Continue an existing task
+  phobos exec <prompt>            Start a task and wait for its result
+  phobos send <task> <prompt>     Send a follow-up and wait
+  phobos watch <task>             Follow work already in progress
+  phobos tasks                   Show tasks from this Home
+  phobos history <task>           Read its transcript
+  phobos inspect <run-id>         Inspect recorded checkpoint and transfer evidence
+  phobos projects                Show Projects and Agents
+  phobos project create <name>   Create a Project with the parent's policy
+  phobos project folders <id> <folder>...  Set a Project's source folders (first is Primary)
+  phobos project policies        Show policies available to a parent Project
+  phobos project delete <id> --yes  Delete a Project
+  phobos agent create <name>     Create an Agent with an explicit model
+  phobos agent delete <id> --yes  Delete an Agent
+  phobos models                  Show available permitted models
+  phobos answer <task> <request>  Answer a pending question
+  phobos stop <task>              Ask the task to stop
+  phobos rename <task> <title>    Rename a task
+  phobos archive <task>           Archive a settled task
+  phobos restore <task>           Restore an archived task
+  phobos delete <task> --yes       Delete a settled task; retain recorded evidence
+  phobos export <task> <file>     Save a transcript (new file only)
+  phobos download <task> <attachment-id> <file>  Save an admitted attachment
+  phobos setup                    Set up a new Home interactively
+  phobos up                       Start or join the shared runtime
+  phobos status                   Inspect runtime and Home readiness
 
 Options:
   --home <path>                   The same Home used by the desktop client
@@ -97,8 +97,8 @@ async function main(argv = process.argv.slice(2), io = process) {
     const flags = parsed.values;
     json = flags.json;
     if (flags.help) { io.stdout.write(commandHelp(parsed.positionals)); return 0; }
-    if (flags.version) { io.stdout.write(`Octopus ${require("../package.json").version}\n`); return 0; }
-    if (Number(process.versions.node.split(".")[0]) < 24) throw new Error("Octopus CLI needs Node.js 24 or newer. Set OCTOPUS_NODE to that Node executable.");
+    if (flags.version) { io.stdout.write(`Phobos ${require("../package.json").version}\n`); return 0; }
+    if (Number(process.versions.node.split(".")[0]) < 24) throw new Error("Phobos CLI needs Node.js 24 or newer. Set PHOBOS_NODE to that Node executable.");
     try { await fs.access(path.join(__dirname, "../build/cli/shared.cjs")); }
     catch (error) { if (error.code === "ENOENT") throw new Error("Build the terminal client first: npm --prefix app run build:cli"); throw error; }
     const { createEnvironment } = require("./environment.cjs");
@@ -125,7 +125,7 @@ async function main(argv = process.argv.slice(2), io = process) {
     let terminal;
     if (command === "chat" || command === "resume" || command === "setup") {
       if (!io.stdin.isTTY || !io.stdout.isTTY) {
-        if (!(command === "setup" && flags["non-interactive"])) throw new Error("Interactive Octopus needs a terminal. Use 'exec', 'send', or '--non-interactive' setup for automation.");
+        if (!(command === "setup" && flags["non-interactive"])) throw new Error("Interactive Phobos needs a terminal. Use 'exec', 'send', or '--non-interactive' setup for automation.");
       }
       terminal = require("./terminal.cjs");
     }
@@ -285,9 +285,9 @@ async function main(argv = process.argv.slice(2), io = process) {
         if (event.type === "request" && event.status !== "resolved") { pending = true; break; }
       }
     } finally { if (deadline) clearTimeout(deadline); }
-    if (interrupted) { progress(io, json, `Detached. Task ${runId} continues; use 'octopus stop ${runId}' to stop it.`); return 130; }
+    if (interrupted) { progress(io, json, `Detached. Task ${runId} continues; use 'phobos stop ${runId}' to stop it.`); return 130; }
     if (controller.signal.aborted) { report({ type: "timeout", runId, status: "still_running" }); return 124; }
-    if (pending) { if (!json) progress(io, false, `An answer is required. Resume ${runId} or use 'octopus answer'.`); return 3; }
+    if (pending) { if (!json) progress(io, false, `An answer is required. Resume ${runId} or use 'phobos answer'.`); return 3; }
     if (!completed) throw new Error("Following ended without a recorded completion. Use 'watch' or 'history' to inspect the task.");
     if (flags["output-last-message"]) await fs.writeFile(path.resolve(flags["output-last-message"]), lastMessage, { flag: "wx", mode: 0o600 });
     if (json) report({ type: "result", runId, status: failed ? "failed" : stopped ? "stopped" : "completed", text: lastMessage });
@@ -295,7 +295,7 @@ async function main(argv = process.argv.slice(2), io = process) {
     return failed ? 1 : stopped ? 130 : 0;
   } catch (error) {
     if (json) io.stdout.write(`${JSON.stringify({ type: "error", code: error.code || "cli_error", message: error.message })}\n`);
-    else io.stderr.write(`Octopus: ${safeText(String(error.message))}\n`);
+    else io.stderr.write(`Phobos: ${safeText(String(error.message))}\n`);
     return 1;
   } finally {
     if (signalHandler) process.removeListener("SIGINT", signalHandler);
@@ -375,9 +375,9 @@ function createEventRenderer(io) {
 function safeText(text) { return require("./presentation.cjs").safeText(text); }
 
 function commandHelp(words) {
-  if (words[0] === "project") return `Octopus Projects\n\n  octopus project create "Project name" [--project <parent-id>] [--policy <id>]\n  octopus project policies [--project <parent-id>] [--json]\n  octopus project folders <project-id> <folder>... [--json]\n\nNew Projects use their parent's policy unless an allowed policy is selected.\nThe first folder is the Project's Primary folder; editing folders affects future tasks.\nUse 'octopus projects' to find existing Project IDs.\n`;
-  if (words[0] === "agent") return `Octopus Agents\n\n  octopus agent create "Agent name" --project <id> --provider <id> --model <id> --effort <level> [--application <id>]...\n\nUse 'octopus projects --json' for Project IDs and 'octopus models --project <id> --json'\nfor the exact permitted provider, model, and reasoning choices.\nThe Agent uses that Project's configured Drivers and its default Applications;\n--application selects the Applications explicitly instead.\n`;
-  if (words[0] === "setup") return `Octopus setup\n\n  octopus setup [--home <path>]\n  octopus setup --home <path> --non-interactive --pack <id> --workspace-name <name>\n    --project-name <name> --model <id> --effort <level>\n\nInteractive setup lists installed choices and guides provider sign-in.\nNoninteractive setup requires existing provider sign-in. Configured Homes are preserved.\n`;
+  if (words[0] === "project") return `Phobos Projects\n\n  phobos project create "Project name" [--project <parent-id>] [--policy <id>]\n  phobos project policies [--project <parent-id>] [--json]\n  phobos project folders <project-id> <folder>... [--json]\n\nNew Projects use their parent's policy unless an allowed policy is selected.\nThe first folder is the Project's Primary folder; editing folders affects future tasks.\nUse 'phobos projects' to find existing Project IDs.\n`;
+  if (words[0] === "agent") return `Phobos Agents\n\n  phobos agent create "Agent name" --project <id> --provider <id> --model <id> --effort <level> [--application <id>]...\n\nUse 'phobos projects --json' for Project IDs and 'phobos models --project <id> --json'\nfor the exact permitted provider, model, and reasoning choices.\nThe Agent uses that Project's configured Drivers and its default Applications;\n--application selects the Applications explicitly instead.\n`;
+  if (words[0] === "setup") return `Phobos setup\n\n  phobos setup [--home <path>]\n  phobos setup --home <path> --non-interactive --pack <id> --workspace-name <name>\n    --project-name <name> --model <id> --effort <level>\n\nInteractive setup lists installed choices and guides provider sign-in.\nNoninteractive setup requires existing provider sign-in. Configured Homes are preserved.\n`;
   return HELP;
 }
 
@@ -423,7 +423,7 @@ async function stdinText(input) {
 }
 
 if (require.main === module) main().then((code) => { process.exitCode = code; }).catch((error) => {
-  process.stderr.write(`Octopus cleanup failed: ${error.message}\n`); process.exitCode = 1;
+  process.stderr.write(`Phobos cleanup failed: ${error.message}\n`); process.exitCode = 1;
 });
 
 function taskAccess(value) {

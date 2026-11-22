@@ -7,7 +7,7 @@ const requests = new Map<string, Promise<ComposerSuggestion | null>>();
 function requestSuggestion(key: string, runId: string): Promise<ComposerSuggestion | null> {
   const pending = requests.get(key);
   if (pending) return pending;
-  const request = window.octopusTransport!.requestComposerPrediction!({ runId })
+  const request = window.phobosTransport!.requestComposerPrediction!({ runId })
     .then((result) => {
       const suggestion = result?.text ? { id: `${runId}:${result.id}`, text: result.text } : null;
       suggestions.set(key, suggestion);
@@ -24,7 +24,7 @@ export function useComposerSuggestion(runId: string, sourceSequence: number | un
   const key = JSON.stringify([runtimeHome, runId, sourceSequence]);
   const [, setRevision] = useState(0);
   useEffect(() => {
-    if (!enabled || !runtimeHome || !runId || sourceSequence === undefined || !window.octopusTransport?.requestComposerPrediction) return;
+    if (!enabled || !runtimeHome || !runId || sourceSequence === undefined || !window.phobosTransport?.requestComposerPrediction) return;
     if (suggestions.has(key)) {
       const value = suggestions.get(key)!;
       suggestions.delete(key);

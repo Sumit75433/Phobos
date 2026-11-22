@@ -65,7 +65,7 @@ arming alone never resets a completed/refused notice. For email the retained
 cursor prevents replaying already-consumed letters; a new identity gives an
 independent watch.
 
-Private `OCTOPUS_VAR_DIR` contains mode-0600 files in mode-0700 directories:
+Private `PHOBOS_VAR_DIR` contains mode-0600 files in mode-0700 directories:
 `ledger-cursor.json`, `fired.json` and content-addressed `payloads/`.
 Prepared payload and manifest hashes are verified before restart replay.
 `prepared` is durable before hand-in. Admission writes `admitted` with the

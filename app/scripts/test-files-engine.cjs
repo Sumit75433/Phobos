@@ -7,10 +7,10 @@ const ts = require("typescript");
 const app = path.resolve(__dirname, "..");
 const sha = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const supportPath = path.join(app, "src/components/files/fileSupport.ts");
-const support = evaluate(fs.readFileSync(supportPath, "utf8"), supportPath, { "@octopus/files-diffs": { EXTENSION_TO_FILE_FORMAT: { ts: "typescript", txt: "text" } } });
+const support = evaluate(fs.readFileSync(supportPath, "utf8"), supportPath, { "@phobos/files-diffs": { EXTENSION_TO_FILE_FORMAT: { ts: "typescript", txt: "text" } } });
 const adoptedFilesHosts = [];
 const filesStyles = { adoptFilesStyles(host) { adoptedFilesHosts.push(host); } };
-const themeNames = { octopusDiffThemeName: (kind, id) => `octopus-codex-${kind}-${id}` };
+const themeNames = { phobosDiffThemeName: (kind, id) => `phobos-codex-${kind}-${id}` };
 
 async function withGlobals(values, run) {
   const previous = Object.keys(values).map((name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)]);
@@ -34,8 +34,8 @@ function evaluate(source, filename, dependencies = {}, globals = {}) {
 }
 
 test("Files adapters use the public renderer, editor and shared theme registry", async () => withGlobals({ navigator: { userAgent: "Files contract", platform: "MacIntel", maxTouchPoints: 0 } }, async () => {
-  const renderer = await import("@octopus/files-diffs");
-  const edit = await import("@octopus/files-diffs/edit");
+  const renderer = await import("@phobos/files-diffs");
+  const edit = await import("@phobos/files-diffs/edit");
   for (const name of ["CodeView", "Virtualizer", "VirtualizedFile", "registerCustomTheme"]) assert.equal(typeof renderer[name], "function", name);
   assert.equal(typeof edit.Editor, "function");
   for (const raw of ["", "α😀\r\n", "a\nb", "a\r\nb", "ab", "ba"]) assert.equal(support.fileContentHash(raw), sha(raw));
@@ -46,7 +46,7 @@ test("upstream editable CodeView routes change events to the current document ow
   requestAnimationFrame: () => 1, cancelAnimationFrame() {},
   document: { createElement: () => ({ style: {} }) },
 }, async () => {
-  const { CodeView } = await import("@octopus/files-diffs");
+  const { CodeView } = await import("@phobos/files-diffs");
   const received = [];
   let notify, createdType;
   const editor = { edit: () => () => {}, cleanUp() {} };
@@ -75,7 +75,7 @@ test("upstream editable CodeView routes change events to the current document ow
 }));
 
 test("public upstream TextDocument preserves CRLF/LF/tabs/Unicode and history without mount normalization", async () => {
-  const { TextDocument: AuditTextDocument } = await import("@octopus/files-diffs/edit");
+  const { TextDocument: AuditTextDocument } = await import("@phobos/files-diffs/edit");
   for (const text of ["", "\r\n", "a\r\nb\r\n", "a\nb\n", "a\nb", "\tα😀e\u0301\r\n尾\t\r\n", "a\rb\r"]) {
     const document = new AuditTextDocument("audit.txt", text);
     assert.equal(document.getText(), text); assert.equal(sha(document.getText()), sha(text));
@@ -98,7 +98,7 @@ test("public upstream TextDocument preserves CRLF/LF/tabs/Unicode and history wi
 test("upstream editor keeps find/replace and platform keyboard commands", async () => withGlobals({
   navigator: { userAgent: "Files contract", platform: "MacIntel", maxTouchPoints: 0 },
 }, async () => {
-  const { TextDocument, resolveEditorCommandFromKeyboardEvent: resolve } = await import("@octopus/files-diffs/edit");
+  const { TextDocument, resolveEditorCommandFromKeyboardEvent: resolve } = await import("@phobos/files-diffs/edit");
   const document = new TextDocument("search.txt", "foo Foo food\r\nfoo");
   const query = { text: "foo", caseSensitive: false, wholeWord: true, regex: false };
   assert.deepEqual(document.search(query), [[0, 3], [4, 7], [14, 17]]);
@@ -172,7 +172,7 @@ test("readonly adapter preserves raw file identity, upstream file/virtualizer ow
   const appearance = { darkCodeTheme: "codex", lightCodeTheme: "codex", themeMode: "dark", codeFontSize: 12 };
   let height = "22px";
   const themeRegistry = themeNames;
-  const dependencies = { "../../appearance": { useAppearance: () => appearance }, "@octopus/files-diffs": { DIFFS_TAG_NAME: "diffs-container", VirtualizedFile: File, Virtualizer }, "./filesPierreSetup": filesStyles, "./fileSupport": metrics, "./filesCodeStyles": { filesCodeSurfaceCss: "source styles" }, "../settings/octopusDiffThemes": themeRegistry };
+  const dependencies = { "../../appearance": { useAppearance: () => appearance }, "@phobos/files-diffs": { DIFFS_TAG_NAME: "diffs-container", VirtualizedFile: File, Virtualizer }, "./filesPierreSetup": filesStyles, "./fileSupport": metrics, "./filesCodeStyles": { filesCodeSurfaceCss: "source styles" }, "../settings/phobosDiffThemes": themeRegistry };
   const Wrapper = evaluate(source, filename, { ...dependencies, react: rootHost.react }).default;
   function findFile(node) {
     if (Array.isArray(node)) return node.map(findFile).find(Boolean);
@@ -206,7 +206,7 @@ test("readonly adapter preserves raw file identity, upstream file/virtualizer ow
     assert.equal(first.options.overflow, "wrap"); assert.equal(first.options.themeType, "light");
     appearance.darkCodeTheme = "github";
     element = findFile(rootHost.update()); childHost.update();
-    assert.equal(first.options.theme.dark, `octopus-codex-dark-${appearance.darkCodeTheme}`);
+    assert.equal(first.options.theme.dark, `phobos-codex-dark-${appearance.darkCodeTheme}`);
     height = "27px"; appearance.codeFontSize = 15; element = findFile(rootHost.update());
     assert.ok(observers[0].disconnected); assert.equal(element.key, `${props.documentId}:27`);
     childHost.close(); mountChild(); assert.equal(first.cleaned, 1); assert.equal(views[1].metrics.lineHeight, 27);
@@ -242,10 +242,10 @@ test("editable adapter separates document identity, fresh callbacks, shared them
   const appearance = { darkCodeTheme: "codex", lightCodeTheme: "codex", themeMode: "dark", codeFontSize: 12 };
   const filename = path.join(app, "src/components/files/FilesPierreEditor.tsx");
   const Wrapper = evaluate(fs.readFileSync(filename, "utf8"), filename, {
-    react: host.react, "../../appearance": { useAppearance: () => appearance }, "@octopus/files-diffs/edit": { Editor },
-    "@octopus/files-diffs": { CodeView: View }, "./filesPierreSetup": filesStyles, "./fileSupport": support,
+    react: host.react, "../../appearance": { useAppearance: () => appearance }, "@phobos/files-diffs/edit": { Editor },
+    "@phobos/files-diffs": { CodeView: View }, "./filesPierreSetup": filesStyles, "./fileSupport": support,
     "./filesCodeStyles": { filesCodeSurfaceCss: "" },
-    "../settings/octopusDiffThemes": themeNames, "../IconGlyphs": { Glyph: () => null },
+    "../settings/phobosDiffThemes": themeNames, "../IconGlyphs": { Glyph: () => null },
   }).default;
   const original = "\tα😀\r\nlast\r\n";
   const props = { documentId: '["root-a","path.txt"]', filename: "path.txt", label: "Edit", onChange: (value) => changes.push(value), value: original, wordWrap: false,
@@ -261,7 +261,7 @@ test("editable adapter separates document identity, fresh callbacks, shared them
     props.onViewStateChange = (view) => scrolls.push({ ...view, fresh: true }); host.update();
     nodes[0].dispatchEvent(new Event("scroll")); assert.equal(scrolls.at(-1).fresh, true);
     const first = views[0], item = first.items[0], edited = { ...item.file, contents: original + "X" };
-    assert.deepEqual(first.options.theme, { dark: "octopus-codex-dark-codex", light: "octopus-codex-light-codex" }, "the editor names themes through the shared registry");
+    assert.deepEqual(first.options.theme, { dark: "phobos-codex-dark-codex", light: "phobos-codex-light-codex" }, "the editor names themes through the shared registry");
     const nativeHost = { shadowRoot: { querySelector: () => ({ setAttribute(name, value) { assert.equal(name, "aria-label"); assert.equal(value, props.label); } }) } };
     first.options.onPostRender(nativeHost, first, "mount"); assert.equal(adoptedFilesHosts.at(-1), nativeHost);
     const adoptedCount = adoptedFilesHosts.length; first.options.onPostRender(nativeHost, first, "unmount"); assert.equal(adoptedFilesHosts.length, adoptedCount);
@@ -331,7 +331,7 @@ function fileSaveHarness(options = {}) {
     readOsFile(request) { return new Promise((done, fail) => reads.push({ request, resolve: done, reject: fail })); },
   };
   const base = {
-    ...lifecycle, ...refs, paneKey, roots, window: { octopusTransport: transport },
+    ...lifecycle, ...refs, paneKey, roots, window: { phobosTransport: transport },
     setFileLoadingState: (value) => { ui.loading = value; }, setFileError: (value) => { ui.error = value; }, failureMessage: (error) => error.message,
     artifactTarget: null, setArtifactRefreshGeneration: () => assert.fail("unexpected artifact refresh"),
     requestDiscard: () => assert.fail("this scenario must settle a dirty draft before replacing its document"),
@@ -356,7 +356,7 @@ function fileSaveHarness(options = {}) {
     root: (id) => { callbacks().setRootId(id); callbacks().rootChanged(); },
     unmount: () => { detachRead(); detachFlush(); },
     remount: () => { detachRead = callbacks().mounted(); detachFlush = callbacks().flush(); },
-    finish: (patch = {}) => resolve({ ...file, text: "sent edit", size: Buffer.byteLength("sent edit"), digest: sha("sent edit"), modifiedAt: "2026-09-08T00:00:01.000Z", outsideOctopusEvidence: true, ...patch }),
+    finish: (patch = {}) => resolve({ ...file, text: "sent edit", size: Buffer.byteLength("sent edit"), digest: sha("sent edit"), modifiedAt: "2026-09-08T00:00:01.000Z", outsidePhobosEvidence: true, ...patch }),
     fail: (error) => reject(error),
   };
 }
@@ -388,7 +388,7 @@ test("save receipt cannot own a refreshed snapshot or same-text document in anot
 test("save receipt updates its unchanged owner and rejects an invalid manual-edit receipt", async () => {
   const h = fileSaveHarness(), pending = h.run(); await h.started; h.finish(); assert.equal(await pending, true);
   assert.equal(h.current.file.digest, sha("sent edit")); assert.equal(h.current.draft, "sent edit");
-  const invalid = fileSaveHarness(), failed = invalid.run(); await invalid.started; invalid.finish({ outsideOctopusEvidence: false }); assert.equal(await failed, false);
+  const invalid = fileSaveHarness(), failed = invalid.run(); await invalid.started; invalid.finish({ outsidePhobosEvidence: false }); assert.equal(await failed, false);
   assert.equal(invalid.current.file.digest, sha("before")); assert.match(invalid.current.error, /invalid manual-edit receipt/);
 });
 
@@ -446,13 +446,13 @@ test("pending file load or remapped admitted root prevents stale save submission
 });
 
 test("Files language policy keeps original full-name and compound-extension matching", async () => {
-  const renderer = await import("@octopus/files-diffs");
-  const { fileLanguage } = evaluate(fs.readFileSync(supportPath, "utf8"), supportPath, { "@octopus/files-diffs": renderer });
+  const renderer = await import("@phobos/files-diffs");
+  const { fileLanguage } = evaluate(fs.readFileSync(supportPath, "utf8"), supportPath, { "@phobos/files-diffs": renderer });
   for (const [name, expected] of [["file.ts", "typescript"], ["a.component.ts", "angular-ts"], ["template.blade.php", "blade"], ["Dockerfile", "dockerfile"], ["nested/Dockerfile", "text"], ["nested\\Dockerfile", "text"], ["file.odin", "text"], ["build.bazel", "text"], ["BUILD", "text"], ["foo.unknown", "text"]]) assert.equal(fileLanguage(name), expected, name);
 });
 
 test("upstream history restores forward and backward selection snapshots", async () => {
-  const { TextDocument } = await import("@octopus/files-diffs/edit");
+  const { TextDocument } = await import("@phobos/files-diffs/edit");
   for (const direction of ["forward", "backward"]) {
     const document = new TextDocument("selection.txt", "α😀\r\nsecond");
     const before = [{ start: { line: 0, character: 0 }, end: { line: 0, character: 3 }, direction }];
@@ -467,7 +467,7 @@ test("upstream history restores forward and backward selection snapshots", async
 });
 
 test("upstream virtual windows preserve original clipping and overscroll contracts", async () => {
-  const { createWindowFromScrollPosition } = await import("@octopus/files-diffs");
+  const { createWindowFromScrollPosition } = await import("@phobos/files-diffs");
   for (const [input, expected] of [
     [{ scrollTop: 0, height: 600, scrollHeight: 10000, overscrollSize: 1000 }, { top: 0, bottom: 1600 }],
     [{ scrollTop: 5000, height: 600, scrollHeight: 10000, overscrollSize: 1000 }, { top: 4000, bottom: 6600 }],
@@ -481,15 +481,15 @@ test("Files alias isolates package resolution, highlighters and unchanged theme 
   navigator: { userAgent: "Files isolation", platform: "MacIntel", maxTouchPoints: 0 },
 }, async () => {
   const { createRequire } = require("node:module");
-  for (const [name, pierreVersion, shikiVersion] of [["@pierre/diffs", "1.2.12", "4.3.1"], ["@octopus/files-diffs", "1.5.2", "3.20.0"]]) {
+  for (const [name, pierreVersion, shikiVersion] of [["@pierre/diffs", "1.2.12", "4.3.1"], ["@phobos/files-diffs", "1.5.2", "3.20.0"]]) {
     const packagePath = path.join(app, "node_modules", name, "package.json");
     const consumer = createRequire(packagePath);
     assert.equal(JSON.parse(fs.readFileSync(packagePath)).version, pierreVersion);
     assert.equal(JSON.parse(fs.readFileSync(consumer.resolve("shiki/package.json"))).version, shikiVersion);
   }
   assert.equal(JSON.parse(fs.readFileSync(path.join(app, "node_modules/@shikijs/themes/package.json"))).version, "4.3.1");
-  const regular = await import("@pierre/diffs"), files = await import("@octopus/files-diffs");
-  const filename = path.join(app, "src/components/settings/octopusDiffThemes.ts");
+  const regular = await import("@pierre/diffs"), files = await import("@phobos/files-diffs");
+  const filename = path.join(app, "src/components/settings/phobosDiffThemes.ts");
   const dependencies = { "@pierre/diffs": regular };
   for (const kind of ["dark", "light"]) {
     for (const family of ["codex", "raycast"]) {
@@ -498,9 +498,9 @@ test("Files alias isolates package resolution, highlighters and unchanged theme 
     }
   }
   const themes = evaluate(fs.readFileSync(filename, "utf8"), filename, dependencies);
-  themes.registerOctopusDiffThemes();
-  themes.registerOctopusDiffThemes(files.registerCustomTheme);
-  const requested = { langs: ["typescript"], themes: ["codex", "raycast"].flatMap((family) => ["dark", "light"].map((kind) => themes.octopusDiffThemeName(kind, family))) };
+  themes.registerPhobosDiffThemes();
+  themes.registerPhobosDiffThemes(files.registerCustomTheme);
+  const requested = { langs: ["typescript"], themes: ["codex", "raycast"].flatMap((family) => ["dark", "light"].map((kind) => themes.phobosDiffThemeName(kind, family))) };
   const a = await regular.getSharedHighlighter(requested), b = await files.getSharedHighlighter(requested);
   assert.notEqual(a, b);
   for (const name of requested.themes) assert.deepEqual(b.getTheme(name), a.getTheme(name));
@@ -511,13 +511,13 @@ test("Files alias isolates package resolution, highlighters and unchanged theme 
 }));
 
 test("Files stylesheet ownership changes only its shadow root and reuses the official sheet", async () => {
-  const renderer = await import("@octopus/files-diffs");
+  const renderer = await import("@phobos/files-diffs");
   const filename = path.join(app, "src/components/files/filesPierreSetup.ts");
   const registrations = [], sheets = [];
   class Sheet { constructor() { sheets.push(this); } replaceSync(css) { this.css = css; } }
   const { adoptFilesStyles } = evaluate(fs.readFileSync(filename, "utf8"), filename, {
-    "@pierre/diffs": {}, "@octopus/files-diffs": renderer,
-    "../settings/octopusDiffThemes": { registerOctopusDiffThemes: registrar => registrations.push(registrar) },
+    "@pierre/diffs": {}, "@phobos/files-diffs": renderer,
+    "../settings/phobosDiffThemes": { registerPhobosDiffThemes: registrar => registrations.push(registrar) },
   }, { CSSStyleSheet: Sheet });
   assert.deepEqual(registrations, [renderer.registerCustomTheme]);
   const document = {}, originalSheet = {}, regular = { ownerDocument: document, shadowRoot: { adoptedStyleSheets: [originalSheet] } };
@@ -540,7 +540,7 @@ test("official dual imports retain the baseline custom-element stylesheet", () =
   const setup = fs.readFileSync(path.join(app, "src/components/files/filesPierreSetup.ts"), "utf8");
   const parsed = ts.createSourceFile("setup.ts", setup, ts.ScriptTarget.Latest, true);
   const imports = parsed.statements.filter(ts.isImportDeclaration).map(node => node.moduleSpecifier.text);
-  assert.deepEqual(imports.slice(0, 2), ["@pierre/diffs", "@octopus/files-diffs"]);
+  assert.deepEqual(imports.slice(0, 2), ["@pierre/diffs", "@phobos/files-diffs"]);
   require("node:child_process").execFileSync(process.execPath, ["--input-type=module", "-e", `
     import assert from "node:assert/strict";
     const registry = new Map();
@@ -552,7 +552,7 @@ test("official dual imports retain the baseline custom-element stylesheet", () =
     const baselineClass = registry.get("diffs-container");
     assert.equal(typeof baselineClass, "function");
     const before = new baselineClass(), originalSheet = before.shadowRoot.adoptedStyleSheets[0];
-    const files = await import("@octopus/files-diffs");
+    const files = await import("@phobos/files-diffs");
     assert.equal(registry.get("diffs-container"), baselineClass);
     const after = new baselineClass();
     assert.equal(after.shadowRoot.adoptedStyleSheets[0], originalSheet);

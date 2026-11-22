@@ -636,7 +636,7 @@ async function synthesizeApplicationPackages(sourceRegistryRoot, claimedOwners, 
       }));
       if (members.some((member) => claimedOwners.has(memberKey(member)))) continue;
       const manifest = parsePackageManifest({
-        schema: "octopus.local_package",
+        schema: "phobos.local_package",
         schema_version: 1,
         id: application.id,
         version: application.version,
@@ -713,7 +713,7 @@ async function synthesizeDriverPackages(sourceRegistryRoot, claimedOwners, error
       ];
       if (members.some((member) => claimedOwners.has(memberKey(member)))) continue;
       const manifest = parsePackageManifest({
-        schema: "octopus.local_package",
+        schema: "phobos.local_package",
         schema_version: 1,
         id: `driver.${entry.name}`,
         version: "1.0.0",
@@ -723,7 +723,7 @@ async function synthesizeDriverPackages(sourceRegistryRoot, claimedOwners, error
         display: {
           name: humanizeId(entry.name),
           description: driverDescription(descriptor),
-          developer: "Octopus",
+          developer: "Phobos",
           category: "worker_environment",
           icon: "environment",
         },
@@ -1687,7 +1687,7 @@ async function snapshotDirectory(rootValue, options = {}) {
       const relative = path.join(relativeDirectory, entry.name);
       if (SOURCE_EXCLUDES.has(entry.name)) { excludedEntries.push(absolute); continue; }
       const stat = await fs.lstat(absolute);
-      if (entry.name === ".octopus-publication") {
+      if (entry.name === ".phobos-publication") {
         if (!stat.isDirectory() || stat.isSymbolicLink() || (stat.mode & 0o077) !== 0) throw new Error(`Invalid private publication directory: ${absolute}`);
         continue;
       }
@@ -1789,7 +1789,7 @@ async function installResolvedPackages(roots, entries, operation) {
     state: "planned",
   })));
   let journal = {
-    schema: "octopus.local_package_transaction",
+    schema: "phobos.local_package_transaction",
     schema_version: 3,
     publication_id: crypto.randomBytes(16).toString("hex"),
     publications: {},
@@ -2004,7 +2004,7 @@ async function repairResolvedPackages(roots, entries, operation) {
     state: "planned",
   })));
   let journal = {
-    schema: "octopus.local_package_transaction",
+    schema: "phobos.local_package_transaction",
     schema_version: 3,
     publication_id: crypto.randomBytes(16).toString("hex"),
     publications: {},
@@ -2275,7 +2275,7 @@ async function removeResolvedPackages(roots, entries, operation) {
     state: "planned",
   })));
   let journal = {
-    schema: "octopus.local_package_transaction",
+    schema: "phobos.local_package_transaction",
     schema_version: 3,
     publication_id: crypto.randomBytes(16).toString("hex"),
     publications: {},
@@ -2357,11 +2357,11 @@ async function removeResolvedPackages(roots, entries, operation) {
 
 async function packageTransactionEntries(roots) {
   const entries = await fs.readdir(roots.transactionsRoot, { withFileTypes: true });
-  if (entries.some(entry => entry.name === ".octopus-publication")) {
-    const stat = await fs.lstat(path.join(roots.transactionsRoot, ".octopus-publication"));
+  if (entries.some(entry => entry.name === ".phobos-publication")) {
+    const stat = await fs.lstat(path.join(roots.transactionsRoot, ".phobos-publication"));
     if (!stat.isDirectory() || stat.isSymbolicLink() || (stat.mode & 0o077) !== 0) throw new Error("Invalid package publication metadata directory");
   }
-  return entries.filter(entry => entry.name !== ".octopus-publication");
+  return entries.filter(entry => entry.name !== ".phobos-publication");
 }
 
 async function recoverLocalPackageTransactionsUnlocked(roots) {
@@ -2735,7 +2735,7 @@ function receiptSourceFiles(member) {
 function packageReceipt(manifest, source, operationId, materialization = source) {
   const sourceMembers = new Map(source.members.map(member => [memberKey(member), member]));
   const receipt = {
-    schema: "octopus.local_package_receipt",
+    schema: "phobos.local_package_receipt",
     schema_version: 2,
     package_id: manifest.id,
     package_version: manifest.version,
@@ -2980,7 +2980,7 @@ function validatePackagePublications(roots, journal) {
       const names = new Set();
       for (const entry of movement.expected.entries) {
         const parts = entry.relative_path.split("/");
-        if (parts.some(part => !part || part === "." || part === ".." || part.includes("\\") || part.includes("\0") || part === ".octopus-publication" || SOURCE_EXCLUDES.has(part))
+        if (parts.some(part => !part || part === "." || part === ".." || part.includes("\\") || part.includes("\0") || part === ".phobos-publication" || SOURCE_EXCLUDES.has(part))
           || path.isAbsolute(entry.relative_path) || names.has(entry.relative_path)
           || !Number.isSafeInteger(entry.identity.device) || !Number.isSafeInteger(entry.identity.inode)
           || !Number.isSafeInteger(entry.bytes)) throw new Error("Package publication has an invalid exact directory manifest");

@@ -6,14 +6,14 @@ const { test } = require("node:test");
 const { collectSupportReport, supportReportText, supportIssueUrl } = require("../electron/clientSupportReport.cjs");
 
 test("reports disclose only selected technical evidence; error text requires explicit inclusion", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-support-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-support-"));
   try {
     await fs.mkdir(path.join(root, "logs"));
     await fs.mkdir(path.join(root, "setup-state/operations"), { recursive: true });
     const operation_id = "workspace_setup_test";
     await fs.writeFile(path.join(root, "setup-state/current.json"), JSON.stringify({ operation_id, plan_digest: "same" }));
     await fs.writeFile(path.join(root, `setup-state/operations/${operation_id}.json`), JSON.stringify({ operation_id, plan_digest: "same", plan: { secret: "PRIVATE_PLAN" }, steps: [{ step: "provider", state: "pending" }], last_error: { step: "provider", message: "PRIVATE_ERROR" } }));
-    await fs.writeFile(path.join(root, "logs/octopus-client.jsonl"), [
+    await fs.writeFile(path.join(root, "logs/phobos-client.jsonl"), [
       JSON.stringify({ at: "2026-10-26T00:00:00.000Z", event: "setup.progress", detail: { step: "provider", phase: "verifying", percent: 96, operationId: "PRIVATE_ID" } }),
       "broken line",
       JSON.stringify({ event: "PRIVATE_EVENT", level: "error", detail: { message: "PRIVATE_ERROR", profile: "PRIVATE_PROFILE", stack: "PRIVATE_STACK" } }),
@@ -33,18 +33,18 @@ test("reports disclose only selected technical evidence; error text requires exp
       assert.equal(report.client_logs, undefined);
       assert.equal(report.runtime, undefined);
     }
-    await fs.unlink(path.join(root, "logs/octopus-client.jsonl"));
-    await fs.symlink(path.join(root, "setup-state/current.json"), path.join(root, "logs/octopus-client.jsonl"));
+    await fs.unlink(path.join(root, "logs/phobos-client.jsonl"));
+    await fs.symlink(path.join(root, "setup-state/current.json"), path.join(root, "logs/phobos-client.jsonl"));
     assert.equal((await collectSupportReport(input)).client_logs.sources[1].state, "symlink_refused");
-    await fs.unlink(path.join(root, "logs/octopus-client.jsonl"));
-    await fs.writeFile(path.join(root, "logs/octopus-client.jsonl"), "x".repeat(300_000) + "\n" + JSON.stringify({ event: "setup.failed", level: "error" }));
+    await fs.unlink(path.join(root, "logs/phobos-client.jsonl"));
+    await fs.writeFile(path.join(root, "logs/phobos-client.jsonl"), "x".repeat(300_000) + "\n" + JSON.stringify({ event: "setup.failed", level: "error" }));
     assert.equal((await collectSupportReport(input)).client_logs.sources[1].truncated, true);
   } finally { await fs.rm(root, { recursive: true, force: true }); }
 });
 
 test("runtime reports retain the failure, exact call coordinates and authored context without exporting content or touching a preserved Home", async () => {
   const { blake3 } = require("@noble/hashes/blake3");
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-old-support-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-old-support-"));
   const hash = bytes => Buffer.from(blake3(bytes)).toString("hex");
   const write = async (relative, bytes) => { const file = path.join(home, relative); await fs.mkdir(path.dirname(file), { recursive: true }); await fs.writeFile(file, bytes); };
   const store = async (value, directory = "ledger/blobs") => { const bytes = Buffer.from(JSON.stringify(value)), digest = hash(bytes); await write(`${directory}/${digest}`, bytes); return digest; };
@@ -67,7 +67,7 @@ test("runtime reports retain the failure, exact call coordinates and authored co
     await write(`interfaces/${provider}/interface-life.stderr.1700000000000.123.1.log`, "PRIVATE_STDERR\n");
     await write("state/runtime-instance/output.log", "PRIVATE_RUNTIME_LOG\n");
     await write(".env", "PRIVATE_CREDENTIAL");
-    await write("client/logs/octopus-client.jsonl", [JSON.stringify({ event: "renderer.toast", level: "error", detail: { message: "First failure (movement seq 4): PRIVATE_ERROR" } }), ...Array.from({ length: 100 }, () => JSON.stringify({ event: "setup.progress", level: "info", detail: { step: "workspace", phase: "verifying", percent: 90 } }))].join("\n"));
+    await write("client/logs/phobos-client.jsonl", [JSON.stringify({ event: "renderer.toast", level: "error", detail: { message: "First failure (movement seq 4): PRIVATE_ERROR" } }), ...Array.from({ length: 100 }, () => JSON.stringify({ event: "setup.progress", level: "info", detail: { step: "workspace", phase: "verifying", percent: 90 } }))].join("\n"));
     const input = { home, clientRoot: path.join(home, "client"), application: { version: "test" }, profile: "live", runtime: { home, phase: "ready", ready: true, interfaceFailures: [{ interfaceId: provider, message: "PRIVATE_LIFE_ERROR" }] } };
     const before = await fs.stat(path.join(home, "ledger/movements.jsonl"));
     const safe = await collectSupportReport(input);

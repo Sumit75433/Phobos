@@ -129,10 +129,10 @@ async function initializeWorkspace(options) {
     }
     try {
       if (needsBrowserNativeHost) {
-        const setup = await options.planBrowserNativeHost({ octopusHomeRoot: roots.octopusHomeRoot, plannedWrites: writes });
+        const setup = await options.planBrowserNativeHost({ phobosHomeRoot: roots.phobosHomeRoot, plannedWrites: writes });
         if (typeof setup?.rollback === "function") setupPlans.push(setup);
         if (!Array.isArray(setup?.writes) || typeof setup.rollback !== "function" || setup.writes.length !== 1
-          || setup.writes.some((write) => write.destination !== path.join(roots.octopusHomeRoot, "host.json") || write.publishBarrier !== false)) {
+          || setup.writes.some((write) => write.destination !== path.join(roots.phobosHomeRoot, "host.json") || write.publishBarrier !== false)) {
           throw new Error("Native browser setup author returned an invalid host manifest plan");
         }
         writes.unshift(...setup.writes);
@@ -141,9 +141,9 @@ async function initializeWorkspace(options) {
         && typeof write.content === "string" && JSON.parse(write.content)?.host?.application_preferences != null);
       if (needsDesktopPreferences) {
         if (typeof options.planDesktopApplicationPreferences !== "function") throw new Error("Computer Use setup requires its verified installed package author");
-        const setup = await options.planDesktopApplicationPreferences({ octopusHomeRoot: roots.octopusHomeRoot, plannedWrites: writes });
+        const setup = await options.planDesktopApplicationPreferences({ phobosHomeRoot: roots.phobosHomeRoot, plannedWrites: writes });
         if (typeof setup?.rollback === "function") setupPlans.push(setup);
-        const hostPath = path.join(roots.octopusHomeRoot, "host.json");
+        const hostPath = path.join(roots.phobosHomeRoot, "host.json");
         const prior = writes.filter((write) => write.destination === hostPath);
         if (!Array.isArray(setup?.writes) || typeof setup.rollback !== "function" || setup.writes.length !== 1
           || setup.writes[0].destination !== hostPath || setup.writes[0].publishBarrier !== false || prior.length > 1
@@ -509,15 +509,15 @@ function parseClientAuthoringPlan(value) {
 }
 
 function parsePublicationCondition(value) {
-  const condition = exactObject(value, ["octopus_home", "preimages"], ["octopus_home", "preimages"], "Workspace publication condition");
+  const condition = exactObject(value, ["phobos_home", "preimages"], ["phobos_home", "preimages"], "Workspace publication condition");
   const normalPath = value => {
     const target = requiredAbsolutePath(value, "Workspace publication condition path");
-    if (target !== value || target.split(path.sep).includes(".octopus-publication")) throw new Error("Workspace publication condition requires normal absolute paths");
+    if (target !== value || target.split(path.sep).includes(".phobos-publication")) throw new Error("Workspace publication condition requires normal absolute paths");
     return target;
   };
   if (!Array.isArray(condition.preimages) || condition.preimages.length > 4096) throw new Error("Workspace publication condition exceeds its preimage bound");
   const paths = new Set();
-  return { octopus_home: normalPath(condition.octopus_home), preimages: condition.preimages.map(value => {
+  return { phobos_home: normalPath(condition.phobos_home), preimages: condition.preimages.map(value => {
     const pin = exactObject(value, ["path", "sha256"], ["path", "sha256"], "Workspace publication preimage");
     const target = normalPath(pin.path);
     if (paths.has(target)) throw new Error("Workspace publication condition repeats a dependency");
@@ -652,23 +652,23 @@ function parseHeldRetirementProof(value, ctx) {
 }
 
 async function normalizeRoots(options) {
-  const octopusHomeRoot = await realPlainDirectory(requiredAbsolutePath(options?.octopusHomeRoot, "octopusHomeRoot"), "Octopus home");
+  const phobosHomeRoot = await realPlainDirectory(requiredAbsolutePath(options?.phobosHomeRoot, "phobosHomeRoot"), "Phobos home");
   const registryRoot = await realPlainDirectory(requiredAbsolutePath(options?.registryRoot, "registryRoot"), "Active Registry");
-  const stateRoot = path.join(octopusHomeRoot, "client-state", "workspace");
+  const stateRoot = path.join(phobosHomeRoot, "client-state", "workspace");
   return {
-    octopusHomeRoot,
+    phobosHomeRoot,
     registryRoot,
     publishFiles: options?.publishFiles ?? options?.publication?.publishFiles,
     publication: options?.publication,
-    eeInstancesRoot: path.join(octopusHomeRoot, "state", "ee_instances"),
-    runsRoot: path.join(octopusHomeRoot, "state", "runs"),
+    eeInstancesRoot: path.join(phobosHomeRoot, "state", "ee_instances"),
+    runsRoot: path.join(phobosHomeRoot, "state", "runs"),
     interfaceRoot: path.join(registryRoot, "interface"),
     toolRoot: path.join(registryRoot, "tool"),
     artifactRoot: path.join(registryRoot, "artifact"),
     eeTemplateRoot: path.join(registryRoot, "ee_template"),
-    privateInterfacesRoot: path.join(octopusHomeRoot, "interfaces"),
-    interfaceHandInRoot: path.join(octopusHomeRoot, "interface-hand-in"),
-    clientAgentsRoot: path.join(octopusHomeRoot, "client", "agents"),
+    privateInterfacesRoot: path.join(phobosHomeRoot, "interfaces"),
+    interfaceHandInRoot: path.join(phobosHomeRoot, "interface-hand-in"),
+    clientAgentsRoot: path.join(phobosHomeRoot, "client", "agents"),
     stateRoot,
     receiptsRoot: path.join(stateRoot, "receipts"),
     projectReceiptsRoot: path.join(stateRoot, "topology-receipts"),
@@ -682,9 +682,9 @@ async function ensureStateRoots(roots) {
   for (const directory of [roots.eeInstancesRoot, roots.interfaceRoot, roots.toolRoot]) {
     await realPlainDirectory(directory, directory);
   }
-  await ensurePlainParent(roots.octopusHomeRoot, roots.runsRoot);
-  await ensurePlainParent(roots.octopusHomeRoot, roots.clientAgentsRoot);
-  await ensurePlainParent(roots.octopusHomeRoot, roots.stateRoot);
+  await ensurePlainParent(roots.phobosHomeRoot, roots.runsRoot);
+  await ensurePlainParent(roots.phobosHomeRoot, roots.clientAgentsRoot);
+  await ensurePlainParent(roots.phobosHomeRoot, roots.stateRoot);
   await ensurePlainParent(roots.stateRoot, roots.receiptsRoot);
   await ensurePlainParent(roots.stateRoot, roots.projectReceiptsRoot);
   await ensurePlainParent(roots.stateRoot, roots.clientAuthoringReceiptsRoot);
@@ -951,8 +951,8 @@ async function planProjectCreate(roots, scope, request, planOperatorSurface) {
     config: projectChildConfig(parentDocument.value.config),
   };
   await validateProjectSourceFolders(request.sourceFolders);
-  projectEe.config.octopus_os ??= {};
-  projectEe.config.octopus_os.source_folders = request.sourceFolders;
+  projectEe.config.phobos_os ??= {};
+  projectEe.config.phobos_os.source_folders = request.sourceFolders;
   const eeContent = eeDocument(projectEe);
   const projectProfile = projectAuthoringProfile(sourceProfile, eeId);
   const homeRun = await readJson(path.join(roots.runsRoot, `${scope.homeRunId}.json`), "Home provider selection");
@@ -996,7 +996,7 @@ async function planProjectCreate(roots, scope, request, planOperatorSurface) {
         "client-agent-catalog",
         false,
       ),
-      projectWrite(sidecar.path, sidecar.digest, sidecarContent, `octopus-os:${scope.homeInterfaceId}`, true),
+      projectWrite(sidecar.path, sidecar.digest, sidecarContent, `phobos-os:${scope.homeInterfaceId}`, true),
     ],
   };
 }
@@ -1047,7 +1047,7 @@ async function planProjectDelete(roots, scope, request) {
         "client-agent-catalog",
         false,
       ),
-      projectWrite(sidecar.path, sidecar.digest, sidecarContent, `octopus-os:${scope.homeInterfaceId}`, false),
+      projectWrite(sidecar.path, sidecar.digest, sidecarContent, `phobos-os:${scope.homeInterfaceId}`, false),
       projectWrite(eePath, ee.digest, null, `ee:${request.eeId}`, true),
     ],
   };
@@ -1083,8 +1083,8 @@ async function planProjectPresentationUpdate(roots, scope, request) {
     if (project.sourceFolders !== undefined) {
       await validateProjectSourceFolders(project.sourceFolders);
       next.config ??= {};
-      next.config.octopus_os ??= {};
-      next.config.octopus_os.source_folders = project.sourceFolders;
+      next.config.phobos_os ??= {};
+      next.config.phobos_os.source_folders = project.sourceFolders;
     }
     names.set(project.eeId, next.name || project.eeId);
     if (stableJson(next) !== stableJson(current.value)) {
@@ -1106,7 +1106,7 @@ async function planProjectPresentationUpdate(roots, scope, request) {
         sidecar.path,
         sidecar.digest,
         `${JSON.stringify(nextSidecar, null, 2)}\n`,
-        `octopus-os:${scope.homeInterfaceId}`,
+        `phobos-os:${scope.homeInterfaceId}`,
         true,
       ),
     ],
@@ -1114,7 +1114,7 @@ async function planProjectPresentationUpdate(roots, scope, request) {
 }
 
 async function readMutableWorkspaceSidecar(roots, scope, expectedDigest) {
-  const file = path.join(roots.interfaceRoot, scope.homeInterfaceId, "octopus_os.json");
+  const file = path.join(roots.interfaceRoot, scope.homeInterfaceId, "phobos_os.json");
   const document = await readJson(file, "Workspace Home sidecar");
   if (document.digest !== expectedDigest || document.digest !== scope.homeSidecarDigest) {
     throw new Error("Workspace Home sidecar changed before Project mutation");
@@ -1134,7 +1134,7 @@ async function readMutableWorkspaceSidecar(roots, scope, expectedDigest) {
   );
   if (
     sidecar.schema_version !== 1
-    || sidecar.workspace !== "octopus_os"
+    || sidecar.workspace !== "phobos_os"
     || sidecar.interface !== scope.homeInterfaceId
     || sidecar.owner_interface !== scope.homeInterfaceId
     || sidecar.component !== "client"
@@ -1160,7 +1160,7 @@ function exactlyOne(values, predicate, label) {
 }
 
 async function requireWorkspaceAgentCatalog(roots) {
-  const catalog = await readClientAgentCatalog(roots.octopusHomeRoot);
+  const catalog = await readClientAgentCatalog(roots.phobosHomeRoot);
   if (!catalog.exists || !catalog.digest) {
     throw new Error(`Workspace has no authored Client Agent catalog: ${catalog.file}`);
   }
@@ -1492,7 +1492,7 @@ async function readTemplate(roots, id) {
 }
 
 async function createEeOverlay(roots, eeWrites) {
-  const overlay = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-workspace-ee-")));
+  const overlay = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-workspace-ee-")));
   try {
     const entries = await publicDirectoryEntries(roots.eeInstancesRoot);
     for (const entry of entries) {
@@ -1629,9 +1629,9 @@ async function workspaceWrites(roots, request, materialized, validatedPlan, proj
   if (runIndexes.length !== 1) throw new Error("Home topology plan must publish exactly one run record");
   const runs = validatePlannedHomeRuns(roots, validatedPlan, planWrites, JSON.parse(planWrites[runIndexes[0]].content));
   await validatePlannedHomeOwnership(roots, validatedPlan, planWrites, runs);
-  const sidecarPath = path.join(roots.interfaceRoot, validatedPlan.chatInterfaceId, "octopus_os.json");
+  const sidecarPath = path.join(roots.interfaceRoot, validatedPlan.chatInterfaceId, "phobos_os.json");
   const sidecarIndex = planWrites.findIndex((write) => write.destination === sidecarPath);
-  if (sidecarIndex < 0) throw new Error("Home topology plan omitted its Octopus OS sidecar");
+  if (sidecarIndex < 0) throw new Error("Home topology plan omitted its Phobos OS sidecar");
   planWrites[sidecarIndex] = {
     ...planWrites[sidecarIndex],
     content: workspaceHomeSidecar(
@@ -1676,7 +1676,7 @@ async function workspaceWrites(roots, request, materialized, validatedPlan, proj
   parseClientAgentCatalog(agentCatalog);
   const agentCatalogContent = `${JSON.stringify(agentCatalog, null, 2)}\n`;
   const agentCatalogWrite = {
-    destination: clientAgentCatalogPath(roots.octopusHomeRoot),
+    destination: clientAgentCatalogPath(roots.phobosHomeRoot),
     expectedBeforeDigest: null,
     afterDigest: sha256(Buffer.from(agentCatalogContent)),
     content: agentCatalogContent,
@@ -2191,7 +2191,7 @@ function workspaceHomeSidecar(content, request, materialized, plan, projectProfi
   try {
     sidecar = JSON.parse(content);
   } catch (error) {
-    throw new Error(`Home Octopus OS sidecar is malformed JSON: ${errorMessage(error)}`);
+    throw new Error(`Home Phobos OS sidecar is malformed JSON: ${errorMessage(error)}`);
   }
   exactObject(
     sidecar,
@@ -2204,11 +2204,11 @@ function workspaceHomeSidecar(content, request, materialized, plan, projectProfi
       "schema_version", "workspace", "interface", "owner_interface", "component", "surface_role",
       "provider_choice_interface", "worker_choice_interface", "authoring_profile",
     ],
-    "Home Octopus OS sidecar",
+    "Home Phobos OS sidecar",
   );
   if (
     sidecar.schema_version !== 1
-    || sidecar.workspace !== "octopus_os"
+    || sidecar.workspace !== "phobos_os"
     || sidecar.interface !== plan.chatInterfaceId
     || sidecar.owner_interface !== plan.chatInterfaceId
     || sidecar.component !== "client"
@@ -2217,7 +2217,7 @@ function workspaceHomeSidecar(content, request, materialized, plan, projectProfi
     || sidecar.worker_choice_interface !== request.home.workerInterfaceId
     || stableJson(sidecar.authoring_profile) !== stableJson(plan.authoringProfile)
   ) {
-    throw new Error("Home Octopus OS sidecar drifted from the planned surface identity");
+    throw new Error("Home Phobos OS sidecar drifted from the planned surface identity");
   }
   if (Object.hasOwn(sidecar, "voice_context") !== (voiceContext !== undefined)
     || voiceContext !== undefined && stableJson(sidecar.voice_context) !== stableJson(voiceContext)) {
@@ -2265,16 +2265,16 @@ function projectChildConfig(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("Project parent EE config must be an object");
   }
-  if (value.octopus_os === undefined) return {};
-  if (!value.octopus_os || typeof value.octopus_os !== "object" || Array.isArray(value.octopus_os)) {
-    throw new Error("Project parent EE Octopus OS config must be an object");
+  if (value.phobos_os === undefined) return {};
+  if (!value.phobos_os || typeof value.phobos_os !== "object" || Array.isArray(value.phobos_os)) {
+    throw new Error("Project parent EE Phobos OS config must be an object");
   }
-  return { octopus_os: structuredClone(value.octopus_os) };
+  return { phobos_os: structuredClone(value.phobos_os) };
 }
 
 function workspaceReceipt(request, materialized, plan, writes) {
   return {
-    schema: "octopus.workspace_setup_receipt",
+    schema: "phobos.workspace_setup_receipt",
     schema_version: 1,
     operation_id: request.operationId,
     request_digest: request.digest,
@@ -2308,7 +2308,7 @@ function projectMutationReceipt(request, planned) {
       ? { ee_id: planned.outcome.eeId }
       : { project_ee_ids: planned.outcome.projectEeIds };
   return {
-    schema: "octopus.workspace_project_receipt",
+    schema: "phobos.workspace_project_receipt",
     schema_version: 1,
     operation_id: request.operationId,
     request_digest: request.digest,
@@ -2333,7 +2333,7 @@ async function stageTransaction(roots, request, writes, receipt) {
     request,
     writes,
     receipt,
-    "octopus.workspace_setup_transaction",
+    "phobos.workspace_setup_transaction",
   );
 }
 
@@ -2343,12 +2343,12 @@ async function stageProjectTransaction(roots, request, writes, receipt) {
     request,
     writes,
     receipt,
-    "octopus.workspace_project_transaction",
+    "phobos.workspace_project_transaction",
   );
 }
 
 async function stageWorkspaceTransaction(roots, request, writes, receipt, schema) {
-  if (schema === "octopus.workspace_setup_transaction") await verifySetupRootObservation(roots, receipt);
+  if (schema === "phobos.workspace_setup_transaction") await verifySetupRootObservation(roots, receipt);
   const transactionRoot = path.join(roots.transactionsRoot, request.operationId);
   if (!pathInside(roots.transactionsRoot, transactionRoot)) throw new Error("Workspace transaction path escapes its state root");
   const stagingRoot = path.join(
@@ -2440,7 +2440,7 @@ async function stageWorkspaceTransaction(roots, request, writes, receipt, schema
 }
 
 async function stageClientAuthoringTransaction(roots, plan) {
-  if (plan.condition && plan.condition.octopus_home !== roots.octopusHomeRoot) throw new Error("Client publication condition belongs to another Home");
+  if (plan.condition && plan.condition.phobos_home !== roots.phobosHomeRoot) throw new Error("Client publication condition belongs to another Home");
   if (plan.retirement) {
     assertRetirementPaths(roots, plan.retirement, plan.writes, plan.removals);
     await assertRetirementConnectionWrites(roots, plan.retirement, plan.writes);
@@ -2538,7 +2538,7 @@ async function stageClientAuthoringTransaction(roots, plan) {
     await syncDirectory(stagingRoot);
     const directoryInventory = plan.retirement ? await captureRetirementDirectoryInventory(roots, plan) : null;
     await writeJournal(stagingRoot, parseClientAuthoringJournal({
-      schema: "octopus.client_authoring_transaction",
+      schema: "phobos.client_authoring_transaction",
       schema_version: plan.condition ? 4 : 3,
       operation_id: plan.operationId,
       label: plan.label,
@@ -2572,7 +2572,7 @@ async function commitTransaction(roots, transactionRoot, onProgress) {
     await rollbackTransaction(roots, transactionRoot);
     throw new Error(`Workspace setup operation '${journal.operation_id}' was rolled back`);
   }
-  if (journal.schema === "octopus.workspace_setup_transaction") await verifySetupRootObservation(roots, journal.receipt);
+  if (journal.schema === "phobos.workspace_setup_transaction") await verifySetupRootObservation(roots, journal.receipt);
   journal.phase = "committing";
   await writeJournal(transactionRoot, journal);
   const ordered = [...journal.writes.keys()].sort((left, right) => (
@@ -2581,7 +2581,7 @@ async function commitTransaction(roots, transactionRoot, onProgress) {
   ));
   for (const [position, index] of ordered.entries()) {
     const write = journal.writes[index];
-    if (write.publish_barrier && journal.schema === "octopus.workspace_setup_transaction") {
+    if (write.publish_barrier && journal.schema === "phobos.workspace_setup_transaction") {
       await verifySetupRootObservation(roots, journal.receipt);
     }
     if (write.state === "unchanged" || write.state === "applied") {
@@ -2600,7 +2600,7 @@ async function commitTransaction(roots, transactionRoot, onProgress) {
     );
   }
   await verifyJournalWrites(journal.writes);
-  if (journal.schema === "octopus.workspace_setup_transaction") await verifySetupRootObservation(roots, journal.receipt);
+  if (journal.schema === "phobos.workspace_setup_transaction") await verifySetupRootObservation(roots, journal.receipt);
   journal.receipt = {
     ...journal.receipt,
     completed_at: journal.receipt.completed_at || new Date().toISOString(),
@@ -2612,7 +2612,7 @@ async function commitTransaction(roots, transactionRoot, onProgress) {
   await writeJournalReceipt(roots, journal);
   journal.phase = "committed";
   await writeJournal(transactionRoot, journal);
-  reportProgress(onProgress, journal.operation_id, "complete", 100, "Octopus is ready");
+  reportProgress(onProgress, journal.operation_id, "complete", 100, "Phobos is ready");
   await finalizeCommittedTransaction(roots, transactionRoot, journal);
 }
 
@@ -2677,7 +2677,7 @@ async function captureRetirementDirectoryInventory(roots, plan) {
         await read(path.join(roots.interfaceRoot, intake, "interface.json"));
         await read(path.join(roots.interfaceRoot, state.input_intake.provider_interface, "interface.json"));
         await read(path.join(roots.interfaceRoot, source.worker, "policy.json"));
-      } else await read(path.join(roots.interfaceRoot, owner, "octopus_os.json"));
+      } else await read(path.join(roots.interfaceRoot, owner, "phobos_os.json"));
     }
     if (persistent) await read(path.join(roots.interfaceRoot, owner, "code_mode.json"));
   }
@@ -2771,7 +2771,7 @@ async function retirementContext(roots, transactionRoot, journal) {
   originals.sort((a, b) => a.file.localeCompare(b.file));
   return { operation_id: journal.operation_id,
     roots: { registry_root: roots.registryRoot, run_records_root: roots.runsRoot,
-      ledger_root: path.join(roots.octopusHomeRoot, "ledger"), interface_private_state_root: roots.privateInterfacesRoot },
+      ledger_root: path.join(roots.phobosHomeRoot, "ledger"), interface_private_state_root: roots.privateInterfacesRoot },
     selection: retirement.selection, selection_digest: retirement.selection_digest, originals,
     directory_inventory: retirement.directory_inventory,
     retired: originals.map(({ file }) => ({ file, expected_digest: null })), prior_proof: retirement.proof };
@@ -2844,7 +2844,7 @@ async function withHeldRetirement(roots, transactionRoot, journal, barrier, oper
 
 async function commitClientAuthoringJournal(roots, transactionRoot, retirementBarrier) {
   let journal = await readJournal(roots, transactionRoot);
-  if (journal.schema !== "octopus.client_authoring_transaction") {
+  if (journal.schema !== "phobos.client_authoring_transaction") {
     throw new Error("Client authoring commit received another transaction schema");
   }
   if (journal.retirement?.proof) {
@@ -3037,7 +3037,7 @@ async function finalizeClientAuthoringTransaction(roots, transactionRoot, journa
   await writeClientAuthoringReceipt(roots, receipt);
   const expected = parseDirectoryPreimage(await publisher.snapshotDirectory(transactionRoot));
   await assertCleanupTree(transactionRoot, expected, journal);
-  const plan = { schema: "octopus.client_authoring_cleanup", schema_version: 4, operation_id: journal.operation_id,
+  const plan = { schema: "phobos.client_authoring_cleanup", schema_version: 4, operation_id: journal.operation_id,
     journal, retirement_context: held ? structuredClone(held.ctx) : null,
     publication: directoryPlan(`${journal.operation_id}:cleanup:${crypto.randomUUID()}`, transactionRoot,
       path.join(roots.transactionsRoot, `.cleanup-${journal.operation_id}`), expected) };
@@ -3090,7 +3090,7 @@ function parseDirectoryCleanupPlan(roots, value) {
   const fields = ["schema", "schema_version", "operation_id", "journal", "retirement_context", "publication"];
   const plan = exactObject(value, fields, fields, "Workspace directory cleanup plan");
   const operationId = requiredOperationId(plan.operation_id), journal = parseClientAuthoringJournal(plan.journal);
-  if (plan.schema !== "octopus.client_authoring_cleanup" || plan.schema_version !== 4 || journal.operation_id !== operationId
+  if (plan.schema !== "phobos.client_authoring_cleanup" || plan.schema_version !== 4 || journal.operation_id !== operationId
     || journal.phase !== "cleaned" || journal.removals.some(removal => !removal.publication?.reclaimed)) {
     throw new Error("Workspace directory cleanup lacks its completed typed journal");
   }
@@ -3116,7 +3116,7 @@ function parseDirectoryCleanupPlan(roots, value) {
     if (ctx.operation_id !== operationId || stableJson(ctx.selection) !== stableJson(journal.retirement.selection)
       || stableJson(parseRetirementDirectoryInventory(ctx.directory_inventory)) !== stableJson(journal.retirement.directory_inventory)
       || ctx.selection_digest !== journal.retirement.selection_digest || stableJson(ctx.roots) !== stableJson({
-        registry_root: roots.registryRoot, run_records_root: roots.runsRoot, ledger_root: path.join(roots.octopusHomeRoot, "ledger"),
+        registry_root: roots.registryRoot, run_records_root: roots.runsRoot, ledger_root: path.join(roots.phobosHomeRoot, "ledger"),
         interface_private_state_root: roots.privateInterfacesRoot }) || !Array.isArray(ctx.originals)
       || ctx.originals.length !== journal.retirement.selection.records.length) throw new Error("Workspace cleanup changed its held retirement context");
     for (const original of ctx.originals) {
@@ -3223,7 +3223,7 @@ async function publishJournalOperation(roots, transactionRoot, journal, index, c
   try {
     const receipts = await roots.publishFiles([{ filePath: write.destination, tag: write.tag,
       operationId, expectedBeforeHash: before, content }], journal.condition
-        ? { octopus_home: journal.condition.octopus_home, preimages: reverse ? [] : journal.condition.preimages } : undefined);
+        ? { phobos_home: journal.condition.phobos_home, preimages: reverse ? [] : journal.condition.preimages } : undefined);
     if (!Array.isArray(receipts) || receipts.length !== 1) throw new Error("Workspace publication omitted its exact receipt");
     publication[receiptKey] = accept(receipts[0]);
   } catch (error) {
@@ -3364,7 +3364,7 @@ async function writeRollbackEvidence(roots, journal) {
   if (!journal.writes.some((write) => write.publication)) return;
   const attempt = journal.writes.find((write) => write.publication).publication.attempt_id;
   const file = path.join(roots.stateRoot, `rollback-${journal.operation_id}-${attempt}.json`);
-  const evidence = { schema: "octopus.workspace_rollback_receipt", schema_version: journal.condition ? 2 : 1,
+  const evidence = { schema: "phobos.workspace_rollback_receipt", schema_version: journal.condition ? 2 : 1,
     ...(journal.condition ? { condition: journal.condition } : {}),
     operation_id: journal.operation_id, journal_schema: journal.schema, writes: journal.writes };
   const existing = await readFileIfPresent(file);
@@ -3436,7 +3436,7 @@ async function recoverWorkspaceTransactionsUnlocked(roots, retirementBarrier) {
   }
   const entries = await fs.readdir(roots.transactionsRoot, { withFileTypes: true });
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
-    if (entry.name === ".octopus-publication") {
+    if (entry.name === ".phobos-publication") {
       await requirePublicationMetadata(path.join(roots.transactionsRoot, entry.name));
       continue;
     }
@@ -3468,7 +3468,7 @@ async function recoverWorkspaceTransactionsUnlocked(roots, retirementBarrier) {
 
 async function recoverTransaction(roots, transactionRoot, retirementBarrier) {
   const journal = await readJournal(roots, transactionRoot);
-  if (journal.schema === "octopus.client_authoring_transaction") {
+  if (journal.schema === "phobos.client_authoring_transaction") {
     await recoverClientAuthoringTransaction(roots, transactionRoot, retirementBarrier);
     return;
   }
@@ -3505,7 +3505,7 @@ async function recoverClientAuthoringTransaction(roots, transactionRoot, retirem
     return "committed";
   }
   const journal = await readJournal(roots, transactionRoot);
-  if (journal.schema !== "octopus.client_authoring_transaction") {
+  if (journal.schema !== "phobos.client_authoring_transaction") {
     throw new Error("Client authoring recovery received another transaction schema");
   }
   if (journal.condition && (journal.phase === "rolling_back" || journal.writes.some(write => write.publication.receipt?.outcome === "not_applied"))) {
@@ -3536,7 +3536,7 @@ async function readJournal(roots, transactionRoot) {
   const file = path.join(transactionRoot, "journal.json");
   const document = await readJson(file, `Workspace transaction ${path.basename(transactionRoot)}`);
   const journal = parseJournal(document.value);
-  if (journal.condition && journal.condition.octopus_home !== roots.octopusHomeRoot) throw new Error("Workspace publication condition belongs to another Home");
+  if (journal.condition && journal.condition.phobos_home !== roots.phobosHomeRoot) throw new Error("Workspace publication condition belongs to another Home");
   if (journal.operation_id !== path.basename(transactionRoot)) {
     throw new Error("Workspace transaction directory disagrees with its operation id");
   }
@@ -3578,7 +3578,7 @@ async function readJournal(roots, transactionRoot) {
     if (stagedFiles.has(removal.tombstone)) throw new Error("Workspace transaction repeats a staged path");
     stagedFiles.add(removal.tombstone);
   }
-  if (journal.schema === "octopus.workspace_setup_transaction") {
+  if (journal.schema === "phobos.workspace_setup_transaction") {
     const homePath = path.join(roots.interfaceRoot, journal.receipt.home_interface_id, "interface.json");
     const homeWrite = journal.writes.find((write) => write.destination === homePath);
     if (!homeWrite) throw new Error("Workspace setup transaction omits its Home descriptor");
@@ -3588,20 +3588,20 @@ async function readJournal(roots, transactionRoot) {
     if (sha256(homeBytes) !== homeWrite.after_digest) throw new Error("Workspace staged Home descriptor changed");
     assertSupportedHomeConfiguration(JSON.parse(homeBytes.toString("utf8")));
   }
-  if (journal.schema === "octopus.workspace_project_transaction") {
+  if (journal.schema === "phobos.workspace_project_transaction") {
     verifyProjectReceiptContract(roots, journal.receipt);
   }
   return journal;
 }
 
 function parseJournal(value) {
-  if (value?.schema === "octopus.workspace_setup_transaction") {
+  if (value?.schema === "phobos.workspace_setup_transaction") {
     return parseSetupJournal(value);
   }
-  if (value?.schema === "octopus.workspace_project_transaction") {
+  if (value?.schema === "phobos.workspace_project_transaction") {
     return parseProjectJournal(value);
   }
-  if (value?.schema === "octopus.client_authoring_transaction") {
+  if (value?.schema === "phobos.client_authoring_transaction") {
     return parseClientAuthoringJournal(value);
   }
   throw new Error("Workspace transaction journal has an unsupported schema");
@@ -3614,7 +3614,7 @@ function parseClientAuthoringJournal(value) {
     ["schema", "schema_version", "operation_id", "label", "phase", "writes", "removals"],
     "Client authoring transaction journal",
   );
-  if (journal.schema !== "octopus.client_authoring_transaction" || ![3, 4].includes(journal.schema_version)
+  if (journal.schema !== "phobos.client_authoring_transaction" || ![3, 4].includes(journal.schema_version)
     || (journal.schema_version === 4) !== Object.hasOwn(journal, "condition")) {
     throw new Error("Client authoring transaction journal has an unsupported schema");
   }
@@ -3742,7 +3742,7 @@ function parseDirectoryPreimage(value) {
     const fields = ["relative_path", "kind", "identity", "mode", "bytes", "digest"];
     const entry = exactObject(value, fields, fields, "Workspace directory member");
     const relative = requiredPortableRelativePath(entry.relative_path, "Workspace directory member path");
-    if (relative.split("/").includes(".octopus-publication") || Buffer.from(relative).toString() !== relative
+    if (relative.split("/").includes(".phobos-publication") || Buffer.from(relative).toString() !== relative
       || previous !== undefined && compareDirectoryPaths(previous, relative) >= 0
       || path.dirname(relative) !== "." && parents.get(path.dirname(relative)) !== "directory"
       || !["directory", "file", "symlink"].includes(entry.kind)
@@ -3784,7 +3784,7 @@ function parseDirectoryPlan(value) {
     exactObject(value, ["source", "destination", "expected"], ["source", "destination", "expected"], "Workspace directory movement");
     for (const target of [value.source, value.destination]) {
       if (typeof target !== "string" || !path.isAbsolute(target) || target !== path.resolve(target) || target.includes("\0")
-        || target.split("/").includes(".octopus-publication")) throw new Error("Workspace directory movement requires an exact ordinary absolute path");
+        || target.split("/").includes(".phobos-publication")) throw new Error("Workspace directory movement requires an exact ordinary absolute path");
     }
     if (value.source === value.destination) throw new Error("Workspace directory movement repeats its endpoint");
     return { source: value.source, destination: value.destination, expected: parseDirectoryPreimage(value.expected) };
@@ -3812,7 +3812,7 @@ function parseSetupJournal(value) {
     ["schema", "schema_version", "operation_id", "request_digest", "phase", "receipt", "writes"],
     "Workspace transaction journal",
   );
-  if (journal.schema !== "octopus.workspace_setup_transaction" || journal.schema_version !== 2) {
+  if (journal.schema !== "phobos.workspace_setup_transaction" || journal.schema_version !== 2) {
     throw new Error("Workspace transaction journal has an unsupported schema");
   }
   const phases = new Set(["staged", "committing", "published", "committed", "rolling_back"]);
@@ -3858,7 +3858,7 @@ function parseProjectJournal(value) {
     ["schema", "schema_version", "operation_id", "request_digest", "phase", "receipt", "writes"],
     "Workspace Project transaction journal",
   );
-  if (journal.schema !== "octopus.workspace_project_transaction" || journal.schema_version !== 2) {
+  if (journal.schema !== "phobos.workspace_project_transaction" || journal.schema_version !== 2) {
     throw new Error("Workspace Project transaction journal has an unsupported schema");
   }
   const phases = new Set(["staged", "committing", "published", "committed", "rolling_back"]);
@@ -3996,7 +3996,7 @@ function parseReceipt(value) {
     ],
     "Workspace setup receipt",
   );
-  if (receipt.schema !== "octopus.workspace_setup_receipt" || receipt.schema_version !== 1) {
+  if (receipt.schema !== "phobos.workspace_setup_receipt" || receipt.schema_version !== 1) {
     throw new Error("Workspace setup receipt has an unsupported schema");
   }
   if (receipt.completed_at && !Number.isFinite(Date.parse(receipt.completed_at))) {
@@ -4066,7 +4066,7 @@ function parseProjectReceipt(value) {
     ],
     "Workspace Project receipt",
   );
-  if (receipt.schema !== "octopus.workspace_project_receipt" || receipt.schema_version !== 1) {
+  if (receipt.schema !== "phobos.workspace_project_receipt" || receipt.schema_version !== 1) {
     throw new Error("Workspace Project receipt has an unsupported schema");
   }
   if (!["create_project", "delete_project", "update_project_presentation"].includes(receipt.action)) {
@@ -4168,7 +4168,7 @@ async function writeJournal(transactionRoot, journal) {
 
 function clientAuthoringReceipt(journal) {
   return {
-    schema: "octopus.client_authoring_receipt",
+    schema: "phobos.client_authoring_receipt",
     schema_version: 1,
     operation_id: journal.operation_id,
     label: journal.label,
@@ -4195,7 +4195,7 @@ function parseClientAuthoringReceipt(value) {
     ["schema", "schema_version", "operation_id", "label", "writes", "removals"],
     "Client authoring receipt",
   );
-  if (receipt.schema !== "octopus.client_authoring_receipt" || receipt.schema_version !== 1) {
+  if (receipt.schema !== "phobos.client_authoring_receipt" || receipt.schema_version !== 1) {
     throw new Error("Client authoring receipt has an unsupported schema");
   }
   if (!Array.isArray(receipt.writes) || !receipt.writes.length || !Array.isArray(receipt.removals)) {
@@ -4396,7 +4396,7 @@ async function writeProjectReceipt(roots, receiptValue) {
 
 function verifyProjectReceiptContract(roots, receipt) {
   for (const write of receipt.writes) allowedDestinationRoot(roots, write.path);
-  const sidecarPath = path.join(roots.interfaceRoot, receipt.home_interface_id, "octopus_os.json");
+  const sidecarPath = path.join(roots.interfaceRoot, receipt.home_interface_id, "phobos_os.json");
   const barrier = receipt.writes.find((write) => write.publish_barrier);
   if (receipt.action === "update_project_presentation") {
     if (barrier?.path !== sidecarPath) {
@@ -4409,7 +4409,7 @@ function verifyProjectReceiptContract(roots, receipt) {
     return;
   }
   const eePath = path.join(roots.eeInstancesRoot, `${receipt.outcome.ee_id}.json`);
-  const agentCatalogPath = clientAgentCatalogPath(roots.octopusHomeRoot);
+  const agentCatalogPath = clientAgentCatalogPath(roots.phobosHomeRoot);
   if (
     !receipt.writes.some((write) => write.path === sidecarPath)
     || !receipt.writes.some((write) => write.path === eePath)
@@ -4424,13 +4424,13 @@ function verifyProjectReceiptContract(roots, receipt) {
 }
 
 async function readJournalReceipt(roots, journal) {
-  return journal.schema === "octopus.workspace_project_transaction"
+  return journal.schema === "phobos.workspace_project_transaction"
     ? readProjectReceipt(roots, journal.operation_id)
     : readReceipt(roots, journal.operation_id);
 }
 
 async function writeJournalReceipt(roots, journal) {
-  if (journal.schema === "octopus.workspace_project_transaction") {
+  if (journal.schema === "phobos.workspace_project_transaction") {
     await writeProjectReceipt(roots, journal.receipt);
     return;
   }
@@ -4453,7 +4453,7 @@ async function verifyWorkspaceReceiptIdentity(roots, receipt) {
   const rootPath = path.join(roots.eeInstancesRoot, `${receipt.root_ee_id}.json`);
   const runPath = path.join(roots.runsRoot, `${receipt.home_run_id}.json`);
   const descriptorPath = path.join(roots.interfaceRoot, receipt.home_interface_id, "interface.json");
-  const sidecarPath = path.join(roots.interfaceRoot, receipt.home_interface_id, "octopus_os.json");
+  const sidecarPath = path.join(roots.interfaceRoot, receipt.home_interface_id, "phobos_os.json");
   for (const requiredPath of [...(receipt.existing_root ? [] : [rootPath]), runPath, descriptorPath, sidecarPath]) {
     if (!writePaths.has(requiredPath)) {
       throw new Error(`Workspace receipt omits identity file '${requiredPath}'`);
@@ -4492,7 +4492,7 @@ async function verifyWorkspaceReceiptIdentity(roots, receipt) {
   const sidecar = (await readJson(sidecarPath, "Workspace Home sidecar")).value;
   if (
     sidecar.schema_version !== 1
-    || sidecar.workspace !== "octopus_os"
+    || sidecar.workspace !== "phobos_os"
     || sidecar.interface !== receipt.home_interface_id
     || sidecar.owner_interface !== receipt.home_interface_id
     || sidecar.component !== "client"
@@ -4500,7 +4500,7 @@ async function verifyWorkspaceReceiptIdentity(roots, receipt) {
   ) {
     throw new Error("Workspace Home sidecar identity is no longer valid");
   }
-  const agentCatalog = await readClientAgentCatalog(roots.octopusHomeRoot);
+  const agentCatalog = await readClientAgentCatalog(roots.phobosHomeRoot);
   if (!agentCatalog.exists) throw new Error("Workspace Client Agent catalog is absent");
 }
 
@@ -4548,17 +4548,17 @@ async function findWorkspaceTopology(roots, allowMissing = false) {
   const homeInterfaceIds = [];
   for (const entry of interfaces) {
     if (!entry.isDirectory()) continue;
-    const file = path.join(roots.interfaceRoot, entry.name, "octopus_os.json");
+    const file = path.join(roots.interfaceRoot, entry.name, "phobos_os.json");
     const bytes = await readFileIfPresent(file);
     if (!bytes) continue;
     let sidecar;
     try {
       sidecar = JSON.parse(bytes.toString("utf8"));
     } catch (error) {
-      throw new Error(`Existing Octopus OS sidecar '${file}' is malformed: ${errorMessage(error)}`);
+      throw new Error(`Existing Phobos OS sidecar '${file}' is malformed: ${errorMessage(error)}`);
     }
     if (
-      sidecar?.workspace === "octopus_os"
+      sidecar?.workspace === "phobos_os"
       && sidecar?.component === "client"
       && sidecar?.surface_role === "home"
     ) {
@@ -4624,7 +4624,7 @@ function projectReceiptOutcome(receipt, changed) {
 }
 
 function allowedDestinationRoot(roots, candidate) {
-  if (candidate === path.join(roots.octopusHomeRoot, "host.json")) return roots.octopusHomeRoot;
+  if (candidate === path.join(roots.phobosHomeRoot, "host.json")) return roots.phobosHomeRoot;
   for (const root of [
     roots.eeInstancesRoot,
     roots.runsRoot,
@@ -4742,7 +4742,7 @@ async function collectClientAuthoringTree(root, relative, rows) {
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const childRelative = relative ? `${relative}/${entry.name}` : entry.name;
     const child = path.join(root, childRelative);
-    if (entry.name === ".octopus-publication") {
+    if (entry.name === ".phobos-publication") {
       await requirePublicationMetadata(child);
       continue;
     }
@@ -4771,8 +4771,8 @@ async function collectClientAuthoringTree(root, relative, rows) {
 
 async function publicDirectoryEntries(directory) {
   const entries = await fs.readdir(directory, { withFileTypes: true });
-  if (entries.some(entry => entry.name === ".octopus-publication")) await requirePublicationMetadata(path.join(directory, ".octopus-publication"));
-  return entries.filter(entry => entry.name !== ".octopus-publication");
+  if (entries.some(entry => entry.name === ".phobos-publication")) await requirePublicationMetadata(path.join(directory, ".phobos-publication"));
+  return entries.filter(entry => entry.name !== ".phobos-publication");
 }
 
 async function requirePublicationMetadata(directory) {

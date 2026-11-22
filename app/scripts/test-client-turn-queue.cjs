@@ -435,7 +435,7 @@ for (const [hadAttachments, attachments, recoverPreparedMessage] of [
     "../chat/MessageTooltip": load("src/components/chat/MessageTooltip.tsx"),
   });
   const menuComponents = load("src/design-system/components.tsx", { "./OcDropdown": {}, "./modalFocus": modalFocus,
-    "../components/IconGlyphs": { Glyph: empty }, "../components/navigation/OctopusSpinner": { OctopusSpinner: empty },
+    "../components/IconGlyphs": { Glyph: empty }, "../components/navigation/PhobosSpinner": { PhobosSpinner: empty },
     "../components/shell/ShellTooltip": shellTooltip });
   const dropdown = load("src/design-system/OcDropdown.tsx", { "./components": menuComponents, "./modalFocus": modalFocus });
   const keydown = async (target, key, modifiers = {}) => {
@@ -454,7 +454,7 @@ for (const [hadAttachments, attachments, recoverPreparedMessage] of [
   });
   for (const compactHeadings of [false, true, false]) {
     await act(async () => host.render(React.createElement(messageContent.MessageContent, { text: "# Heading", compactHeadings })));
-    assert.equal(Boolean(document.querySelector("h1.octopus-markdown-heading")), !compactHeadings, "compact headings are opt-in and invalidate the memo");
+    assert.equal(Boolean(document.querySelector("h1.phobos-markdown-heading")), !compactHeadings, "compact headings are opt-in and invalidate the memo");
   }
   const openedFiles = [];
   for (const [href, expected] of [["/workspace/report%20one.md", "/workspace/report one.md"],
@@ -478,13 +478,13 @@ for (const [hadAttachments, attachments, recoverPreparedMessage] of [
   await act(async () => host.render(React.createElement(messageContent.MessageContent, { text: "[Website](https://example.com/)" })));
   const webLinks = [];
   const openWebLink = event => { event.preventDefault(); webLinks.push(event.detail.url); };
-  window.addEventListener("octopus:open-web-link", openWebLink);
+  window.addEventListener("phobos:open-web-link", openWebLink);
   const externalClick = new window.MouseEvent("click", { bubbles: true, cancelable: true });
   await act(async () => document.querySelector("a").dispatchEvent(externalClick));
   assert.equal(externalClick.defaultPrevented, true, "web links never navigate the app document");
   assert.deepEqual(webLinks, ["https://example.com/"], "web links open in the client browser");
   assert.equal(document.querySelector('[role="dialog"]'), null, "ordinary links do not prompt for an external browser");
-  window.removeEventListener("octopus:open-web-link", openWebLink);
+  window.removeEventListener("phobos:open-web-link", openWebLink);
   const realNow = performance.now;
   let streamNow = 1_000;
   Object.defineProperty(performance, "now", { configurable: true, value: () => streamNow });
@@ -495,7 +495,7 @@ for (const [hadAttachments, attachments, recoverPreparedMessage] of [
     const startOf = (element) => 1_000 + delayOf(element);
     await streamed("1. First item\n2. `artifact.*` second\n3.", true);
     const items = [...document.querySelectorAll("li")];
-    const ordered = [...document.querySelectorAll("li, .octopus-markdown-fade-in")];
+    const ordered = [...document.querySelectorAll("li, .phobos-markdown-fade-in")];
     const starts = ordered.filter((element) => element.tagName !== "LI" || element.style.getPropertyValue("--fade-delay") !== "600000ms").map(startOf);
     assert.deepEqual(starts, [...starts].sort((left, right) => left - right), "streamed list markers, words and inline code reveal in document order");
     assert.equal(startOf(items[1]), startOf(items[1].querySelector("code")), "a list item appears with its first unit, even when that unit is inline code");
@@ -503,20 +503,20 @@ for (const [hadAttachments, attachments, recoverPreparedMessage] of [
     streamNow = 2_000;
     await streamed("1. First item\n2. `artifact.*` second\n3. Third", true);
     assert.equal(document.querySelectorAll("li")[2], items[2]);
-    assert.equal(1_000 + delayOf(items[2]), 2_000 + delayOf(items[2].querySelector(".octopus-markdown-fade-in")), "the held item appears with its first word");
+    assert.equal(1_000 + delayOf(items[2]), 2_000 + delayOf(items[2].querySelector(".phobos-markdown-fade-in")), "the held item appears with its first word");
     await streamed("1. First item\n2. `artifact.*` second\n3. Third", false);
     assert.deepEqual([...document.querySelectorAll("li")], items, "completing the reply keeps the streamed markdown mounted");
-    assert.ok(document.querySelector("[data-markdown-animated], .octopus-markdown-fade-in") === null);
+    assert.ok(document.querySelector("[data-markdown-animated], .phobos-markdown-fade-in") === null);
   } finally {
     Object.defineProperty(performance, "now", { configurable: true, value: realNow });
   }
   const preferencesApi = load("src/clientPreferences.ts"); let loadedPreferences;
   const obsoletePreference = JSON.stringify({ activeRunSubmitBehavior: "queue", sendShortcut: "cmd-always" });
-  localStorage.setItem("octopus.client-preferences.v1.test", obsoletePreference);
+  localStorage.setItem("phobos.client-preferences.v1.test", obsoletePreference);
   function PreferencesProbe() { loadedPreferences = preferencesApi.useClientPreferences(); return null; }
   await act(async () => host.render(React.createElement(preferencesApi.ClientPreferencesProvider, { profile: "lab" }, React.createElement(PreferencesProbe))));
   assert.equal("activeRunSubmitBehavior" in loadedPreferences, false); assert.equal(loadedPreferences.sendShortcut, "cmd-always");
-  assert.equal(localStorage.getItem("octopus.client-preferences.v1.test"), obsoletePreference, "reading an obsolete queue default does not migrate storage");
+  assert.equal(localStorage.getItem("phobos.client-preferences.v1.test"), obsoletePreference, "reading an obsolete queue default does not migrate storage");
   let reduceQueueMotion = false;
   const queueComponent = load("src/components/chat/QueuedMessageList.tsx", {
     "../../appearance": { useShouldReduceMotion: () => reduceQueueMotion },

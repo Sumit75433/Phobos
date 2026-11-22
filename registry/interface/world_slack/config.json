@@ -4,10 +4,10 @@
     "max_row_bytes": 1048576
   },
   "transport": {
-    "api_base_env": "OCTOPUS_SLACK_API_BASE",
+    "api_base_env": "PHOBOS_SLACK_API_BASE",
     "api_base_default": "https://slack.com/api",
-    "socket_url_env": "OCTOPUS_SLACK_SOCKET_URL",
-    "proxy_env": "OCTOPUS_SLACK_PROXY",
+    "socket_url_env": "PHOBOS_SLACK_SOCKET_URL",
+    "proxy_env": "PHOBOS_SLACK_PROXY",
     "connect_timeout_ms": 15000,
     "request_timeout_ms": 60000,
     "max_response_bytes": 16777216,

@@ -50,7 +50,7 @@ function resolveRoot(resolver, fallback) {
 async function buildLabCatalog(registryRoot, libraryRoot) {
   const { readLocalPackageCatalog } = require("./localPackages.cjs");
   const { readProviderInterfaceDescriptors } = require("./projection.cjs");
-  const stateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-lab-catalog-"));
+  const stateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-lab-catalog-"));
   let catalog;
   try {
     catalog = await readLocalPackageCatalog({

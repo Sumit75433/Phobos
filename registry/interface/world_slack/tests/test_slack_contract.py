@@ -14,7 +14,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-import octopus_operation_catalog as catalog
+import phobos_operation_catalog as catalog
 import slack_contract
 from slack_wire import SlackApi
 from slack_wire import SlackWireError
@@ -167,7 +167,7 @@ class SlackContractTests(unittest.TestCase):
             validate_proxy_url(" https://proxy.example:8443")
         with self.assertRaisesRegex(ValueError, "credentials require"):
             validate_proxy_url("https://user@proxy.example:8443")
-        with mock.patch.dict(os.environ, {"HTTP_PROXY": "http://ambient.invalid:8080", "HTTPS_PROXY": "http://ambient.invalid:8080", "OCTOPUS_SLACK_PROXY": ""}, clear=False):
+        with mock.patch.dict(os.environ, {"HTTP_PROXY": "http://ambient.invalid:8080", "HTTPS_PROXY": "http://ambient.invalid:8080", "PHOBOS_SLACK_PROXY": ""}, clear=False):
             api = SlackApi(self.config, ["xoxb-" + "a" * 32], "xapp-" + "b" * 32)
             self.assertEqual(api.proxy_url, "")
 
@@ -200,12 +200,12 @@ class SlackLifeTests(unittest.TestCase):
         self.environment = mock.patch.dict(
             os.environ,
             {
-                "OCTOPUS_INTERFACE_ID": "world_slack",
-                "OCTOPUS_INTERFACE_DIR": str(ROOT),
-                "OCTOPUS_VAR_DIR": str(root / "var"),
-                "OCTOPUS_MOVEMENTS_JSONL": str(root / "movements.jsonl"),
-                "OCTOPUS_BLOBS_DIR": str(root / "blobs"),
-                "OCTOPUS_LEDGER_INDEX_SQLITE": str(root / "ledger-index.sqlite"),
+                "PHOBOS_INTERFACE_ID": "world_slack",
+                "PHOBOS_INTERFACE_DIR": str(ROOT),
+                "PHOBOS_VAR_DIR": str(root / "var"),
+                "PHOBOS_MOVEMENTS_JSONL": str(root / "movements.jsonl"),
+                "PHOBOS_BLOBS_DIR": str(root / "blobs"),
+                "PHOBOS_LEDGER_INDEX_SQLITE": str(root / "ledger-index.sqlite"),
                 "SLACK_ALLOWED_USERS": "U12345678",
                 "SLACK_ALLOWED_CHANNELS": "",
                 "SLACK_HOME_CHANNEL": "",
@@ -374,7 +374,7 @@ class SlackLifeTests(unittest.TestCase):
 
 
     def test_private_file_and_artifact_paths_fail_closed(self):
-        root = Path(os.environ["OCTOPUS_VAR_DIR"])
+        root = Path(os.environ["PHOBOS_VAR_DIR"])
         secret = root / "secret.key"
         secret.write_text("secret\n", encoding="utf-8")
         secret.chmod(0o600)
@@ -394,7 +394,7 @@ class SlackLifeTests(unittest.TestCase):
     def test_sanitizer_redacts_nested_secret_encodings(self):
         token = "xoxb-super-secret-value"
         proxy = "https://proxy-user:proxy-pass@proxy.example:8443"
-        with mock.patch.dict(os.environ, {"SLACK_BOT_TOKEN": token, "OCTOPUS_SLACK_PROXY": proxy}, clear=False):
+        with mock.patch.dict(os.environ, {"SLACK_BOT_TOKEN": token, "PHOBOS_SLACK_PROXY": proxy}, clear=False):
             value = self.life.sanitize_external_error({token: [token, "eG94Yi1zdXBlci1zZWNyZXQtdmFsdWU=", proxy]}, self.config)
         encoded = json.dumps(value, sort_keys=True)
         self.assertNotIn(token, encoded)
@@ -402,7 +402,7 @@ class SlackLifeTests(unittest.TestCase):
 
 
     def test_ledger_fallback_bounds_rows_before_json_allocation(self):
-        path = Path(os.environ["OCTOPUS_MOVEMENTS_JSONL"])
+        path = Path(os.environ["PHOBOS_MOVEMENTS_JSONL"])
         path.write_bytes(b"{" + b"x" * 256 + b"}\n")
         self.life._LEDGER_FALLBACK_OFFSET = 0
         self.life._LEDGER_FALLBACK_SIZE = 0

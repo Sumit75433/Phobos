@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { configureClientAccess, unlockClientAccess } from "../../clientAccess";
-import type { OctopusClientAccessStatus } from "../../electron";
+import type { PhobosClientAccessStatus } from "../../electron";
 import { appToast } from "../../toasts";
 
 const MIN_LENGTH = 8;
 
 type Props = {
   mode: "set" | "unlock";
-  onDone: (status: OctopusClientAccessStatus) => void;
+  onDone: (status: PhobosClientAccessStatus) => void;
   onLaunchingChange?: (launching: boolean) => void;
 };
 
@@ -48,7 +48,7 @@ export function PasswordGate({ mode, onDone, onLaunchingChange }: Props) {
     }
   }
 
-  function finish(status: OctopusClientAccessStatus) {
+  function finish(status: PhobosClientAccessStatus) {
     setLaunching(true);
     onLaunchingChange?.(true);
     window.setTimeout(() => onDone(status), 520);
@@ -69,7 +69,7 @@ export function PasswordGate({ mode, onDone, onLaunchingChange }: Props) {
       </h1>
       <p className="welcome-body">
         {isSet
-          ? "Set a password for this device. Anyone who opens Octopus could otherwise drive the agent — this gates the controls. It's stored only here, never sent to your runtime or Gateway."
+          ? "Set a password for this device. Anyone who opens Phobos could otherwise drive the agent — this gates the controls. It's stored only here, never sent to your runtime or Gateway."
           : "Enter the Administrator or Test password. Each profile opens a separate client data boundary on this device."}
       </p>
 

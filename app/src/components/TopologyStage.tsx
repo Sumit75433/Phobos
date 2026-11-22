@@ -6,7 +6,7 @@ import { WorldProjection } from "./WorldProjection";
 import { SystemArtifactTransfers, useArtifactTransferFeed } from "./ArtifactTransferAnimation";
 import { DashboardLabel, DashboardTooltip } from "./DashboardLabel";
 import { useAppErrorToast } from "../toasts";
-import { OctopusLoadingState } from "./OctopusLoadingLogo";
+import { PhobosLoadingState } from "./PhobosLoadingLogo";
 
 // Two scopes, two honest pictures (owner):
 //   System — zone cards, one level at a time (drill into child environments instead of
@@ -29,8 +29,8 @@ const SURFACE_GRID = 52; // world-units per grid square at scale 1
 const MIN_SCALE = 0.35;
 const STEP_UP_SCALE = 0.5; // zoom out past this at a child level → the parent frame takes over
 const MAX_SCALE = 2.2;
-const RUN_POSITIONS_KEY = "octopus.runPos.v6.zones";
-const ZONE_PALETTE_KEY = "octopus.eeZonePalette.v1.zones";
+const RUN_POSITIONS_KEY = "phobos.runPos.v6.zones";
+const ZONE_PALETTE_KEY = "phobos.eeZonePalette.v1.zones";
 const ZONES_INITIAL_CHECKPOINTS = 2;
 const ZONE_MATERIALS: ZoneMaterial[] = [
   { id: "aqua", rgb: [54, 169, 184], edgeRgb: [83, 202, 213], labelRgb: [164, 228, 234] },
@@ -266,7 +266,7 @@ export const TopologyStage = memo(function TopologyStage({ snapshot, query, scop
   // THIS IS TOPOLOGY, not a list (owner): zones live at REAL coordinates on the surface.
   // Drag a card anywhere; the position pins and persists per level. A card without a pin
   // gets a seeded flow position once, then it is the operator's to move.
-  const positionsKey = `octopus.eePos.v1.${levelId || "root"}`;
+  const positionsKey = `phobos.eePos.v1.${levelId || "root"}`;
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
   useEffect(() => {
     try {
@@ -460,7 +460,7 @@ export const TopologyStage = memo(function TopologyStage({ snapshot, query, scop
   const breadcrumb = useMemo(() => breadcrumbChain(levelId, environmentsById), [levelId, environmentsById]);
 
   if (snapshot.projection.mode === "connecting") {
-    return <OctopusLoadingState className="surface-content-loading-state" label="Loading topology" />;
+    return <PhobosLoadingState className="surface-content-loading-state" label="Loading topology" />;
   }
 
   if (scope === "World") {

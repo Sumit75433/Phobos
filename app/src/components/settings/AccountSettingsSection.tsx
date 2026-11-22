@@ -44,7 +44,7 @@ export function AccountSettingsSection() {
           ?? (sessionsLoading ? <OcLoadingText label="Loading workspace…">Workspace name</OcLoadingText> : "Unavailable")}</span>} /> : null}
       </div>
     </AccountSection>
-    {account?.signedIn ? <AccountSection title="Workspaces" description="Octopus uses the selected workspace for new ChatGPT requests and reloads the model list after a switch."
+    {account?.signedIn ? <AccountSection title="Workspaces" description="Phobos uses the selected workspace for new ChatGPT requests and reloads the model list after a switch."
       actions={state.action === "switching" ? <OcLoadingText label="Switching workspace…" /> : undefined} {...settingsTargetProps("account.workspace")}>
       {sessionsError ? <div className="account-inline-notice account-error" role="alert"><span>Workspaces are unavailable. {sessionsError}</span>
         <OcButton disabled={busy || sessionsLoading} onClick={() => void state.loadSessions?.()}>Retry</OcButton>

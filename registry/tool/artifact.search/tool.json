@@ -2,7 +2,7 @@
   "id": "artifact.search",
   "interface": "system_context",
   "process": {
-    "bin": "target/debug/octopus-artifact-bound-tool",
+    "bin": "target/debug/phobos-artifact-bound-tool",
     "authority": {
       "read_root_slots": [], "write_root_slots": [], "executable_root_slots": [],
       "read_paths": [], "write_paths": [], "executable_paths": [],

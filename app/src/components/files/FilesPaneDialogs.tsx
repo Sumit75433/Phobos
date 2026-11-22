@@ -9,7 +9,7 @@ export function FilesPaneDialogs() {
   if (!pending) return null;
   const { key, state } = pending;
   const resolve = (decision: "save" | "discard" | "cancel") => {
-    void resolveFilesPaneClose(key, decision, window.octopusTransport);
+    void resolveFilesPaneClose(key, decision, window.phobosTransport);
   };
   return <SetupDialogShell ariaLabel="Save changes before closing" busy={state.saving} onClose={() => resolve("cancel")} open size="compact">
     <div className="px-6 pt-8 pb-6">

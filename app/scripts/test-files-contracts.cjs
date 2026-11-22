@@ -56,10 +56,10 @@ const filesDiffs = {
 const filesEdit = { Editor: class { constructor(type, options) { Object.assign(this, { type, options, canUndo: false, canRedo: false }); } } };
 const heavy = new Proxy({}, { get: (_, name) => name === "__esModule" ? true : () => null });
 function moduleRequire(id) {
-  if (id.startsWith("@octopus/")) harness.requires.push(id);
-  if (id === "@octopus/files-diffs") return filesDiffs;
-  if (id === "@octopus/files-diffs/edit") return filesEdit;
-  if (id.startsWith("@octopus/")) throw new Error(`${id} is not a Files dependency`);
+  if (id.startsWith("@phobos/")) harness.requires.push(id);
+  if (id === "@phobos/files-diffs") return filesDiffs;
+  if (id === "@phobos/files-diffs/edit") return filesEdit;
+  if (id.startsWith("@phobos/")) throw new Error(`${id} is not a Files dependency`);
   if (id === "motion/react") return { motion: new Proxy({}, { get: (_, tag) => ({ children, style, ...props }) => React.createElement(tag, props, children) }) };
   if (/^(@pierre\/(diffs|trees)|shiki|@shikijs)/.test(id)) return heavy;
   return require(id);
@@ -71,7 +71,7 @@ async function compile(entry, stubs) {
     entryPoints: [path.join(appRoot, entry)], bundle: true, platform: "node", format: "cjs", write: false, logLevel: "silent",
     loader: { ".css": "empty", ".svg": "dataurl", ".png": "dataurl" },
     define: { "import.meta.env.DEV": "false", "import.meta.env.PROD": "true" },
-    external: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "motion/react", "@octopus/*", "@pierre/*", "shiki", "@shikijs/*"],
+    external: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "motion/react", "@phobos/*", "@pierre/*", "shiki", "@shikijs/*"],
     plugins: [{ name: "stubs", setup(stage) {
       stage.onResolve({ filter: /.*/ }, (args) => {
         const key = args.path.startsWith(".") ? path.resolve(path.dirname(args.importer), args.path) : args.path;
@@ -86,21 +86,21 @@ async function compile(entry, stubs) {
 }
 
 const appearance = `export const useAppearance = () => ({ darkCodeTheme: "github", lightCodeTheme: "solarized", themeMode: "dark", codeFontSize: 12 }); export const applyAppearance = () => {};`;
-const themes = `export const octopusDiffThemeName = (kind, id) => \`octopus-\${kind}-\${id}\`; export const registerOctopusDiffThemes = () => { globalThis.__files.themeRegistrations += 1; };`;
+const themes = `export const phobosDiffThemeName = (kind, id) => \`phobos-\${kind}-\${id}\`; export const registerPhobosDiffThemes = () => { globalThis.__files.themeRegistrations += 1; };`;
 const nothing = (...names) => names.map((name) => `export function ${name}() { return null; }`).join("\n");
 const editorModules = compile("src/components/files/FilesCodeEditor.tsx", {
   "src/appearance": appearance,
-  "src/components/settings/octopusDiffThemes": themes,
+  "src/components/settings/phobosDiffThemes": themes,
   "src/components/files/filesPierreSetup": "export const adoptFilesStyles = () => {};",
-  "src/components/navigation/OctopusSpinner": nothing("OctopusSpinner"),
+  "src/components/navigation/PhobosSpinner": nothing("PhobosSpinner"),
 });
 const filesViewModule = compile("src/components/files/FilesView.tsx", {
   "src/components/files/FilesCodeEditor": `export function FilesCodeEditor(props) { globalThis.__files.editorProps.push(props); return null; }`,
-  "src/components/OctopusSurface": `import { createElement } from "react";
-export { octopusTreeAncestors } from "${path.join(appRoot, "src/components/OctopusSurface.tsx")}";
-export function OctopusFileTree(props) { globalThis.__files.trees.push(props); return null; }
-export function OctopusFilterField() { return null; }
-export function OctopusPanelNote({ children }) { return createElement("p", { className: "stub-note" }, children); }`,
+  "src/components/PhobosSurface": `import { createElement } from "react";
+export { phobosTreeAncestors } from "${path.join(appRoot, "src/components/PhobosSurface.tsx")}";
+export function PhobosFileTree(props) { globalThis.__files.trees.push(props); return null; }
+export function PhobosFilterField() { return null; }
+export function PhobosPanelNote({ children }) { return createElement("p", { className: "stub-note" }, children); }`,
   "src/components/artifacts/artifactFileOperations": `export const resolveArtifactFilePreview = (reference) => globalThis.__files.resolveArtifact(reference);
 export const openArtifactFile = async () => {}; export const safeArtifactFilename = (value) => \`safe:\${value}\`;`,
   "src/design-system/components": `import { createElement } from "react";
@@ -114,12 +114,12 @@ export function OcStatus({ label }) { return createElement("span", null, label);
   "src/keyboardShortcuts": `export const clientDialogOwnsCommands = () => false;`,
   "src/components/artifacts/ArtifactPreview": nothing("ArtifactPreview"),
   "src/components/IconGlyphs": nothing("Glyph"),
-  "src/components/navigation/OctopusSpinner": nothing("OctopusSpinner"),
+  "src/components/navigation/PhobosSpinner": nothing("PhobosSpinner"),
   "src/components/SetupDialogShell": nothing("SetupDialogShell"),
   "src/components/shell/PanelResizeHandle": `export function PanelResizeHandle() { return null; } export const useAnimatedPanelSize = () => ({ mounted: true, opacity: 1, animatedSize: 250 });`,
   "src/components/files/FilesBreadcrumb": nothing("FilesBreadcrumb"),
 });
-const treeModule = compile("src/components/OctopusSurface.tsx", {
+const treeModule = compile("src/components/PhobosSurface.tsx", {
   "@pierre/trees/react": `export const useFileTree = (options) => globalThis.__files.useFileTree(options); export function FileTree() { return null; }`,
   "src/components/IconGlyphs": nothing("Glyph"),
 });
@@ -146,7 +146,7 @@ test("Files code surfaces load lazily: a readonly file through the virtualized r
   const [file] = harness.virtualFiles;
   assert.deepEqual([file.hydrated.file.name, file.hydrated.file.lang, file.hydrated.file.contents], ["view.ts", "typescript", "const a = 1;\n"]);
   assert.equal(file.options.disableWorkerPool, undefined);
-  assert.deepEqual([...new Set(harness.requires)], ["@octopus/files-diffs"], "a readonly file never loads the editor");
+  assert.deepEqual([...new Set(harness.requires)], ["@phobos/files-diffs"], "a readonly file never loads the editor");
   root.render(null);
   await settle(5);
   root.render(React.createElement(FilesCodeEditor, { documentId: '["source","src/edit.md"]', filename: "edit.md", label: "Edit edit.md", onChange: (value) => changes.push(value), value: "# Draft\n", wordWrap: true }));
@@ -163,7 +163,7 @@ test("Files code surfaces load lazily: a readonly file through the virtualized r
   assert.equal(view.options.disableWorkerPool, undefined);
   view.options.onItemEditChange({ editor: view.editor, file: { ...view.items[0].file, contents: "# Draft\nmore\n" } }, view.items[0]);
   assert.deepEqual(changes, ["# Draft\nmore\n"]);
-  assert.deepEqual([...new Set(harness.requires)].sort(), ["@octopus/files-diffs", "@octopus/files-diffs/edit"]);
+  assert.deepEqual([...new Set(harness.requires)].sort(), ["@phobos/files-diffs", "@phobos/files-diffs/edit"]);
   assert.equal(window.getComputedStyle(surface).getPropertyValue("--diffs-gap-block"), "0");
 });
 
@@ -180,7 +180,7 @@ function filesBridge() {
     })])),
     release: async () => { while (pending.length) pending.shift()[2](); await settle(); },
   };
-  window.octopusTransport = bridge;
+  window.phobosTransport = bridge;
   return bridge;
 }
 
@@ -259,7 +259,7 @@ test("an admitted read opens its exact content in Files instead of the tool enve
 });
 
 test("the renderer root gives the diff worker pool the appearance themes and a Pierre worker", async () => {
-  window.octopusTransport = undefined;
+  window.phobosTransport = undefined;
   harness.pool = { setRenderOptions: async (options) => { harness.renderOptions.push(options); } };
   await compile("src/main.tsx", {
     "@pierre/diffs/react": `import { createElement } from "react";
@@ -269,10 +269,10 @@ export const useWorkerPool = () => globalThis.__files.pool;`,
     "src/App": nothing("App"),
     "src/RendererFailureBoundary": `export function RendererFailureBoundary({ children }) { return children; }`,
     "src/appearance": appearance,
-    "src/components/settings/octopusDiffThemes": themes,
+    "src/components/settings/phobosDiffThemes": themes,
   });
   await settle(40);
-  const theme = { dark: "octopus-dark-github", light: "octopus-light-solarized" };
+  const theme = { dark: "phobos-dark-github", light: "phobos-light-solarized" };
   const provider = harness.providers.at(-1);
   assert.deepEqual(provider.highlighterOptions, { theme });
   const worker = provider.poolOptions.workerFactory();
@@ -282,7 +282,7 @@ export const useWorkerPool = () => globalThis.__files.pool;`,
 });
 
 test("the file tree resets only for new paths, reveals the selection by scrolling, and never expands parents itself", async () => {
-  const { OctopusFileTree } = await treeModule;
+  const { PhobosFileTree } = await treeModule;
   const calls = [];
   const selected = new Set();
   const model = {
@@ -295,7 +295,7 @@ test("the file tree resets only for new paths, reveals the selection by scrollin
   };
   harness.useFileTree = () => ({ model });
   const selections = [];
-  const render = (props) => root.render(React.createElement(OctopusFileTree, { onSelectPath: (value) => selections.push(value), revealSelectedPath: true, revealSelectedPathScrollOffset: "center", ...props }));
+  const render = (props) => root.render(React.createElement(PhobosFileTree, { onSelectPath: (value) => selections.push(value), revealSelectedPath: true, revealSelectedPathScrollOffset: "center", ...props }));
   root.render(null);
   await settle(5);
   render({ paths: ["src/", "src/a.ts"], selectedPath: "src/a.ts" });

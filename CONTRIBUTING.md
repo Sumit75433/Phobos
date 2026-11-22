@@ -1,6 +1,6 @@
 # Contributing
 
-Octopus is a fully public initiative. There is no commercial plan behind it and
+Phobos is a fully public initiative. There is no commercial plan behind it and
 there will not be one: no paid tier, no hosted version, no company waiting at
 the end. The motivation is simple: everyone should end up with a
 superintelligence of their own.
@@ -19,7 +19,7 @@ So contributions are open. Any pull request is welcome, and so is any idea.
 Before filing a bug, work through [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 Never upload a Home, a ledger, provider sign-in files, or unredacted logs.
 
-Octopus was created and is maintained by [@miuuyy](https://github.com/miuuyy).
+Phobos was created and is maintained by [@miuuyy](https://github.com/miuuyy).
 
 ## Core invariants
 
@@ -65,13 +65,13 @@ An ordinary fix that restores an existing contract does not need this section.
 
 For a new package, application, extension, or driver, complete **Use and need**:
 explain who benefits and why existing options are insufficient, and show your own
-practical use in Octopus. Include the setup, task, result, and anything untested;
+practical use in Phobos. Include the setup, task, result, and anything untested;
 for visual extensions, follow [Client UI evidence](#client-ui-evidence). A build or tool-list
 check alone is not enough. Niche or hard-to-test integrations receive individual
 maintainer review, and visual extensions require a visual review before acceptance.
 
 A working implementation is not the only consideration: we also assess whether
-the capability belongs in Octopus and whether its approach keeps the architecture
+the capability belongs in Phobos and whether its approach keeps the architecture
 coherent. A useful report can lead to a different fix rather than merging its PR.
 
 ### Client UI evidence

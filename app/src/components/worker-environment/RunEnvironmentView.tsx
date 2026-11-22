@@ -8,8 +8,8 @@ import { ClientSurfaceRenderer } from "../../client-surfaces/ClientSurfaceRender
 import type { AdmittedClientSurfaceDocument } from "../../client-surfaces/types";
 import type { RunProjection, WorkerEnvironmentProjection, WorkerEnvironmentSurfaceProjection } from "../../data/topology";
 import type {
-  OctopusClientAccessProfile,
-  OctopusWorkerEnvironmentWindowTarget,
+  PhobosClientAccessProfile,
+  PhobosWorkerEnvironmentWindowTarget,
 } from "../../electron";
 import { OcButton, OcIconButton, OcMenuItem, OcMenuMessage, OcMenuSurface } from "../../design-system/components";
 import type { GlyphName } from "../IconGlyphs";
@@ -57,7 +57,7 @@ type EnvironmentPanel = {
 };
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   assistantCodeComments?: ProjectedAssistantCodeComment[];
   maximized: boolean;
   onClose: () => void;
@@ -65,7 +65,7 @@ type Props = {
   openPanelKind?: WorkerEnvironmentPanelKind;
   openSurfaceId?: string;
   openFilePath?: string;
-  openClientSurface?: OctopusWorkerEnvironmentWindowTarget["clientSurface"];
+  openClientSurface?: PhobosWorkerEnvironmentWindowTarget["clientSurface"];
   openRequestId?: number;
   run: RunProjection | null;
   surfaces?: AdmittedClientSurfaceDocument[];
@@ -86,7 +86,7 @@ type StoredEnvironmentLayout = {
   }>;
 };
 
-const ENVIRONMENT_LAYOUT_STORAGE_KEY = "octopus.worker-environment-layouts.v1";
+const ENVIRONMENT_LAYOUT_STORAGE_KEY = "phobos.worker-environment-layouts.v1";
 const MAX_STORED_ENVIRONMENT_LAYOUTS = 60;
 
 export function RunEnvironmentView({ accessProfile, assistantCodeComments = [], maximized, onClose, onMaximizedChange, openPanelKind, openSurfaceId, openFilePath, openClientSurface, openRequestId = 0, run, surfaces = [], windowed = false, workerEnvironment }: Props) {
@@ -425,7 +425,7 @@ export function RunEnvironmentView({ accessProfile, assistantCodeComments = [], 
 }
 
 export function WorkerEnvironmentSurfacePanel({ accessProfile, assistantCodeComments = [], document, environment, filePath, onOpenFile, run, surface }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   assistantCodeComments?: ProjectedAssistantCodeComment[];
   document?: AdmittedClientSurfaceDocument | null;
   environment: WorkerEnvironmentProjection;
@@ -484,7 +484,7 @@ class EnvironmentPanelErrorBoundary extends Component<{
 }
 
 function EnvironmentPanelContent({ accessProfile, active, assistantCodeComments = [], environment, onOpenFile, panel, run }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   active: boolean;
   assistantCodeComments?: ProjectedAssistantCodeComment[];
   environment: WorkerEnvironmentProjection;
@@ -599,7 +599,7 @@ function EnvironmentUnavailable({ detail, title }: { detail: string; title: stri
 
 function environmentPanels(
   environment: WorkerEnvironmentProjection | null,
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   clientSurfaces: AdmittedClientSurfaceDocument[],
 ): EnvironmentPanel[] {
   if (!environment) return [{ id: "overview", kind: "overview", label: "Overview", glyph: "ee" }];
@@ -643,7 +643,7 @@ function requestedEnvironmentPanel(
   panels: EnvironmentPanel[],
   panelKind: WorkerEnvironmentPanelKind,
   surfaceId?: string,
-  clientSurface?: OctopusWorkerEnvironmentWindowTarget["clientSurface"],
+  clientSurface?: PhobosWorkerEnvironmentWindowTarget["clientSurface"],
 ): EnvironmentPanel | null {
   if (clientSurface) {
     return panels.find((panel) => {
@@ -675,7 +675,7 @@ function filePanelId(surfaceId: string, filePath: string): string {
   return `file:${surfaceId}:${filePath}`;
 }
 
-function restoreEnvironmentLayout(accessProfile: OctopusClientAccessProfile, layoutId: string, availablePanels: EnvironmentPanel[]): {
+function restoreEnvironmentLayout(accessProfile: PhobosClientAccessProfile, layoutId: string, availablePanels: EnvironmentPanel[]): {
   panels: EnvironmentPanel[];
   activePanelId: string;
   newTabOpen: boolean;
@@ -720,7 +720,7 @@ function restoreEnvironmentLayout(accessProfile: OctopusClientAccessProfile, lay
 }
 
 function persistEnvironmentLayout(
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   layoutId: string,
   panels: EnvironmentPanel[],
   activePanelId: string,
@@ -751,11 +751,11 @@ function persistEnvironmentLayout(
   }
 }
 
-function environmentLayoutStorageKey(accessProfile: OctopusClientAccessProfile): string {
+function environmentLayoutStorageKey(accessProfile: PhobosClientAccessProfile): string {
   return `${ENVIRONMENT_LAYOUT_STORAGE_KEY}.${accessProfile}`;
 }
 
-function readEnvironmentLayouts(accessProfile: OctopusClientAccessProfile): Record<string, StoredEnvironmentLayout> {
+function readEnvironmentLayouts(accessProfile: PhobosClientAccessProfile): Record<string, StoredEnvironmentLayout> {
   try {
     const raw = window.localStorage.getItem(environmentLayoutStorageKey(accessProfile));
     if (!raw || raw.length > 256 * 1024) return {};

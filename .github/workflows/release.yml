@@ -52,10 +52,10 @@ jobs:
       - name: Fetch pinned Node headers and Electron
         run: |
           headers="$(node app/native/runtime.cjs headers)"
-          echo "OCTOPUS_NATIVE_NODE_HEADERS=$headers" >> "$GITHUB_ENV"
+          echo "PHOBOS_NATIVE_NODE_HEADERS=$headers" >> "$GITHUB_ENV"
           node app/native/runtime.cjs electron
 
-      - name: Package Octopus.app
+      - name: Package Phobos.app
         env:
           CARGO_INCREMENTAL: "0"
         run: npm --prefix app run package:mac
@@ -66,7 +66,7 @@ jobs:
       - name: Upload release assets
         uses: actions/upload-artifact@v4
         with:
-          name: octopus-macos
+          name: phobos-macos
           path: |
             app/build/release/
             app/build/release-notes.md
@@ -84,7 +84,7 @@ jobs:
       - name: Download release assets
         uses: actions/download-artifact@v4
         with:
-          name: octopus-macos
+          name: phobos-macos
           path: release-assets
 
       - name: Verify checksums
@@ -108,7 +108,7 @@ jobs:
           fi
           gh release create "$GITHUB_REF_NAME" release-assets/release/* \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Octopus ${GITHUB_REF_NAME#v}" \
+            --title "Phobos ${GITHUB_REF_NAME#v}" \
             --notes-file release-assets/release-notes.md \
             --verify-tag \
             --draft

@@ -14,7 +14,7 @@ function createClientWindowCloseHost({ authorize, accessTokenForSender, onQuitAp
   function cancelRequest(record, reason) {
     const request = record.request;
     record.request = null;
-    if (request) send(record, "octopus:client-window-close-cancelled", { ...request.payload, reason });
+    if (request) send(record, "phobos:client-window-close-cancelled", { ...request.payload, reason });
   }
 
   function cancelAction(reason) {
@@ -60,7 +60,7 @@ function createClientWindowCloseHost({ authorize, accessTokenForSender, onQuitAp
     if (record.readiness !== "guarded" || !record.guard) return false;
     const payload = { windowId: record.windowId, generation: record.guard.generation, requestId: randomUUID(), reason };
     record.request = { payload, status: "pending", transaction };
-    try { record.sender.send("octopus:client-window-close-requested", payload); }
+    try { record.sender.send("phobos:client-window-close-requested", payload); }
     catch (error) {
       if (transaction) cancelAction("invalidated");
       else cancelRequest(record, "invalidated");

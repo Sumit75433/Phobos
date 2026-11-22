@@ -120,7 +120,7 @@ export function indexedQueuePersistence(factory: IDBFactory): QueuePersistence {
     const release = () => { if (connection === opening) connection = undefined; };
     const fail = (error: unknown) => { failed = true; release(); reject(error); };
     try {
-      const request = factory.open("octopus.client.turnQueue", 1);
+      const request = factory.open("phobos.client.turnQueue", 1);
       request.onupgradeneeded = () => request.result.createObjectStore("queues");
       request.onerror = () => fail(request.error);
       request.onblocked = () => fail(new Error("Message storage is blocked by another client window."));

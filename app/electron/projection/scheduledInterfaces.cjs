@@ -10,7 +10,7 @@ const { parseScheduledDueAt } = require("../scheduledTime.cjs");
 const { activationDriverRef, cronScheduleFingerprint, parseCronActivationDocument, scheduledInterfaceDisplayName } = require("./cronActivation.cjs");
 const { readJsonFile, readOptionalRegularJsonDocument, stableJson } = require("./jsonFiles.cjs");
 const { movementBoundaryInterface, movementRunId, readChangeJournal } = require("./movementRows.cjs");
-const { baseInterfaceRows, octopusOsInterfaceSidecars } = require("./registryRows.cjs");
+const { baseInterfaceRows, phobosOsInterfaceSidecars } = require("./registryRows.cjs");
 const { arrayValue, isAdmittedInterfaceArtifactMovement, ledgerArtifactId, ledgerArtifactLabel, numberValue, objectOrEmpty, rowTimeMs, stringValue } = require("./values.cjs");
 
 function scheduledInterfacesProjection(store) {
@@ -144,7 +144,7 @@ function scheduledInterfacesProjection(store) {
       .some((checkpoint) => checkpoint.status === "projected" && checkpoint.interface === interfaceId));
     if (!targets.length) return [];
     const entries = new Map((await store.operatorChatRunIndex(projection)).map((entry) => [entry.runId, entry]));
-    const sidecars = octopusOsInterfaceSidecars(projection);
+    const sidecars = phobosOsInterfaceSidecars(projection);
     const rows = [];
     for (const target of targets) {
       const entry = entries.get(target.run_id);
@@ -186,7 +186,7 @@ function scheduledInterfacesProjection(store) {
     let nextRunSource = "";
     let inactivityState = null;
     if (schedule.inactivity != null) {
-      const document = await readOptionalRegularJsonDocument(path.join(projection.octopusHome, "interfaces", interfaceId, "cron-inactivity-state.json"), "inactivity trigger state");
+      const document = await readOptionalRegularJsonDocument(path.join(projection.phobosHome, "interfaces", interfaceId, "cron-inactivity-state.json"), "inactivity trigger state");
       const state = document?.document;
       if (state && (state.schema_version !== 1 || !["idle", "waiting", "prepared", "admitted"].includes(state.status))) throw new Error("inactivity trigger state has an invalid schema or status");
       if (state && ["waiting", "prepared"].includes(state.status) && (!Number.isSafeInteger(state.next_due_unix_ms) || state.next_due_unix_ms < 0)) throw new Error("inactivity trigger state has an invalid deadline");
@@ -208,7 +208,7 @@ function scheduledInterfacesProjection(store) {
       nextRunSource = "schedule";
     }
     if (schedule.interval_seconds != null) {
-      const statePath = path.join(projection.octopusHome, "interfaces", interfaceId, "cron-interval-state.json");
+      const statePath = path.join(projection.phobosHome, "interfaces", interfaceId, "cron-interval-state.json");
       const state = await readJsonFile(statePath);
       const fingerprint = state ? cronScheduleFingerprint(interfaceId, schedule) : null;
       if (
@@ -226,7 +226,7 @@ function scheduledInterfacesProjection(store) {
       }
     }
     if (!lastRunAtMs && config.schedule.cron != null) {
-      const state = await readJsonFile(path.join(projection.octopusHome, "interfaces", interfaceId, "cron-state.json"));
+      const state = await readJsonFile(path.join(projection.phobosHome, "interfaces", interfaceId, "cron-state.json"));
       const parsed = typeof state?.last_cron_minute === "string" ? Date.parse(state.last_cron_minute) : NaN;
       if (Number.isFinite(parsed)) lastRunAtMs = parsed;
     }
@@ -239,7 +239,7 @@ function scheduledInterfacesProjection(store) {
     const recent = deliveries.sort((left, right) => right.seq - left.seq).slice(0, 8);
     const entries = recent.some((row) => clientRuns.has(row.run_id))
       ? new Map((await store.operatorChatRunIndex(projection)).map((entry) => [entry.runId, entry])) : new Map();
-    const sidecars = octopusOsInterfaceSidecars(projection);
+    const sidecars = phobosOsInterfaceSidecars(projection);
     for (const delivery of recent) {
       delivery.chat_interface_id = stringValue(clientRuns.get(delivery.run_id)?.interface_id);
       const firing = objectOrEmpty(await store.resolveLedgerArtifactPayload(delivery.movement)).now_unix_ms;

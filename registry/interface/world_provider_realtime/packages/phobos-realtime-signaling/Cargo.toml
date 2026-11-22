@@ -1,0 +1,43 @@
+[package]
+name = "phobos-realtime-signaling"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "phobos_realtime_signaling"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = "0.1.44"
+reqwest = { version = "0.12", features = ["json"] }
+blake3 = { workspace = true }
+futures-util = "0.3"
+tokio-tungstenite = { version = "0.28", features = ["rustls-tls-native-roots"] }
+rustls = { version = "0.23", default-features = false, features = ["aws_lc_rs", "std", "tls12"] }
+rustls-native-certs = "0.8"
+phobos-login = { path = "../../../world_provider_codex/packages/phobos-codex-login" }
+phobos-run-authoring = { path = "../../../system_interface_authoring/packages/phobos-run-authoring" }
+
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-policy = { path = "../../../../../crates/phobos-policy" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-world-pyecho-life-runtime = { path = "../../../world_pyecho/packages/phobos-world-pyecho-life-runtime" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+
+[dev-dependencies]
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-system-room-env = { path = "../../../../worker_environment_kind/system_room/packages/phobos-system-room-env" }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+json-patch = { workspace = true }
+phobos-app-server-interface = { path = "../../../world_operator_chat/packages/phobos-app-server-interface" }
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "net"] }
+tokio-util = { workspace = true }

@@ -4,7 +4,7 @@ const { modelServiceTiers } = require("../providerModelTiers.cjs");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { readJsonFile } = require("./jsonFiles.cjs");
-const { parseOctopusOsSidecar } = require("./sidecars.cjs");
+const { parsePhobosOsSidecar } = require("./sidecars.cjs");
 const { arrayValue, objectOrEmpty, stringValue } = require("./values.cjs");
 
 async function readProviderInterfaceDescriptors(registryRoot) {
@@ -24,10 +24,10 @@ async function readProviderInterfaceDescriptors(registryRoot) {
     if (stringValue(descriptor.role).toLowerCase() !== "provider") continue;
     const id = stringValue(descriptor.id) || entry.name;
     if (id !== entry.name) continue;
-    const octopusOsPath = path.join(interfaceRoot, entry.name, "octopus_os.json");
-    const octopusOs = await readJsonFile(octopusOsPath);
-    if (octopusOs) {
-      parseOctopusOsSidecar(octopusOs, id, octopusOsPath);
+    const phobosOsPath = path.join(interfaceRoot, entry.name, "phobos_os.json");
+    const phobosOs = await readJsonFile(phobosOsPath);
+    if (phobosOs) {
+      parsePhobosOsSidecar(phobosOs, id, phobosOsPath);
       continue;
     }
     descriptors.push({
@@ -44,7 +44,7 @@ function providerInterfaceDescriptorRows(descriptors) {
   for (const descriptor of descriptors) {
     if (stringValue(descriptor.interface_type).toLowerCase() !== "world") continue;
     if (stringValue(descriptor.role).toLowerCase() !== "provider") continue;
-    if (descriptor.octopus_os_sidecar) continue;
+    if (descriptor.phobos_os_sidecar) continue;
     const id = stringValue(descriptor.id) || stringValue(descriptor.registry_dir);
     if (!id || id !== stringValue(descriptor.registry_dir)) continue;
     const descriptorConfig = objectOrEmpty(descriptor.interface_driver_config);

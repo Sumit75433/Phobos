@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.client_surface",
+  "schema": "phobos.client_surface",
   "schema_version": 1,
   "release_channel": "lab",
   "id": "voice.weather",

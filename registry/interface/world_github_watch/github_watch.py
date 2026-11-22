@@ -93,11 +93,11 @@ class Watcher:
                                  "branch": self.c["branch"], "observed_at": observed_at,
                                  "generation": candidate["generation"],
                                  "untrusted_external_data": True, "events": notices[offset:offset + 100]})
-            digest = self.b.octopus_content_hash(payload)
+            digest = self.b.phobos_content_hash(payload)
             payload_path = str(Path(self.b.PAYLOADS_DIR) / (digest + ".payload"))
             self.b.private_file(payload_path, payload, self.b.IO_LIMITS["max_payload_bytes"], "github notice")
             manifest = canonical({"label": LABEL, "payload_path": payload_path, "payload_content_hash": digest})
-            manifest_hash = self.b.octopus_content_hash(manifest)
+            manifest_hash = self.b.phobos_content_hash(manifest)
             path = str(Path(self.b.PAYLOADS_DIR) / (manifest_hash + ".artifact.json"))
             self.b.private_file(path, manifest, self.b.IO_LIMITS["max_manifest_bytes"], "github manifest")
             prepared.append({"label": LABEL, "manifest_path": path, "manifest_hash": manifest_hash,
@@ -119,7 +119,7 @@ class Watcher:
             if admitted is None:
                 evidence = [{"interface_id": self.b.INTERFACE_ID, "artifact_id": artifact_id,
                              "label": "github.watch.idempotency",
-                             "bytes": list(bytes.fromhex(self.b.octopus_content_hash(artifact_id.encode())))}]
+                             "bytes": list(bytes.fromhex(self.b.phobos_content_hash(artifact_id.encode())))}]
                 try:
                     admitted = self.b.hand(notice["manifest_path"], evidence)
                 except self.b.Refused as refusal:

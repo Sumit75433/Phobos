@@ -1,9 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { OcButton } from "../../design-system/components";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 
 export function SurfaceLoadingState({ label }: { label: string }) {
-  return <OctopusLoadingState className="surface-loading-state h-full w-full" label={label} />;
+  return <PhobosLoadingState className="surface-loading-state h-full w-full" label={label} />;
 }
 
 export class SurfaceRenderBoundary extends Component<{
@@ -17,7 +17,7 @@ export class SurfaceRenderBoundary extends Component<{
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    void window.octopusTransport?.logClientEvent({
+    void window.phobosTransport?.logClientEvent({
       level: "error",
       event: "renderer.surface_failure",
       message: `${error.stack || error.message}\n${info.componentStack ?? ""}`.slice(0, 8_000),

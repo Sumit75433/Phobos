@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_legacy_watch",
   "version": "1.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Legacy watch",
     "description": "A trigger template: the first letter in your mailbox that reports your death wakes one task with your last instructions.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "mail"
   },

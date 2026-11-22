@@ -30,7 +30,7 @@ export function ApplicationMiniLogo({ application }: { application: ApplicationR
 export function ConnectLogoRow({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-3">
-      <img alt="" className="-m-[7px] size-[70px] shrink-0" draggable={false} src="./octopus-dev-dock-icon.png" />
+      <img alt="" className="-m-[7px] size-[70px] shrink-0" draggable={false} src="./phobos-dev-dock-icon.png" />
       <span aria-hidden="true" className="flex items-center gap-1">
         <span className="size-1.5 rounded-full bg-border" />
         <span className="size-1.5 rounded-full bg-border" />

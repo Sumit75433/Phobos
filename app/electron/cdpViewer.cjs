@@ -515,7 +515,7 @@ class CdpViewerSession {
 
   emit(payload) {
     if (this.closed || this.sender.isDestroyed()) return;
-    this.sender.send("octopus:cdp-viewer-event", { sessionId: this.sessionId, ...payload });
+    this.sender.send("phobos:cdp-viewer-event", { sessionId: this.sessionId, ...payload });
   }
 
   fail(message) {

@@ -17,7 +17,7 @@ LIFE = os.path.join(SENSOR_DIR, "legacy_watch_life.py")
 AUTHOR = os.path.join(SENSOR_DIR, "author.py")
 sys.path.insert(0, SENSOR_DIR)
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 with open(os.path.join(SENSOR_DIR, "life.json")) as handle:
     IO_LIMITS = json.load(handle)["processes"][0]["io_limits"]
@@ -66,7 +66,7 @@ class FakeRuntime:
             handle.write(line)
 
     def put_blob(self, content):
-        digest = octopus_content_hash(content)
+        digest = phobos_content_hash(content)
         with open(os.path.join(self.blobs, digest), "wb") as handle:
             handle.write(content)
         return digest
@@ -119,12 +119,12 @@ class FakeRuntime:
         environment = {
             "PATH": os.environ.get("PATH", ""),
             "PYTHONDONTWRITEBYTECODE": "1",
-            "OCTOPUS_INTERFACE_ID": "world_legacy_watch",
-            "OCTOPUS_INTERFACE_DIR": self.interface,
-            "OCTOPUS_VAR_DIR": self.var,
-            "OCTOPUS_MOVEMENTS_JSONL": self.ledger,
-            "OCTOPUS_BLOBS_DIR": self.blobs,
-            "OCTOPUS_INTERFACE_HOST_IO_LIMITS": json.dumps(IO_LIMITS),
+            "PHOBOS_INTERFACE_ID": "world_legacy_watch",
+            "PHOBOS_INTERFACE_DIR": self.interface,
+            "PHOBOS_VAR_DIR": self.var,
+            "PHOBOS_MOVEMENTS_JSONL": self.ledger,
+            "PHOBOS_BLOBS_DIR": self.blobs,
+            "PHOBOS_INTERFACE_HOST_IO_LIMITS": json.dumps(IO_LIMITS),
         }
         self.process = subprocess.Popen([sys.executable, LIFE], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment)
         self.frames = queue.Queue()
@@ -182,8 +182,8 @@ class FakeRuntime:
         manifest = json.loads(manifest_bytes)
         with open(manifest["payload_path"], "rb") as handle:
             payload = handle.read()
-        artifact_id = f"{manifest['label']}:{octopus_content_hash(manifest_bytes)}"
-        seq = self.append({"kind": "InterfaceArrival", "from": {"Interface": "world_legacy_watch"}, "to": {"Interface": "system_worker_operator_task_x"}, "artifact": {"id": artifact_id, "content": octopus_content_hash(manifest_bytes)}, "invocation_metadata": {}})
+        artifact_id = f"{manifest['label']}:{phobos_content_hash(manifest_bytes)}"
+        seq = self.append({"kind": "InterfaceArrival", "from": {"Interface": "world_legacy_watch"}, "to": {"Interface": "system_worker_operator_task_x"}, "artifact": {"id": artifact_id, "content": phobos_content_hash(manifest_bytes)}, "invocation_metadata": {}})
         self.reply(frame, {"admitted": {"seq": seq}})
         return manifest_bytes, manifest, payload, artifact_id, seq
 
@@ -244,7 +244,7 @@ class LegacyWatchLifeTest(unittest.TestCase):
         manifest_bytes, manifest, payload, artifact_id, seq = runtime.admit(frame)
         self.assertEqual(set(manifest), {"label", "payload_path", "payload_content_hash"})
         self.assertEqual(manifest["label"], "legacy_watch.notice")
-        self.assertEqual(manifest["payload_content_hash"], octopus_content_hash(payload))
+        self.assertEqual(manifest["payload_content_hash"], phobos_content_hash(payload))
         notice = json.loads(payload)
         self.assertEqual(set(notice), {"trigger", "from_owner", "message"})
         self.assertEqual(set(notice["trigger"]), {"event", "watched_fields", "watched_words", "matched_words"})
@@ -258,7 +258,7 @@ class LegacyWatchLifeTest(unittest.TestCase):
         evidence = frame["evidence"]
         self.assertEqual(len(evidence), 1)
         self.assertEqual(evidence[0]["artifact_id"], artifact_id)
-        self.assertEqual(evidence[0]["bytes"], list(bytes.fromhex(octopus_content_hash(artifact_id.encode("utf-8")))))
+        self.assertEqual(evidence[0]["bytes"], list(bytes.fromhex(phobos_content_hash(artifact_id.encode("utf-8")))))
         for private in PRIVATE_STRINGS:
             self.assertNotIn(private.encode("utf-8"), manifest_bytes + payload + canonical(frame))
         runtime.letter("СВИДЕТЕЛЬСТВО О СМЕРТИ", "Second matching letter.")
@@ -315,8 +315,8 @@ class LegacyWatchLifeTest(unittest.TestCase):
         frame = runtime.expect_frame("arrival")
         with open(frame["artifact_manifest_path"], "rb") as handle:
             manifest_bytes = handle.read()
-        artifact_id = f"legacy_watch.notice:{octopus_content_hash(manifest_bytes)}"
-        seq = runtime.append({"kind": "InterfaceArrival", "from": {"Interface": "world_legacy_watch"}, "to": {"Interface": "system_worker_operator_task_x"}, "artifact": {"id": artifact_id, "content": octopus_content_hash(manifest_bytes)}, "invocation_metadata": {}})
+        artifact_id = f"legacy_watch.notice:{phobos_content_hash(manifest_bytes)}"
+        seq = runtime.append({"kind": "InterfaceArrival", "from": {"Interface": "world_legacy_watch"}, "to": {"Interface": "system_worker_operator_task_x"}, "artifact": {"id": artifact_id, "content": phobos_content_hash(manifest_bytes)}, "invocation_metadata": {}})
         runtime.stop()
         runtime.start()
         runtime.wait_cursor()
@@ -355,8 +355,8 @@ class LegacyWatchLifeTest(unittest.TestCase):
         self.assertEqual({**second, "request_id": first["request_id"]}, first)
         with open(second["artifact_manifest_path"], "rb") as handle:
             manifest_bytes = handle.read()
-        artifact_id = f"legacy_watch.notice:{octopus_content_hash(manifest_bytes)}"
-        seq = runtime.append({"kind": "InterfaceArrival", "from": {"Interface": "world_legacy_watch"}, "to": {"Interface": "system_worker_operator_task_x"}, "artifact": {"id": artifact_id, "content": octopus_content_hash(manifest_bytes)}, "invocation_metadata": {}})
+        artifact_id = f"legacy_watch.notice:{phobos_content_hash(manifest_bytes)}"
+        seq = runtime.append({"kind": "InterfaceArrival", "from": {"Interface": "world_legacy_watch"}, "to": {"Interface": "system_worker_operator_task_x"}, "artifact": {"id": artifact_id, "content": phobos_content_hash(manifest_bytes)}, "invocation_metadata": {}})
         runtime.refuse(second, "duplicate_evidence", {"artifact_id": artifact_id, "message": "arrival evidence already exists in the movement ledger"})
         runtime.wait_cursor()
         runtime.expect_no_frame()
@@ -413,7 +413,7 @@ FAKE_PLANNER = r'''#!{python}
 import json, os, sys
 sys.dont_write_bytecode = True
 sys.path.insert(0, {sensor!r})
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 home = {home!r}
 request = json.loads(sys.stdin.read())
 interfaces = os.path.join(home, "registry", "interface")
@@ -437,8 +437,8 @@ model = "world_provider_codex_" + chat
 worker = "system_worker_operator_task_" + chat
 shared = os.path.join(home, "registry", "artifact", "shared", "artifact.json")
 with open(shared, "rb") as handle:
-    shared_hash = octopus_content_hash(handle.read())
-sidecar = {{"schema_version": 1, "workspace": "octopus_os", "interface": client, "owner_interface": client, "component": "client", "surface_role": "task", "provider_choice_interface": request["provider_interface_id"], "worker_choice_interface": request["worker_interface_id"]}}
+    shared_hash = phobos_content_hash(handle.read())
+sidecar = {{"schema_version": 1, "workspace": "phobos_os", "interface": client, "owner_interface": client, "component": "client", "surface_role": "task", "provider_choice_interface": request["provider_interface_id"], "worker_choice_interface": request["worker_interface_id"]}}
 run = {{"id": run_id, "ee": request["ee_id"], "worker": worker, "trace": "trace:" + run_id, "status": "idle", "interface_state": {{}},
        "checkpoints": [{{"id": "cp_legacy_watch", "run": run_id, "trace": "t", "epoch": 0,
            "interface_binding": {{"interface": "world_legacy_watch", "config": {{"artifact_policy": {{"mode": "allow", "names": trigger["artifact_names"], "namespaces": []}}}}}},
@@ -449,7 +449,7 @@ plan = {{
     "client_surface_role": "task", "expected_before_hash_algorithm": "blake3", "removals": [], "authoring_profile": profile,
     "interface_writes": [
         {{"path": os.path.join(interfaces, client, "interface.json"), "content": json.dumps({{"id": client}}) + "\n", "tag": "interface:" + client, "expected_before_hash": None}},
-        {{"path": os.path.join(interfaces, client, "octopus_os.json"), "content": json.dumps(sidecar, indent=2) + "\n", "tag": "octopus-os:" + client, "expected_before_hash": None}},
+        {{"path": os.path.join(interfaces, client, "phobos_os.json"), "content": json.dumps(sidecar, indent=2) + "\n", "tag": "phobos-os:" + client, "expected_before_hash": None}},
         {{"path": shared, "content": json.dumps({{"id": "shared", "version": 2}}) + "\n", "tag": "artifact:shared", "expected_before_hash": shared_hash}},
     ],
     "run_writes": [
@@ -462,7 +462,7 @@ print(json.dumps(plan))
 
 FAKE_RUNTIME = r'''#!{python}
 import os, sys
-if sys.argv[1:] != ["project-ee-policies"] or os.environ.get("OCTOPUS_HOME") != {home!r}:
+if sys.argv[1:] != ["project-ee-policies"] or os.environ.get("PHOBOS_HOME") != {home!r}:
     sys.exit("unexpected runtime call")
 with open({projection!r}) as handle:
     sys.stdout.write(handle.read())
@@ -490,7 +490,7 @@ class AuthorTest(unittest.TestCase):
         for name in ("interface.json", "life.json", "config.json", "application.json"):
             shutil.copyfile(os.path.join(source, name), os.path.join(email, name))
         shutil.copytree(os.path.join(source, "operations"), os.path.join(email, "operations"))
-        self.write(os.path.join(interfaces, "world_operator_chat_home1", "octopus_os.json"), {"schema_version": 1, "workspace": "octopus_os", "interface": "world_operator_chat_home1", "owner_interface": "world_operator_chat_home1", "component": "client", "surface_role": "home", "provider_choice_interface": "world_provider_codex", "worker_choice_interface": "system_worker_operator_home", "authoring_profile": {"ee_id": "ee_existence", "worker_choice_interface": "system_worker_operator_home", "door_host_slots": {}}, "task_authoring_profiles": [PROFILE], "presentation": {"name": "Home", "projects": []}})
+        self.write(os.path.join(interfaces, "world_operator_chat_home1", "phobos_os.json"), {"schema_version": 1, "workspace": "phobos_os", "interface": "world_operator_chat_home1", "owner_interface": "world_operator_chat_home1", "component": "client", "surface_role": "home", "provider_choice_interface": "world_provider_codex", "worker_choice_interface": "system_worker_operator_home", "authoring_profile": {"ee_id": "ee_existence", "worker_choice_interface": "system_worker_operator_home", "door_host_slots": {}}, "task_authoring_profiles": [PROFILE], "presentation": {"name": "Home", "projects": []}})
         self.write(os.path.join(interfaces, "system_worker_operator_task", "policy.json"), {"id": "system_worker_operator_task", "ceiling": {"interfaces": CEILING_INTERFACES, "tools": ["file.read", "workspace.exec", "memory.save"], "wek": ["system_room", "filesystem_workspace"]}})
         for tool, (owner, kinds) in TOOLS.items():
             self.write(os.path.join(self.home, "registry", "tool", tool, "tool.json"), {"id": tool, "interface": owner, "supported_worker_environment_kinds": kinds})
@@ -587,7 +587,7 @@ class AuthorTest(unittest.TestCase):
             f"folder {os.path.join(interfaces, 'world_legacy_watch')}",
             f"folder {os.path.join(interfaces, 'system_worker_legacy_relay')}",
             os.path.join(interfaces, f"world_operator_chat_{chat}", "interface.json"),
-            os.path.join(interfaces, f"world_operator_chat_{chat}", "octopus_os.json"),
+            os.path.join(interfaces, f"world_operator_chat_{chat}", "phobos_os.json"),
             os.path.join(self.home, "registry", "artifact", "shared", "artifact.json"),
             os.path.join(runs, f"run_writer_{chat}.json"),
             os.path.join(runs, f"run_operator_chat_{chat}.json"),
@@ -595,7 +595,7 @@ class AuthorTest(unittest.TestCase):
         ])
         self.assertIn("senders: only the mailbox's own address and the Allowed senders set in Email reach the trigger, automated mail is dropped", completed.stdout)
         self.assertEqual(observed, {
-            "sensor_files": ["armed.json", "interface.json", "legacy_watch_life.py", "life.json", "octopus_content_hash.py", "watch.json"],
+            "sensor_files": ["armed.json", "interface.json", "legacy_watch_life.py", "life.json", "phobos_content_hash.py", "watch.json"],
             "worker_files": ["interface.json", "policy.json"],
             "email_open": False,
             "relay_present": False,
@@ -633,7 +633,7 @@ class AuthorTest(unittest.TestCase):
         self.assertIn("left out world_draft: world_draft is not connected", completed.stdout)
         self.assertIn("left out world_email: its task input email.event would wake the task", completed.stdout)
         self.assertIn("selects git_worktree, which this Home does not offer", completed.stdout)
-        with open(os.path.join(interfaces, f"world_operator_chat_{chat}", "octopus_os.json")) as handle:
+        with open(os.path.join(interfaces, f"world_operator_chat_{chat}", "phobos_os.json")) as handle:
             self.assertEqual(json.load(handle)["presentation"], {"name": "Watch legacy mail", "projects": []})
         with open(os.path.join(interfaces, "world_email", "config.json")) as handle:
             text_after = handle.read()
@@ -666,7 +666,7 @@ class AuthorTest(unittest.TestCase):
         self.assertGreater(self.armed_at(), stale)
 
     def test_a_missing_task_profile_a_narrowed_ee_chain_or_a_failing_planner_leaves_the_home_unchanged(self):
-        sidecar_path = os.path.join(self.home, "registry", "interface", "world_operator_chat_home1", "octopus_os.json")
+        sidecar_path = os.path.join(self.home, "registry", "interface", "world_operator_chat_home1", "phobos_os.json")
         with open(sidecar_path) as handle:
             sidecar = json.load(handle)
         self.write(sidecar_path, {**sidecar, "task_authoring_profiles": []})

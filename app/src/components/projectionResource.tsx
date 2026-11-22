@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { OcButton, OcEmptyState, cx } from "../design-system/components";
 import { formatProjectionError } from "../projectionClient";
-import { OctopusLoadingState } from "./OctopusLoadingLogo";
+import { PhobosLoadingState } from "./PhobosLoadingLogo";
 
 export type ProjectionResourcePhase = "initial-loading" | "refreshing" | "ready" | "failed" | "degraded";
 
@@ -95,7 +95,7 @@ export function useProjectionResource<T>({
 
 export function ProjectionResourceLoading({ label, className }: { label: string; className?: string }) {
   return (
-    <OctopusLoadingState className={cx("flex h-full min-h-64 w-full flex-1 items-center justify-center", className)} label={label} />
+    <PhobosLoadingState className={cx("flex h-full min-h-64 w-full flex-1 items-center justify-center", className)} label={label} />
   );
 }
 

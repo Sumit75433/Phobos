@@ -9,8 +9,8 @@ const { projectedFilesystemRootSurfaces, projectedGitSurfaces, projectedWorktree
 const { arrayValue, isPathInside, numberValue, objectOrEmpty, safeInterfacePathSegment, stringValue, validWorkerEnvironmentFormation } = require("./values.cjs");
 
 function workerEnvironmentsProjection(store) {
-  async function readWorkerEnvironmentRecords(octopusHomeRoot, warnings = [], kindDescriptors = new Map()) {
-    const interfacesRoot = path.join(octopusHomeRoot, "interfaces");
+  async function readWorkerEnvironmentRecords(phobosHomeRoot, warnings = [], kindDescriptors = new Map()) {
+    const interfacesRoot = path.join(phobosHomeRoot, "interfaces");
     const files = await listWorkerEnvironmentRecordFiles(interfacesRoot);
     const rows = [];
     for (const file of files) {
@@ -105,7 +105,7 @@ function workerEnvironmentsProjection(store) {
         tools: arrayValue(formation.granted_tools),
         tool_descriptor_hashes: objectOrEmpty(formation.tool_descriptor_hashes),
         client_surfaces: await projectedWorkerEnvironmentSurfaces({
-          octopusHomeRoot,
+          phobosHomeRoot,
           formation,
           interfaceVarDir,
           lifecycle,
@@ -195,7 +195,7 @@ function workerEnvironmentsProjection(store) {
       let downloads = null;
       try {
         if (!store.nativeBrowserDownloadsForProjection) throw new Error("The native download history host is not connected.");
-        const history = await store.nativeBrowserDownloadsForProjection({ octopusHome: input.octopusHomeRoot,
+        const history = await store.nativeBrowserDownloadsForProjection({ phobosHome: input.phobosHomeRoot,
           worker_environment_id: id, formation_pin: stringValue(formation.formation_pin) });
         const historySupported = history?.engine?.capabilities?.persistentDownloadHistory;
         if (typeof historySupported !== "boolean") throw new Error("The native download history host returned no history capability declaration.");
@@ -237,7 +237,7 @@ function workerEnvironmentsProjection(store) {
       try {
         if (!store.nativeBrowserTargetsForProjection) throw new Error("The native browser host is not connected.");
         observation = await store.nativeBrowserTargetsForProjection({
-          octopusHome: input.octopusHomeRoot,
+          phobosHome: input.phobosHomeRoot,
           worker_environment_id: id, formation_pin: stringValue(formation.formation_pin),
           engine_handle: engineHandle, host_generation: hostGeneration, browser_context_id: browserContextId,
         });

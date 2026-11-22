@@ -47,7 +47,7 @@ export function failClientExtensionIncidentAction(id: string, error: unknown) {
   const candidate = error as { message?: unknown; retryable?: unknown } | null;
   const message = typeof candidate?.message === "string" && candidate.message.trim()
     ? candidate.message
-    : "Octopus couldn't complete the repair. Try again.";
+    : "Phobos couldn't complete the repair. Try again.";
   updateIncident(id, (incident) => ({
     ...incident,
     operation: {

@@ -1,0 +1,22 @@
+[package]
+name = "phobos-system-coder-env"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+
+phobos-git-sandbox = { package = "phobos-git-sandbox-substrate", path = "../phobos-git-sandbox-substrate" }
+phobos-system-workspace-env = { path = "../../../filesystem_workspace/packages/phobos-system-workspace-env" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+
+[dev-dependencies]
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+tempfile = "3"

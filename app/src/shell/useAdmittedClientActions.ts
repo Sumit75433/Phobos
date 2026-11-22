@@ -26,7 +26,7 @@ type ClientActionOptions = ActionScope & {
 };
 
 const PAGE_SIZE = 128;
-const CURSOR_PREFIX = "octopus.client-actions.cursor.v1:";
+const CURSOR_PREFIX = "phobos.client-actions.cursor.v1:";
 
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Malformed client action evidence.");
@@ -142,12 +142,12 @@ export function useAdmittedClientActions(options: ClientActionOptions): void {
             }
             let relaunchReady = false;
             if (action && action.action !== "open_surface" && !recorded) {
-              const pendingKey = `octopus.client-widget-result.v1:${scopeKey}`;
+              const pendingKey = `phobos.client-widget-result.v1:${scopeKey}`;
               const retained = storage.getItem(pendingKey);
               let receipt: Record<string, unknown>;
               if (retained !== null) {
                 receipt = object(JSON.parse(retained));
-                if (receipt.schema !== "octopus.client_action_result" || receipt.schema_version !== 1
+                if (receipt.schema !== "phobos.client_action_result" || receipt.schema_version !== 1
                   || typeof receipt.observed_at !== "string" || !Number.isFinite(Date.parse(receipt.observed_at))
                   || !["prepared", "completed"].includes(String(receipt.phase))
                   || receipt.phase === "completed" && (typeof receipt.ok !== "boolean"
@@ -164,13 +164,13 @@ export function useAdmittedClientActions(options: ClientActionOptions): void {
                 }
               } else receipt = {};
               if (!receipt.request_artifact && closure === "stopped") {
-                receipt = { schema: "octopus.client_action_result", schema_version: 1,
+                receipt = { schema: "phobos.client_action_result", schema_version: 1,
                   observed_at: new Date().toISOString(), phase: "completed", ok: false,
                   request_artifact: identity.artifact_id, request_seq: identity.seq,
                   request_id: action.request_id, action: action.action, tool_call: row.tool_call,
                   error: "The request was stopped before this client action executed." };
               } else if (!receipt.request_artifact) {
-                const base = { schema: "octopus.client_action_result", schema_version: 1,
+                const base = { schema: "phobos.client_action_result", schema_version: 1,
                   observed_at: new Date().toISOString(),
                   request_artifact: identity.artifact_id, request_seq: identity.seq, request_id: action.request_id, action: action.action,
                   tool_call: row.tool_call };

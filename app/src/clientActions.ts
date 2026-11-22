@@ -43,8 +43,8 @@ export type ClientCommand = {
 };
 
 export const clientCommands: readonly ClientCommand[] = [
-  { id: "new_chat", label: "New task", detail: "Start a new run in the selected Octopus OS scope" },
-  { id: "open_voice", label: "Open Home", detail: "Open the persistent Home surface of the current Octopus OS" },
+  { id: "new_chat", label: "New task", detail: "Start a new run in the selected Phobos OS scope" },
+  { id: "open_voice", label: "Open Home", detail: "Open the persistent Home surface of the current Phobos OS" },
   { id: "open_settings", label: "Open settings", detail: "Open application settings" },
   { id: "open_command_menu", label: "Open command menu", detail: "Search commands, surfaces, and recent tasks" },
   { id: "focus_search", label: "Focus search", detail: "Focus search on the current surface" },
@@ -79,7 +79,7 @@ export const clientCommands: readonly ClientCommand[] = [
   { id: "toggle_gesture_control", label: "Turn gesture control on or off", detail: "Start or stop camera hand tracking in this client" },
 ];
 
-export const CLIENT_COMMAND_EVENT = "octopus:client-command";
+export const CLIENT_COMMAND_EVENT = "phobos:client-command";
 
 export type ClientSettingsDestination = { sectionId?: string; dictationRecordingId?: string };
 

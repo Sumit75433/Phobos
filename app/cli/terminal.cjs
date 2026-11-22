@@ -320,7 +320,7 @@ class InteractiveTerminal {
 
   project() { return this.catalog.projects.find((project) => project.id === this.selection.projectId); }
   agent() { return this.project()?.agents?.find((agent) => agent.id === this.selection.agentId); }
-  assistantName() { return this.agent()?.name || this.run?.agentName || 'Octopus'; }
+  assistantName() { return this.agent()?.name || this.run?.agentName || 'Phobos'; }
   taskTitle(task = this.run) { return task?.isHome ? 'Home' : task?.title || 'New task'; }
   providerName(providerId = this.selection.providerId) {
     const provider = this.catalog.providers?.find((item) => item.id === providerId);
@@ -441,7 +441,7 @@ class InteractiveTerminal {
     this.output.once('error', this.onOutputError);
     this.input.resume();
     this.output.write('\x1b[?2004h');
-    this.renderer.append([row('Octopus', 'title'), row('Talk to an Agent. Your tasks are shared with the desktop.', 'muted'), row()]);
+    this.renderer.append([row('Phobos', 'title'), row('Talk to an Agent. Your tasks are shared with the desktop.', 'muted'), row()]);
     this.render();
     if (this.options.processSignals !== false && this.input === process.stdin) {
       this.onInterrupt = () => this.key({ key: 'interrupt' });
@@ -1053,7 +1053,7 @@ class InteractiveTerminal {
   }
 
   help() {
-    const rows = [row('Talk to Octopus', 'bold'), row('Enter sends. Alt+Enter, Shift+Enter (supported terminals), or Ctrl+J adds a line.'), row('Pasted text stays editable. ↑/↓ recalls prompts at the start/end of a draft.'), row('Ctrl+R searches prompt history; selecting a prompt does not send it.'), row('Ctrl+P Projects · Ctrl+G Agents · Alt+M Models · Ctrl+T Tasks · Ctrl+N New'), row('Ctrl+O attaches a file or folder · Ctrl+Q answers a pending request.'), row('Arrows / Home / End edit. Ctrl+W/U/K deletes; Ctrl+Y restores. Ctrl+Z undoes.'), row('Esc closes a picker first, then stops the active task. Ctrl+C stops an active task.'), row('Ctrl+D, /exit, and /detach leave the terminal; shared tasks keep running.'), row('Quoted file paths are supported. Prefix a message with // to send a literal slash.'), row()];
+    const rows = [row('Talk to Phobos', 'bold'), row('Enter sends. Alt+Enter, Shift+Enter (supported terminals), or Ctrl+J adds a line.'), row('Pasted text stays editable. ↑/↓ recalls prompts at the start/end of a draft.'), row('Ctrl+R searches prompt history; selecting a prompt does not send it.'), row('Ctrl+P Projects · Ctrl+G Agents · Alt+M Models · Ctrl+T Tasks · Ctrl+N New'), row('Ctrl+O attaches a file or folder · Ctrl+Q answers a pending request.'), row('Arrows / Home / End edit. Ctrl+W/U/K deletes; Ctrl+Y restores. Ctrl+Z undoes.'), row('Esc closes a picker first, then stops the active task. Ctrl+C stops an active task.'), row('Ctrl+D, /exit, and /detach leave the terminal; shared tasks keep running.'), row('Quoted file paths are supported. Prefix a message with // to send a literal slash.'), row()];
     for (const command of COMMANDS) rows.push(...wrap(`${command.label}${command.args ? ` ${command.args}` : ''}  ${command.description}`, this.renderer.width).map((line) => row(line)));
     rows.push(row());
     this.print(rows);
@@ -1258,7 +1258,7 @@ class InteractiveTerminal {
     this.detachFollow();
     clearTimeout(this.renderTimer);
     this.renderTimer = null;
-    this.renderer.close([row('Detached. Your tasks remain available in Octopus.', 'muted')]);
+    this.renderer.close([row('Detached. Your tasks remain available in Phobos.', 'muted')]);
     this.maybeDone();
   }
 
@@ -1291,13 +1291,13 @@ async function runInteractive(client, options = {}) {
   const input = options.input || process.stdin;
   const output = options.output || process.stdout;
   if (!input.isTTY || !output.isTTY || typeof input.setRawMode !== 'function') {
-    const error = new Error('Interactive chat needs a terminal on both input and output. Open Octopus in a terminal, or use the noninteractive chat command.');
-    error.code = 'OCTOPUS_TTY_REQUIRED';
+    const error = new Error('Interactive chat needs a terminal on both input and output. Open Phobos in a terminal, or use the noninteractive chat command.');
+    error.code = 'PHOBOS_TTY_REQUIRED';
     throw error;
   }
   if (options.term === 'dumb' || (!options.term && process.env.TERM === 'dumb')) {
     const error = new Error('This terminal cannot display interactive chat. Use a terminal with cursor support or the noninteractive chat command.');
-    error.code = 'OCTOPUS_TERMINAL_UNSUPPORTED';
+    error.code = 'PHOBOS_TERMINAL_UNSUPPORTED';
     throw error;
   }
   for (const method of ['status', 'contexts', 'send', 'follow']) if (typeof client?.[method] !== 'function') throw new TypeError(`The terminal client needs ${method}().`);

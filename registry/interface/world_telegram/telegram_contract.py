@@ -6,7 +6,7 @@ import os
 import re
 from datetime import datetime, timezone
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 from telegram_render import safe_link_url
 
 
@@ -547,7 +547,7 @@ def embed_image(media, view, path, content, limits):
     if mime_type is None or len(content) > image_room(media, limits):
         return
     view["image"] = len(media)
-    media.append({"mime_type": mime_type, "artifact": {"label": limits["file_label"], "payload_path": path, "payload_content_hash": octopus_content_hash(content)}, "payload_base64": base64.b64encode(content).decode("ascii")})
+    media.append({"mime_type": mime_type, "artifact": {"label": limits["file_label"], "payload_path": path, "payload_content_hash": phobos_content_hash(content)}, "payload_base64": base64.b64encode(content).decode("ascii")})
 
 
 def message_content(message, bot, files, config):

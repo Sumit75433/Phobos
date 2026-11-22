@@ -21,27 +21,27 @@ function createClientSupportHost({ app, BrowserWindow, ipcMain, dialog, clipboar
     if (typeof request.description !== "string" || request.description.length > 4000) throw new Error("Describe the problem in 4,000 characters or fewer.");
     return supportReportText(value.report, request.description);
   }
-  ipcMain.handle("octopus:support-collect", async (event, request) => {
+  ipcMain.handle("phobos:support-collect", async (event, request) => {
     const value = entry(event);
     if (typeof request?.includeDetails !== "boolean") throw new Error("Choose whether to include error text.");
     if (![undefined, "choose", "current"].includes(request.source)) throw new Error("Choose a report source using this window.");
-    if (request.includeDetails && profile(value) !== "live") throw new Error("Unlock Octopus as Administrator to include error text.");
-    if (request.source === "choose" && profile(value) !== "live") throw new Error("Unlock Octopus as Administrator to choose a saved Home.");
+    if (request.includeDetails && profile(value) !== "live") throw new Error("Unlock Phobos as Administrator to include error text.");
+    if (request.source === "choose" && profile(value) !== "live") throw new Error("Unlock Phobos as Administrator to choose a saved Home.");
     const accessProfile = profile(value);
     const generation = ++value.generation;
     const activeHome = home();
     let savedHome = request.source === "current" || profile(value) !== "live" ? null : value.savedHome;
     if (request.source === "choose") {
       const selected = await dialog.showOpenDialog(value.win, {
-        title: "Choose a saved Octopus Home", buttonLabel: "Use this Home",
-        message: "Select the Home you kept when the problem occurred. Octopus will only read it.",
+        title: "Choose a saved Phobos Home", buttonLabel: "Use this Home",
+        message: "Select the Home you kept when the problem occurred. Phobos will only read it.",
         defaultPath: path.dirname(activeHome), properties: ["openDirectory", "showHiddenFiles"],
       });
       if (selected.canceled || selected.filePaths.length !== 1) return null;
       if (profile(value) !== accessProfile) throw new Error("Client access changed while choosing a Home.");
       savedHome = await fs.realpath(selected.filePaths[0]);
       const manifest = await fs.lstat(path.join(savedHome, "host.json")).catch(() => null);
-      if (!manifest?.isFile() || manifest.isSymbolicLink()) throw new Error("That folder does not contain an Octopus Home. Choose the preserved Home folder.");
+      if (!manifest?.isFile() || manifest.isSymbolicLink()) throw new Error("That folder does not contain a Phobos Home. Choose the preserved Home folder.");
     }
     const selectedHome = savedHome ?? activeHome;
     const report = await collectSupportReport({ application: application(), clientRoot: path.join(selectedHome, "client"), home: selectedHome,
@@ -55,16 +55,16 @@ function createClientSupportHost({ app, BrowserWindow, ipcMain, dialog, clipboar
     value.report = report;
     return { report, source: { kind: savedHome ? "saved" : "current", name: savedHome ? path.basename(savedHome) : "Current Home" } };
   });
-  ipcMain.handle("octopus:support-copy", async (event, request) => {
+  ipcMain.handle("phobos:support-copy", async (event, request) => {
     await clipboard.writeText(snapshot(entry(event), request));
     return { copied: true };
   });
-  ipcMain.handle("octopus:support-save", async (event, request) => {
+  ipcMain.handle("phobos:support-save", async (event, request) => {
     const value = entry(event);
     const text = snapshot(value, request);
     const selected = await dialog.showSaveDialog(value.win, {
       title: "Save problem report",
-      defaultPath: path.join(app.getPath("downloads"), `Octopus-report-${value.report.report_id}.txt`),
+      defaultPath: path.join(app.getPath("downloads"), `Phobos-report-${value.report.report_id}.txt`),
       filters: [{ name: "Text report", extensions: ["txt"] }],
     });
     if (selected.canceled || !selected.filePath) return { saved: false };
@@ -76,7 +76,7 @@ function createClientSupportHost({ app, BrowserWindow, ipcMain, dialog, clipboar
     } finally { await file.close(); }
     return { saved: true };
   });
-  ipcMain.handle("octopus:support-issue", async (event, request) => {
+  ipcMain.handle("phobos:support-issue", async (event, request) => {
     const value = entry(event);
     snapshot(value, request);
     await shell.openExternal(supportIssueUrl(value.report, request.description));

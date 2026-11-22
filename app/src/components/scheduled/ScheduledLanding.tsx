@@ -28,7 +28,7 @@ export function ScheduledLanding({ disabledReason, onCreate, templates, timeDisa
               <span aria-hidden="true" className="text-5xl leading-none select-none">🕗</span>
               <div className="flex flex-col items-center gap-0.5">
                 <h1 className="m-0 text-[18px] leading-[26px] font-normal tracking-[-0.025em] text-default">Create a trigger</h1>
-                <p className="m-0 text-[14px] leading-5 font-normal tracking-[-0.01em] text-tertiary">Octopus can take care of ongoing tasks so you don’t have to.</p>
+                <p className="m-0 text-[14px] leading-5 font-normal tracking-[-0.01em] text-tertiary">Phobos can take care of ongoing tasks so you don’t have to.</p>
               </div>
             </div>
           </div>

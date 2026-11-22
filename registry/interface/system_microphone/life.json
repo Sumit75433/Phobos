@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-audio-device-session-tool-door-life",
+      "bin": "target/debug/phobos-audio-device-session-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -21,7 +21,7 @@
         "read_paths": [],
         "write_paths": [],
         "executable_paths": [
-          "target/debug/octopus-audio-device-session-tool"
+          "target/debug/phobos-audio-device-session-tool"
         ],
         "executable_commands": [],
         "read_env_paths": [],

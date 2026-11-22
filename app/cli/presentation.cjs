@@ -148,7 +148,7 @@ function attachmentLabel(attachment) {
     attachment?.name ?? attachment?.fileName ?? attachment?.path ?? 'Attached file');
 }
 
-function entryRows(entry, width, { assistantName = 'Octopus', outputRows = 24 } = {}) {
+function entryRows(entry, width, { assistantName = 'Phobos', outputRows = 24 } = {}) {
   if (!entry || typeof entry !== 'object') throw new TypeError('Invalid transcript entry.');
   if (!isConversationEntry(entry)) return [];
   const rows = [];

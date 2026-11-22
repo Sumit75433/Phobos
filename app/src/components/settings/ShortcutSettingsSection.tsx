@@ -2,14 +2,14 @@ import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from "rea
 import { useClientPreferences } from "../../clientPreferences";
 import { OcButton, OcCard, OcEmptyState, OcSettingsRow, cx } from "../../design-system/components";
 import { Glyph } from "../IconGlyphs";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { appToast, useAppErrorToast } from "../../toasts";
 import { SettingsHeading } from "./SettingsHeading";
 import { clientCommands, type ClientCommandId } from "../../clientActions";
 import { defaultKeyboardShortcuts, formatKeyboardShortcut, keyboardShortcutFromEvent, keyboardShortcutOwner, keyboardShortcutReservedReason, useKeyboardShortcuts, useReplaceKeyboardShortcuts, useResetKeyboardShortcuts, useSetKeyboardShortcuts } from "../../keyboardShortcuts";
 import { settingsTargetProps } from "./settingsCatalog";
 
-export function ShortcutsSection({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
+export function ShortcutsSection({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
   const preferences = useClientPreferences();
   const shortcuts = useKeyboardShortcuts(accessProfile);
   const setShortcuts = useSetKeyboardShortcuts(accessProfile);

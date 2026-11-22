@@ -1,6 +1,6 @@
-import type { OctopusProviderRateLimits, OctopusProviderRateLimitWindow } from "../electron";
+import type { PhobosProviderRateLimits, PhobosProviderRateLimitWindow } from "../electron";
 
-export function ProviderUsage({ rateLimits }: { rateLimits: OctopusProviderRateLimits }) {
+export function ProviderUsage({ rateLimits }: { rateLimits: PhobosProviderRateLimits }) {
   const rows = providerUsageRows(rateLimits);
   const observed = rateLimits.observedAtMs ? new Date(rateLimits.observedAtMs).toLocaleString() : "";
   return (
@@ -40,8 +40,8 @@ export function ProviderUsage({ rateLimits }: { rateLimits: OctopusProviderRateL
   );
 }
 
-function providerUsageRows(rateLimits: OctopusProviderRateLimits): Array<{ key: string; label: string; remaining: number; reset: string }> {
-  const windows: Array<[string, OctopusProviderRateLimitWindow | null]> = [
+function providerUsageRows(rateLimits: PhobosProviderRateLimits): Array<{ key: string; label: string; remaining: number; reset: string }> {
+  const windows: Array<[string, PhobosProviderRateLimitWindow | null]> = [
     ["primary", rateLimits.primary],
     ["secondary", rateLimits.secondary],
   ];
@@ -56,7 +56,7 @@ function providerUsageRows(rateLimits: OctopusProviderRateLimits): Array<{ key: 
   });
 }
 
-function rateLimitWindowLabel(window: OctopusProviderRateLimitWindow): string {
+function rateLimitWindowLabel(window: PhobosProviderRateLimitWindow): string {
   const minutes = window.windowDurationMins ?? 0;
   if (minutes >= 9_500 && minutes <= 10_600) return "Weekly usage limit";
   if (minutes >= 285 && minutes <= 315) return "5 hour usage limit";

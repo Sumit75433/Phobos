@@ -71,7 +71,7 @@ function toBuffer(value) {
 function resolveCodexExecutable(env) {
   const binary = process.platform === "win32" ? "codex.exe" : "codex";
   const candidates = [
-    nonEmptyString(env.OCTOPUS_CODEX_PATH),
+    nonEmptyString(env.PHOBOS_CODEX_PATH),
     ...(nonEmptyString(env.PATH)?.split(path.delimiter).map((entry) => path.join(entry, binary)) ?? []),
     process.platform === "darwin" ? "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex" : "",
     process.platform === "darwin" ? path.join(os.homedir(), "Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex") : "",
@@ -176,7 +176,7 @@ function discoverCodexAuth(input, refresh) {
       id: 1,
       method: "initialize",
       params: {
-        clientInfo: { name: "octopus-desktop", title: "Octopus", version: input.clientVersion },
+        clientInfo: { name: "phobos-desktop", title: "Phobos", version: input.clientVersion },
         capabilities: { experimentalApi: true },
       },
     });

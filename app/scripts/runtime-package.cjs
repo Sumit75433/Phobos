@@ -11,10 +11,10 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
   }
   const bundledAppRoot = outputRoot;
   const generatedOutputs = readGeneratedSourcePaths(repoRoot);
-  const openCodexOwnerRoot = path.join(repoRoot, "registry", "interface", "world_provider_codex", "packages", "octopus-provider-codex");
+  const openCodexOwnerRoot = path.join(repoRoot, "registry", "interface", "world_provider_codex", "packages", "phobos-provider-codex");
   const managedCodexRoot = path.join(openCodexOwnerRoot, "managed-cli");
   const managedCodexDistribution = require(path.join(managedCodexRoot, "bootstrap.cjs"));
-  const openCodexLifeBinary = "octopus-provider-opencodex-life";
+  const openCodexLifeBinary = "phobos-provider-opencodex-life";
 
   function bundleManagedCodex(registries) {
     const sharedBin = path.join(bundledAppRoot, "bin");
@@ -56,13 +56,13 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
     ) {
       throw new Error(`system baseline manifest is invalid: ${manifestPath}`);
     }
-    const identity = JSON.parse(fs.readFileSync(path.join(source, ".octopus-source.json"), "utf8"));
+    const identity = JSON.parse(fs.readFileSync(path.join(source, ".phobos-source.json"), "utf8"));
     if (identity?.schema_version !== 1 || identity?.id !== manifest.id) {
       throw new Error(`system baseline identity disagrees with registry source: ${manifestPath}`);
     }
     fs.rmSync(destination, { recursive: true, force: true });
     fs.mkdirSync(destination, { recursive: true });
-    copyFile(path.join(source, ".octopus-source.json"), path.join(destination, ".octopus-source.json"));
+    copyFile(path.join(source, ".phobos-source.json"), path.join(destination, ".phobos-source.json"));
     for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
       if (entry.isDirectory() && !["target", "node_modules", "__pycache__", ".git"].includes(entry.name)) {
         fs.mkdirSync(path.join(destination, entry.name), { recursive: true });
@@ -102,11 +102,11 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
   }
 
   const installationBinaries = Object.freeze([
-    "octopus",
-    "octopus-operator-chat-artifact",
-    "octopus-operator-chat-topology",
-    "octopus-secret-store",
-    ...(platform === "linux" ? ["octopus-linux-process-authority"] : []),
+    "phobos",
+    "phobos-operator-chat-artifact",
+    "phobos-operator-chat-topology",
+    "phobos-secret-store",
+    ...(platform === "linux" ? ["phobos-linux-process-authority"] : []),
   ]);
 
   function collectBundledBinaries(source) {
@@ -151,7 +151,7 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
     const life = path.join(ownerRoot, "life-bin", openCodexLifeBinary);
     const lifeReceiptFile = path.join(ownerRoot, "build-receipt.json");
     const bridgeRoot = path.join(ownerRoot, "opencodex-bridge");
-    const bridge = path.join(bridgeRoot, "bin", "octopus-opencodex-bridge");
+    const bridge = path.join(bridgeRoot, "bin", "phobos-opencodex-bridge");
     const receiptFile = path.join(bridgeRoot, "build-receipt.json");
     for (const executable of [life, bridge]) {
       const stat = fs.statSync(executable);
@@ -182,7 +182,7 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
     };
     if (
       receipt?.schema_version !== 1
-      || receipt.executable !== "bin/octopus-opencodex-bridge"
+      || receipt.executable !== "bin/phobos-opencodex-bridge"
       || receipt.executable_bytes !== bridgeBytes.length
       || receipt.executable_sha256 !== bridgeDigest
       || typeof upstream?.npm_package !== "string"
@@ -460,7 +460,7 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
         "interface",
         "world_provider_codex",
         "packages",
-        "octopus-provider-codex",
+        "phobos-provider-codex",
       );
       if (fs.existsSync(ownerRoot)) validateOpenCodexOwnerAssets(ownerRoot);
     }
@@ -482,7 +482,7 @@ function createRuntimePackager({ repoRoot, appRoot, outputRoot, platform = proce
   function captureProviderSigningInputs(registries) {
     const records = [];
     for (const registry of registries) {
-      const provider = path.join(registry, "interface", "world_provider_codex", "packages", "octopus-provider-codex");
+      const provider = path.join(registry, "interface", "world_provider_codex", "packages", "phobos-provider-codex");
       if (!fs.existsSync(provider)) continue;
       for (const owner of [provider, path.join(provider, "intake"), path.join(provider, "opencodex-bridge")]) {
         const receiptPath = path.join(owner, "build-receipt.json");

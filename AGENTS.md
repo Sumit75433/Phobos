@@ -1,6 +1,6 @@
-# Octopus
+# Phobos
 
-Octopus is an operating system for agents. A small Rust kernel admits
+Phobos is an operating system for agents. A small Rust kernel admits
 artifacts, forms policy, and records movements. Everything else - model
 providers, channels, tool rooms, workers, memory, the desktop client - attaches
 to it through JSON descriptors and one boundary contract.

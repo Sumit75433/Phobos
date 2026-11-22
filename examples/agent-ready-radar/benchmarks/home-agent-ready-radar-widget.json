@@ -85,7 +85,7 @@
     }
   },
   "revision": 1,
-  "schema": "octopus.client_surface",
+  "schema": "phobos.client_surface",
   "schema_version": 1,
   "target": {
     "kind": "voice.widget",

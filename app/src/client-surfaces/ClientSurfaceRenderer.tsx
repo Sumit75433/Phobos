@@ -9,8 +9,8 @@ import { readPath } from "../runtimeFormat";
 import { readClientExtensionFilesystemSource } from "../extensions/transport";
 import { clearClientSurfaceRuntimeIssue, reportClientSurfaceRuntimeIssue } from "../extensions/runtimeIssues";
 import { Glyph } from "../components/IconGlyphs";
-import { OCTOPUS_FLOATING_SURFACE_CLASS, OCTOPUS_WIDGET_SURFACE_CLASS } from "../design-system/components";
-import type { OctopusClientAccessProfile } from "../electron";
+import { PHOBOS_FLOATING_SURFACE_CLASS, PHOBOS_WIDGET_SURFACE_CLASS } from "../design-system/components";
+import type { PhobosClientAccessProfile } from "../electron";
 import { CLIENT_SURFACE_ACTION_EVENT } from "../clientEvents";
 import type {
   AdmittedClientSurfaceDocument,
@@ -42,10 +42,10 @@ import { HOME_SURFACE_FORMING, HOME_SURFACE_LEAVING } from "./homeSurfaceMotion"
 import { placeVoiceWidget, type WidgetRect } from "./voiceWidgetPlacement";
 import scrollbarCss from "../design-system/scrollbars.css?raw";
 
-const VOICE_WIDGET_LAYOUT_RESET_EVENT = "octopus:voice-widget-layout-reset";
+const VOICE_WIDGET_LAYOUT_RESET_EVENT = "phobos:voice-widget-layout-reset";
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   admitted: AdmittedClientSurfaceDocument;
   onAction?: (action: ClientSurfaceActionEvent) => boolean | void;
   onDismiss?: () => void;
@@ -126,7 +126,7 @@ export function ClientSurfaceRenderer({ accessProfile, admitted, onAction, onDis
     return (
       <motion.section
         animate={{ opacity: voiceLeaving ? 0 : 1 }}
-        className={`voice-projection-card client-surface-frame ${OCTOPUS_WIDGET_SURFACE_CLASS} is-${document.render.kind}${densityClass}${widgetResize.layoutReady ? " is-layout-ready" : ""}${widgetResize.interacting ? " is-interacting" : ""}`}
+        className={`voice-projection-card client-surface-frame ${PHOBOS_WIDGET_SURFACE_CLASS} is-${document.render.kind}${densityClass}${widgetResize.layoutReady ? " is-layout-ready" : ""}${widgetResize.interacting ? " is-interacting" : ""}`}
         data-content-fit={document.target.layout.content_fit}
         data-gesture-label={document.title}
         data-surface-document={document.id}
@@ -187,7 +187,7 @@ export function ClientSurfaceRenderer({ accessProfile, admitted, onAction, onDis
     return (
       <motion.section
         animate={voiceLeaving ? { opacity: 0, scale: 0.985, y: 5 } : { opacity: 1, scale: 1, y: 0 }}
-        className={`voice-surface-window client-surface-frame ${OCTOPUS_FLOATING_SURFACE_CLASS} is-${document.render.kind}${densityClass}${widgetResize.layoutReady ? " is-layout-ready" : ""}${widgetResize.interacting ? " is-interacting" : ""}`}
+        className={`voice-surface-window client-surface-frame ${PHOBOS_FLOATING_SURFACE_CLASS} is-${document.render.kind}${densityClass}${widgetResize.layoutReady ? " is-layout-ready" : ""}${widgetResize.interacting ? " is-interacting" : ""}`}
         data-gesture-label={document.title}
         data-surface-document={document.id}
         data-surface-artifact={admitted.sourceArtifactId}
@@ -289,8 +289,8 @@ type WidgetSizeBounds = {
 };
 
 const VOICE_WIDGET_RESIZE_CORNERS: VoiceSpatialCorner[] = ["north-west", "north-east", "south-east", "south-west"];
-const VOICE_WIDGET_LAYOUT_KEY = "octopus.voice.widget-layout.v3";
-const LAB_VOICE_WIDGET_LAYOUT_KEY = "octopus.voice.widget-layout.v4.lab";
+const VOICE_WIDGET_LAYOUT_KEY = "phobos.voice.widget-layout.v3";
+const LAB_VOICE_WIDGET_LAYOUT_KEY = "phobos.voice.widget-layout.v4.lab";
 const DEFAULT_WIDGET_GEOMETRY: WidgetGeometry = {
   height: null,
   stageHeight: null,
@@ -367,7 +367,7 @@ function useVoiceWidgetContentFit(
   return contentRef;
 }
 
-export function resetVoiceWidgetLayout(accessProfile: OctopusClientAccessProfile): string | null {
+export function resetVoiceWidgetLayout(accessProfile: PhobosClientAccessProfile): string | null {
   const storageKey = voiceWidgetLayoutStorageKey(accessProfile);
   const previous = window.localStorage.getItem(storageKey);
   window.localStorage.removeItem(storageKey);
@@ -376,7 +376,7 @@ export function resetVoiceWidgetLayout(accessProfile: OctopusClientAccessProfile
   return previous;
 }
 
-export function restoreVoiceWidgetLayout(accessProfile: OctopusClientAccessProfile, snapshot: string | null): void {
+export function restoreVoiceWidgetLayout(accessProfile: PhobosClientAccessProfile, snapshot: string | null): void {
   const storageKey = voiceWidgetLayoutStorageKey(accessProfile);
   if (snapshot === null) window.localStorage.removeItem(storageKey);
   else window.localStorage.setItem(storageKey, snapshot);
@@ -386,7 +386,7 @@ export function restoreVoiceWidgetLayout(accessProfile: OctopusClientAccessProfi
 
 export function useVoiceWidgetResize(
   documentId: string,
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   placement?: VoiceSurfacePlacement,
   layout?: VoiceWidgetLayout,
 ) {
@@ -866,11 +866,11 @@ function validWidgetStage(bounds: DOMRect): boolean {
     && bounds.height > WIDGET_EDGE_GAP * 2;
 }
 
-function voiceWidgetLayoutStorageKey(accessProfile: OctopusClientAccessProfile): string {
+function voiceWidgetLayoutStorageKey(accessProfile: PhobosClientAccessProfile): string {
   return accessProfile === "live" ? VOICE_WIDGET_LAYOUT_KEY : LAB_VOICE_WIDGET_LAYOUT_KEY;
 }
 
-function readWidgetGeometry(documentId: string, accessProfile: OctopusClientAccessProfile): WidgetGeometry {
+function readWidgetGeometry(documentId: string, accessProfile: PhobosClientAccessProfile): WidgetGeometry {
   try {
     const stored = JSON.parse(localStorage.getItem(voiceWidgetLayoutStorageKey(accessProfile)) || "{}");
     const value = stored && typeof stored === "object" ? stored[documentId] : undefined;
@@ -894,7 +894,7 @@ function readWidgetGeometry(documentId: string, accessProfile: OctopusClientAcce
 
 function writeWidgetGeometry(
   documentId: string,
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   geometry: WidgetGeometry,
 ) {
   try {
@@ -1393,12 +1393,12 @@ function SandboxSurface({ admitted, appearance, context, onAction }: {
     const listener = (event: MessageEvent) => {
       if (event.source !== iframeRef.current?.contentWindow) return;
       if (!event.data || typeof event.data !== "object") return;
-      if (event.data.type === "octopus.surface.resize") {
+      if (event.data.type === "phobos.surface.resize") {
         const next = Number(event.data.height);
         if (Number.isFinite(next)) setHeight(clamp(next, 80, 1600));
         return;
       }
-      if (event.data.type === "octopus.surface.error") {
+      if (event.data.type === "phobos.surface.error") {
         reportClientSurfaceRuntimeIssue({
           extensionId: admitted.sourceExtensionId,
           documentId: admitted.document.id,
@@ -1406,7 +1406,7 @@ function SandboxSurface({ admitted, appearance, context, onAction }: {
         }, "script", typeof event.data.message === "string" ? event.data.message : "Sandbox script failed");
         return;
       }
-      if (event.data.type !== "octopus.surface.action" || render.kind !== "sandbox") return;
+      if (event.data.type !== "phobos.surface.action" || render.kind !== "sandbox") return;
       const actionId = typeof event.data.actionId === "string" ? event.data.actionId : "";
       const action = render.actions?.[actionId];
       if (action) dispatchAction(admitted.document.id, action, onAction);
@@ -1432,7 +1432,7 @@ function sandboxDocument(render: Extract<ClientSurfaceDocument["render"], { kind
   const encodedContext = encodeScriptJson(context);
   const css = escapeClosingTag(`${sandboxThemeCss()}${render.css ?? ""}`, "style");
   const javascript = escapeClosingTag(render.javascript ?? "", "script");
-  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; media-src 'none'; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body>${render.html}<script>(()=>{const fail=(reason)=>parent.postMessage({type:"octopus.surface.error",message:String(reason&&reason.message||reason||"Script error").slice(0,2000)},"*");addEventListener("error",(event)=>fail(event.error||event.message));addEventListener("unhandledrejection",(event)=>fail(event.reason))})();window.octopusSurface=${encodedContext};Object.defineProperty(window.octopusSurface,"invoke",{enumerable:false,value:(actionId)=>{if(typeof actionId==="string"&&/^[a-z0-9][a-z0-9._-]{1,63}$/.test(actionId))parent.postMessage({type:"octopus.surface.action",actionId},"*")}});(()=>{const send=()=>parent.postMessage({type:"octopus.surface.resize",height:Math.ceil(document.documentElement.getBoundingClientRect().height)},"*");new ResizeObserver(send).observe(document.documentElement);addEventListener("load",send);send()})();</script>${javascript ? `<script>${javascript}</script>` : ""}</body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; media-src 'none'; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body>${render.html}<script>(()=>{const fail=(reason)=>parent.postMessage({type:"phobos.surface.error",message:String(reason&&reason.message||reason||"Script error").slice(0,2000)},"*");addEventListener("error",(event)=>fail(event.error||event.message));addEventListener("unhandledrejection",(event)=>fail(event.reason))})();window.phobosSurface=${encodedContext};Object.defineProperty(window.phobosSurface,"invoke",{enumerable:false,value:(actionId)=>{if(typeof actionId==="string"&&/^[a-z0-9][a-z0-9._-]{1,63}$/.test(actionId))parent.postMessage({type:"phobos.surface.action",actionId},"*")}});(()=>{const send=()=>parent.postMessage({type:"phobos.surface.resize",height:Math.ceil(document.documentElement.getBoundingClientRect().height)},"*");new ResizeObserver(send).observe(document.documentElement);addEventListener("load",send);send()})();</script>${javascript ? `<script>${javascript}</script>` : ""}</body></html>`;
 }
 
 function sandboxThemeCss(): string {

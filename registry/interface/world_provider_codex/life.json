@@ -1,6 +1,6 @@
 {
   "processes": [{
-      "bin": "target/debug/octopus-provider-codex-life",
+      "bin": "target/debug/phobos-provider-codex-life",
       "doctor": {
         "args": ["--doctor"],
         "timeout_ms": 5000
@@ -14,13 +14,13 @@
       "args": [],
       "read_handles": ["ledger", "ledger_index", "blobs"],
       "coordinate_root_slots": ["run_records_root", "app_server_control_root", "registry_interface_root"],
-      "inherit_env": ["HOME", "PATH", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "OCTOPUS_MACHINE_CODEX_AUTH_FILE", "OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE"],
+      "inherit_env": ["HOME", "PATH", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "PHOBOS_MACHINE_CODEX_AUTH_FILE", "PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE"],
       "authority": {
         "read_root_slots": ["run_records_root", "registry_interface_root"],
         "write_root_slots": ["interface_hand_in_root"],
         "executable_root_slots": [],
         "read_paths": ["/etc"],
-        "write_paths": ["/tmp/octopus-provider-cwd"],
+        "write_paths": ["/tmp/phobos-provider-cwd"],
         "executable_paths": [],
         "executable_root_subpaths": [{
           "root_slot": "registry_interface_root",
@@ -30,8 +30,8 @@
           "relative_path": "world_provider_codex/packages/bin/codex-code-mode-host"
         }],
         "executable_commands": [],
-        "read_env_paths": ["OCTOPUS_MACHINE_CODEX_AUTH_FILE"],
-        "write_env_paths": ["OCTOPUS_MACHINE_CODEX_AUTH_FILE", "OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE"],
+        "read_env_paths": ["PHOBOS_MACHINE_CODEX_AUTH_FILE"],
+        "write_env_paths": ["PHOBOS_MACHINE_CODEX_AUTH_FILE", "PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE"],
         "executable_env_paths": [],
         "read_env_subpaths": [],
         "allow_network": true,

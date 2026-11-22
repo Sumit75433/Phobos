@@ -1,17 +1,17 @@
-import type { OctopusChatgptAccount, OctopusChatgptAccountSessions } from "../electron";
+import type { PhobosChatgptAccount, PhobosChatgptAccountSessions } from "../electron";
 
-export type ChatgptAccountBridge = Pick<NonNullable<Window["octopusTransport"]>,
+export type ChatgptAccountBridge = Pick<NonNullable<Window["phobosTransport"]>,
   "chatgptAccount" | "chatgptAccountSessions" | "chatgptSwitchWorkspace" | "chatgptSignInStart" | "chatgptSignInStatus"
   | "chatgptSignInCancel" | "chatgptLogout" | "onChatgptAccountChanged">;
 
 export type ChatgptAccountState = {
-  account: OctopusChatgptAccount | null;
+  account: PhobosChatgptAccount | null;
   loading: boolean;
   action: "idle" | "starting" | "waiting" | "cancelling" | "signing-out" | "switching";
   error: string;
   signInStatusError: string;
   signInUrl: string;
-  sessions: OctopusChatgptAccountSessions | null;
+  sessions: PhobosChatgptAccountSessions | null;
   sessionsLoading: boolean;
   sessionsError: string;
 };
@@ -21,7 +21,7 @@ export type ChatgptWorkspaceSwitchOutcome = "switched" | "browser" | "failed";
 export const EMPTY_CHATGPT_ACCOUNT_STATE: ChatgptAccountState = { account: null, loading: true, action: "idle", error: "", signInStatusError: "", signInUrl: "",
   sessions: null, sessionsLoading: false, sessionsError: "" };
 
-export function chatgptAccountIdentity(account: OctopusChatgptAccount | null): string | null {
+export function chatgptAccountIdentity(account: PhobosChatgptAccount | null): string | null {
   return account?.signedIn ? JSON.stringify([account.credentialHome, account.email, account.workspaceName ?? null]) : null;
 }
 
@@ -29,13 +29,13 @@ export function createChatgptAccountState(bridge: ChatgptAccountBridge, home?: s
   let state = EMPTY_CHATGPT_ACCOUNT_STATE;
   let disposed = false;
   let readGeneration = 0;
-  let pendingRead: Promise<OctopusChatgptAccount | null> | null = null;
+  let pendingRead: Promise<PhobosChatgptAccount | null> | null = null;
   let actionGeneration = 0;
   let loginId = "";
   let timer: ReturnType<typeof setTimeout> | null = null;
   let observedIdentity: string | null = null;
   let sessionsGeneration = 0;
-  let pendingSessions: Promise<OctopusChatgptAccountSessions | null> | null = null;
+  let pendingSessions: Promise<PhobosChatgptAccountSessions | null> | null = null;
   const listeners = new Set<() => void>();
   const message = (error: unknown) => error instanceof Error ? error.message : String(error);
   function update(patch: Partial<ChatgptAccountState>) {
@@ -47,7 +47,7 @@ export function createChatgptAccountState(bridge: ChatgptAccountBridge, home?: s
     timer = null;
     actionGeneration += 1;
   }
-  function observeAccount(account: OctopusChatgptAccount | null): Partial<ChatgptAccountState> {
+  function observeAccount(account: PhobosChatgptAccount | null): Partial<ChatgptAccountState> {
     const identity = chatgptAccountIdentity(account);
     if (identity === observedIdentity) return {};
     observedIdentity = identity;
@@ -55,15 +55,15 @@ export function createChatgptAccountState(bridge: ChatgptAccountBridge, home?: s
     pendingSessions = null;
     return { sessions: null, sessionsLoading: false, sessionsError: "" };
   }
-  function requireHome(observation: { octopusHome: string | null }) {
-    if (home !== undefined && observation.octopusHome !== home) throw new Error("The provider account observation belongs to another Home.");
+  function requireHome(observation: { phobosHome: string | null }) {
+    if (home !== undefined && observation.phobosHome !== home) throw new Error("The provider account observation belongs to another Home.");
   }
-  function loadSessions(): Promise<OctopusChatgptAccountSessions | null> {
+  function loadSessions(): Promise<PhobosChatgptAccountSessions | null> {
     if (disposed || !state.account?.signedIn) return Promise.resolve(null);
     if (pendingSessions) return pendingSessions;
     const generation = ++sessionsGeneration;
     update({ sessionsLoading: true, sessionsError: "" });
-    const request: Promise<OctopusChatgptAccountSessions | null> = Promise.resolve().then(() => bridge.chatgptAccountSessions()).then((sessions) => {
+    const request: Promise<PhobosChatgptAccountSessions | null> = Promise.resolve().then(() => bridge.chatgptAccountSessions()).then((sessions) => {
       requireHome(sessions);
       if (generation !== sessionsGeneration) return state.sessions;
       update({ sessions, sessionsLoading: false });
@@ -76,11 +76,11 @@ export function createChatgptAccountState(bridge: ChatgptAccountBridge, home?: s
     pendingSessions = request;
     return request;
   }
-  function refresh(): Promise<OctopusChatgptAccount | null> {
+  function refresh(): Promise<PhobosChatgptAccount | null> {
     if (disposed) return Promise.resolve(null);
     const generation = ++readGeneration;
     update({ account: null, loading: true, error: "" });
-    const request: Promise<OctopusChatgptAccount | null> = Promise.resolve().then(() => bridge.chatgptAccount()).then((account) => {
+    const request: Promise<PhobosChatgptAccount | null> = Promise.resolve().then(() => bridge.chatgptAccount()).then((account) => {
       requireHome(account);
       return account;
     }).then((account) => {

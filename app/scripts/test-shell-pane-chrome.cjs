@@ -90,7 +90,7 @@ test("the window header owns pane tabs and the Tools surface retains content, se
   const { WorkspaceSurfacePane, WorkspacePaneManager, WindowPaneControlsProvider, WorkspacePaneHeaderActions, useClientPaneWindowDrag, usePaneTabs } = await compiled;
   const actions = [], closed = [], reorders = [], transfers = [], focusChanges = [];
   let paneWidth;
-  window.octopusTransport = { onClientPaneDragState: () => () => {}, beginClientPaneDrag: async () => {}, finishClientPaneDrag: async () => {}, cancelClientPaneDrag: async () => {} };
+  window.phobosTransport = { onClientPaneDragState: () => () => {}, beginClientPaneDrag: async () => {}, finishClientPaneDrag: async () => {}, cancelClientPaneDrag: async () => {} };
   const browserSource = ts.createSourceFile("browser.tsx", fs.readFileSync(path.join(__dirname, "../src/components/worker-environment/RunEnvironmentBrowserSurfaces.tsx"), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const geometrySource = browserSource.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "nativeBrowserGeometry");
   assert(geometrySource);
@@ -191,7 +191,7 @@ test("the window header owns pane tabs and the Tools surface retains content, se
   assert.equal(paneWidth.get(), 0, "the composer receives the released width immediately");
   assert.deepEqual(closed.slice(closedBefore), ["b"], "a middle click closes the tab");
   await React.act(() => root.unmount());
-  delete window.octopusTransport;
+  delete window.phobosTransport;
 });
 
 test("resize cancellation uses the last captured position and ignores unrelated pointers", async () => {

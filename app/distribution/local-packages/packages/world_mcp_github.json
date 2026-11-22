@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_mcp_github",
   "version": "2.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "GitHub",
     "description": "Work with repositories, code, issues, pull requests and workflows through the GitHub app connected to your ChatGPT account.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "plugin",
     "icon": "github"
   },

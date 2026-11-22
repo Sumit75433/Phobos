@@ -14,7 +14,7 @@ export type ClientNotificationTarget =
   | { kind: "mark"; movementId: string }
   | { kind: "surface"; surfaceId: string };
 
-export const CLIENT_NOTIFICATION_ACTIVATE_EVENT = "octopus:client-notification-activate";
+export const CLIENT_NOTIFICATION_ACTIVATE_EVENT = "phobos:client-notification-activate";
 
 const delivered = new Map<string, number>();
 

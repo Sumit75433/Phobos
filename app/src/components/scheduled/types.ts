@@ -1,4 +1,4 @@
-import type { OctopusScheduledDraft } from "../../electron";
+import type { PhobosScheduledDraft } from "../../electron";
 
 export type ScheduledInterfaceStatus = "enabled" | "disabled" | "invalid" | "template" | "armed" | "fired" | "disarmed" | "prepared";
 
@@ -98,7 +98,7 @@ export type ScheduledInterfaceProjection = {
   error: string;
 };
 
-export type ScheduledEditorDraft = OctopusScheduledDraft & {
+export type ScheduledEditorDraft = PhobosScheduledDraft & {
   interfaceId: string;
   sourceInterfaceId: string;
 };

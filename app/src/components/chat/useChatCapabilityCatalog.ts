@@ -7,7 +7,7 @@ import {
   type ChatExecutionContext,
   type ChatWorkerEnvironmentRoom,
 } from "../../chatRuns";
-import type { OctopusClientAccessProfile, OctopusProviderInterface } from "../../electron";
+import type { PhobosClientAccessProfile, PhobosProviderInterface } from "../../electron";
 import {
   hasProjectionBridge,
   readRuntimeProviderInterfaces,
@@ -23,7 +23,7 @@ import type { ChatToolPresentationIndex } from "./types";
 type ProviderRead = { key: string; generation: number; promise: Promise<void> };
 
 export function useChatCapabilityCatalog(
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   enabled: boolean,
   runtimeReady: boolean,
   runtimeHome: string,
@@ -40,7 +40,7 @@ export function useChatCapabilityCatalog(
   const [workerEnvironmentRooms, setWorkerEnvironmentRooms] = useState<ChatWorkerEnvironmentRoom[]>([]);
   const [toolPresentations, setToolPresentations] = useState<ChatToolPresentationIndex>({});
   const [executionContextError, setExecutionContextError] = useState("");
-  const [providerInterfaces, setProviderInterfaces] = useState<OctopusProviderInterface[]>([]);
+  const [providerInterfaces, setProviderInterfaces] = useState<PhobosProviderInterface[]>([]);
   const [providerInterfacesLoaded, setProviderInterfacesLoaded] = useState(false);
   const [providerReadPending, setProviderReadPending] = useState(false);
   const [completedProviderReadKey, setCompletedProviderReadKey] = useState("");
@@ -154,7 +154,7 @@ export function useChatCapabilityCatalog(
 
   useEffect(() => {
     if (accessProfile !== "live" || !enabled) return;
-    return window.octopusTransport?.onChatgptAccountChanged?.(() => { void refreshProviderInterfaces(true); });
+    return window.phobosTransport?.onChatgptAccountChanged?.(() => { void refreshProviderInterfaces(true); });
   }, [accessProfile, enabled, refreshProviderInterfaces]);
 
   useEffect(() => {

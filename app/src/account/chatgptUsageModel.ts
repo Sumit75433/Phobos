@@ -1,4 +1,4 @@
-import type { OctopusChatgptLimit, OctopusChatgptUsage } from "../electron";
+import type { PhobosChatgptLimit, PhobosChatgptUsage } from "../electron";
 
 export type AccountUsageWindow = {
   key: string;
@@ -9,10 +9,10 @@ export type AccountUsageWindow = {
   remaining: number | null;
   resetsAt: number | null;
 };
-export type AccountUsageGroup = { key: string; label: string; limit: OctopusChatgptLimit; windows: AccountUsageWindow[] };
+export type AccountUsageGroup = { key: string; label: string; limit: PhobosChatgptLimit; windows: AccountUsageWindow[] };
 
-export function accountUsageGroups(usage: OctopusChatgptUsage): AccountUsageGroup[] {
-  const entries: Array<[string, OctopusChatgptLimit]> = usage.rateLimitsByLimitId === null
+export function accountUsageGroups(usage: PhobosChatgptUsage): AccountUsageGroup[] {
+  const entries: Array<[string, PhobosChatgptLimit]> = usage.rateLimitsByLimitId === null
     ? [[usage.rateLimits.limitId ?? "account", usage.rateLimits]]
     : Object.entries(usage.rateLimitsByLimitId);
   return entries.map(([key, limit]) => ({

@@ -343,7 +343,7 @@ class BotApi:
 
     def _exchange(self, verb, path, body, content_type, method, timeout, maximum):
         host_header = self.base["host"] if self.base["port"] in (80, 443) else f"{self.base['host']}:{self.base['port']}"
-        request = [f"{verb} {self.base['prefix']}{path} HTTP/1.1", f"Host: {host_header}", "User-Agent: octopus-world-telegram/1", "Accept: application/json", "Connection: close"]
+        request = [f"{verb} {self.base['prefix']}{path} HTTP/1.1", f"Host: {host_header}", "User-Agent: phobos-world-telegram/1", "Accept: application/json", "Connection: close"]
         if body is not None:
             request += [f"Content-Type: {content_type}", f"Content-Length: {len(body)}"]
         payload = ("\r\n".join(request) + "\r\n\r\n").encode("utf-8") + (body or b"")
@@ -419,7 +419,7 @@ class BotApi:
         return self._request("POST", f"/bot{self.token}/{method}", body, "application/json", method, timeout or self.request_timeout, retry_safe, self.maximum)
 
     def call_multipart(self, method, fields, files):
-        boundary = "octopus-" + secrets.token_hex(16)
+        boundary = "phobos-" + secrets.token_hex(16)
         body = bytearray()
         for name, value in fields.items():
             if value is None:

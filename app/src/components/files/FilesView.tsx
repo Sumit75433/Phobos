@@ -2,11 +2,11 @@ import { OcLoadingRows, OcLoadingText } from "../../design-system/LoadingSkeleto
 import { motion } from "motion/react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type {
-  OctopusClientAccessProfile,
-  OctopusOsFile,
-  OctopusOsFileEntry,
-  OctopusOsFileRoot,
-  OctopusOsFileSystemAction,
+  PhobosClientAccessProfile,
+  PhobosOsFile,
+  PhobosOsFileEntry,
+  PhobosOsFileRoot,
+  PhobosOsFileSystemAction,
 } from "../../electron";
 import { OcButton, OcIconButton, OcMenuItem } from "../../design-system/components";
 import { OcDropdown } from "../../design-system/OcDropdown";
@@ -21,8 +21,8 @@ import {
   type ResolvedArtifactFilePreview,
 } from "../artifacts/artifactFileOperations";
 import { Glyph } from "../IconGlyphs";
-import { OctopusSpinner } from "../navigation/OctopusSpinner";
-import { OctopusFileTree, OctopusFilterField, OctopusPanelNote, octopusTreeAncestors } from "../OctopusSurface";
+import { PhobosSpinner } from "../navigation/PhobosSpinner";
+import { PhobosFileTree, PhobosFilterField, PhobosPanelNote, phobosTreeAncestors } from "../PhobosSurface";
 import { SetupDialogShell } from "../SetupDialogShell";
 import { PanelResizeHandle, useAnimatedPanelSize } from "../shell/PanelResizeHandle";
 import { FilesCodeEditor } from "./FilesCodeEditor";
@@ -34,7 +34,7 @@ import { filesRootMatches, type FilesEditorViewState, type FilesPaneSnapshot } f
 import "../artifacts/artifact-workbench.css";
 import "./files.css";
 
-type DirectoryCache = Record<string, OctopusOsFileEntry[]>;
+type DirectoryCache = Record<string, PhobosOsFileEntry[]>;
 type ArtifactResolutionState = {
   error: string;
   loading: boolean;
@@ -48,11 +48,11 @@ type ArtifactTextState =
 
 const FILE_TREE_DEFAULT_WIDTH = 250;
 const FILE_TREE_MINIMUM_WIDTH = 200;
-const FILE_TREE_WIDTH_KEY = "octopus.files.treeWidth";
+const FILE_TREE_WIDTH_KEY = "phobos.files.treeWidth";
 const FILES_TEXT_PREVIEW_MAX_BYTES = 2 * 1024 * 1024;
 
 export function FilesView({ accessProfile, active, paneKey, snapshot: initialSnapshot, target }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   active: boolean;
   paneKey: string;
   snapshot?: FilesPaneSnapshot;
@@ -75,13 +75,13 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
   const artifactTargetKey = artifactTarget
     ? JSON.stringify([artifactTarget.artifactId, artifactTarget.runId, artifactTarget.interfaceId, ...(artifactTarget.previewText === undefined ? [] : ["read"])])
     : "";
-  const [roots, setRoots] = useState<OctopusOsFileRoot[]>([]);
+  const [roots, setRoots] = useState<PhobosOsFileRoot[]>([]);
   const [directories, setDirectories] = useState<DirectoryCache>({});
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [loadingPaths, setLoadingPaths] = useState<Set<string>>(new Set());
   const [treeError, setTreeError] = useState("");
   const [query, setQuery] = useState("");
-  const setFile = useCallback((file: OctopusOsFile | null) => updateFilesPane(paneKey, (current) => ({ ...current, file, draft: file?.text ?? "", view: { scrollTop: 0, scrollLeft: 0 } })), [paneKey]);
+  const setFile = useCallback((file: PhobosOsFile | null) => updateFilesPane(paneKey, (current) => ({ ...current, file, draft: file?.text ?? "", view: { scrollTop: 0, scrollLeft: 0 } })), [paneKey]);
   const setDraft = useCallback((draft: string) => updateFilesPane(paneKey, (current) => current.draft === draft ? current : { ...current, draft }), [paneKey]);
   const [fileLoading, setFileLoadingState] = useState(false);
   const fileLoadingRef = useRef(false);
@@ -189,7 +189,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
       setTreeError("");
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.osFileRoots) {
       setTreeError("The desktop Files bridge is unavailable.");
       return;
@@ -253,7 +253,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
   ]);
 
   const loadDirectory = useCallback(async (requestedRootId: string, path: string) => {
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!requestedRootId || !transport?.listOsFiles) return false;
     setLoadingPaths((current) => new Set(current).add(path));
     try {
@@ -304,7 +304,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
       return;
     }
     let cancelled = false;
-    const ancestors = octopusTreeAncestors([location.path]);
+    const ancestors = phobosTreeAncestors([location.path]);
     const directoryLoad = Promise.all(["", ...ancestors].map((path) => loadDirectory(location.rootId, path)));
     const fileLoad = openFile(location.path);
     void Promise.all([directoryLoad, fileLoad]).then(() => {
@@ -331,7 +331,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
   });
 
   const loadedEntries = useMemo(() => {
-    const byPath = new Map<string, OctopusOsFileEntry>();
+    const byPath = new Map<string, PhobosOsFileEntry>();
     for (const entries of Object.values(directories)) {
       for (const entry of entries) byPath.set(entry.path, entry);
     }
@@ -353,7 +353,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
     if (!searchActive && file?.rootId === rootId && file.path && !paths.includes(file.path)) paths.push(file.path);
     return paths;
   }, [file, rootId, searchActive, visibleTreeEntries]);
-  const searchExpandedPaths = useMemo(() => octopusTreeAncestors(fileTreePaths), [fileTreePaths]);
+  const searchExpandedPaths = useMemo(() => phobosTreeAncestors(fileTreePaths), [fileTreePaths]);
   const artifactTreePaths = useMemo(() => {
     const filename = activeArtifactPreview?.file.filename ?? "";
     if (!filename || normalizedQuery && !filename.toLocaleLowerCase().includes(normalizedQuery)) return [];
@@ -386,7 +386,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
       requestDiscard("Discard unsaved changes and open another file?", () => void openFile(path, true));
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.readOsFile) return;
     const requestedRootId = rootId;
     const requestId = fileRequestRef.current + 1;
@@ -415,7 +415,7 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
 
   async function saveFile(): Promise<boolean> {
     if (fileLoading) return false;
-    const saved = await saveFilesPane(paneKey, window.octopusTransport);
+    const saved = await saveFilesPane(paneKey, window.phobosTransport);
     if (!hasFilesPane(paneKey)) return saved;
     if (saved) appToast.success(`Saved ${readFilesPane(paneKey).snapshot.file?.name ?? "file"}`);
     else if (readFilesPane(paneKey).error) appToast.danger(readFilesPane(paneKey).error);
@@ -444,8 +444,8 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
     await openFile(path, true);
   }
 
-  async function fileSystemAction(action: OctopusOsFileSystemAction) {
-    const transport = window.octopusTransport;
+  async function fileSystemAction(action: PhobosOsFileSystemAction) {
+    const transport = window.phobosTransport;
     if (!file || !transport?.performOsFileSystemAction) return;
     try {
       const outcome = await transport.performOsFileSystemAction({ rootId: file.rootId, path: file.path, action });
@@ -665,14 +665,14 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
                 </div>
               ) : null}
               <div className="os-files-filter-shell">
-                <OctopusFilterField inputId="os-files-tree-search" label="Filter files" onQueryChange={setQuery} placeholder="Filter files…" searchQuery={query} />
+                <PhobosFilterField inputId="os-files-tree-search" label="Filter files" onQueryChange={setQuery} placeholder="Filter files…" searchQuery={query} />
               </div>
-              <div className="os-files-octopus-tree">
-                {artifactTarget ? artifactLoading ? <OctopusPanelNote><OcLoadingText label="Resolving artifact payload…" /></OctopusPanelNote>
+              <div className="os-files-phobos-tree">
+                {artifactTarget ? artifactLoading ? <PhobosPanelNote><OcLoadingText label="Resolving artifact payload…" /></PhobosPanelNote>
                   : artifactError ? <p className="os-files-tree-message is-error">Payload unavailable</p>
-                    : searchActive && !treePaths.length ? <OctopusPanelNote>No matching files</OctopusPanelNote>
-                      : !treePaths.length ? <OctopusPanelNote>Payload unavailable</OctopusPanelNote>
-                        : <OctopusFileTree
+                    : searchActive && !treePaths.length ? <PhobosPanelNote>No matching files</PhobosPanelNote>
+                      : !treePaths.length ? <PhobosPanelNote>Payload unavailable</PhobosPanelNote>
+                        : <PhobosFileTree
                             directScrolling
                             initialSelectedPaths={treePaths}
                             onOpenPath={() => undefined}
@@ -682,8 +682,8 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
                             revealSelectedPath
                             selectedPath={treePaths[0]}
                           />
-                  : searchActive ? !treePaths.length ? <OctopusPanelNote>No matching files</OctopusPanelNote>
-                    : <OctopusFileTree
+                  : searchActive ? !treePaths.length ? <PhobosPanelNote>No matching files</PhobosPanelNote>
+                    : <PhobosFileTree
                         directScrolling
                         flattenEmptyDirectories
                         initialExpandedPaths={searchExpandedPaths}
@@ -696,8 +696,8 @@ export function FilesView({ accessProfile, active, paneKey, snapshot: initialSna
                       />
                     : treeError ? <p className="os-files-tree-message is-error">{treeError}</p>
                       : loadingPaths.has("") && !treePaths.length ? <OcLoadingRows label="Loading directory entries…" />
-                        : !treePaths.length ? <OctopusPanelNote>No files in this folder</OctopusPanelNote>
-                          : <OctopusFileTree
+                        : !treePaths.length ? <PhobosPanelNote>No files in this folder</PhobosPanelNote>
+                          : <PhobosFileTree
                               directScrolling
                               initialExpandedPaths={[...expanded]}
                               initialSelectedPaths={file ? [file.path] : []}
@@ -760,7 +760,7 @@ function filesOpenTargetKey(target: FilesOpenTarget | undefined): string {
 
 function FilesUnavailable({ detail, glyph = "file", initial = false, title }: { detail: string; glyph?: "file" | "refresh" | "warning"; initial?: boolean; title: string }) {
   if (glyph === "refresh") {
-    return <div aria-busy="true" className="os-files-loading" role="status"><OctopusSpinner /><span className="sr-only">{title}. {detail}</span></div>;
+    return <div aria-busy="true" className="os-files-loading" role="status"><PhobosSpinner /><span className="sr-only">{title}. {detail}</span></div>;
   }
   return (
     <div className={`os-files-empty${initial ? " is-initial" : ""}`}>

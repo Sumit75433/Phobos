@@ -55,28 +55,28 @@ async function verifySandboxedPreloadImports() {
   const imports = [...source.matchAll(/require\(\s*(["'])([^"']+)\1\s*\)/g)].map((match) => match[2]);
   assert.deepEqual(imports, ["electron"]);
   const preload = loadPreloadTransport(source, {
-    "octopus:access-inherit": (claim) => claim === "claim-1" ? "token-1" : "",
-    "octopus:client-window-bootstrap": () => ({ windowId: "window-1" }),
-    "octopus:client-pane-transfer-begin": (token, request) => token === "token-1" && request.tabId !== "refused"
+    "phobos:access-inherit": (claim) => claim === "claim-1" ? "token-1" : "",
+    "phobos:client-window-bootstrap": () => ({ windowId: "window-1" }),
+    "phobos:client-pane-transfer-begin": (token, request) => token === "token-1" && request.tabId !== "refused"
       ? { ok: true, value: { transferId: "transfer-1" } } : { ok: false, error: { message: "Pane is not transferable." } },
-    "octopus:client-pane-transfer-acknowledge": (token, request) => ({ ok: true, value: { released: true, transferId: request.transferId } }),
+    "phobos:client-pane-transfer-acknowledge": (token, request) => ({ ok: true, value: { released: true, transferId: request.transferId } }),
   });
-  assert.equal(preload.name, "octopusTransport");
+  assert.equal(preload.name, "phobosTransport");
   const request = { marker: "request" };
   for (const [method, args, channel] of [
-    ["openLaunchTerminal", [request], "octopus:launch-terminal-open"],
-    ["writeLaunchTerminal", ["session-1", "ls\n"], "octopus:launch-terminal-write"],
-    ["resizeLaunchTerminal", ["session-1", request], "octopus:launch-terminal-resize"],
-    ["bootStatus", [], "octopus:boot-status"],
-    ["openClientWindow", [request], "octopus:client-window-open"],
-    ["clientWindowReady", [request], "octopus:client-window-ready"],
-    ["acceptClientPaneTransfer", [request], "octopus:client-pane-transfer-accept"],
-    ["commitClientPaneTransfer", [request], "octopus:client-pane-transfer-commit"],
-    ["pendingClientPaneTransfers", [], "octopus:client-pane-transfer-pending"],
-    ["pendingClientPaneDestinationTransfers", [], "octopus:client-pane-transfer-destination-pending"],
-    ["resumeClientPaneTransfer", [request], "octopus:client-pane-transfer-resume"],
-    ["finalizeClientPaneTransfer", [request], "octopus:client-pane-transfer-finalize"],
-    ["submitOperatorTurnControl", [request], "octopus:submit-operator-turn-control"],
+    ["openLaunchTerminal", [request], "phobos:launch-terminal-open"],
+    ["writeLaunchTerminal", ["session-1", "ls\n"], "phobos:launch-terminal-write"],
+    ["resizeLaunchTerminal", ["session-1", request], "phobos:launch-terminal-resize"],
+    ["bootStatus", [], "phobos:boot-status"],
+    ["openClientWindow", [request], "phobos:client-window-open"],
+    ["clientWindowReady", [request], "phobos:client-window-ready"],
+    ["acceptClientPaneTransfer", [request], "phobos:client-pane-transfer-accept"],
+    ["commitClientPaneTransfer", [request], "phobos:client-pane-transfer-commit"],
+    ["pendingClientPaneTransfers", [], "phobos:client-pane-transfer-pending"],
+    ["pendingClientPaneDestinationTransfers", [], "phobos:client-pane-transfer-destination-pending"],
+    ["resumeClientPaneTransfer", [request], "phobos:client-pane-transfer-resume"],
+    ["finalizeClientPaneTransfer", [request], "phobos:client-pane-transfer-finalize"],
+    ["submitOperatorTurnControl", [request], "phobos:submit-operator-turn-control"],
   ]) {
     preload.calls.length = 0;
     await preload.api[method](...args);
@@ -84,36 +84,36 @@ async function verifySandboxedPreloadImports() {
   }
   preload.calls.length = 0;
   assert.deepEqual(preload.api.clientWindowBootstrap(), { windowId: "window-1" });
-  assert.deepEqual(preload.calls, [["sendSync", "octopus:client-window-bootstrap"]]);
+  assert.deepEqual(preload.calls, [["sendSync", "phobos:client-window-bootstrap"]]);
   assert.deepEqual(preload.api.beginClientPaneTransfer({ tabId: "chat" }), { transferId: "transfer-1" });
   assert.throws(() => preload.api.beginClientPaneTransfer({ tabId: "refused" }), /Pane is not transferable\./);
   assert.deepEqual(preload.api.acknowledgeClientPaneTransfer({ transferId: "transfer-1" }), { released: true, transferId: "transfer-1" });
   const completions = [];
   const stopCompletions = preload.api.onClientPaneTransferCompleted((completion) => completions.push(completion));
-  preload.emit("octopus:client-pane-transfer-completed", { transferId: "transfer-1" });
+  preload.emit("phobos:client-pane-transfer-completed", { transferId: "transfer-1" });
   stopCompletions();
-  preload.emit("octopus:client-pane-transfer-completed", { transferId: "transfer-2" });
+  preload.emit("phobos:client-pane-transfer-completed", { transferId: "transfer-2" });
   assert.deepEqual(completions, [{ transferId: "transfer-1" }]);
   preload.calls.length = 0;
   const hostStates = [];
   const stopHostStates = preload.api.onRuntimeHostState((state) => hostStates.push(state));
-  preload.emit("octopus:runtime-host-state", { phase: "ready" });
+  preload.emit("phobos:runtime-host-state", { phase: "ready" });
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(hostStates, [{ phase: "ready" }]);
   assert.deepEqual(preload.calls.map(([kind, channel, token]) => [kind, channel, token]), [
-    ["invoke", "octopus:runtime-events-unsubscribe", "token-1"], ["invoke", "octopus:runtime-events-subscribe", "token-1"],
+    ["invoke", "phobos:runtime-events-unsubscribe", "token-1"], ["invoke", "phobos:runtime-events-subscribe", "token-1"],
   ]);
   stopHostStates();
-  assert.deepEqual(preload.calls.at(-1).slice(0, 3), ["invoke", "octopus:runtime-events-unsubscribe", "token-1"]);
+  assert.deepEqual(preload.calls.at(-1).slice(0, 3), ["invoke", "phobos:runtime-events-unsubscribe", "token-1"]);
   const locks = [];
   preload.api.onClientAccessLocked((status) => locks.push(status));
   preload.calls.length = 0;
-  preload.emit("octopus:client-access-locked", { locked: true });
+  preload.emit("phobos:client-access-locked", { locked: true });
   assert.deepEqual(locks, [{ locked: true }]);
-  assert.deepEqual(preload.calls, [["invoke", "octopus:runtime-events-unsubscribe", "token-1"]]);
+  assert.deepEqual(preload.calls, [["invoke", "phobos:runtime-events-unsubscribe", "token-1"]]);
   preload.calls.length = 0;
   await preload.api.bootStatus();
-  assert.deepEqual(preload.calls, [["invoke", "octopus:boot-status", ""]], "a locked window stops presenting its access token");
+  assert.deepEqual(preload.calls, [["invoke", "phobos:boot-status", ""]], "a locked window stops presenting its access token");
 }
 
 function loadPreloadTransport(source, sendSyncReplies) {
@@ -135,7 +135,7 @@ function loadPreloadTransport(source, sendSyncReplies) {
   };
   vm.runInNewContext(source, {
     require: (id) => { assert.equal(id, "electron"); return electron; },
-    process: { argv: ["electron", "--octopus-access-claim=claim-1"] },
+    process: { argv: ["electron", "--phobos-access-claim=claim-1"] },
     console, setTimeout, clearTimeout, setImmediate, URL, Error, Promise,
   });
   return {
@@ -150,7 +150,7 @@ async function verifyClientWindowHostContract() {
     kind: "surface",
     runId: "run-1",
     surfaceId: "chat",
-    workspaceKey: "octopus-os",
+    workspaceKey: "phobos-os",
   };
   const request = validateClientWindowOpenRequest({ initialTarget: surface });
   assert.deepEqual(request, { initialTarget: surface });
@@ -167,7 +167,7 @@ async function verifyClientWindowHostContract() {
   } });
   assert.deepEqual(validateClientWindowOpenRequest({ initialTarget: {
     kind: "worker_environment",
-    workspaceKey: "octopus-os",
+    workspaceKey: "phobos-os",
     target: {
       schemaVersion: 1,
       workerEnvironmentId: "we-1",
@@ -182,7 +182,7 @@ async function verifyClientWindowHostContract() {
     kind: "terminal",
     terminalId: "terminal-1",
     title: "Terminal",
-    workspaceKey: "octopus-os",
+    workspaceKey: "phobos-os",
   } }), /Terminal panes cannot be transferred/);
   assert.throws(() => validateClientWindowOpenRequest({ initialTarget: { ...surface, extra: "field" } }), /unsupported field/);
   assert.throws(() => validateClientWindowOpenRequest({ initialTarget: { ...surface, surfaceId: "x".repeat(513) } }), /surface id is invalid/);
@@ -194,7 +194,7 @@ async function verifyClientWindowHostContract() {
   } }), /creation time is invalid/);
   assert.throws(() => validateClientWindowOpenRequest({ initialTarget: {
     kind: "worker_environment",
-    workspaceKey: "octopus-os",
+    workspaceKey: "phobos-os",
     target: { schemaVersion: 1, workerEnvironmentId: "we-1", clientSurface: { documentId: "doc", revision: 1, sourceDigest: "digest" } },
   } }), /requires an exact surface id/);
 
@@ -203,7 +203,7 @@ async function verifyClientWindowHostContract() {
   const primary = testClientWindow(101);
   const primaryBootstrap = registry.register(primary, { primary: true });
   assert.deepEqual(primaryBootstrap, {
-    schema: "octopus.client-window",
+    schema: "phobos.client-window",
     schemaVersion: 1,
     windowId: "main",
     scope: "main",
@@ -226,16 +226,16 @@ async function verifyClientWindowHostContract() {
   assert.throws(() => registry.markReady(102, { windowId: "main" }), /does not match/);
   const transferReference = registry.beginPaneTransfer(102, {
     sourcePane: "secondary",
-    sourceTabId: "chat:octopus-os:run-1",
+    sourceTabId: "chat:phobos-os:run-1",
     target: surface,
   });
   assert.throws(() => registry.beginPaneTransfer(102, {
     sourcePane: "secondary",
-    sourceTabId: "chat:octopus-os:run-1",
+    sourceTabId: "chat:phobos-os:run-1",
     target: surface,
   }), /already active for this source tab/);
   assert.deepEqual(transferReference, {
-    schema: "octopus.client-pane-transfer",
+    schema: "phobos.client-pane-transfer",
     schemaVersion: 1,
     sourceWindowId: peerBootstrap.windowId,
     transferId: "transfer-test-2",
@@ -244,14 +244,14 @@ async function verifyClientWindowHostContract() {
   assert.deepEqual(registry.acceptPaneTransfer(101, { transferId: transferReference.transferId }), {
     ...transferReference,
     sourcePane: "secondary",
-    sourceTabId: "chat:octopus-os:run-1",
+    sourceTabId: "chat:phobos-os:run-1",
     target: surface,
   });
   const competingSource = testClientWindow(107);
   registry.register(competingSource, { accessToken: "token-a", primary: false });
   const competingTransfer = registry.beginPaneTransfer(107, {
     sourcePane: "secondary",
-    sourceTabId: "surface:octopus-os:drivers",
+    sourceTabId: "surface:phobos-os:drivers",
     target: { ...surface, runId: "", surfaceId: "drivers" },
   });
   assert.throws(() => registry.acceptPaneTransfer(101, { transferId: competingTransfer.transferId }), /destination is already accepting another tab/);
@@ -260,7 +260,7 @@ async function verifyClientWindowHostContract() {
   const expectedCompletion = {
     ...transferReference,
     sourcePane: "secondary",
-    sourceTabId: "chat:octopus-os:run-1",
+    sourceTabId: "chat:phobos-os:run-1",
     target: surface,
   };
   const committedTransfer = registry.commitPaneTransfer(101, { transferId: transferReference.transferId });
@@ -279,7 +279,7 @@ async function verifyClientWindowHostContract() {
   assert.throws(() => registry.cancelPaneTransfer(102, { transferId: transferReference.transferId }), /requires source acknowledgement/);
   assert.throws(() => registry.beginPaneTransfer(102, {
     sourcePane: "secondary",
-    sourceTabId: "chat:octopus-os:run-1",
+    sourceTabId: "chat:phobos-os:run-1",
     target: surface,
   }), /already active for this source tab/);
   assert.deepEqual(registry.acknowledgePaneTransfer(102, { released: true, transferId: transferReference.transferId }), {
@@ -426,13 +426,13 @@ async function verifyClientWindowHostContract() {
 
 async function verifyRuntimeReadinessEvidence() {
   const root = await fs.mkdtemp(process.platform === "win32"
-    ? path.join(os.tmpdir(), "octopus-runtime-observer-")
-    : "/tmp/octopus-runtime-observer-");
+    ? path.join(os.tmpdir(), "phobos-runtime-observer-")
+    : "/tmp/phobos-runtime-observer-");
   const home = path.join(root, "home");
   const registry = path.join(root, "registry");
-  const runtimeBinary = path.join(root, "octopus");
+  const runtimeBinary = path.join(root, "phobos");
   const endpoint = path.join(home, "app-server-control", "app-server-control.sock");
-  const launchEnv = { OCTOPUS_HOME: home, OCTOPUS_SOURCE_REGISTRY: registry };
+  const launchEnv = { PHOBOS_HOME: home, PHOBOS_SOURCE_REGISTRY: registry };
   const host = createRuntimeHost({
     home: () => home,
     sourceRegistry: () => registry,
@@ -536,7 +536,7 @@ async function verifyRuntimeReadinessEvidence() {
 }
 
 async function verifyBootTerminalBehavior() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-boot-terminal-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-boot-terminal-"));
   const host = createTerminalHost();
   const enterOwner = { scope: "launch", senderId: 101, token: "" };
   const editOwner = { scope: "launch", senderId: 202, token: "" };
@@ -550,7 +550,7 @@ async function verifyBootTerminalBehavior() {
     const entered = host.open(enterOwner, {
       terminalId: "launch",
       cwd: root,
-      env: { OCTOPUS_TEST_BOOT: "1" },
+      env: { PHOBOS_TEST_BOOT: "1" },
       preparedCommand: enterCommand,
       cols: 90,
       rows: 24,
@@ -593,7 +593,7 @@ async function verifyBootTerminalBehavior() {
 
 async function verifyBootTerminalQuit() {
   if (process.platform === "win32") return;
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-boot-terminal-quit-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-boot-terminal-quit-"));
   const host = createTerminalHost();
   const owner = { scope: "launch", senderId: 212, token: "" };
   const childPidPath = path.join(root, "child.pid");
@@ -634,7 +634,7 @@ async function verifyBootTerminalQuit() {
 }
 
 async function verifyTerminalOwnership() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-terminal-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-terminal-test-"));
   const host = createTerminalHost();
   const owner = { scope: "access", senderId: 101, token: "owner-a" };
   const foreign = { scope: "access", senderId: 102, token: "owner-b" };
@@ -719,7 +719,7 @@ function verifyOperatorChatSubmitResult() {
       code: "operator_chat_client_contract_mismatch",
     })),
     (error) => error.code === "chat_package_repair_required"
-      && error.message === "Octopus Home chat package needs repair before sending."
+      && error.message === "Phobos Home chat package needs repair before sending."
       && error.retryable === false,
   );
   assert.throws(
@@ -729,7 +729,7 @@ function verifyOperatorChatSubmitResult() {
 }
 
 async function verifyGitIndexMutation() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-git-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-git-test-"));
   const filePath = path.join(root, "sample.txt");
   const runId = "run-smoke";
   const workerEnvironmentId = "we-smoke";
@@ -756,8 +756,8 @@ async function verifyGitIndexMutation() {
   });
   try {
     await git("init", "-q");
-    await git("config", "user.email", "octopus@example.invalid");
-    await git("config", "user.name", "Octopus Host Test");
+    await git("config", "user.email", "phobos@example.invalid");
+    await git("config", "user.name", "Phobos Host Test");
     await fs.writeFile(filePath, "before\n");
     await git("add", "sample.txt");
     await git("commit", "-qm", "base");
@@ -797,10 +797,10 @@ async function verifyGitIndexMutation() {
 }
 
 async function verifyProviderCredentialRepair() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-provider-repair-test-"));
-  const octopusHome = path.join(root, "octopus-home");
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-provider-repair-test-"));
+  const phobosHome = path.join(root, "phobos-home");
   const codexHome = path.join(root, "codex-home");
-  const descriptorRoot = path.join(octopusHome, "registry", "interface", "world_provider_codex");
+  const descriptorRoot = path.join(phobosHome, "registry", "interface", "world_provider_codex");
   const authPath = path.join(codexHome, "auth.json");
   const machineAuth = JSON.stringify({
     auth_mode: "chatgpt",
@@ -817,7 +817,7 @@ async function verifyProviderCredentialRepair() {
       id: "world_provider_codex",
       interface_driver_config: {
         residual_ambient: {
-          private_auth_store: { auth_file_env: "OCTOPUS_MACHINE_CODEX_AUTH_FILE" },
+          private_auth_store: { auth_file_env: "PHOBOS_MACHINE_CODEX_AUTH_FILE" },
         },
       },
     }));
@@ -834,13 +834,13 @@ async function verifyProviderCredentialRepair() {
     await assert.rejects(executeClientExtensionAction({
       codexHome,
       installedExtensionIds: [],
-      octopusHome,
+      phobosHome,
     }, request), /not installed/);
 
     const outcome = await executeClientExtensionAction({
       codexHome,
       installedExtensionIds: [PROVIDER_CREDENTIAL_REPAIR_EXTENSION],
-      octopusHome,
+      phobosHome,
     }, request);
     assert.equal(outcome.credentialUpdated, false);
     assert.equal(outcome.runtimeRestarted, false);
@@ -852,7 +852,7 @@ async function verifyProviderCredentialRepair() {
     const [status] = await readClientExtensionActionStatuses({
       codexHome,
       installedExtensionIds: [PROVIDER_CREDENTIAL_REPAIR_EXTENSION],
-      octopusHome,
+      phobosHome,
     });
     assert.equal(status.state, "configured");
     assert.equal(status.actionAvailable, false);
@@ -861,7 +861,7 @@ async function verifyProviderCredentialRepair() {
     await assert.rejects(executeClientExtensionAction({
       codexHome,
       installedExtensionIds: [PROVIDER_CREDENTIAL_REPAIR_EXTENSION],
-      octopusHome,
+      phobosHome,
     }, request), /complete ChatGPT token data/);
 
     await fs.writeFile(authPath, machineAuth, { mode: 0o600 });
@@ -872,7 +872,7 @@ async function verifyProviderCredentialRepair() {
     await assert.rejects(executeClientExtensionAction({
       codexHome,
       installedExtensionIds: [PROVIDER_CREDENTIAL_REPAIR_EXTENSION],
-      octopusHome,
+      phobosHome,
     }, request), (error) => error.code === "provider_auth_store_unsupported");
   } finally {
     await fs.rm(root, { recursive: true, force: true });

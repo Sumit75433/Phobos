@@ -1,6 +1,6 @@
 # Glossary
 
-Terms whose meaning matters across Octopus. Constraints and reasons belong in
+Terms whose meaning matters across Phobos. Constraints and reasons belong in
 [Architecture](architecture.md) and the [contracts](contracts/README.md), not
 in these definitions.
 
@@ -73,9 +73,9 @@ existing primitives; they do not name additional runtime components.
 
 ## Terms from other frameworks
 
-If you are looking for a familiar concept, this is where it lives in Octopus.
+If you are looking for a familiar concept, this is where it lives in Phobos.
 
-| Elsewhere | In Octopus |
+| Elsewhere | In Phobos |
 | --- | --- |
 | Agent | A worker: the same role, kept as a descriptor a run wears. |
 | Session or conversation | An exact interface folder. A session is private vocabulary of the interface that owns it. |
