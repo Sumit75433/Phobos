@@ -41,7 +41,7 @@ def validate_config(c):
     if not isinstance(c, dict) or required - c.keys() or c.keys() - required - optional:
         raise ValueError("invalid github-watch.json keys")
     if c["schema_version"] != 1 or not isinstance(c["repository"], str) or not re.fullmatch(
-            r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", c["repository"]):
+            r"(?!\.{1,2}/)[A-Za-z0-9_.-]+/(?!\.{1,2}$)[A-Za-z0-9_.-]+", c["repository"]):
         raise ValueError("invalid repository or schema_version")
     if not isinstance(c["branch"], str) or not 1 <= len(c["branch"]) <= 200:
         raise ValueError("invalid branch")
