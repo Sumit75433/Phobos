@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/client_extension_publication.schema.json",
-  "title": "Octopus Client Extension Publication",
+  "$id": "https://phobos.local/schemas/client_extension_publication.schema.json",
+  "title": "Phobos Client Extension Publication",
   "type": "object",
   "required": [
     "schema",
@@ -16,9 +16,9 @@
     "bundle_digest"
   ],
   "properties": {
-    "schema": { "const": "octopus.client_extension_publication" },
+    "schema": { "const": "phobos.client_extension_publication" },
     "schema_version": { "const": 1 },
-    "layout": { "const": "octopus.client_extension_library.v1" },
+    "layout": { "const": "phobos.client_extension_library.v1" },
     "extension_id": { "$ref": "#/$defs/id" },
     "extension_version": { "$ref": "#/$defs/version" },
     "manifest_path": { "$ref": "#/$defs/path" },

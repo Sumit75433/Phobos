@@ -44,7 +44,7 @@ export type ArtifactPreviewModel = {
 };
 
 export type ArtifactContextPreparedDetail = {
-  schema: "octopus.client.artifact_context";
+  schema: "phobos.client.artifact_context";
   schemaVersion: 1;
   contextRef: string;
   createdAtMs: number;

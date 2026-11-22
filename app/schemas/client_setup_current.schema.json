@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/client_setup_current.schema.json",
-  "title": "Octopus Current Client Setup",
+  "$id": "https://phobos.local/schemas/client_setup_current.schema.json",
+  "title": "Phobos Current Client Setup",
   "type": "object",
   "required": [
     "schema",
@@ -11,16 +11,16 @@
     "selected_at"
   ],
   "properties": {
-    "schema": { "const": "octopus.client_setup_current" },
+    "schema": { "const": "phobos.client_setup_current" },
     "schema_version": { "const": 1 },
     "operation_id": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/operationId"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/operationId"
     },
     "plan_digest": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/digest"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/digest"
     },
     "selected_at": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/timestamp"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/timestamp"
     }
   },
   "additionalProperties": false

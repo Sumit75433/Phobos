@@ -45,7 +45,7 @@ test("client links own isolated tabs, stay inside their window, and revoke acces
   const popupContents = popup.createWindow({});
   assert.equal(popupContents, views[1].webContents);
   assert.equal(popupContents.url, "", "Electron must retain the original popup navigation, including POST data");
-  assert.equal(sent.at(-1)[0], "octopus:client-browser-opened");
+  assert.equal(sent.at(-1)[0], "phobos:client-browser-opened");
   assert.equal(sent.at(-1)[1].url, "https://popup.test/");
   assert.equal(views[0].webContents.openWindow({ url: "file:///secret" }).action, "deny");
   unlocked = false;

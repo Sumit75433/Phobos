@@ -51,15 +51,15 @@ export function CadencedShimmerText({ active: requestedActive = true, as: Elemen
   return (
     <Element
       {...props}
-      className={`${active ? "loading-shimmer-pure-text octopus-cadenced-shimmer" : ""}${className ? `${active ? " " : ""}${className}` : ""}` || undefined}
+      className={`${active ? "loading-shimmer-pure-text phobos-cadenced-shimmer" : ""}${className ? `${active ? " " : ""}${className}` : ""}` || undefined}
       ref={(element) => {
         elementRef.current = element;
       }}
     >
       {children}
       {active ? (
-        <span aria-hidden="true" className="octopus-cadenced-shimmer-sweep">
-          <span className="octopus-cadenced-shimmer-highlight">{highlight ?? children}</span>
+        <span aria-hidden="true" className="phobos-cadenced-shimmer-sweep">
+          <span className="phobos-cadenced-shimmer-highlight">{highlight ?? children}</span>
         </span>
       ) : null}
     </Element>

@@ -5,7 +5,7 @@
     "system_web_search"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-web-search-tool"
+    "target/debug/phobos-web-search-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": [

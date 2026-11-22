@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "command": "target/debug/octopus-mcp-stdio-room-tool",
+  "command": "target/debug/phobos-mcp-stdio-room-tool",
   "args": [
     "--example-server"
   ],
@@ -11,7 +11,7 @@
     "2025-06-18",
     "2025-03-26"
   ],
-  "client_name": "octopus-mcp-stdio-room",
+  "client_name": "phobos-mcp-stdio-room",
   "client_version": "1",
   "request_timeout_ms": 120000,
   "max_message_bytes": 8388608,

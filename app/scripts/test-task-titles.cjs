@@ -7,16 +7,16 @@ const Ajv = require("ajv");
 const { requestTaskTitle, readTaskTitleTopology } = require("../../registry/interface/world_operator_chat/task-titles.cjs");
 
 test("a task title uses an isolated tool-free run, preserves its model and a concurrent rename, and stops its provider", async () => {
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-task-title-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-task-title-"));
   const registry = path.join(home, "registry"), source = path.resolve(__dirname, "../../registry/interface");
   const write = async (file, value) => { await fs.mkdir(path.dirname(file), { recursive: true }); await fs.writeFile(file, JSON.stringify(value)); };
   const sourceRecord = { id: "task", interface_state: { client: { provider_runtime_interface: "selected-provider" } } };
-  const sourceFile = path.join(home, "state/runs/task.json"), sidecar = path.join(registry, "interface/client/octopus_os.json");
+  const sourceFile = path.join(home, "state/runs/task.json"), sidecar = path.join(registry, "interface/client/phobos_os.json");
   let request, recordFile, deliveries = 0, concurrentRename = false;
   const rows = [];
   const schema = new Ajv({ strict: false, logger: false }).compile(require("../../schemas/run_record.schema.json"));
   const options = {
-    octopusHome: () => home, withRunLock: (_key, fn) => fn(), withTopologyLock: (_home, fn) => fn(),
+    phobosHome: () => home, withRunLock: (_key, fn) => fn(), withTopologyLock: (_home, fn) => fn(),
     assertCurrent() {}, waitForInterface: async () => {},
     readSource: async () => ({ chat: { chat_interface_id: "client", provider_bound_interface_id: "selected-provider", os_root_ee_id: "root" },
       input: { artifact_id: "operator.message:original", content_hash: "01".repeat(32), movement_seq: 4 } }),

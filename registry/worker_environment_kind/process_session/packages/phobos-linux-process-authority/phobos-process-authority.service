@@ -1,0 +1,24 @@
+[Unit]
+Description=Phobos process authority for Linux
+After=apparmor.service
+Requires=apparmor.service
+
+[Service]
+Type=notify
+ExecStart=/usr/libexec/phobos/phobos-linux-process-authority
+User=root
+Group=phobos-process
+UMask=0007
+RuntimeDirectory=phobos-process-authority
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+Delegate=yes
+TasksMax=infinity
+KillMode=process
+Restart=on-failure
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_UNIX
+CapabilityBoundingSet=CAP_MAC_ADMIN CAP_DAC_OVERRIDE CAP_SYS_PTRACE
+
+[Install]
+WantedBy=multi-user.target

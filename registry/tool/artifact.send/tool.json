@@ -2,7 +2,7 @@
   "id": "artifact.send",
   "interface": "system_room",
   "process": {
-    "bin": "target/debug/octopus-artifact-send-tool",
+    "bin": "target/debug/phobos-artifact-send-tool",
     "authority": {
       "read_root_slots": [], "write_root_slots": [], "executable_root_slots": [],
       "read_paths": [], "write_paths": [], "executable_paths": [],

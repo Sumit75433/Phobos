@@ -20,8 +20,8 @@ for (const file of files) {
     additionalProperties: false,
     bannerComment:
       `/* Generated from schemas/${file} — do not edit.\n` +
-      ` * Source of truth: the Rust types (crates/octopus-schemas surfaces()).\n` +
-      ` * Regenerate: cargo run -p octopus-schemas --bin octopus-emit-schemas && npm run gen:types */`,
+      ` * Source of truth: the Rust types (crates/phobos-schemas surfaces()).\n` +
+      ` * Regenerate: cargo run -p phobos-schemas --bin phobos-emit-schemas && npm run gen:types */`,
   });
   await writeFile(path.join(outDir, `${stem}.d.ts`), ts);
   console.log(`wrote src/generated/${stem}.d.ts`);
@@ -55,7 +55,7 @@ const projectionReadBinding = [
   "export type ProjectionReadMethod = typeof PROJECTION_READ_METHODS[number];",
   `export const CLIENT_SURFACE_PROJECTION_READ_METHODS = ${JSON.stringify(clientSurfaceProjectionReadMethods, null, 2)} as const;`,
   "export type ClientSurfaceProjectionReadMethod = typeof CLIENT_SURFACE_PROJECTION_READ_METHODS[number];",
-  "export type OctopusClientProjectionReadRequest = {",
+  "export type PhobosClientProjectionReadRequest = {",
   "  contract_version: typeof PROJECTION_READ_CONTRACT_VERSION;",
   "  method: ProjectionReadMethod;",
   "  params?: Record<string, unknown>;",

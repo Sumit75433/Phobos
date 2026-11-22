@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react";
-import type { OctopusProjectionChange } from "./electron";
+import type { PhobosProjectionChange } from "./electron";
 
 let generation = 0;
 let structureGeneration = 0;
 let registryGeneration = 0;
-const initialProjectionChange: OctopusProjectionChange = { generation: 0, kind: "structure" };
+const initialProjectionChange: PhobosProjectionChange = { generation: 0, kind: "structure" };
 let projectionChange = initialProjectionChange;
 let attached = false;
 let detachProjectionChange: (() => void) | null = null;
@@ -30,11 +30,11 @@ function bump(next: unknown): void {
 function attach(): void {
   if (attached) return;
   attached = true;
-  const bridge = window.octopusTransport;
+  const bridge = window.phobosTransport;
   if (bridge?.onProjectionChanged) {
     detachProjectionChange = bridge.onProjectionChanged((change) => bump(change));
   } else if (import.meta.env.DEV && typeof EventSource === "function") {
-    eventSource = new EventSource("/__octopus/events");
+    eventSource = new EventSource("/__phobos/events");
     eventSource.onmessage = (event) => {
       try {
         bump(JSON.parse(event.data));
@@ -79,7 +79,7 @@ export function currentProjectionRegistryGeneration(): number {
   return registryGeneration;
 }
 
-export function currentProjectionChange(): OctopusProjectionChange {
+export function currentProjectionChange(): PhobosProjectionChange {
   return projectionChange;
 }
 
@@ -107,7 +107,7 @@ export function useProjectionRegistryGeneration(): number {
   );
 }
 
-export function useProjectionChange(): OctopusProjectionChange {
+export function useProjectionChange(): PhobosProjectionChange {
   return useSyncExternalStore(
     subscribeProjectionChanges,
     currentProjectionChange,

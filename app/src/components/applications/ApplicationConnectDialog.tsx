@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import type { OctopusApplicationConnectionProgress, OctopusApplicationConnectionState } from "../../electron";
+import type { PhobosApplicationConnectionProgress, PhobosApplicationConnectionState } from "../../electron";
 import { OcButton, OcDialog, OcIconButton } from "../../design-system/components";
-import { OctopusSpinner } from "../navigation/OctopusSpinner";
+import { PhobosSpinner } from "../navigation/PhobosSpinner";
 import { copyText } from "../../runtimeFormat";
 import {
   canConnectApplications,
@@ -31,10 +31,10 @@ type Blurb = { title?: string; description: string };
 const DEFAULT_BLURBS = (name: string): Blurb[] => [
   {
     title: "Permissions always respected",
-    description: `Octopus uses ${name} only in Home and projects where you allow it, and only in tasks connected to it.`,
+    description: `Phobos uses ${name} only in Home and projects where you allow it, and only in tasks connected to it.`,
   },
   {
-    title: "Stays in your Octopus Home",
+    title: "Stays in your Phobos Home",
     description: "Connection details are saved privately on this computer. Disconnect anytime to remove access.",
   },
   {
@@ -59,7 +59,7 @@ export function ApplicationConnectDialog({
   application: ApplicationRecord | null;
   availabilitySavingEeId: string;
   mode: ApplicationConnectMode;
-  moduleStates: Record<string, OctopusApplicationConnectionState>;
+  moduleStates: Record<string, PhobosApplicationConnectionState>;
   onAvailabilityChange: (application: ApplicationRecord, state: ApplicationProjectState, next: ApplicationAvailabilityChange) => void;
   onChanged: (applicationId: string) => void;
   onClose: () => void;
@@ -110,7 +110,7 @@ function ConnectDialogContent({
   application: ApplicationRecord;
   availabilitySavingEeId: string;
   mode: ApplicationConnectMode;
-  moduleStates: Record<string, OctopusApplicationConnectionState>;
+  moduleStates: Record<string, PhobosApplicationConnectionState>;
   onAvailabilityChange: (application: ApplicationRecord, state: ApplicationProjectState, next: ApplicationAvailabilityChange) => void;
   onBusyChange: (busy: boolean) => void;
   onChanged: (applicationId: string) => void;
@@ -126,7 +126,7 @@ function ConnectDialogContent({
   const [invalid, setInvalid] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [progress, setProgress] = useState<OctopusApplicationConnectionProgress | null>(null);
+  const [progress, setProgress] = useState<PhobosApplicationConnectionProgress | null>(null);
   const [account, setAccount] = useState<{ label: string; detail?: string } | null>(null);
   const operationRef = useRef<{ operationId: string; interfaceId: string } | null>(null);
   const attemptRef = useRef(0);
@@ -259,7 +259,7 @@ function ConnectDialogContent({
               <div className="text-sm text-default">{account.label}</div>
               {account.detail ? <div className="text-sm text-secondary">{account.detail}</div> : null}
             </>
-          ) : <div className="text-sm text-secondary">Saved privately in this Octopus Home</div>
+          ) : <div className="text-sm text-secondary">Saved privately in this Phobos Home</div>
         ) : application.developer ? <div className="text-sm text-secondary">Developed by {application.developer}</div> : null}
       </div>
     </div>
@@ -318,7 +318,7 @@ function ConnectDialogContent({
               {progress ? <ConnectProgress progress={progress} /> : null}
               <ConnectDisclosure blurbs={blurbs} />
               {phase === "error" && error ? <div className="text-center text-sm text-danger" role="alert">{error}</div> : null}
-              {!connectAvailable ? <div className="text-center text-sm text-token-description-foreground">Connect applications from the Octopus desktop client.</div> : null}
+              {!connectAvailable ? <div className="text-center text-sm text-token-description-foreground">Connect applications from the Phobos desktop client.</div> : null}
             </div>
           )}
         </div>
@@ -334,7 +334,7 @@ function ConnectDialogContent({
           variant="primary"
         >
           <span className="flex items-center gap-2">
-            {connecting ? <OctopusSpinner className="icon-xs" /> : null}
+            {connecting ? <PhobosSpinner className="icon-xs" /> : null}
             {primaryLabel}
           </span>
         </OcButton>
@@ -358,7 +358,7 @@ function ConnectField({ disabled, field, invalid, onChange, value }: {
   const placeholder = field.private_saved
     ? "Leave blank to keep the saved value"
     : environment
-      ? "Set in the environment Octopus starts with"
+      ? "Set in the environment Phobos starts with"
       : field.placeholder || (field.required ? "" : "Optional");
   return (
     <div className="flex flex-col gap-2">
@@ -385,7 +385,7 @@ function ConnectField({ disabled, field, invalid, onChange, value }: {
   );
 }
 
-function ConnectProgress({ progress }: { progress: OctopusApplicationConnectionProgress }) {
+function ConnectProgress({ progress }: { progress: PhobosApplicationConnectionProgress }) {
   const [copied, setCopied] = useState(false);
   useEffect(() => setCopied(false), [progress.code]);
   return (
@@ -431,7 +431,7 @@ function ConnectDisclosure({ blurbs }: { blurbs: Blurb[] }) {
   );
 }
 
-function connectionFailureCopy(state: OctopusApplicationConnectionState["state"], name: string): string {
+function connectionFailureCopy(state: PhobosApplicationConnectionState["state"], name: string): string {
   if (state === "expired") return `${name} needs to be connected again.`;
   if (state === "not_connected") return `${name} was not connected.`;
   return `Couldn't connect ${name}. Try again.`;

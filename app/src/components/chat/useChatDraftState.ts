@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type DragEvent, type RefObject, type SetStateAction } from "react";
 import type {
-  OctopusClientAccessProfile,
-  OctopusClientAttachmentStageHandle,
+  PhobosClientAccessProfile,
+  PhobosClientAttachmentStageHandle,
 } from "../../electron";
 import { attachmentLabel } from "./artifacts";
 import { captureAttachmentDrop, discardAttachmentDrop, isAttachmentDrop, resolveAttachmentDrop, validateAttachmentDrop } from "./attachmentDrop";
@@ -69,7 +69,7 @@ type ChatDraftState = ChatDraftValue & {
   navigateInputHistory: (event: globalThis.KeyboardEvent, editor: HTMLElement, inputHistory: string[]) => boolean;
   onDragLeave: () => void;
   onDragOver: (event: DragEvent<HTMLElement>) => void;
-  onFilesPicked: (files: FileList | readonly (File | OctopusClientAttachmentStageHandle)[] | null) => void;
+  onFilesPicked: (files: FileList | readonly (File | PhobosClientAttachmentStageHandle)[] | null) => void;
   dropFiles: (event: DragEvent<HTMLElement>) => void;
   removeAttachment: (id: string) => void;
 };
@@ -79,7 +79,7 @@ export function chatDraftKey(runId: string): string {
 }
 
 export function useChatDraftState(input: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   activeRunId: string;
   onError: (message: string) => void;
   preserveSubmissionIntentOnEdit: (runId: string, messageId: string) => boolean;
@@ -344,7 +344,7 @@ export function useChatDraftState(input: {
     return true;
   }
 
-  function onFilesPicked(files: FileList | readonly (File | OctopusClientAttachmentStageHandle)[] | null) {
+  function onFilesPicked(files: FileList | readonly (File | PhobosClientAttachmentStageHandle)[] | null) {
     const tooLarge: string[] = [];
     const picked: ChatAttachment[] = Array.from(files ?? []).flatMap<ChatAttachment>((value) => {
       if (value.size > MAX_ATTACHMENT_BYTES) {
@@ -433,7 +433,7 @@ export function useChatDraftState(input: {
       input.onError(error instanceof Error ? error.message : String(error));
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     pendingDropRef.current = owner;
     void (async () => {
       const selected = await resolveAttachmentDrop(entries, transport);

@@ -40,7 +40,7 @@
     :root:not([data-reduced-motion]) .oc-skeleton::before { animation: none; will-change: auto; }
   }
   @supports (corner-shape: superellipse(1.5)) {
-    .oc-skeleton { corner-shape: var(--octopus-corner-shape); }
+    .oc-skeleton { corner-shape: var(--phobos-corner-shape); }
   }
   @media (forced-colors: active) {
     .oc-skeleton { background: GrayText; }

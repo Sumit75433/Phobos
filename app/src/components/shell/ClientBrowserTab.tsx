@@ -9,21 +9,21 @@ export function ClientBrowserTab({ id, active }: { id: string; active: boolean }
   const viewport = useRef<HTMLDivElement>(null);
   const action = async (request: ClientBrowserRequest) => {
     try {
-      if (!window.octopusTransport?.clientBrowser) throw new Error("The in-app browser is unavailable.");
-      const next = await window.octopusTransport.clientBrowser(request);
+      if (!window.phobosTransport?.clientBrowser) throw new Error("The in-app browser is unavailable.");
+      const next = await window.phobosTransport.clientBrowser(request);
       if (next) setState(next);
     } catch (error) { appToast.danger(error instanceof Error ? error.message : String(error)); }
   };
   useEffect(() => {
     let disposed = false;
     const update = (next: ClientBrowserState) => { if (!disposed && next.id === id) setState(next); };
-    const stop = window.octopusTransport?.onClientBrowserState(update);
-    void window.octopusTransport?.clientBrowser({ action: "state", id }).then(next => { if (next) update(next); }).catch(error => appToast.danger(String(error)));
+    const stop = window.phobosTransport?.onClientBrowserState(update);
+    void window.phobosTransport?.clientBrowser({ action: "state", id }).then(next => { if (next) update(next); }).catch(error => appToast.danger(String(error)));
     return () => { disposed = true; stop?.(); };
   }, [id]);
   useEffect(() => { if (state) setAddress(state.url); }, [state?.url]);
   useEffect(() => {
-    const element = viewport.current, transport = window.octopusTransport;
+    const element = viewport.current, transport = window.phobosTransport;
     if (!element || !transport) return;
     let stopped = false, frame = 0, last = "";
     const sync = () => {

@@ -8,7 +8,7 @@ const { requestComposerPrediction } = require("../../registry/interface/world_op
 const lifecycle = require("../../registry/interface/world_operator_chat/maintenance-lifecycle.cjs");
 
 test("client maintenance uses isolated ports, preserves results and rearms only settled unchanged records", async () => {
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-prediction-run-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-prediction-run-"));
   const write = async (file, value) => { await fs.mkdir(path.dirname(file), { recursive: true }); await fs.writeFile(file, JSON.stringify(value)); };
   const registry = path.join(home, "registry", "interface");
   const sourcePath = path.join(home, "state/runs/chat.json");
@@ -19,7 +19,7 @@ test("client maintenance uses isolated ports, preserves results and rearms only 
   let sequence = 1, deliveries = 0, commits = 0, recordPath, failed = false;
   const rows = [];
   const options = {
-    octopusHome: () => home, withRunLock: (_id, work) => work(), withTopologyLock: (_home, work) => work(),
+    phobosHome: () => home, withRunLock: (_id, work) => work(), withTopologyLock: (_home, work) => work(),
     assertCurrent() {}, waitForInterface: async () => {},
     readSource: async () => ({ chat: { provider_bound_interface_id: "provider", os_root_ee_id: "root" },
       terminal: { artifact_id: `answer-${sequence}`, content_hash: "01".repeat(32), movement_seq: sequence } }),
@@ -53,7 +53,7 @@ test("client maintenance uses isolated ports, preserves results and rearms only 
     }
     const lifePath = path.join(registry, "system_client_maintenance", "life.json");
     const life = JSON.parse(await fs.readFile(lifePath));
-    life.processes[0].bin = "owner://packages/bin/octopus-app-server-activation-life";
+    life.processes[0].bin = "owner://packages/bin/phobos-app-server-activation-life";
     await write(lifePath, life);
     await write(path.join(registry, "provider", "interface.json"), { id: "provider", interface_driver_ref: "codex_app_server" });
     await write(sourcePath, source);
@@ -68,7 +68,7 @@ test("client maintenance uses isolated ports, preserves results and rearms only 
     assert.equal(owned.interfaces.size, 3);
     assert.equal(owned.interfaces.has("provider"), false);
     const clone = JSON.parse(await fs.readFile(path.join(registry, initial.checkpoints[0].interface_binding.interface, "life.json")));
-    assert.equal(clone.processes[0].bin, "interface://system_client_maintenance/packages/bin/octopus-app-server-activation-life");
+    assert.equal(clone.processes[0].bin, "interface://system_client_maintenance/packages/bin/phobos-app-server-activation-life");
     await requestComposerPrediction(options, { runId: "chat" });
     assert.equal(deliveries, 1); assert.equal(commits, 1);
     sequence = 10; failed = true;

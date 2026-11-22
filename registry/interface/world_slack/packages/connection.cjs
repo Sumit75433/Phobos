@@ -88,7 +88,7 @@ async function effective(ctx, name) {
   const saved = ctx.values?.[name];
   const ambient = await ctx.launchEnvironment(name);
   if (typeof saved === "string" && typeof ambient === "string" && saved !== ambient) {
-    throw new SlackFailure("error", `${name} is set in this Mac's environment and saved in Octopus with a different value, so the Slack interface cannot start. Remove it from the environment or connect with the same value.`);
+    throw new SlackFailure("error", `${name} is set in this Mac's environment and saved in Phobos with a different value, so the Slack interface cannot start. Remove it from the environment or connect with the same value.`);
   }
   const value = typeof ambient === "string" ? ambient : typeof saved === "string" ? saved : "";
   return value.trim();
@@ -339,7 +339,7 @@ async function throughProxy(ctx, route, method, token) {
     const head = [
       `POST ${route.prefix}/${method} HTTP/1.1`,
       `Host: ${route.authority}`,
-      "User-Agent: octopus-world-slack/1",
+      "User-Agent: phobos-world-slack/1",
       "Accept: application/json",
       `Authorization: Bearer ${token}`,
       "Content-Type: application/x-www-form-urlencoded",
@@ -498,19 +498,19 @@ async function disconnect(ctx) {
     for (const name of [names.bot_token_env, names.app_token_env]) {
       if (typeof (await ctx.launchEnvironment(name)) === "string") kept.push(name);
     }
-    const removed = "Slack is disconnected: Octopus removed the tokens and member settings from this Mac.";
+    const removed = "Slack is disconnected: Phobos removed the tokens and member settings from this Mac.";
     if (!kept.length) {
       return { state: "not_connected", manage: manage(null), message: `${removed} The Slack app stays installed in its workspace; uninstall it or regenerate its tokens in the app's Slack settings.` };
     }
     const listed = `${kept.join(" and ")} ${kept.length === 1 ? "is" : "are"} set in this Mac's environment`;
     const state = await probe(ctx);
-    if (state.state === "error") return { ...state, message: `Octopus removed the saved Slack settings, but ${listed} and checking ${kept.length === 1 ? "it" : "them"} failed: ${state.message}` };
+    if (state.state === "error") return { ...state, message: `Phobos removed the saved Slack settings, but ${listed} and checking ${kept.length === 1 ? "it" : "them"} failed: ${state.message}` };
     if (state.state === "not_connected") {
       return { ...state, manage: manage(null), message: `${removed} ${listed}, but without the removed settings no Slack message reaches tasks. The Slack app stays installed in its workspace.` };
     }
     return {
       ...state,
-      message: `Octopus removed the saved Slack settings, but ${listed}, so the Slack interface keeps using ${kept.length === 1 ? "it" : "them"}. Remove ${kept.length === 1 ? "it" : "them"} there to disconnect.`,
+      message: `Phobos removed the saved Slack settings, but ${listed}, so the Slack interface keeps using ${kept.length === 1 ? "it" : "them"}. Remove ${kept.length === 1 ? "it" : "them"} there to disconnect.`,
     };
   });
 }

@@ -1,10 +1,10 @@
 // The regular renderer must retain ownership of the shared custom element.
 // Files owns its shadow stylesheet separately, as the original Files host did.
 import "@pierre/diffs";
-import { registerCustomTheme, wrapCoreCSS } from "@octopus/files-diffs";
-import { registerOctopusDiffThemes } from "../settings/octopusDiffThemes";
+import { registerCustomTheme, wrapCoreCSS } from "@phobos/files-diffs";
+import { registerPhobosDiffThemes } from "../settings/phobosDiffThemes";
 
-registerOctopusDiffThemes(registerCustomTheme);
+registerPhobosDiffThemes(registerCustomTheme);
 
 const stylesheets = new WeakMap<Document, CSSStyleSheet>();
 export function adoptFilesStyles(host: HTMLElement): void {

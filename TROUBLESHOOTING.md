@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Octopus fails closed. When something is wrong you should see an error, not a
+Phobos fails closed. When something is wrong you should see an error, not a
 quiet fallback. This page says where to look.
 
 ## The first five minutes
@@ -33,22 +33,22 @@ For a deeper local investigation:
 1. Run the doctor against the Home you are using. With the installed app:
 
    ```sh
-   /Applications/Octopus.app/Contents/Resources/app/bin/octopus doctor
+   /Applications/Phobos.app/Contents/Resources/app/bin/phobos doctor
    ```
 
-   For a build from source, use `./app/build/Octopus.app` from the checkout
-   root. For a custom Home, pass the same `OCTOPUS_HOME` you launch with.
+   For a build from source, use `./app/build/Phobos.app` from the checkout
+   root. For a custom Home, pass the same `PHOBOS_HOME` you launch with.
 2. Read the error the app shows and use its own retry or sign-in action.
 3. Do not delete the Home or replace its descriptors to make an error go away.
    To start clean, launch with a separate Home instead:
 
    ```sh
-   open -n --env OCTOPUS_HOME="$HOME/.octopus-preview" /Applications/Octopus.app
+   open -n --env PHOBOS_HOME="$HOME/.phobos-preview" /Applications/Phobos.app
    ```
 
 If the failed Home was already moved aside, open **Help → Report a Problem…**
 in the updated app and click **Choose saved Home…**. Select the preserved
-Octopus Home folder, enable **Include error text and log excerpts** if needed,
+Phobos Home folder, enable **Include error text and log excerpts** if needed,
 review the preview and click **Save report…**. The picker shows hidden folders.
 This reads the selected Home without switching to it, starting its runtime or
 changing its files. **Use current Home** returns to the active Home's diagnostics.
@@ -72,13 +72,13 @@ For a package/configuration bug, collect a scoped report before changing the
 Home. From the checkout root, set the Home you actually use:
 
 ```sh
-OCTOPUS_DIAG_HOME="$HOME/.octopus"
-OCTOPUS_DIAG_SOURCE="$PWD/registry"
-OCTOPUS_DIAG_LIBRARY="$PWD/app/distribution/local-packages"
+PHOBOS_DIAG_HOME="$HOME/.phobos"
+PHOBOS_DIAG_SOURCE="$PWD/registry"
+PHOBOS_DIAG_LIBRARY="$PWD/app/distribution/local-packages"
 
 node app/electron/clientDoctor.cjs \
-  "$OCTOPUS_DIAG_SOURCE" "$OCTOPUS_DIAG_HOME/registry" \
-  "$OCTOPUS_DIAG_LIBRARY" "$OCTOPUS_DIAG_HOME/client/package-state" \
+  "$PHOBOS_DIAG_SOURCE" "$PHOBOS_DIAG_HOME/registry" \
+  "$PHOBOS_DIAG_LIBRARY" "$PHOBOS_DIAG_HOME/client/package-state" \
   --package world_provider_codex > package-diagnostic.json
 ```
 
@@ -90,8 +90,8 @@ replace `--package world_provider_codex` with:
 ```
 
 Use the source belonging to the build being diagnosed. For a packaged app,
-set `OCTOPUS_DIAG_SOURCE` to its
-`Contents/Resources/app/local-packages/registry` and `OCTOPUS_DIAG_LIBRARY` to
+set `PHOBOS_DIAG_SOURCE` to its
+`Contents/Resources/app/local-packages/registry` and `PHOBOS_DIAG_LIBRARY` to
 `Contents/Resources/app/local-packages`. A checkout is useful for comparing
 against a proposed update, but it is not evidence of what an older app shipped.
 
@@ -102,7 +102,7 @@ field is not automatically corruption, and a descriptor created only in Home
 does not need a source package owner. `null` means there is not enough evidence
 for that comparison.
 
-The versioned output is `octopus.configuration_diagnostic`, version `1`.
+The versioned output is `phobos.configuration_diagnostic`, version `1`.
 By default it omits names, paths, JSON values, active-content hashes, logs,
 credentials, and environment variables. `--include-paths` adds relative names
 and configuration pointers for a more precise local investigation; review
@@ -120,30 +120,30 @@ include private paths or details. They are not the scoped configuration
 export. Inspect the scoped report first; if a maintainer needs a
 specific setting afterward, share only the relevant sanitized value.
 
-## macOS will not open Octopus, or blocks its tools
+## macOS will not open Phobos, or blocks its tools
 
 The release is ad-hoc signed and not notarized. A disk image downloaded with a
 browser is quarantined, and so is everything copied out of it.
 
-- **"Octopus" Not Opened, or "cannot be opened because Apple cannot check it"**
+- **"Phobos" Not Opened, or "cannot be opened because Apple cannot check it"**
   - clear the quarantine of the installed app once:
 
   ```sh
-  xattr -dr com.apple.quarantine /Applications/Octopus.app
+  xattr -dr com.apple.quarantine /Applications/Phobos.app
   ```
 
 - **The app opened, but tools, provider lives, or `codex` fail to start, or
   macOS asks about them one by one** - the app was admitted with **Open
   Anyway** while still quarantined, and the packages it installed into your Home
-  kept the mark. Quit Octopus and its runtime, then clear both:
+  kept the mark. Quit Phobos and its runtime, then clear both:
 
   ```sh
-  xattr -dr com.apple.quarantine /Applications/Octopus.app
-  xattr -dr com.apple.quarantine "$HOME/.octopus"
+  xattr -dr com.apple.quarantine /Applications/Phobos.app
+  xattr -dr com.apple.quarantine "$HOME/.phobos"
   ```
 
-  Use your `OCTOPUS_HOME` if it is not the default.
-- **The path in an error contains `AppTranslocation`** - Octopus was opened
+  Use your `PHOBOS_HOME` if it is not the default.
+- **The path in an error contains `AppTranslocation`** - Phobos was opened
   from the disk image or the Downloads folder. Move it to Applications, clear
   the quarantine as above, and open it from there.
 
@@ -152,7 +152,7 @@ downloads with `curl` and avoids all three.
 
 ## Setup cannot run python3 or git
 
-For Apple's `python3` and `git` shims, Octopus uses the active developer
+For Apple's `python3` and `git` shims, Phobos uses the active developer
 directory reported by `xcode-select --print-path`. The installed Command Line
 Tools or Xcode must provide the requested command, as described in
 [Apple's command-line tools settings](https://developer.apple.com/documentation/xcode/configuring-command-line-tools-settings).
@@ -179,7 +179,7 @@ records to force a retry.
 
 ## The build fails
 
-- **`Packaging native PiP requires explicit OCTOPUS_NATIVE_NODE_HEADERS`**  - 
+- **`Packaging native PiP requires explicit PHOBOS_NATIVE_NODE_HEADERS`**  - 
   run `node app/native/runtime.cjs headers` and set the variable to the
   directory it prints, as shown in [Getting started](docs/getting-started.md#build).
   `Native headers must be exactly Node 24.22.1` means the variable points at
@@ -204,18 +204,18 @@ records to force a retry.
 
 - **The Home path is too long.** macOS limits Unix socket paths to about 104
   bytes, and the runtime keeps its sockets inside the Home. Use a short path
-  such as `~/.octopus` or `~/.octopus-preview`.
+  such as `~/.phobos` or `~/.phobos-preview`.
 - **The Home path goes through a symlink.** `/tmp` is a symlink on macOS. Point
-  `OCTOPUS_HOME` at a real path under your home directory.
+  `PHOBOS_HOME` at a real path under your home directory.
 - **Another runtime already holds this Home.** One runtime per Home. Quit the
-  other app instance, or run `octopus down` with the same `OCTOPUS_HOME`.
+  other app instance, or run `phobos down` with the same `PHOBOS_HOME`.
 
 ## Sign in with ChatGPT does not complete
 
 - Finish the flow in the browser window that opened, then return to the app.
 - Cancel in the app and start again if the browser tab was closed.
 - The account must have access to the model you select. Availability and usage
-  limits belong to the provider account, not to Octopus.
+  limits belong to the provider account, not to Phobos.
 - The sign-in is shared with Codex CLI through `~/.codex`. An API-key login
   there asks you to sign in with ChatGPT; see
   [Codex CLI](docs/getting-started.md#codex-cli) to keep the two apart.

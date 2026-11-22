@@ -18,8 +18,8 @@ STAGING_MACOS_DIR="$STAGING_CONTENTS_DIR/MacOS"
 STAGING_INFO_PLIST="$STAGING_CONTENTS_DIR/Info.plist"
 BINARY="$BUILD_DIR/$PRODUCT_NAME"
 SIGN_IDENTITY="${AIRHAND_CODESIGN_IDENTITY:-AirHand Local Development}"
-OCTOPUS_HOME_PATH="${OCTOPUS_HOME:-$HOME/.octopus}"
-OCTOPUS_SOCKET="${AIRHAND_OCTOPUS_SOCKET:-$OCTOPUS_HOME_PATH/interfaces/world_hand_gesture_control/airhand.sock}"
+PHOBOS_HOME_PATH="${PHOBOS_HOME:-$HOME/.phobos}"
+PHOBOS_SOCKET="${AIRHAND_PHOBOS_SOCKET:-$PHOBOS_HOME_PATH/interfaces/world_hand_gesture_control/airhand.sock}"
 
 usage() {
   cat <<USAGE
@@ -140,7 +140,7 @@ else
   echo "$APP_NAME bundle is current; not rebuilding or re-signing"
 fi
 
-/usr/bin/open -n "$APP_BUNDLE" --args --octopus-socket "$OCTOPUS_SOCKET"
+/usr/bin/open -n "$APP_BUNDLE" --args --phobos-socket "$PHOBOS_SOCKET"
 
 if [[ "$VERIFY" == "1" ]]; then
   for _ in {1..20}; do

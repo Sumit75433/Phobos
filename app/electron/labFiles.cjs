@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createOsFileStore } = require("./osFiles.cjs");
 
-const LAB_ROOT_ID = "octopus-home";
+const LAB_ROOT_ID = "phobos-home";
 const LAB_ROOT_PATH = "lab://home";
 const REGISTRY_DIRECTORY = "registry";
 const WORKSPACE_DIRECTORY = "workspace";
@@ -78,7 +78,7 @@ function createLabFileStore(options) {
     }
     const next = { text, modifiedAt: new Date().toISOString() };
     workspace.set(location.inner, next);
-    return { ...workspaceDocument(location.path, next), outsideOctopusEvidence: true };
+    return { ...workspaceDocument(location.path, next), outsidePhobosEvidence: true };
   }
 
   function labInterfaceDescriptor(inner) {

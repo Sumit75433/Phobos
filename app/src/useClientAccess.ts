@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readClientAccessStatus } from "./clientAccess";
-import type { OctopusClientAccessStatus } from "./electron";
+import type { PhobosClientAccessStatus } from "./electron";
 
 export function useClientAccess() {
-  const [access, updateAccess] = useState<OctopusClientAccessStatus | null>(null);
+  const [access, updateAccess] = useState<PhobosClientAccessStatus | null>(null);
   const [accessError, setAccessError] = useState("");
   const generation = useRef(0);
 
-  const setAccess = useCallback((status: OctopusClientAccessStatus) => {
+  const setAccess = useCallback((status: PhobosClientAccessStatus) => {
     generation.current += 1;
     updateAccess(status);
     setAccessError("");
@@ -30,7 +30,7 @@ export function useClientAccess() {
     const onVisibility = () => {
       if (document.visibilityState === "visible") void refresh();
     };
-    const unsubscribe = window.octopusTransport?.onClientAccessLocked?.(setAccess);
+    const unsubscribe = window.phobosTransport?.onClientAccessLocked?.(setAccess);
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
     void refresh();

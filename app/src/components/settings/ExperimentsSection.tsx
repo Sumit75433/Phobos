@@ -1,10 +1,10 @@
 import { clientExperiments, useClientExperimentState, useSetClientExperiment } from "../../clientExperiments";
 import { OcCard, OcSettingsRow, OcSwitch } from "../../design-system/components";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { settingsTargetProps } from "./settingsCatalog";
 import { SettingsHeading } from "./SettingsHeading";
 
-export function ExperimentsSection({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
+export function ExperimentsSection({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
   const state = useClientExperimentState(accessProfile);
   const setExperiment = useSetClientExperiment(accessProfile);
   return (

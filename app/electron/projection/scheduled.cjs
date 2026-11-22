@@ -11,10 +11,10 @@ const { readOptionalRegularJsonDocument, readRegularJsonDocument, requirePlainDi
 const { requirePrivatePublicationDirectory, runInterfaceReferences } = require("./taskDeletion.cjs");
 const { arrayValue, atomicWriteJson, exactObjectKeys, requiredDigest, requiredSafeRegistryId, stringValue } = require("./values.cjs");
 
-async function mutateScheduledInterface(registryRoot, octopusHomeRoot, request, hooks = {}) {
+async function mutateScheduledInterface(registryRoot, phobosHomeRoot, request, hooks = {}) {
   const action = stringValue(request?.action);
   if (!["update", "set_enabled", "delete", "undo_changes"].includes(action)) throw new Error("scheduled mutation action is invalid");
-  if (action === "undo_changes") return undoChangeJournal(registryRoot, octopusHomeRoot, request, hooks.commitClientAuthoring);
+  if (action === "undo_changes") return undoChangeJournal(registryRoot, phobosHomeRoot, request, hooks.commitClientAuthoring);
   const interfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
   const interfaceId = requiredSafeRegistryId(request?.interfaceId, "interfaceId");
   const interfaceDirectory = path.join(interfaceRoot, interfaceId);
@@ -52,7 +52,7 @@ async function deleteTrigger(interfaceDirectory, interfaceId, commitClientAuthor
   if (typeof commitClientAuthoring !== "function") throw new Error("client authoring transaction is unavailable");
   const writes = [];
   for (const entry of await fs.readdir(interfaceDirectory, { withFileTypes: true })) {
-    if (entry.name === ".octopus-publication") { await requirePrivatePublicationDirectory(path.join(interfaceDirectory, entry.name)); continue; }
+    if (entry.name === ".phobos-publication") { await requirePrivatePublicationDirectory(path.join(interfaceDirectory, entry.name)); continue; }
     if (!entry.isFile()) throw new Error(`trigger ${interfaceId} holds ${entry.name}, which is not a regular file`);
     const file = path.join(interfaceDirectory, entry.name);
     writes.push({ file, beforeDigest: crypto.createHash("sha256").update(await fs.readFile(file)).digest("hex"), next: null });
@@ -103,8 +103,8 @@ function setupTriggerEntries(pack, selectedRecommended) {
     .sort((left, right) => left.interface_id.localeCompare(right.interface_id));
 }
 
-async function boundTriggerRuns(octopusHomeRoot, interfaceId) {
-  const runRoot = path.join(octopusHomeRoot, "state", "runs");
+async function boundTriggerRuns(phobosHomeRoot, interfaceId) {
+  const runRoot = path.join(phobosHomeRoot, "state", "runs");
   const runs = [];
   for (const entry of await fs.readdir(runRoot, { withFileTypes: true }).catch((error) => error?.code === "ENOENT" ? [] : Promise.reject(error))) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
@@ -114,7 +114,7 @@ async function boundTriggerRuns(octopusHomeRoot, interfaceId) {
   return runs.sort();
 }
 
-async function setupTriggerState(interfaceRoot, octopusHomeRoot, entry) {
+async function setupTriggerState(interfaceRoot, phobosHomeRoot, entry) {
   const interfaceId = requiredSafeRegistryId(entry?.interface_id, "setup trigger interface id");
   const directory = await fs.lstat(path.join(interfaceRoot, interfaceId)).catch((error) => error?.code === "ENOENT" ? null : Promise.reject(error));
   if (!directory) return null;
@@ -123,7 +123,7 @@ async function setupTriggerState(interfaceRoot, octopusHomeRoot, entry) {
   if (parsed.activation.enabled !== true || parsed.config.schedule.inactivity?.seconds !== entry.quiet_period_seconds) {
     throw new Error(`setup trigger ${interfaceId} exists but is not the enabled quiet-period trigger the pack declares`);
   }
-  const runs = await boundTriggerRuns(octopusHomeRoot, interfaceId);
+  const runs = await boundTriggerRuns(phobosHomeRoot, interfaceId);
   if (runs.length === 0) return null;
   return {
     interface_id: interfaceId,
@@ -134,11 +134,11 @@ async function setupTriggerState(interfaceRoot, octopusHomeRoot, entry) {
   };
 }
 
-async function setupTriggerProof(registryRoot, octopusHomeRoot, entries) {
+async function setupTriggerProof(registryRoot, phobosHomeRoot, entries) {
   const interfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
   const proven = [];
   for (const entry of entries) {
-    const state = await setupTriggerState(interfaceRoot, octopusHomeRoot, entry);
+    const state = await setupTriggerState(interfaceRoot, phobosHomeRoot, entry);
     if (!state) return null;
     proven.push(state);
   }
@@ -177,14 +177,14 @@ function setupTriggerTaskPlanner(planSurface, { eeInstancesRoot, rootEeId, home 
   };
 }
 
-async function armSetupTriggers(registryRoot, octopusHomeRoot, entries, hooks = {}) {
+async function armSetupTriggers(registryRoot, phobosHomeRoot, entries, hooks = {}) {
   if (typeof hooks.commitClientAuthoring !== "function" || typeof hooks.planTriggerTask !== "function") {
     throw new Error("setup triggers require the client authoring transaction and the task planner");
   }
   const interfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
   const armed = [];
   for (const entry of entries) {
-    if (await setupTriggerState(interfaceRoot, octopusHomeRoot, entry)) continue;
+    if (await setupTriggerState(interfaceRoot, phobosHomeRoot, entry)) continue;
     const interfaceId = requiredSafeRegistryId(entry.interface_id, "setup trigger interface id");
     const sourceInterfaceId = requiredSafeRegistryId(entry.template_interface_id, "setup trigger template");
     if (!await fs.lstat(path.join(interfaceRoot, interfaceId)).catch((error) => error?.code === "ENOENT" ? null : Promise.reject(error))) {

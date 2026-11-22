@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.container_session",
   "version": "1.0.1",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Container Session",
     "description": "A pinned container to start, run commands in, read and write its files, and stop.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "layers"
   },

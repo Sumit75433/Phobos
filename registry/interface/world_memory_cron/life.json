@@ -12,9 +12,9 @@
     ],
     "required_files": [
       "registry/interface/world_cron/cron_life.py",
-      "registry/interface/world_cron/octopus_content_hash.py"
+      "registry/interface/world_cron/phobos_content_hash.py"
     ],
-    "inherit_env": ["OCTOPUS_CRON_REMINDER", "PATH"],
+    "inherit_env": ["PHOBOS_CRON_REMINDER", "PATH"],
     "authority": {
       "read_root_slots": [
         "run_records_root",

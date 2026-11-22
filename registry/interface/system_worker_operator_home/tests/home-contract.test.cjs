@@ -79,7 +79,7 @@ test('real verifier gates reject undeclared calls and prove receipt without asse
   const request = { params: requirement.params, payload_utf8: JSON.stringify(payload) };
   assert.equal(verify(requirement.verifier, request).passed, true);
   assert.equal(verify(requirement.verifier, { ...request, payload_utf8: JSON.stringify({ ...payload, tool: 'file.write' }) }).passed, false);
-  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'octopus-home-contract-'));
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'phobos-home-contract-'));
   try {
     const payloadPath = path.join(temporary, 'outcome.json');
     fs.writeFileSync(payloadPath, JSON.stringify(example.return_tool_arguments.payload));

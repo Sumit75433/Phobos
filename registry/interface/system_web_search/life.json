@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-web-search-tool-door-life",
+      "bin": "target/debug/phobos-web-search-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -17,10 +17,10 @@
         "FIRECRAWL_API_KEY",
         "FIRECRAWL_API_URL",
         "KEENABLE_BASE_URL",
-        "OCTOPUS_WEB_EXTRACT_URL",
-        "OCTOPUS_WEB_PROXY",
-        "OCTOPUS_WEB_SEARCH_API_KEY",
-        "OCTOPUS_WEB_SEARCH_URL",
+        "PHOBOS_WEB_EXTRACT_URL",
+        "PHOBOS_WEB_PROXY",
+        "PHOBOS_WEB_SEARCH_API_KEY",
+        "PHOBOS_WEB_SEARCH_URL",
         "SEARXNG_BASE_URL",
         "TAVILY_API_KEY",
         "TAVILY_BASE_URL"
@@ -37,7 +37,7 @@
         "read_paths": [],
         "write_paths": [],
         "executable_paths": [
-          "target/debug/octopus-web-search-tool"
+          "target/debug/phobos-web-search-tool"
         ],
         "executable_commands": [],
         "read_env_paths": [],

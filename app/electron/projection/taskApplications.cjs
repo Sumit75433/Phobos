@@ -1,20 +1,20 @@
-module.exports = { applicationTaskCheckpointId, configureOctopusOsTaskApplication, plannedTaskApplicationRemovals, plannedTaskApplicationWrites, readInstalledApplicationManifestDocuments };
+module.exports = { applicationTaskCheckpointId, configurePhobosOsTaskApplication, plannedTaskApplicationRemovals, plannedTaskApplicationWrites, readInstalledApplicationManifestDocuments };
 
 const fs = require("node:fs/promises");
 const crypto = require("node:crypto");
 const path = require("node:path");
 const { installedDescriptorIds } = require("./applicationConfiguration.cjs");
 const { applicationHasAnyAuthoredBinding, applicationIsConnectedToAuthoredRun, taskBaseAuthoringProfile, taskProviderContextArtifactIds } = require("./applicationPackages.cjs");
-const { projectOctopusOsRequiredVerifiedArtifacts } = require("./authoringProfiles.cjs");
+const { projectPhobosOsRequiredVerifiedArtifacts } = require("./authoringProfiles.cjs");
 const { readOptionalRegularJsonDocument, readRegularJsonDocument, requireUnchangedJsonDigest } = require("./jsonFiles.cjs");
-const { parseApplicationManifest, parseOctopusOsSidecar } = require("./sidecars.cjs");
+const { parseApplicationManifest, parsePhobosOsSidecar } = require("./sidecars.cjs");
 const { readClientTaskArchive } = require("./taskArchive.cjs");
 const { assertRunPrivateStateIsOwned, assertTaskWorkerPinRemainsTaskLocal, taskOwnedInterfaceIds, requirePrivatePublicationDirectory, scopedRecordPath, snapshotRemovalDirectory } = require("./taskDeletion.cjs");
 const { arrayValue, isPlainRecord, mapConcurrentOrdered, numberValue, objectOrEmpty, requiredAbsolutePath, requiredBoolean, requiredDigest, requiredSafeRegistryId, requiredString, stringValue } = require("./values.cjs");
 
-async function configureOctopusOsTaskApplication(
+async function configurePhobosOsTaskApplication(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   request,
   withTaskAuthoringLock,
@@ -34,12 +34,12 @@ async function configureOctopusOsTaskApplication(
   const runProjection = scope.clientRuns.find((row) => (
     stringValue(row?.run_id) === runId && stringValue(row?.surface_role) === "task"
   ));
-  if (!runProjection) throw new Error(`task '${runId}' is not a writable Octopus OS task`);
+  if (!runProjection) throw new Error(`task '${runId}' is not a writable Phobos OS task`);
   const expectedDigest = requiredDigest(request?.expectedDigest, "expectedDigest");
   const applicationId = requiredSafeRegistryId(request?.applicationId, "applicationId");
   const connected = requiredBoolean(request?.connected, "connected");
   const environment = scope.byId.get(requiredSafeRegistryId(runProjection.ee_id, "task EE"));
-  if (!environment) throw new Error(`task '${runId}' belongs to an EE outside the Octopus OS scope`);
+  if (!environment) throw new Error(`task '${runId}' belongs to an EE outside the Phobos OS scope`);
   const applicationPath = path.join(
     await fs.realpath(path.join(registryRoot, "interface")),
     applicationId,
@@ -77,7 +77,7 @@ async function configureOctopusOsTaskApplication(
   }
   return withTaskAuthoringLock(runId, async () => {
     const runPath = await scopedRecordPath(
-      octopusHomeRoot,
+      phobosHomeRoot,
       runProjection.record_path,
       path.join("state", "runs"),
       `${runId}.json`,
@@ -136,7 +136,7 @@ async function configureOctopusOsTaskApplication(
     assertRunPrivateStateIsOwned(next, exactInterfaces, runId);
     const workerInterface = requiredSafeRegistryId(next.worker, "task worker interface");
     await assertTaskWorkerPinRemainsTaskLocal(
-      octopusHomeRoot,
+      phobosHomeRoot,
       workerInterface,
       chatInterface,
       next,
@@ -146,10 +146,10 @@ async function configureOctopusOsTaskApplication(
     const chatSidecarPath = path.join(
       await fs.realpath(path.join(registryRoot, "interface")),
       chatInterface,
-      "octopus_os.json",
+      "phobos_os.json",
     );
     const chatSidecar = await readRegularJsonDocument(chatSidecarPath, `task client sidecar ${chatInterface}`);
-    const parsedSidecar = parseOctopusOsSidecar(chatSidecar.document, chatInterface, chatSidecarPath);
+    const parsedSidecar = parsePhobosOsSidecar(chatSidecar.document, chatInterface, chatSidecarPath);
     const profile = objectOrEmpty(parsedSidecar.authoring_profile);
     const currentConnected = applicationIsConnectedToAuthoredRun(next, manifest, profile);
     const currentPresent = applicationHasAnyAuthoredBinding(next, manifest);
@@ -207,7 +207,7 @@ async function configureOctopusOsTaskApplication(
             ...(arrayValue(input?.artifact_names).length
               ? { artifactNames: arrayValue(input.artifact_names).map(stringValue) }
               : {}),
-            requiredVerifiedArtifacts: projectOctopusOsRequiredVerifiedArtifacts(
+            requiredVerifiedArtifacts: projectPhobosOsRequiredVerifiedArtifacts(
               input?.required_verified_artifacts,
             ),
           }]
@@ -298,7 +298,7 @@ async function configureOctopusOsTaskApplication(
         checkpointId: stringValue(relay?.checkpoint_id),
         interfaceId: stringValue(relay?.interface_id),
         outboundInterfaceIds: arrayValue(relay?.outbound_interface_ids).map(stringValue).filter(Boolean),
-        requiredVerifiedArtifacts: projectOctopusOsRequiredVerifiedArtifacts(
+        requiredVerifiedArtifacts: projectPhobosOsRequiredVerifiedArtifacts(
           relay?.required_verified_artifacts,
         ),
       })),
@@ -429,7 +429,7 @@ async function plannedTaskApplicationRemovals(value) {
     if (!expectedFiles.size) throw new Error(`task application planner removal ${index} has no files`);
     const actual = new Map();
     for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
-      if (entry.name === ".octopus-publication") { await requirePrivatePublicationDirectory(path.join(directory, entry.name)); continue; }
+      if (entry.name === ".phobos-publication") { await requirePrivatePublicationDirectory(path.join(directory, entry.name)); continue; }
       if (!entry.isFile() || entry.isSymbolicLink()) {
         throw new Error(`task application removal '${directory}' contains a non-file entry`);
       }

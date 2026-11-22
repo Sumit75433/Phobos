@@ -1,16 +1,16 @@
-import type { OctopusTerminalOpenRequest, OctopusTerminalResizeRequest, OctopusTerminalSnapshot } from "../../electron";
-import type { OctopusTerminalSession, OctopusTerminalSessionHandlers } from "./OctopusTerminal";
+import type { PhobosTerminalOpenRequest, PhobosTerminalResizeRequest, PhobosTerminalSnapshot } from "../../electron";
+import type { PhobosTerminalSession, PhobosTerminalSessionHandlers } from "./PhobosTerminal";
 
-export type ShellLaunch = Omit<OctopusTerminalOpenRequest, "cols" | "rows">;
+export type ShellLaunch = Omit<PhobosTerminalOpenRequest, "cols" | "rows">;
 
 type HostedShell = {
-  open(launch: ShellLaunch, dimensions: OctopusTerminalResizeRequest): Promise<OctopusTerminalSnapshot>;
-  resize(terminalId: string, sessionId: string, dimensions: OctopusTerminalResizeRequest): Promise<OctopusTerminalSnapshot>;
-  write(terminalId: string, sessionId: string, data: string): Promise<OctopusTerminalSnapshot>;
+  open(launch: ShellLaunch, dimensions: PhobosTerminalResizeRequest): Promise<PhobosTerminalSnapshot>;
+  resize(terminalId: string, sessionId: string, dimensions: PhobosTerminalResizeRequest): Promise<PhobosTerminalSnapshot>;
+  write(terminalId: string, sessionId: string, data: string): Promise<PhobosTerminalSnapshot>;
 };
 
-export function createShellSession(resolveLaunch: () => ShellLaunch | null): OctopusTerminalSession {
-  const bridge = window.octopusTransport;
+export function createShellSession(resolveLaunch: () => ShellLaunch | null): PhobosTerminalSession {
+  const bridge = window.phobosTransport;
   return createHostedShellSession(resolveLaunch, {
     open(launch, dimensions) {
       if (!bridge?.openTerminal) return Promise.reject(new Error("The terminal is only available inside the desktop app"));
@@ -27,8 +27,8 @@ export function createShellSession(resolveLaunch: () => ShellLaunch | null): Oct
   });
 }
 
-export function createLaunchShellSession(): OctopusTerminalSession {
-  const bridge = window.octopusTransport;
+export function createLaunchShellSession(): PhobosTerminalSession {
+  const bridge = window.phobosTransport;
   return createHostedShellSession(() => ({ terminalId: "launch" }), {
     open(_launch, dimensions) {
       if (!bridge?.openLaunchTerminal) return Promise.reject(new Error("The launch terminal is unavailable"));
@@ -45,14 +45,14 @@ export function createLaunchShellSession(): OctopusTerminalSession {
   });
 }
 
-function createHostedShellSession(resolveLaunch: () => ShellLaunch | null, host: HostedShell): OctopusTerminalSession {
-  const bridge = window.octopusTransport;
+function createHostedShellSession(resolveLaunch: () => ShellLaunch | null, host: HostedShell): PhobosTerminalSession {
+  const bridge = window.phobosTransport;
   let terminalId = "";
   let sessionId = "";
   let shellExited = false;
   let reopening = false;
   let dimensions = { cols: 100, rows: 32 };
-  let handlers: OctopusTerminalSessionHandlers | null = null;
+  let handlers: PhobosTerminalSessionHandlers | null = null;
 
   const reportFailure = (error: unknown) => {
     handlers?.onData(`\r\n\x1b[31m${error instanceof Error ? error.message : String(error)}\x1b[0m\r\n`);

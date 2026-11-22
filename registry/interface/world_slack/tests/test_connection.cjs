@@ -55,14 +55,14 @@ function context(input, replies, { values = {}, launch = {} } = {}) {
 
 (async () => {
   const replies = {
-    "auth.test": { ok: true, team: "Octopus Lab", team_id: TEAM, user: "octopus", user_id: "U0BOT00001" },
+    "auth.test": { ok: true, team: "Phobos Lab", team_id: TEAM, user: "phobos", user_id: "U0BOT00001" },
     "apps.connections.open": { ok: true, url: "wss://wss-primary.slack.com/link/?ticket=1&app_id=A0123ABCDEF" },
   };
   const good = context({ SLACK_BOT_TOKEN: BOT, SLACK_APP_TOKEN: APP, SLACK_ALLOWED_USERS: USER }, replies);
   const result = await connection.connect(good.ctx);
   assert.deepEqual(result, {
     state: "connected",
-    account: { label: "@octopus in Octopus Lab", detail: `Through Socket Mode, for member ${USER}` },
+    account: { label: "@phobos in Phobos Lab", detail: `Through Socket Mode, for member ${USER}` },
     manage: { label: "Manage in Slack", url: "https://api.slack.com/apps/A0123ABCDEF" },
   });
   assert.deepEqual(good.calls, [{ method: "auth.test", token: `Bearer ${BOT}` }, { method: "apps.connections.open", token: `Bearer ${APP}` }]);
@@ -84,7 +84,7 @@ function context(input, replies, { values = {}, launch = {} } = {}) {
   const everyone = context({}, replies, { values: { SLACK_BOT_TOKEN: BOT, SLACK_APP_TOKEN: APP }, launch: { SLACK_ALLOW_ALL_USERS: "true", SLACK_ALLOWED_TEAMS: "T0OTHER0001" } });
   const outside = await connection.probe(everyone.ctx);
   assert.deepEqual([outside.state, outside.account.detail], ["error", "Through Socket Mode, for every member"]);
-  assert.match(outside.message, /^SLACK_ALLOWED_TEAMS does not include Octopus Lab/);
+  assert.match(outside.message, /^SLACK_ALLOWED_TEAMS does not include Phobos Lab/);
 
   const missing = context({ SLACK_BOT_TOKEN: BOT, SLACK_APP_TOKEN: APP }, {});
   assert.deepEqual(await connection.probe(missing.ctx), { state: "not_connected", message: "Enter the bot token." });
@@ -92,7 +92,7 @@ function context(input, replies, { values = {}, launch = {} } = {}) {
 
   const gone = await connection.disconnect(good.ctx);
   assert.deepEqual([gone.state, gone.manage], ["not_connected", { label: "Manage in Slack", url: "https://api.slack.com/apps" }]);
-  assert.match(gone.message, /^Slack is disconnected: Octopus removed the tokens and member settings from this Mac\./);
+  assert.match(gone.message, /^Slack is disconnected: Phobos removed the tokens and member settings from this Mac\./);
   const ambient = context({}, replies, { values: { SLACK_BOT_TOKEN: BOT }, launch: { SLACK_BOT_TOKEN: BOT, SLACK_APP_TOKEN: APP, SLACK_ALLOWED_USERS: USER } });
   const kept = await connection.disconnect(ambient.ctx);
   assert.equal(kept.state, "connected");
@@ -101,8 +101,8 @@ function context(input, replies, { values = {}, launch = {} } = {}) {
   const leftover = await connection.disconnect(half.ctx);
   assert.equal(leftover.state, "not_connected");
   assert.match(leftover.message, /SLACK_APP_TOKEN is set in this Mac's environment, but without the removed settings no Slack message reaches tasks/);
-  const plain = context({}, replies, { values: { SLACK_BOT_TOKEN: BOT, SLACK_APP_TOKEN: APP, SLACK_ALLOWED_USERS: USER }, launch: { OCTOPUS_SLACK_PROXY: "http://proxy.example.test:3128" } });
-  assert.deepEqual(await connection.probe(plain.ctx), { state: "error", message: "OCTOPUS_SLACK_PROXY must use an HTTPS proxy for a proxy on another computer." });
+  const plain = context({}, replies, { values: { SLACK_BOT_TOKEN: BOT, SLACK_APP_TOKEN: APP, SLACK_ALLOWED_USERS: USER }, launch: { PHOBOS_SLACK_PROXY: "http://proxy.example.test:3128" } });
+  assert.deepEqual(await connection.probe(plain.ctx), { state: "error", message: "PHOBOS_SLACK_PROXY must use an HTTPS proxy for a proxy on another computer." });
   assert.equal(plain.calls.length, 0);
   const split = context({ SLACK_BOT_TOKEN: `${BOT}0` }, replies, { launch: { SLACK_BOT_TOKEN: BOT } });
   assert.match((await connection.connect(split.ctx)).message, /^SLACK_BOT_TOKEN is set in this Mac's environment to a different value/);

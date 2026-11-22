@@ -261,7 +261,7 @@ function createWorkerEnvironmentFileReader(options) {
       text,
       truncated: false,
       digest: sha256(bytes),
-      outsideOctopusEvidence: true,
+      outsidePhobosEvidence: true,
     };
   }
 

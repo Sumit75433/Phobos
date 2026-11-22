@@ -78,17 +78,17 @@ function createMarkdownComponents(
   return {
   span: MarkdownSpan,
   strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-  p: ({ children }) => <p className={reasoning ? "m-0 has-[.inline-markdown]:py-0.5" : "octopus-markdown-text octopus-markdown-paragraph"}>{children}</p>,
-  h1: ({ children }) => <h1 className={reasoning ? "m-0 font-semibold" : "octopus-markdown-heading octopus-markdown-heading1"}>{children}</h1>,
-  h2: ({ children }) => <h2 className={reasoning ? "m-0 font-semibold" : "octopus-markdown-heading octopus-markdown-heading2"}>{children}</h2>,
-  h3: ({ children }) => <h3 className={reasoning ? "m-0 font-semibold" : "octopus-markdown-heading octopus-markdown-heading3"}>{children}</h3>,
-  h4: ({ children }) => <h4 className={reasoning ? "m-0 font-semibold" : "octopus-markdown-heading octopus-markdown-heading4"}>{children}</h4>,
-  h5: ({ children }) => <h5 className={reasoning ? "m-0 font-semibold" : "octopus-markdown-heading octopus-markdown-heading5"}>{children}</h5>,
-  h6: ({ children }) => <h6 className={reasoning ? "m-0 font-semibold" : "octopus-markdown-heading octopus-markdown-heading6"}>{children}</h6>,
+  p: ({ children }) => <p className={reasoning ? "m-0 has-[.inline-markdown]:py-0.5" : "phobos-markdown-text phobos-markdown-paragraph"}>{children}</p>,
+  h1: ({ children }) => <h1 className={reasoning ? "m-0 font-semibold" : "phobos-markdown-heading phobos-markdown-heading1"}>{children}</h1>,
+  h2: ({ children }) => <h2 className={reasoning ? "m-0 font-semibold" : "phobos-markdown-heading phobos-markdown-heading2"}>{children}</h2>,
+  h3: ({ children }) => <h3 className={reasoning ? "m-0 font-semibold" : "phobos-markdown-heading phobos-markdown-heading3"}>{children}</h3>,
+  h4: ({ children }) => <h4 className={reasoning ? "m-0 font-semibold" : "phobos-markdown-heading phobos-markdown-heading4"}>{children}</h4>,
+  h5: ({ children }) => <h5 className={reasoning ? "m-0 font-semibold" : "phobos-markdown-heading phobos-markdown-heading5"}>{children}</h5>,
+  h6: ({ children }) => <h6 className={reasoning ? "m-0 font-semibold" : "phobos-markdown-heading phobos-markdown-heading6"}>{children}</h6>,
   ul: ({ children, className }) => (
     <ul className={reasoning
       ? `my-0 list-disc pl-4 ${className ?? ""}`.trim()
-      : `octopus-markdown-text octopus-markdown-list ${className?.includes("contains-task-list") ? "octopus-markdown-task-list" : "octopus-markdown-unordered-list"} ${className ?? ""}`.trim()}>
+      : `phobos-markdown-text phobos-markdown-list ${className?.includes("contains-task-list") ? "phobos-markdown-task-list" : "phobos-markdown-unordered-list"} ${className ?? ""}`.trim()}>
       {children}
     </ul>
   ),
@@ -98,7 +98,7 @@ function createMarkdownComponents(
       <ol
         className={reasoning
           ? `my-0 list-decimal pl-8 ${className ?? ""}`.trim()
-          : `octopus-markdown-text octopus-markdown-list ${taskList ? "octopus-markdown-task-list" : "octopus-markdown-ordered-list"} ${className ?? ""}`.trim()}
+          : `phobos-markdown-text phobos-markdown-list ${taskList ? "phobos-markdown-task-list" : "phobos-markdown-ordered-list"} ${className ?? ""}`.trim()}
         start={taskList ? undefined : start}
       >
         {children}
@@ -110,34 +110,34 @@ function createMarkdownComponents(
       {...props}
       className={reasoning
         ? `m-0 ${className ?? ""}`.trim()
-        : `octopus-markdown-text octopus-markdown-list-item ${className?.includes("task-list-item") ? "octopus-markdown-task-list-item" : ""} ${className ?? ""}`.trim()}
+        : `phobos-markdown-text phobos-markdown-list-item ${className?.includes("task-list-item") ? "phobos-markdown-task-list-item" : ""} ${className ?? ""}`.trim()}
     >
       {children}
     </MarkdownListItem>
   ),
   blockquote: ({ children, node: _node, ...props }) => (
-    <StreamingContainer as="blockquote" className="octopus-markdown-blockquote" lead={streamingLeadKey(props)}>{children}</StreamingContainer>
+    <StreamingContainer as="blockquote" className="phobos-markdown-blockquote" lead={streamingLeadKey(props)}>{children}</StreamingContainer>
   ),
-  hr: ({ node: _node, ...props }) => <StreamingContainer as="hr" className="octopus-markdown-horizontal-rule" lead={streamingSegmentKey(props)} />,
+  hr: ({ node: _node, ...props }) => <StreamingContainer as="hr" className="phobos-markdown-horizontal-rule" lead={streamingSegmentKey(props)} />,
   a: ({ children, href }) => <SafeMarkdownLink href={href} onOpenFile={onOpenFile}>{children}</SafeMarkdownLink>,
   img: ({ alt, node: _node, src, ...props }) => <SafeMarkdownImage alt={alt ?? ""} revealKey={streamingSegmentKey(props)} src={src ?? ""} />,
   pre: ({ children }) => <>{children}</>,
   code: MarkdownCode,
   table: ({ children, node, ...props }) => <MarkdownTable lead={streamingLeadKey(props)} node={node}>{children}</MarkdownTable>,
   thead: ({ children }) => <thead>{children}</thead>,
-  tbody: ({ children }) => <tbody className="octopus-markdown-table-body">{children}</tbody>,
+  tbody: ({ children }) => <tbody className="phobos-markdown-table-body">{children}</tbody>,
   tr: ({ children, node: _node, ...props }) => (
-    <StreamingContainer as="tr" className="octopus-markdown-table-row" lead={streamingLeadKey(props)}>{children}</StreamingContainer>
+    <StreamingContainer as="tr" className="phobos-markdown-table-row" lead={streamingLeadKey(props)}>{children}</StreamingContainer>
   ),
   th: ({ children }) => (
-    <th className={`octopus-markdown-table-header-cell${Children.count(children) === 1 ? " octopus-markdown-single-child-table-cell" : ""}`}>
+    <th className={`phobos-markdown-table-header-cell${Children.count(children) === 1 ? " phobos-markdown-single-child-table-cell" : ""}`}>
       {children}
     </th>
   ),
   td: ({ children }) => {
     const numeric = /^\d+$/.test(textFromChildren(children));
     return (
-      <td className={`octopus-markdown-table-cell${numeric ? " octopus-markdown-numeric-table-cell" : ""}${Children.count(children) === 1 ? " octopus-markdown-single-child-table-cell" : ""}`}>
+      <td className={`phobos-markdown-table-cell${numeric ? " phobos-markdown-numeric-table-cell" : ""}${Children.count(children) === 1 ? " phobos-markdown-single-child-table-cell" : ""}`}>
         {children}
       </td>
     );
@@ -202,7 +202,7 @@ function useStreamingReveal(key: string | undefined, container = false): Streami
   const settled = startsAt !== undefined && performance.now() >= startsAt + STREAM_FADE_DURATION_MS;
   if (settled && !container) return NO_STREAMING_REVEAL;
   return {
-    className: settled ? undefined : "octopus-markdown-fade-in",
+    className: settled ? undefined : "phobos-markdown-fade-in",
     ref: (element) => {
       if (element) revealStreamingElement(element, key, timeline);
     },
@@ -265,7 +265,7 @@ function MarkdownCode({ children, className, node: _node, ...props }: ComponentP
   const value = raw.replace(/\n$/, "");
   const language = /^language-(.+)$/.exec(className ?? "")?.[1] ?? "";
   if (!block) {
-    return <code className={joinClassNames("octopus-markdown-inline-markdown", reveal.className)} ref={reveal.ref}>{value}</code>;
+    return <code className={joinClassNames("phobos-markdown-inline-markdown", reveal.className)} ref={reveal.ref}>{value}</code>;
   }
   if (language.toLocaleLowerCase() === "mermaid") return <MermaidBlock reveal={reveal} value={value} />;
   return <CodeBlock language={language} reveal={reveal} value={value} />;
@@ -387,10 +387,10 @@ function MessageContentView({ compactHeadings = false, find, onOpenFile, streamK
     ...(streamingPlugin ? [streamingPlugin] : []),
   ], [find?.activeIndex, find?.offset, find?.query, streamingPlugin]);
   const className = variant === "user"
-    ? "octopus-markdown-root [&>*:first-child]:mt-0 octopus-markdown-content [&_li+li]:!mt-0 [&_li>ol]:!mt-0 [&_li>p+p]:!mt-0 [&_li>ul]:!mt-0 [&_ol]:!pl-6 [&_p]:!m-0 [&_p+p]:!mt-5 [&_ul]:!pl-6"
+    ? "phobos-markdown-root [&>*:first-child]:mt-0 phobos-markdown-content [&_li+li]:!mt-0 [&_li>ol]:!mt-0 [&_li>p+p]:!mt-0 [&_li>ul]:!mt-0 [&_ol]:!pl-6 [&_p]:!m-0 [&_p+p]:!mt-5 [&_ul]:!pl-6"
     : variant === "reasoning"
-      ? "octopus-markdown-root octopus-markdown-content break-words text-size-chat text-token-conversation-body [&_*]:text-size-chat [&_*]:text-token-non-assistant-body-descendant [&>h1]:mt-2 [&>h2]:mt-2 [&>h3]:mt-2 [&>h1+*]:mt-1 [&>h2+*]:mt-1 [&>h3+*]:mt-1 [&>p+p]:mt-1"
-      : "octopus-markdown-root [&>*:first-child]:mt-0 octopus-markdown-content [&>*:last-child]:mb-0 [&>ol:first-child]:mt-0 [&>ul:first-child]:mt-0";
+      ? "phobos-markdown-root phobos-markdown-content break-words text-size-chat text-token-conversation-body [&_*]:text-size-chat [&_*]:text-token-non-assistant-body-descendant [&>h1]:mt-2 [&>h2]:mt-2 [&>h3]:mt-2 [&>h1+*]:mt-1 [&>h2+*]:mt-1 [&>h3+*]:mt-1 [&>p+p]:mt-1"
+      : "phobos-markdown-root [&>*:first-child]:mt-0 phobos-markdown-content [&>*:last-child]:mb-0 [&>ol:first-child]:mt-0 [&>ul:first-child]:mt-0";
 
   useLayoutEffect(() => {
     if (!streamingTimeline?.pendingSegmentKeyState) return;
@@ -401,7 +401,7 @@ function MessageContentView({ compactHeadings = false, find, onOpenFile, streamK
   return (
     <MarkdownSourceContext.Provider value={text}>
       <StreamingTimelineContext.Provider value={streamingTimeline}>
-        <div className={`${className}${streaming ? " octopus-streaming-markdown" : ""}`} data-markdown-animated={streaming ? "" : undefined}>
+        <div className={`${className}${streaming ? " phobos-streaming-markdown" : ""}`} data-markdown-animated={streaming ? "" : undefined}>
           <Markdown
             components={components}
             rehypePlugins={rehypePlugins}
@@ -621,10 +621,10 @@ function findHighlightPlugin(options: { query: string; offset: number; activeInd
             tagName: "mark",
             properties: {
               className: [
-                "octopus-thread-find-match",
-                globalIndex === options.activeIndex ? "octopus-thread-find-active" : "",
+                "phobos-thread-find-match",
+                globalIndex === options.activeIndex ? "phobos-thread-find-active" : "",
               ].filter(Boolean),
-              dataOctopusThreadFindIndex: String(globalIndex),
+              dataPhobosThreadFindIndex: String(globalIndex),
             },
             children: [{ type: "text", value: value.slice(matchStart, matchStart + options.query.length) }],
           });
@@ -662,9 +662,9 @@ function TableBlock({ children, lead, markdownSource }: { children: ReactNode; l
   }
 
   return (
-    <div className={joinClassNames("octopus-markdown-table-container", reveal.className)} ref={reveal.ref}>
-      <div className="octopus-markdown-table-wrapper group relative" data-markdown-table tabIndex={-1}>
-        <table className="octopus-markdown-text octopus-markdown-table">{children}</table>
+    <div className={joinClassNames("phobos-markdown-table-container", reveal.className)} ref={reveal.ref}>
+      <div className="phobos-markdown-table-wrapper group relative" data-markdown-table tabIndex={-1}>
+        <table className="phobos-markdown-text phobos-markdown-table">{children}</table>
         <div className="absolute end-0 top-0 select-none" data-markdown-copy="exclude">
           <ShellTooltip label={copied ? "Copied" : "Copy table"}>
             <button
@@ -688,7 +688,7 @@ function MermaidBlock({ reveal = NO_STREAMING_REVEAL, value }: { reveal?: Stream
   const appearance = useAppearance();
   const systemDark = useSyncExternalStore(subscribeToColorScheme, systemPrefersDark, () => false);
   const theme = appearance.themeMode === "system" ? (systemDark ? "dark" : "light") : appearance.themeMode;
-  const renderId = `octopus-mermaid-${useId().replace(/:/g, "")}`;
+  const renderId = `phobos-mermaid-${useId().replace(/:/g, "")}`;
   const [svg, setSvg] = useState("");
   const [error, setError] = useState("");
   const [sourceOpen, setSourceOpen] = useState(false);
@@ -810,7 +810,7 @@ function CodeBlock({ language, reveal = NO_STREAMING_REVEAL, value }: { language
 
   return (
     <div
-      className={`relative w-full min-w-0 overflow-clip rounded-lg bg-token-text-code-block-background contain-inline-size ${theme} octopus-markdown-code-block${reveal.className ? ` ${reveal.className}` : ""}`}
+      className={`relative w-full min-w-0 overflow-clip rounded-lg bg-token-text-code-block-background contain-inline-size ${theme} phobos-markdown-code-block${reveal.className ? ` ${reveal.className}` : ""}`}
       data-markdown-copy="code-block"
       data-theme={theme}
       ref={reveal.ref}
@@ -947,7 +947,7 @@ const HighlightedLine = memo(function HighlightedLine({ html }: { html: string }
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
 });
 
-const CODE_BLOCK_WORD_WRAP_KEY = "octopus.markdownCodeBlockWordWrap";
+const CODE_BLOCK_WORD_WRAP_KEY = "phobos.markdownCodeBlockWordWrap";
 const codeBlockWordWrapListeners = new Set<() => void>();
 let codeBlockWordWrap = loadCodeBlockWordWrap();
 

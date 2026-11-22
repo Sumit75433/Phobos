@@ -11,7 +11,7 @@ the package library as the optional **Legacy watch** application.
 
 ## What is in this folder
 
-- `legacy-watch.octopus-setup.json` — a Home for it: the default space, the
+- `legacy-watch.phobos-setup.json` — a Home for it: the default space, the
   Codex Pack and its recommended applications. Import it on the first step of
   the setup wizard.
 - `world_legacy_watch/` (this folder) — the sensor (world, sensor, inbound).
@@ -36,7 +36,7 @@ the package library as the optional **Legacy watch** application.
   becomes one `legacy_watch.notice`, and the trigger never fires again until it
   is re-armed.
 - The receiving task is created by the bundled task planner
-  (`octopus-operator-chat-topology`) from the same request the client builds
+  (`phobos-operator-chat-topology`) from the same request the client builds
   for a new task in the root EE with `system_worker_operator_task`, everything
   enabled (see [What the task can do](#what-the-task-can-do)). One input is
   added: the checkpoint `cp_legacy_watch` admits only `legacy_watch.notice`
@@ -66,10 +66,10 @@ wake the task with a single word.
 
 ## Set it up
 
-1. Install Octopus and open it. On the first step of the
+1. Install Phobos and open it. On the first step of the
    setup wizard choose **Import setup…** and pick
-   `legacy-watch.octopus-setup.json`. Check each step and select **Set up
-   Octopus**.
+   `legacy-watch.phobos-setup.json`. Check each step and select **Set up
+   Phobos**.
 2. In **Applications**, install **Email** and connect a mailbox. Fill in
    **Allowed senders** unless you will pass `--any-sender`.
 3. Choose the model. By default the task takes the Home's provider, model,
@@ -82,18 +82,18 @@ wake the task with a single word.
    terms or the prompt if you want to. The prompt and everything the model
    sees are in English; the Russian terms are there only to match Russian
    letters.
-5. Author the trigger. Octopus can be open or closed.
+5. Author the trigger. Phobos can be open or closed.
 
 ```sh
-python3 /Applications/Octopus.app/Contents/Resources/app/local-packages/registry/interface/world_legacy_watch/author.py \
-  --home ~/.octopus --app /Applications/Octopus.app
+python3 /Applications/Phobos.app/Contents/Resources/app/local-packages/registry/interface/world_legacy_watch/author.py \
+  --home ~/.phobos --app /Applications/Phobos.app
 ```
 
 6. The trigger fires once; run `author.py` with `--rearm` to arm it again.
 
 ### Flags
 
-- `--app <Octopus.app>`: where the bundled task planner and `octopus` come
+- `--app <Phobos.app>`: where the bundled task planner and `phobos` come
   from (its `project-ee-policies` forms the root EE policy the way the client
   does). `--planner <path>` and `--runtime <path>` override each one. Without
   them `author.py` refuses.
@@ -143,7 +143,7 @@ the same rules as the client's `executionContextTaskCapabilities`:
   `context_artifact_bindings`, `payload_artifact_bindings`, the
   `selected_tools` of the selected kinds and the `door_host_slots` of the
   selected doors carry over. No profile means a refusal with nothing written.
-- **Policy.** The formed root EE policy from `octopus project-ee-policies`. The
+- **Policy.** The formed root EE policy from `phobos project-ee-policies`. The
   worker must be in it, and its provider policy must admit the model.
 - **Worker Environments.** Every kind the client offers this worker (allowed
   by the EE policy, in the worker's ceiling, with at least one tool in the
@@ -161,7 +161,7 @@ the same rules as the client's `executionContextTaskCapabilities`:
   artifact bindings in the context, its tools in the selection. The planner
   adds the operation routes and the operation catalog.
 - **Only `cp_legacy_watch` starts a turn.** So applications with an interface
-  without an operation catalog (its input admits everything: Memory, Octopus
+  without an operation catalog (its input admits everything: Memory, Phobos
   Home) are not connected, and neither are applications whose catalog declares
   `task_input_labels` (Email, Telegram, Slack). The task still gets the Memory
   tools through `system_room`. Applications with an operation catalog but no
@@ -222,7 +222,7 @@ After the trigger fires, the relay keeps passing letters on.
 ## Where it runs from
 
 `author.py` copies the folders from the package library it runs from: the
-bundled copy inside `Octopus.app`, or a source checkout. Installing **Legacy
+bundled copy inside `Phobos.app`, or a source checkout. Installing **Legacy
 watch** in Applications is not needed for it. Everything `author.py` puts into
 the Home looks written inside the Home: the interface folders, the pin, the run
 records and the task files carry no path of the library.
@@ -243,7 +243,7 @@ planner stub and a `project-ee-policies` stub.
 
 - If Email has never run in the Home, it takes the current end of the mailbox
   as its starting point on its first start. A letter that arrives between
-  running `author.py` with Octopus closed and that first start is never seen.
+  running `author.py` with Phobos closed and that first start is never seen.
 - `armed_at` comes from this machine's clock, `received_at` from the mail
   server's.
 - Terms match as case-insensitive substrings. Scam letters about inheritances
@@ -254,7 +254,7 @@ planner stub and a `project-ee-policies` stub.
   be removed by hand.
 - For an application, installed means it has a receipt; `author.py` does not
   re-check the receipt's digests the way the client does.
-- The client also offers tasks "Octopus Home" (`world_operator_chat`): once it
+- The client also offers tasks "Phobos Home" (`world_operator_chat`): once it
   is installed, its interfaces are in the ceiling of
   `system_worker_operator_task`. `author.py` does not connect it (see
   [What the task can do](#what-the-task-can-do)).

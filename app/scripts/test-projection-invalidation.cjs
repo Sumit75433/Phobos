@@ -26,7 +26,7 @@ test("run progress refreshes exact records without invalidating configuration or
     await fs.writeFile(path.join(root, name, "registry/interface/provider/interface.json"), JSON.stringify(provider));
     await fs.writeFile(path.join(root, name, "ledger/movements.jsonl"), "");
   }
-  const store = createProjectionStore({ resolveRepoRoot: () => root, octopusHome: () => home,
+  const store = createProjectionStore({ resolveRepoRoot: () => root, phobosHome: () => home,
     sourceRegistry: () => path.join(home, "registry"), localPackageRegistry: () => path.join(root, "source", "registry"),
     projectEePolicies: async () => { throw new Error("Policy projection diagnostic"); },
     onChange: (_generation, kind) => changes.push(kind) });
@@ -167,7 +167,7 @@ test("run progress refreshes exact records without invalidating configuration or
 
 test("EE policy projection rebuilds when policy changes while its build is in flight", async () => {
   const builds = [];
-  const store = require("../electron/projection.cjs").createProjectionContext({ resolveRepoRoot: () => os.tmpdir(), octopusHome: () => os.tmpdir(),
+  const store = require("../electron/projection.cjs").createProjectionContext({ resolveRepoRoot: () => os.tmpdir(), phobosHome: () => os.tmpdir(),
     projectEePolicies: () => new Promise((resolve) => builds.push(resolve)) });
   const first = store.cachedEePolicyProjection();
   await delay(0); assert.equal(builds.length, 1);
@@ -200,7 +200,7 @@ test("workspace inspection reads while a writer holds its lock and leaves pendin
   try {
     await ready;
     const result = await Promise.race([
-      require("../electron/workspaceSetup.cjs").inspectWorkspaceSetupState({ octopusHomeRoot: root, registryRoot: path.join(root, "registry") }),
+      require("../electron/workspaceSetup.cjs").inspectWorkspaceSetupState({ phobosHomeRoot: root, registryRoot: path.join(root, "registry") }),
       delay(2000).then(() => assert.fail("a read waited on the writer")),
     ]);
     assert.equal(result.status, "not_configured", JSON.stringify(result));
@@ -213,7 +213,7 @@ test("run movements do not starve a snapshot and the next read sees the newer re
   const { invalidationProjection } = require("../electron/projection/invalidation.cjs");
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "oct-snapshot-read-"));
   let finish, count = 0;
-  const store = { octopusHome: () => root, resolveSourceRegistry: () => "/source",
+  const store = { phobosHome: () => root, resolveSourceRegistry: () => "/source",
     resolveLocalPackageRegistry: () => "/packages", resolveLocalPackageLibrary: () => "/library",
     invalidateConfigurationProjection() {}, onChange() {},
     buildFileProjection: () => { count++; return new Promise(resolve => { finish = resolve; }); },
@@ -240,12 +240,12 @@ test("topology without ledger preserves structure without reading malformed hist
     from: { Interface: "input" }, to: { Interface: "output" } })}\nmalformed ledger row\n`);
   try {
     for (const params of [{ include_ledger: false }, { include_ledger: true }, {}]) {
-      const store = createProjectionContext({ resolveRepoRoot: () => root, octopusHome: () => root });
+      const store = createProjectionContext({ resolveRepoRoot: () => root, phobosHome: () => root });
       let ledgerReads = 0;
       const readLedger = store.readLedgerProjection;
       store.readLedgerProjection = (...args) => { ledgerReads++; return readLedger(...args); };
       store.buildFileProjection = async () => ({
-        repoRoot: root, octopusHome: root, registryRoot: path.join(root, "registry"),
+        repoRoot: root, phobosHome: root, registryRoot: path.join(root, "registry"),
         stateRoot: path.join(root, "state"), runRecordsRoot: path.join(root, "state/runs"),
         durableRoot: path.join(root, "ledger"), generation: store.projectionGeneration,
         generatedAt: "2026-01-01T00:00:00Z", descriptors: {}, eeInstances: [],

@@ -222,14 +222,14 @@ export function TurnActivity({ activityWindow = "all", activities, finalStartedA
     if (index === null || !historyFullyExpanded) return;
     const frame = window.requestAnimationFrame(() => {
       pendingFindRevealRef.current = null;
-      sectionRef.current?.querySelector<HTMLElement>(`[data-octopus-thread-find-index="${index}"]`)
+      sectionRef.current?.querySelector<HTMLElement>(`[data-phobos-thread-find-index="${index}"]`)
         ?.scrollIntoView({ block: "center", behavior: reducedMotion ? "instant" : "smooth" });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [historyFullyExpanded, reducedMotion, revealFind?.index]);
   if (startingTask) {
     return (
-      <section className="octopus-turn-activity min-h-0 min-w-0" data-state="starting">
+      <section className="phobos-turn-activity min-h-0 min-w-0" data-state="starting">
         <div
           aria-live="polite"
           className="text-size-chat text-token-text-tertiary select-none"
@@ -279,7 +279,7 @@ export function TurnActivity({ activityWindow = "all", activities, finalStartedA
   return (
     <section
       ref={sectionRef}
-      className="octopus-turn-activity flex min-h-0 min-w-0 flex-col text-token-text-secondary"
+      className="phobos-turn-activity flex min-h-0 min-w-0 flex-col text-token-text-secondary"
       data-state={blocked ? "blocked" : working ? "working" : stopped ? "stopped" : failed ? "failed" : "complete"}
       onClickCapture={(event) => {
         const target = event.target;
@@ -291,7 +291,7 @@ export function TurnActivity({ activityWindow = "all", activities, finalStartedA
       {collapsibleHistory ? (
         <>
           <WorkedForToggle elapsed={elapsed} expanded={historyExpanded} onToggle={toggleHistory} />
-          <div aria-hidden="true" className="octopus-worked-for-rule" />
+          <div aria-hidden="true" className="phobos-worked-for-rule" />
         </>
       ) : showWorkedForBoundary ? (
         <WorkedForBoundary
@@ -305,7 +305,7 @@ export function TurnActivity({ activityWindow = "all", activities, finalStartedA
           key="activity-content"
           animate={contentsExpanded ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
           aria-hidden={!contentsExpanded}
-          className="octopus-turn-history"
+          className="phobos-turn-history"
           initial={false}
           inert={!contentsExpanded || undefined}
           onAnimationComplete={() => {
@@ -338,7 +338,7 @@ function ActivityUnits({ activeGroupId, renderActivity, showThinkingFallback, th
   units: ActivityUnit[];
 }) {
   return (
-    <div className="octopus-turn-activity-content">
+    <div className="phobos-turn-activity-content">
       {units.map((unit) => {
         if (unit.kind === "group") {
           return (
@@ -407,7 +407,7 @@ function AgentActivityGroup({ activeSlice, entries, renderActivity, thinkingFall
       shouldAnimateInitialCollapse={activeSlice}
       tone={tone}
     >
-      {() => <div className="octopus-agent-activity-viewport">
+      {() => <div className="phobos-agent-activity-viewport">
         <ActivityList activeSlice={activeSlice} entries={visibleEntries} renderActivity={renderActivity} />
       </div>}
     </ActivityDisclosure>
@@ -432,9 +432,9 @@ function MultiAgentActivityGroup({ entries }: { entries: ActivityEntry[] }) {
       summaryTransition={status === "inProgress" ? "deferred" : "immediate"}
       tone={status === "failed" ? "danger" : "default"}
     >
-      <div className="octopus-agent-activity-viewport">
-        <div className="octopus-multi-agent-rows" data-testid="multi-agent-action-rows">
-          {rows.map((row) => <div className="octopus-multi-agent-row" key={row.key}>{row.node}</div>)}
+      <div className="phobos-agent-activity-viewport">
+        <div className="phobos-multi-agent-rows" data-testid="multi-agent-action-rows">
+          {rows.map((row) => <div className="phobos-multi-agent-row" key={row.key}>{row.node}</div>)}
         </div>
       </div>
     </ActivityDisclosure>
@@ -453,14 +453,14 @@ function SubagentActivityGroup({ entries }: { entries: ActivityEntry[] }) {
   const hidden = items.length - visible.length;
   const status = subagentGroupStatus(items);
   return (
-    <div className="octopus-subagent-activity-group" data-testid="subagent-activity-inline-group">
+    <div className="phobos-subagent-activity-group" data-testid="subagent-activity-inline-group">
       {visible.map((item) => (
-        <span className="octopus-subagent-chip" key={item.agentThreadId}>
-          <span aria-hidden="true" className="octopus-subagent-avatar"><Glyph name="user" size={13} /></span>
-          <span className="octopus-subagent-chip-name">{item.displayName}</span>
+        <span className="phobos-subagent-chip" key={item.agentThreadId}>
+          <span aria-hidden="true" className="phobos-subagent-avatar"><Glyph name="user" size={13} /></span>
+          <span className="phobos-subagent-chip-name">{item.displayName}</span>
         </span>
       ))}
-      <span className="octopus-subagent-group-status">
+      <span className="phobos-subagent-group-status">
         {hidden > 0 ? `and ${hidden} other ${hidden === 1 ? "subagent" : "subagents"} ` : ""}{status}
       </span>
     </div>
@@ -539,11 +539,11 @@ function multiAgentDisplayName(agentId: string): string {
 }
 
 function multiAgentLabel(agentId: string, model: string): ReactNode {
-  return <span className="octopus-multi-agent-name" title={model ? `Uses ${model}` : undefined}>{multiAgentDisplayName(agentId)}</span>;
+  return <span className="phobos-multi-agent-name" title={model ? `Uses ${model}` : undefined}>{multiAgentDisplayName(agentId)}</span>;
 }
 
 function multiAgentPrompt(prompt: string): ReactNode {
-  return <span className="octopus-multi-agent-prompt" title={prompt}>{prompt}</span>;
+  return <span className="phobos-multi-agent-prompt" title={prompt}>{prompt}</span>;
 }
 
 function multiAgentRows(items: MultiAgentActivityItem[]): Array<{ key: string; node: ReactNode }> {
@@ -558,9 +558,9 @@ function multiAgentRows(items: MultiAgentActivityItem[]): Array<{ key: string; n
       for (const agentId of ids) {
         const agent = multiAgentLabel(agentId, item.model);
         const node = spawnWithInstructions ? (
-          <span className="octopus-multi-agent-row-nowrap">Created {agent} with the instructions: {multiAgentPrompt(item.prompt)}</span>
+          <span className="phobos-multi-agent-row-nowrap">Created {agent} with the instructions: {multiAgentPrompt(item.prompt)}</span>
         ) : sendWithPrompt ? (
-          <span className="octopus-multi-agent-row-nowrap">{multiAgentSendInputAction(item.status)} {agent}: {multiAgentPrompt(item.prompt)}</span>
+          <span className="phobos-multi-agent-row-nowrap">{multiAgentSendInputAction(item.status)} {agent}: {multiAgentPrompt(item.prompt)}</span>
         ) : (
           <>{multiAgentRowAction(item.action, item.status)} {agent}{multiAgentStateSuffix(item, agentId)}</>
         );
@@ -570,7 +570,7 @@ function multiAgentRows(items: MultiAgentActivityItem[]): Array<{ key: string; n
     if (!spawnWithInstructions && !sendWithPrompt && item.prompt) {
       rows.push({
         key: `meta-prompt-${item.id}`,
-        node: <span className="octopus-multi-agent-input">Input: {item.prompt}</span>,
+        node: <span className="phobos-multi-agent-input">Input: {item.prompt}</span>,
       });
     }
   }
@@ -602,20 +602,20 @@ function ActivityList({ activeSlice, entries, renderActivity }: {
   renderActivity: Props["renderActivity"];
 }) {
   return (
-    <div className="octopus-agent-activity-list">
+    <div className="phobos-agent-activity-list">
       {entries.map((entry) => {
         const details = activityDetailMessages(entry);
         return (
           <div
-            className="octopus-agent-activity-row"
+            className="phobos-agent-activity-row"
             data-state={activeSlice && entry.active ? "active" : entry.tone === "danger" ? "error" : "complete"}
             key={entry.id}
           >
             {details.length > 0 ? details.map((message) => (
-              <div className="octopus-agent-activity-detail-item" key={message.id}>
+              <div className="phobos-agent-activity-detail-item" key={message.id}>
                 {renderActivity(message)}
               </div>
-            )) : <span className="octopus-agent-activity-empty-detail">{activityLabel(entry)}</span>}
+            )) : <span className="phobos-agent-activity-empty-detail">{activityLabel(entry)}</span>}
           </div>
         );
       })}
@@ -635,7 +635,7 @@ function StandaloneActivity({ entry, renderActivity }: {
   if (retryableError) return <RetryableErrorActivity message={retryableError} />;
   return (
     <div
-      className="octopus-agent-activity-standalone min-w-0"
+      className="phobos-agent-activity-standalone min-w-0"
       data-tone={entry.tone}
     >
       {details.map((message) => <Fragment key={message.id}>{renderActivity(message)}</Fragment>)}
@@ -656,14 +656,14 @@ function ReasoningSummaryActivity({ entry, message }: {
     <ActivityDisclosure
       active={entry.active}
       canExpand={Boolean(detail)}
-      className="octopus-reasoning-activity"
+      className="phobos-reasoning-activity"
       defaultExpanded={entry.active}
       followActive
       icon={null}
       summary={summary}
       summaryKey={`${entry.id}:${lifecycle}:${entry.active ? "" : elapsed ?? ""}`}
     >
-      <div className="octopus-reasoning-detail">
+      <div className="phobos-reasoning-detail">
         <MessageContent
           streamKey={message.id}
           streaming={entry.active}
@@ -837,9 +837,9 @@ export function ActivityDisclosure({
   };
   const headerContents = (
     <>
-      <span className="octopus-agent-activity-leading">
+      <span className="phobos-agent-activity-leading">
         {icon ? <Glyph aria-hidden="true" className="icon-xs shrink-0" name={icon} /> : null}
-        <span className="octopus-agent-activity-summary">
+        <span className="phobos-agent-activity-summary">
           <DeferredActivitySummary
             active={active}
             summary={summary}
@@ -849,9 +849,9 @@ export function ActivityDisclosure({
         </span>
       </span>
       {disclosure ? (
-        <span aria-hidden="true" className="octopus-agent-activity-chevron-wrap">
+        <span aria-hidden="true" className="phobos-agent-activity-chevron-wrap">
           <Glyph
-            className={`octopus-agent-activity-chevron icon-2xs${expanded ? " is-expanded" : ""}`}
+            className={`phobos-agent-activity-chevron icon-2xs${expanded ? " is-expanded" : ""}`}
             name="chevronDown"
             size={12}
           />
@@ -860,13 +860,13 @@ export function ActivityDisclosure({
     </>
   );
   return (
-    <div className={`octopus-agent-activity min-w-0${className ? ` ${className}` : ""}`} data-state={lifecycle}>
-      <div className="octopus-agent-activity-header group/activity-header">
+    <div className={`phobos-agent-activity min-w-0${className ? ` ${className}` : ""}`} data-state={lifecycle}>
+      <div className="phobos-agent-activity-header group/activity-header">
         {disclosure ? (
           <button
             aria-expanded={expanded}
             aria-label={summary}
-            className="octopus-agent-activity-toggle cursor-interaction"
+            className="phobos-agent-activity-toggle cursor-interaction"
             onClick={toggle}
             type="button"
           />
@@ -877,7 +877,7 @@ export function ActivityDisclosure({
         <motion.div
           animate={fullyExpanded ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
           aria-hidden={!fullyExpanded}
-          className="octopus-agent-activity-body"
+          className="phobos-agent-activity-body"
           initial={false}
           inert={!fullyExpanded || undefined}
           onAnimationComplete={() => {
@@ -934,7 +934,7 @@ function DeferredActivitySummary({ active, summary, summaryKey, transition }: {
 
   const visible = transition === "immediate" || displayed.key === summaryKey ? summary : displayed.summary;
   return (
-    <CadencedShimmerText active={active} className="octopus-agent-activity-summary-value">
+    <CadencedShimmerText active={active} className="phobos-agent-activity-summary-value">
       {visible}
     </CadencedShimmerText>
   );
@@ -942,9 +942,9 @@ function DeferredActivitySummary({ active, summary, summaryKey, transition }: {
 
 function ThinkingFallback({ active = true, label = "Thinking" }: { active?: boolean; label?: string }) {
   return (
-    <div className="octopus-thinking-fallback text-size-chat text-token-conversation-body">
+    <div className="phobos-thinking-fallback text-size-chat text-token-conversation-body">
       <span aria-hidden="true" className="h-4 w-0 shrink-0" />
-      <CadencedShimmerText active={active} className="octopus-thinking-fallback-label select-none">{label}</CadencedShimmerText>
+      <CadencedShimmerText active={active} className="phobos-thinking-fallback-label select-none">{label}</CadencedShimmerText>
     </div>
   );
 }
@@ -981,13 +981,13 @@ export function TerminalErrorActivity({ message, renderActivity }: {
     : kind === "overload" ? "Provider is overloaded" : "";
   const retry = providerRetryAdvice(data);
   return (
-    <aside className="octopus-turn-error">
-      <div aria-hidden="true" className="octopus-turn-error-background" />
-      <div className="octopus-turn-error-icon">
+    <aside className="phobos-turn-error">
+      <div aria-hidden="true" className="phobos-turn-error-background" />
+      <div className="phobos-turn-error-icon">
         <Glyph aria-hidden="true" className="icon-sm shrink-0" name="warning" size={16} />
       </div>
-      <div className="octopus-turn-error-content">
-        <div className="octopus-turn-error-copy">
+      <div className="phobos-turn-error-content">
+        <div className="phobos-turn-error-copy">
           {title ? <>
             <strong>{title}</strong>
             <div>{kind === "quota" ? "Check your provider’s plan or billing limits." : "Try again later."}
@@ -1019,7 +1019,7 @@ function RetryableErrorActivity({ message }: { message: ChatRenderMessage }) {
       summary={label}
       summaryKey={`${attempt}:${maximum}:${label}`}
     >
-      <div className="octopus-stream-error-details">{details}</div>
+      <div className="phobos-stream-error-details">{details}</div>
     </ActivityDisclosure>
   );
 }
@@ -1032,12 +1032,12 @@ function WorkedForToggle({ elapsed, expanded, onToggle }: {
   return (
     <button
       aria-expanded={expanded}
-      className="octopus-worked-for-toggle cursor-interaction"
+      className="phobos-worked-for-toggle cursor-interaction"
       onClick={onToggle}
       type="button"
     >
       <span className="text-token-conversation-body">Worked for {formatElapsed(elapsed)}</span>
-      <Glyph className={`octopus-worked-for-chevron icon-2xs${expanded ? " is-expanded" : ""}`} name="chevronDown" size={12} />
+      <Glyph className={`phobos-worked-for-chevron icon-2xs${expanded ? " is-expanded" : ""}`} name="chevronDown" size={12} />
     </button>
   );
 }
@@ -1061,7 +1061,7 @@ function WorkedForBoundary({ elapsed, reducedMotion, status }: {
       style={{ overflow: "hidden" }}
       transition={{ duration: reducedMotion ? 0 : 0.3, ease: [0.19, 1, 0.22, 1] }}
     >
-      <div className="octopus-worked-for-boundary">
+      <div className="phobos-worked-for-boundary">
         <span className="text-token-conversation-body">{label}</span>
         <div aria-hidden="true" />
       </div>

@@ -10,7 +10,7 @@ from unittest import mock
 
 
 PACKAGE = pathlib.Path(__file__).resolve().parent
-ROOT = pathlib.Path(tempfile.mkdtemp(prefix="octopus-pyecho-contract-"))
+ROOT = pathlib.Path(tempfile.mkdtemp(prefix="phobos-pyecho-contract-"))
 VAR = ROOT / "var"
 BLOBS = ROOT / "blobs"
 MOVEMENTS = ROOT / "movements.jsonl"
@@ -19,11 +19,11 @@ BLOBS.mkdir()
 MOVEMENTS.write_bytes(b"")
 os.environ.update(
     {
-        "OCTOPUS_INTERFACE_ID": "world_pyecho",
-        "OCTOPUS_VAR_DIR": str(VAR),
-        "OCTOPUS_MOVEMENTS_JSONL": str(MOVEMENTS),
-        "OCTOPUS_BLOBS_DIR": str(BLOBS),
-        "OCTOPUS_INTERFACE_HOST_IO_LIMITS": json.dumps(
+        "PHOBOS_INTERFACE_ID": "world_pyecho",
+        "PHOBOS_VAR_DIR": str(VAR),
+        "PHOBOS_MOVEMENTS_JSONL": str(MOVEMENTS),
+        "PHOBOS_BLOBS_DIR": str(BLOBS),
+        "PHOBOS_INTERFACE_HOST_IO_LIMITS": json.dumps(
             {
                 "max_control_frame_bytes": 1024,
                 "max_stderr_bytes": 1024,
@@ -38,7 +38,7 @@ life = importlib.import_module("pyecho_life")
 
 
 def cached_artifact(payload, label="operator.message"):
-    payload_hash = life.octopus_content_hash(payload)
+    payload_hash = life.phobos_content_hash(payload)
     (BLOBS / payload_hash).write_bytes(payload)
     manifest = life.canonical_json(
         {
@@ -47,7 +47,7 @@ def cached_artifact(payload, label="operator.message"):
             "payload_content_hash": payload_hash,
         }
     )
-    manifest_hash = life.octopus_content_hash(manifest)
+    manifest_hash = life.phobos_content_hash(manifest)
     (BLOBS / manifest_hash).write_bytes(manifest)
     return manifest_hash
 
@@ -70,7 +70,7 @@ class PyechoContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exceeds 64 bytes"):
             life.materialize_payload(oversized_hash)
         self.assertEqual(
-            life.octopus_content_hash(b"abc"),
+            life.phobos_content_hash(b"abc"),
             "6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85",
         )
 

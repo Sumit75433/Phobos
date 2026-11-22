@@ -4,7 +4,7 @@
   "name": "Telegram",
   "description": "Message the tasks you connect to Telegram from your phone, and let them answer you there.",
   "category": "connector",
-  "developer": "Octopus",
+  "developer": "Phobos",
   "version": "3.0.0",
   "icon": "message",
   "logo": "application-logo.png",

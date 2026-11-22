@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
-import type { OctopusClientAccessProfile, OctopusClientAttachmentStageHandle, OctopusProviderInterface } from "../../electron";
+import type { PhobosClientAccessProfile, PhobosClientAttachmentStageHandle, PhobosProviderInterface } from "../../electron";
 import { Glyph } from "../IconGlyphs";
 import { cubicCirclePath, threeQuarterRingPath } from "../icon-glyphs/geometric-primitives";
 import { ProviderModelPicker } from "./ProviderModelPicker";
@@ -9,7 +9,7 @@ import type { ChatAttachment } from "./types";
 import { useLocalDictation } from "./useLocalDictation";
 import { DictationIcon } from "./DictationIcon";
 import { appToast } from "../../toasts";
-import { OCTOPUS_COMPACT_SURFACE_CLASS, OcMenuItem, OcButton, OcDialog, OcDialogFooter, OcDialogHeader } from "../../design-system/components";
+import { PHOBOS_COMPACT_SURFACE_CLASS, OcMenuItem, OcButton, OcDialog, OcDialogFooter, OcDialogHeader } from "../../design-system/components";
 import { clientCommands, dispatchClientCommand, subscribeClientCommands, type ClientCommandId } from "../../clientActions";
 import { useClientPreferences } from "../../clientPreferences";
 import { ProjectedFilePicker, type ProjectedFileSource } from "./ProjectedFilePicker";
@@ -25,14 +25,14 @@ import { ChatAttachmentStrip } from "./ChatAttachmentCard";
 import { useComposerSuggestion } from "./useComposerSuggestion";
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   text: string;
   attachments: ChatAttachment[];
-  providerInterfaces: OctopusProviderInterface[];
+  providerInterfaces: PhobosProviderInterface[];
   providerInterfacesLoaded?: boolean;
   providerInterfacesRefreshing?: boolean;
   modelSelectionLoading?: boolean;
-  activeProvider?: OctopusProviderInterface;
+  activeProvider?: PhobosProviderInterface;
   providerInterfaceId: string;
   providerModel: string;
   reasoningEffort: string;
@@ -68,7 +68,7 @@ type Props = {
   interruptPending?: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
   onTextChange: (value: string) => void;
-  onFilesPicked: (files: FileList | readonly (File | OctopusClientAttachmentStageHandle)[] | null) => void;
+  onFilesPicked: (files: FileList | readonly (File | PhobosClientAttachmentStageHandle)[] | null) => void;
   onRemoveAttachment: (id: string) => void;
   onProviderInterfaceChange: (providerInterfaceId: string) => void;
   onProviderModelChange: (providerInterfaceId: string, providerModel: string, reasoningEffort?: string) => void;
@@ -162,7 +162,7 @@ export function ChatComposer({
   projectedFileSources,
   listenToGlobalCommands = true,
   onVoiceStart,
-  placeholder = "Message Octopus",
+  placeholder = "Message Phobos",
   isSubmitting = false,
   turnOpen = false,
   resumeAvailable = false,
@@ -247,7 +247,7 @@ export function ChatComposer({
   const projectedFileSource = availableProjectedFileSources.find((source) => projectedSourceKey(source) === projectedFileSourceKey) ?? null;
 
   async function pickFilesAndFolders() {
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.selectClientAttachments) {
       appToast.danger("Native file selection is unavailable in this client host.");
       return;
@@ -366,7 +366,7 @@ export function ChatComposer({
       />
       <div className="flex flex-col gap-2">
         {blockingReason ? <div className="composer-storage-warning" role="alert">{blockingReason}</div> : null}
-        <div className="min-w-0" data-octopus-composer-root="">
+        <div className="min-w-0" data-phobos-composer-root="">
           <div className="relative">
           {projectedFilePickerOpen && projectedFileSource ? (
             <div className="absolute right-0 bottom-full left-0 z-[60] mb-1" data-composer-projected-file-picker="true">
@@ -382,7 +382,7 @@ export function ChatComposer({
           ) : null}
           {slashMenuOpen && !projectedFilePickerOpen ? (
             <div className="absolute right-0 bottom-full left-0 z-50 mb-1" data-composer-slash-menu="true">
-              <div className={`${OCTOPUS_COMPACT_SURFACE_CLASS} max-h-[320px]`} role="listbox">
+              <div className={`${PHOBOS_COMPACT_SURFACE_CLASS} max-h-[320px]`} role="listbox">
                 <div className="vertical-scroll-fade-mask flex w-full flex-1 flex-col overflow-y-auto p-1">
                   {slashEntries.map((entry, index) => (
                     <button
@@ -415,7 +415,7 @@ export function ChatComposer({
               ref={contextMenuRef}
             >
               <div
-                className={`${OCTOPUS_COMPACT_SURFACE_CLASS} max-h-[320px]`}
+                className={`${PHOBOS_COMPACT_SURFACE_CLASS} max-h-[320px]`}
                 role="menu"
               >
                 <div className="vertical-scroll-fade-mask flex w-full flex-1 flex-col overflow-y-auto">
@@ -715,11 +715,11 @@ function PausedQueueSubmissionDialog({ count, onResolve }: {
   return (
     <OcDialog
       ariaLabelledBy="paused-queue-submit-title"
-      backdropClassName="octopus-dialog-overlay bg-[#00000022]"
+      backdropClassName="phobos-dialog-overlay bg-[#00000022]"
       initialFocusRef={cancelRef}
       onClose={() => onResolve?.("cancel")}
       open={count > 0}
-      panelClassName="octopus-dialog w-[460px] max-w-[calc(100vw-2rem)] rounded-3xl bg-token-dropdown-background/95 p-5 text-token-foreground ring-[0.5px] ring-token-border backdrop-blur-xl"
+      panelClassName="phobos-dialog w-[460px] max-w-[calc(100vw-2rem)] rounded-3xl bg-token-dropdown-background/95 p-5 text-token-foreground ring-[0.5px] ring-token-border backdrop-blur-xl"
     >
       <OcDialogHeader
         className="p-0"

@@ -14,13 +14,13 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
-import "./octopusIconButton.css";
+import "./phobosIconButton.css";
 import "./booleanControls.css";
 import "./nativeSlider.css";
 import { OcDropdown } from "./OcDropdown";
 import { containModalFocus, isolateModalLayer, isTopmostModal, restoreModalFocus } from "./modalFocus";
 import { Glyph, type GlyphName } from "../components/IconGlyphs";
-import { OctopusSpinner } from "../components/navigation/OctopusSpinner";
+import { PhobosSpinner } from "../components/navigation/PhobosSpinner";
 import { ShellTooltip } from "../components/shell/ShellTooltip";
 import "./oc-menu.css";
 
@@ -28,18 +28,18 @@ export type OcTone = "neutral" | "accent" | "success" | "warning" | "danger" | "
 export type OcControlVariant = "primary" | "secondary" | "ghost" | "outline";
 export type OcControlSize = "xs" | "sm" | "md";
 
-const OCTOPUS_BUTTON_BASE = "border-default no-drag cursor-interaction flex items-center gap-1 rounded-lg border whitespace-nowrap select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-default";
-const OCTOPUS_BUTTON_SIZE: Record<OcControlSize, string> = {
+const PHOBOS_BUTTON_BASE = "border-default no-drag cursor-interaction flex items-center gap-1 rounded-lg border whitespace-nowrap select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-default";
+const PHOBOS_BUTTON_SIZE: Record<OcControlSize, string> = {
   xs: "h-token-button-composer-sm px-1.5 py-0 text-sm leading-[18px]",
   sm: "h-token-button-composer px-2 py-0 text-base leading-[18px]",
   md: "min-h-9 px-3 text-sm font-medium",
 };
-const OCTOPUS_CONTROL_HEIGHT: Record<OcControlSize, string> = {
+const PHOBOS_CONTROL_HEIGHT: Record<OcControlSize, string> = {
   xs: "h-token-button-composer-sm",
   sm: "h-token-button-composer",
   md: "min-h-toolbar",
 };
-const OCTOPUS_BUTTON_VARIANT: Record<OcControlVariant, string> = {
+const PHOBOS_BUTTON_VARIANT: Record<OcControlVariant, string> = {
   primary: "bg-token-foreground text-token-dropdown-background enabled:hover:bg-token-foreground/80 data-[state=open]:bg-token-foreground/80",
   secondary: "border-transparent bg-token-foreground/5 text-token-foreground enabled:hover:bg-token-foreground/10 data-[state=open]:bg-token-foreground/10",
   ghost: "border-transparent bg-transparent text-tertiary enabled:hover:bg-primary-ghost-hover data-[state=open]:bg-primary-ghost-hover",
@@ -50,9 +50,9 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
 
-export const OCTOPUS_COMPACT_SURFACE_CLASS = "border-token-border bg-token-dropdown-background/90 relative flex w-full flex-col overflow-hidden rounded-2xl border p-1 text-sm backdrop-blur-sm";
-export const OCTOPUS_FLOATING_SURFACE_CLASS = "group relative z-40 flex w-full flex-col overflow-hidden rounded-2xl bg-token-main-surface-primary/70 text-token-foreground shadow-lg ring-[0.5px] ring-token-border";
-export const OCTOPUS_WIDGET_SURFACE_CLASS = "group relative flex w-full flex-col overflow-hidden rounded-xl border border-token-foreground/5 bg-token-foreground/[0.01] text-token-foreground";
+export const PHOBOS_COMPACT_SURFACE_CLASS = "border-token-border bg-token-dropdown-background/90 relative flex w-full flex-col overflow-hidden rounded-2xl border p-1 text-sm backdrop-blur-sm";
+export const PHOBOS_FLOATING_SURFACE_CLASS = "group relative z-40 flex w-full flex-col overflow-hidden rounded-2xl bg-token-main-surface-primary/70 text-token-foreground shadow-lg ring-[0.5px] ring-token-border";
+export const PHOBOS_WIDGET_SURFACE_CLASS = "group relative flex w-full flex-col overflow-hidden rounded-xl border border-token-foreground/5 bg-token-foreground/[0.01] text-token-foreground";
 
 type OcMenuSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   density?: "menu" | "wide";
@@ -292,10 +292,10 @@ export function OcButton({
       className={cx(
         "oc-button-root",
         `oc-tone-${tone}`,
-        OCTOPUS_BUTTON_BASE,
+        PHOBOS_BUTTON_BASE,
         !busy && "disabled:opacity-40",
-        OCTOPUS_BUTTON_SIZE[size],
-        OCTOPUS_BUTTON_VARIANT[variant],
+        PHOBOS_BUTTON_SIZE[size],
+        PHOBOS_BUTTON_VARIANT[variant],
         selected && "is-selected bg-token-foreground/10",
         className,
       )}
@@ -379,7 +379,7 @@ export function OcIconButton({
   const button = appearance !== "default" ? <button
     {...props}
     aria-label={label}
-    className={cx("oc-octopus-icon-control no-drag", className)}
+    className={cx("oc-phobos-icon-control no-drag", className)}
     data-appearance={appearance}
     data-selected={selected || undefined}
     ref={buttonRef}
@@ -447,7 +447,7 @@ export function OcSegmented<T extends string>({
             "no-drag cursor-interaction flex items-center gap-1 border whitespace-nowrap select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:ring-inset disabled:cursor-default disabled:opacity-40 border-transparent shrink-0",
             size === "xs"
               ? "rounded-full px-2 py-0.5 text-sm leading-[18px]"
-              : cx("rounded-lg px-2 py-0 text-base leading-[18px]", OCTOPUS_CONTROL_HEIGHT[size]),
+              : cx("rounded-lg px-2 py-0 text-base leading-[18px]", PHOBOS_CONTROL_HEIGHT[size]),
             option.value === value
               ? "text-default bg-text/5 enabled:hover:bg-text/10 data-[state=open]:bg-text/10"
               : "text-tertiary enabled:hover:bg-primary-ghost-hover data-[state=open]:bg-primary-ghost-hover",
@@ -552,7 +552,7 @@ export function OcInlineProgress({
           style={{ transition: ringTransition }}
           transform="rotate(-90 8 8)"
         />
-      </svg> : <OctopusSpinner className="icon-xs shrink-0" />}
+      </svg> : <PhobosSpinner className="icon-xs shrink-0" />}
       <span className="min-w-0 truncate">{label}{showValue && roundedProgress != null ? ` ${roundedProgress}%` : ""}</span>
     </span>
   );
@@ -1533,7 +1533,7 @@ export function OcDialog({
             aria-labelledby={ariaLabelledBy}
             aria-modal="true"
             className={cx(
-              "octopus-dialog oc-dialog flex flex-col overflow-hidden outline-none",
+              "phobos-dialog oc-dialog flex flex-col overflow-hidden outline-none",
               variant === "form"
                 ? "relative bg-surface-elevated-secondary text-default"
                 : "rounded-3xl bg-token-dropdown-background/90 text-token-foreground shadow-lg ring-[0.5px] ring-token-border backdrop-blur-xl",

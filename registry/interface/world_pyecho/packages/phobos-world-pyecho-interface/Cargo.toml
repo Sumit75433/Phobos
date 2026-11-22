@@ -1,0 +1,24 @@
+[package]
+name = "phobos-world-pyecho-interface"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dev-dependencies]
+serde_json.workspace = true
+tempfile = "3"
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }
+tokio-util.workspace = true
+phobos-app-server = { path = "../../../../../crates/phobos-app-server" }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-runtime = { path = "../../../../../crates/phobos-runtime" }
+phobos-run-record = { path = "../../../../../crates/phobos-run-record" }
+
+[lints.rust]
+unsafe_code = "forbid"

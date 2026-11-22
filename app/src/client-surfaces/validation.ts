@@ -144,7 +144,7 @@ function makeVerdict(
     passed,
     details: {
       verifier: "client_surface_document_v1",
-      contract: "octopus.client_surface@1",
+      contract: "phobos.client_surface@1",
       document_id: documentId,
       revision,
       source_digest: sourceDigest,

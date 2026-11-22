@@ -26,13 +26,13 @@ async function json(file, value) {
 async function fixture(root) {
   const roots = rootsFor(root);
   await json(ownerFile(roots, false, "interface.json"), { id: "world_fixture", config: { model: "default", effort: "medium" }, contract: 1 });
-  await json(ownerFile(roots, false, "application.json"), { schema_version: 3, id: "world_fixture", name: "Fixture", description: "Declared setup fields", developer: "Octopus", version: "1.0.0", category: "provider", interfaces: ["world_fixture"],
+  await json(ownerFile(roots, false, "application.json"), { schema_version: 3, id: "world_fixture", name: "Fixture", description: "Declared setup fields", developer: "Phobos", version: "1.0.0", category: "provider", interfaces: ["world_fixture"],
     setup: { fields: [{ interface: "world_fixture", kind: "url", label: "Endpoint", pointer: "/config/endpoint", required: false }] } });
   await fs.writeFile(ownerFile(roots, false, "life-bin"), "version one\n", { mode: 0o755 });
   await json(path.join(roots.sourceRegistryRoot, "tool", "fixture.tool", "tool.json"), { id: "fixture.tool" });
   await json(path.join(roots.libraryRoot, "packages", "fixture.json"), {
-    schema: "octopus.local_package", schema_version: 1, id: "fixture", version: "1.0.0", product_kind: "application", product_id: "world_fixture", release_status: "optional",
-    display: { name: "Fixture", description: "Declared package ownership", developer: "Octopus", category: "provider" },
+    schema: "phobos.local_package", schema_version: 1, id: "fixture", version: "1.0.0", product_kind: "application", product_id: "world_fixture", release_status: "optional",
+    display: { name: "Fixture", description: "Declared package ownership", developer: "Phobos", category: "provider" },
     members: [{ registry_kind: "interface", owner: "world_fixture", primary: true,
       configuration: [{ path: "interface.json", fields: [
         { pointer: "/config/model", schema: { type: "string", minLength: 1 } },
@@ -149,7 +149,7 @@ async function sourceBoundaryFixture(root, repoRoot) {
     await fs.mkdir(path.dirname(path.join(root, relative)), { recursive: true });
     await fs.copyFile(path.join(repoRoot, relative), path.join(root, relative));
   }
-  await json(path.join(root, "registry", ".octopus-source.json"), { schema_version: 1, id: "fixture" });
+  await json(path.join(root, "registry", ".phobos-source.json"), { schema_version: 1, id: "fixture" });
   const output = readGeneratedSourcePaths(root).find((entry) => entry.endsWith("life-bin/"));
   const executable = path.join(root, output, "generated"), body = Buffer.from(`${os.homedir()}/build-host-path`);
   await fs.mkdir(path.dirname(executable), { recursive: true }); await fs.writeFile(executable, body);
@@ -170,11 +170,11 @@ async function packageExportFixture(root, repoRoot) {
   }
   const registry = path.join(root, "registry"), library = path.join(root, "app", "distribution", "local-packages"), out = path.join(root, "published");
   const descriptor = path.join(registry, "interface", "world_provider_codex", "interface.json");
-  await json(path.join(registry, ".octopus-source.json"), { schema_version: 1, id: "fixture" });
+  await json(path.join(registry, ".phobos-source.json"), { schema_version: 1, id: "fixture" });
   await json(descriptor, { id: "world_provider_codex" });
   await json(path.join(library, "packages", "fixture.json"), {
-    schema: "octopus.local_package", schema_version: 1, id: "fixture", version: "1.0.0", product_kind: "application", product_id: "world_provider_codex", release_status: "optional",
-    display: { name: "Fixture", description: "Selected package export", developer: "Octopus", category: "provider" },
+    schema: "phobos.local_package", schema_version: 1, id: "fixture", version: "1.0.0", product_kind: "application", product_id: "world_provider_codex", release_status: "optional",
+    display: { name: "Fixture", description: "Selected package export", developer: "Phobos", category: "provider" },
     members: [{ registry_kind: "interface", owner: "world_provider_codex", primary: true }],
   });
   const body = Buffer.from(`${os.homedir()}/private-build-input`), unselected = path.join(registry, "unselected", "payload");
@@ -246,7 +246,7 @@ async function dataDirectoryFixture(root) {
 }
 
 async function run() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-package-ownership-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-package-ownership-")));
   try {
     await publicationRecoveryFixture(path.join(root, "publication-recovery"));
     await nativeRenameFixture(path.join(root, "native-rename"));
@@ -388,7 +388,7 @@ if (require.main === module) {
   const focused = { "--publication-recovery": publicationRecoveryFixture, "--data-directories": dataDirectoryFixture }[process.argv[2]];
   const action = process.argv[2] === "--crash" ? crash(process.argv[3], process.argv[4])
     : focused ? (async () => {
-      const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-package-contract-")));
+      const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-package-contract-")));
       try { await focused(root); }
       finally { await fs.rm(root, { recursive: true, force: true }); }
     })() : run();

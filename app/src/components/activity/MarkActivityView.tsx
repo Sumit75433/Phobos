@@ -2,8 +2,8 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { useSetClientPreferences, useClientPreferences } from "../../clientPreferences";
 import { OcIconButton, OcMenuItem, OcMenuSectionLabel } from "../../design-system/components";
 import { OcDropdown } from "../../design-system/OcDropdown";
-import { OctopusNavSection } from "../navigation/OctopusNav";
-import { OctopusSpinner } from "../navigation/OctopusSpinner";
+import { PhobosNavSection } from "../navigation/PhobosNav";
+import { PhobosSpinner } from "../navigation/PhobosSpinner";
 import { ActivityMark } from "./ActivityMark";
 import type { MarkActivityItem } from "./markActivity";
 import { activityHeadline, activityPresentation, activitySections, activitySummary, isActivityRequest, relativeActivityTime, type ActivityRowGroup } from "./markPresentation";
@@ -31,7 +31,7 @@ export function MarkActivityView({ activity, activeId, onSelect }: {
     <div className="mark-activity px-row-x" aria-label="Inbox">
       <div className="flex flex-col" role="list">
         {!visible.length ? (
-          <ActivitySection heading={<OctopusNavSection title={<div className="py-0.5">Inbox</div>} titleActions={options}>{null}</OctopusNavSection>}>
+          <ActivitySection heading={<PhobosNavSection title={<div className="py-0.5">Inbox</div>} titleActions={options}>{null}</PhobosNavSection>}>
             {activity.error ? <div className="mark-activity-message" role="alert">{activity.error}</div> : null}
             {!activity.loaded && !activity.error ? <div className="mark-activity-message" role="status">Loading Inbox…</div> : null}
             {activity.loaded && !activity.error ? <div className="mark-activity-empty">You're all caught up</div> : null}
@@ -39,7 +39,7 @@ export function MarkActivityView({ activity, activeId, onSelect }: {
         ) : visible.map((section, index) => (
           <Fragment key={section.key}>
             {index > 0 ? <div aria-hidden="true" className="h-3 shrink-0" /> : null}
-            <ActivitySection heading={<OctopusNavSection title={<div className="py-0.5">{section.label}</div>} titleActions={index === 0 ? options : undefined}>{null}</OctopusNavSection>}>
+            <ActivitySection heading={<PhobosNavSection title={<div className="py-0.5">{section.label}</div>} titleActions={index === 0 ? options : undefined}>{null}</PhobosNavSection>}>
               {index === 0 && activity.error ? <div className="mark-activity-message" role="alert">{activity.error}</div> : null}
               {section.rows.map((row) => (
                 <div role="listitem" key={row.id}>
@@ -154,7 +154,7 @@ function ActivityNextPage({ onLoad }: { onLoad: () => void }) {
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
-  return <div role="listitem"><div className="flex w-full justify-center py-3" ref={sentinel}><OctopusSpinner className="icon-xs text-secondary" /></div></div>;
+  return <div role="listitem"><div className="flex w-full justify-center py-3" ref={sentinel}><PhobosSpinner className="icon-xs text-secondary" /></div></div>;
 }
 
 function markKindLabel(name: string): string {

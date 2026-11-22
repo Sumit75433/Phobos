@@ -11,7 +11,7 @@ const image = {media_type:'image/jpeg',data_base64:imageBytes.toString('base64')
 const state = () => ({status:'ready',permissions:{screen_capture:true,accessibility:true},control:{mode:'model',owner:'room-a',generation:1},screens:[screen],observation:{id:'frame-1',screen,focus:{app_id:'example.app',process_id:5,window_id:7},input_revision:'1',captured_at_unix_ms:1,image}});
 const input = (viewId, operation='view') => ({workerEnvironmentId:'room-a',surfaceId:'desktop',runId:'run-a',viewId,operation,screenId:'left'});
 async function fixture(timeout=1000, native=false) {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'octopus-B2-bridge-')));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'phobos-B2-bridge-')));
   const dir = path.join(root,'registry/interface/system_gui'); await fs.mkdir(dir,{recursive:true});
   const config = {schema_version:1,viewer_url:'http://127.0.0.1:8766/view',action_url:'http://127.0.0.1:8766/v1/action',auth_header:'Authorization',auth_value_prefix:'Bearer ',auth_env_key:'DESKTOP_TEST_SECRET',request_timeout_ms:timeout,max_response_bytes:97871192};
   const secret = native ? 'a'.repeat(64) : randomUUID();
@@ -351,9 +351,9 @@ test('browser-only Home uses one receipted client presentation factory without i
  const syncFs=require('node:fs'),vm=require('node:vm'),ts=require('typescript');
  const {createClientPresentationHost,verifyClientPresentationArtifact}=require('../electron/nativePresentation.cjs');
  const {publishClientPresentation,sealClientPresentation}=require('./client-presentation-artifact.cjs');
- const root=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'octopus-client-presentation-')));
+ const root=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'phobos-client-presentation-')));
  try {
-  const source=path.resolve(__dirname,'../../registry/worker_environment_kind/desktop_session/packages/octopus-system-gui-env/native/pip');
+  const source=path.resolve(__dirname,'../../registry/worker_environment_kind/desktop_session/packages/phobos-system-gui-env/native/pip');
   const manifestBytes=await fs.readFile(path.join(source,'manifest.json')),manifest=JSON.parse(manifestBytes),sha=b=>createHash('sha256').update(b).digest('hex');
   const clientRuntime=require('../native/runtime.cjs').clientRuntime();
   const resources=path.join(root,'resources'),home=path.join(root,'browser-only-home');
@@ -376,7 +376,7 @@ test('browser-only Home uses one receipted client presentation factory without i
   const functions=main.statements.filter(node=>ts.isFunctionDeclaration(node)&&names.has(node.name?.text)).map(node=>node.getText(main));assert.equal(functions.length,3);
   const context=vm.createContext({path,process:{resourcesPath:resources,arch:'arm64',versions:{node:clientRuntime.node,electron:clientRuntime.electron}},
    app:{isPackaged:true,getAppPath:()=>path.join(resources,'app')},nativeClientPresentations:null,nativeBrowserPresentations:null,nativeDesktopPresentations:null,nativeDesktopPermissions:null,
-   resolveOctopusHome:()=>currentHome,requireNativeDesktopAccess:()=>{},syncNativeDesktopHosts:()=>calls.push(['sync-hosts']),
+   resolvePhobosHome:()=>currentHome,requireNativeDesktopAccess:()=>{},syncNativeDesktopHosts:()=>calls.push(['sync-hosts']),
    createClientPresentationHost:options=>createClientPresentationHost({...options,loadAddon:file=>{calls.push(['load',file]);return{createPiPHost:config=>{event=config.onEvent;calls.push(['factory']);return native;}};}}),
    createBrowserPresentationHost:options=>({native:options.getNativeHost,onEvent:async value=>events.push(value)}),
    createDesktopPresentationHost:options=>({native:options.getNativeHost,onEvent:value=>events.push(value)}),
@@ -412,7 +412,7 @@ test('native presentation reconciliation isolates one invalid source or browser 
  const browserHost={snapshot:()=>[],reconcile:async values=>{calls.push(['browser',values.map(value=>value.room.worker_environment_id)]);throw new Error('image artifact unavailable');},revokeAll:()=>calls.push(['revoke-browser'])};
  const history={reconcile:async values=>calls.push(['history',values.map(value=>value.room.worker_environment_id)]),revokeAll:()=>calls.push(['revoke-history'])};
  const context=vm.createContext({process:{platform:'darwin'},quitCleanupStarted:false,nativeDesktopRefreshScheduled:false,nativeDesktopRefreshRunning:false,nativeDesktopRefreshAgain:false,
-  queueMicrotask,nativeBrowserHost:{getEngineInfo:()=>({capabilities:{persistentDownloadHistory:true}})},nativeBrowserHome:'/home',resolveOctopusHome:()=>'/home',nativeDesktopAccessEntries:()=>authorized?[{}]:[],
+  queueMicrotask,nativeBrowserHost:{getEngineInfo:()=>({capabilities:{persistentDownloadHistory:true}})},nativeBrowserHome:'/home',resolvePhobosHome:()=>'/home',nativeDesktopAccessEntries:()=>authorized?[{}]:[],
   requireNativeDesktopAccess:()=>{if(!authorized)throw new Error('access withdrawn');},requireNativeBrowserHome:()=>{},
   getProjectionStore:()=>({read:async request=>request.kind==='projection.worker_environments.list'?{worker_environments:rooms}:{chats:turns}}),
   projectionReadRequest:(kind,args)=>({kind,args}),presentationSource:(_descriptor,input)=>{if(input.sourceWindowId==='invalid-source')throw new Error('invalid exact source');return{source:{},identity:{}};},
@@ -438,7 +438,7 @@ test('native presentation reconciliation isolates one invalid source or browser 
 test('native permission UI binds human callbacks, fresh helper status and uncertain-request refresh without app/input grants', async () => {
  const {createDesktopPermissionHost,validatePermissionSnapshot,validatePermissionSettingsSource}=require('../electron/desktopSurface.cjs');const f=await fixture(1000,true);
  const row={id:'screen',kind:'screen_capture',title:'Screen Recording',status:'not_granted',can_request:true,can_open_settings:true,provenance:{process_id:77,api:'CGPreflightScreenCaptureAccess'}};
- const snapshot={schema_version:1,host_generation:f.manifest.host_generation,helper:{executable_path:'/test/bin/octopus-desktop-native',display_name:'octopus-desktop-native',process_id:77,bundle:null,responsible_app:null},permissions:[row]};
+ const snapshot={schema_version:1,host_generation:f.manifest.host_generation,helper:{executable_path:'/test/bin/phobos-desktop-native',display_name:'phobos-desktop-native',process_id:77,bundle:null,responsible_app:null},permissions:[row]};
  const calls=[];let changedHome=f.root,allowed=true,uncertain=false;
  assert.deepEqual(validatePermissionSnapshot(snapshot,f.manifest.host_generation).helper,snapshot.helper);
  for(const altered of [

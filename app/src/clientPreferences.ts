@@ -6,7 +6,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 
 export type SendShortcut = "enter" | "cmd-if-multiline" | "cmd-always";
 export type MarkNotifications = "never" | "unfocused" | "always";
@@ -111,7 +111,7 @@ export const defaultClientPreferences: ClientPreferences = Object.freeze({
   hiddenSurfaceIds: [],
 });
 
-const STORAGE_KEY = "octopus.client-preferences.v1";
+const STORAGE_KEY = "phobos.client-preferences.v1";
 const sendShortcuts: readonly SendShortcut[] = ["enter", "cmd-if-multiline", "cmd-always"];
 const markNotificationModes: readonly MarkNotifications[] = [
   "never",
@@ -124,12 +124,12 @@ const incomingAudioArtifactBehaviors: readonly IncomingAudioArtifactBehavior[] =
 const dictationProviders: readonly DictationProvider[] = ["codex"];
 const technicalDetailLevels: readonly TechnicalDetailLevel[] = ["detailed", "concise"];
 type ClientPreferencesStore = {
-  readonly profile: OctopusClientAccessProfile;
+  readonly profile: PhobosClientAccessProfile;
   current: ClientPreferences;
   readonly subscribers: Set<() => void>;
 };
 
-const stores = new Map<OctopusClientAccessProfile, ClientPreferencesStore>();
+const stores = new Map<PhobosClientAccessProfile, ClientPreferencesStore>();
 let clientPreferencesStorageListenerReady = false;
 const ClientPreferencesContext = createContext<ClientPreferencesStore | null>(null);
 
@@ -327,11 +327,11 @@ function normalizePreferences(value: unknown, transientSearch = ""): ClientPrefe
   });
 }
 
-function storageKey(profile: OctopusClientAccessProfile): string {
+function storageKey(profile: PhobosClientAccessProfile): string {
   return profile === "live" ? STORAGE_KEY : `${STORAGE_KEY}.test`;
 }
 
-function loadClientPreferences(profile: OctopusClientAccessProfile): ClientPreferences {
+function loadClientPreferences(profile: PhobosClientAccessProfile): ClientPreferences {
   try {
     if (typeof window === "undefined") return defaultClientPreferences;
     const raw = window.localStorage.getItem(storageKey(profile));
@@ -362,7 +362,7 @@ function loadClientPreferences(profile: OctopusClientAccessProfile): ClientPrefe
   }
 }
 
-function clientPreferencesStore(profile: OctopusClientAccessProfile): ClientPreferencesStore {
+function clientPreferencesStore(profile: PhobosClientAccessProfile): ClientPreferencesStore {
   ensureClientPreferencesStorageListener();
   const existing = stores.get(profile);
   if (existing) return existing;
@@ -459,7 +459,7 @@ export function ClientPreferencesProvider({
   profile,
 }: {
   children: ReactNode;
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
 }) {
   return createElement(
     ClientPreferencesContext.Provider,

@@ -146,7 +146,7 @@ async function effective(ctx, name) {
   const saved = ctx.values?.[name];
   const ambient = await ctx.launchEnvironment(name);
   if (typeof saved === "string" && typeof ambient === "string" && saved !== ambient) {
-    throw new MailFailure("input", `${name} is set in this Mac's environment and saved in Octopus with a different value, so the Email interface cannot start. Remove it from the environment or connect with the same value.`);
+    throw new MailFailure("input", `${name} is set in this Mac's environment and saved in Phobos with a different value, so the Email interface cannot start. Remove it from the environment or connect with the same value.`);
   }
   return typeof ambient === "string" ? ambient : typeof saved === "string" ? saved : "";
 }
@@ -363,7 +363,7 @@ async function checkImap(endpoint, account, timeoutMs, signal) {
     let capabilities = advertised ? capabilityTokens(advertised[1]) : await imapCapabilities(wire);
     if (endpoint.tls === "starttls") {
       if (!capabilities.has("STARTTLS")) {
-        throw new MailFailure("tls", `${endpoint.host} does not offer STARTTLS on port ${endpoint.port}; Octopus never signs in without encryption.`);
+        throw new MailFailure("tls", `${endpoint.host} does not offer STARTTLS on port ${endpoint.port}; Phobos never signs in without encryption.`);
       }
       const started = await imapCommand(wire, "STARTTLS");
       if (started.status !== "OK") throw new MailFailure("tls", `${endpoint.host} refused to start encryption.`, started.text);
@@ -430,7 +430,7 @@ async function checkSmtp(endpoint, account, timeoutMs, signal) {
     let extensions = await smtpHello(wire);
     if (endpoint.tls === "starttls") {
       if (!extensions.has("STARTTLS")) {
-        throw new MailFailure("tls", `${endpoint.host} does not offer STARTTLS on port ${endpoint.port}; Octopus never signs in without encryption.`);
+        throw new MailFailure("tls", `${endpoint.host} does not offer STARTTLS on port ${endpoint.port}; Phobos never signs in without encryption.`);
       }
       const started = await smtpCommand(wire, "STARTTLS");
       if (started.code !== 220) throw new MailFailure("tls", `${endpoint.host} refused to start encryption.`, started.text);
@@ -574,17 +574,17 @@ async function disconnect(ctx) {
   for (const name of [names.address, names.password]) {
     if (typeof (await ctx.launchEnvironment(name)) === "string") kept.push(name);
   }
-  const removed = `Email is disconnected: Octopus removed ${account?.address ?? "the mailbox"} and its app password from this Mac.`;
+  const removed = `Email is disconnected: Phobos removed ${account?.address ?? "the mailbox"} and its app password from this Mac.`;
   const revoke = "The app password itself keeps working until you revoke it in your mail provider's account settings.";
   if (!kept.length) return managed({ state: "not_connected", message: clip(`${removed} ${revoke}`) }, account);
   const them = kept.length === 1 ? "it" : "them";
   const listed = `${kept.join(" and ")} ${kept.length === 1 ? "is" : "are"} set in this Mac's environment`;
   const state = await probe(ctx);
-  if (state.state === "error") return { ...state, message: clip(`Octopus removed the saved mailbox settings, but ${listed} and checking ${them} failed: ${state.message}`) };
+  if (state.state === "error") return { ...state, message: clip(`Phobos removed the saved mailbox settings, but ${listed} and checking ${them} failed: ${state.message}`) };
   if (state.state === "not_connected") {
     return managed({ ...state, message: clip(`${removed} ${listed}, but the Email interface cannot sign in without the removed settings. Revoke the app password with your mail provider.`) }, account);
   }
-  return { ...state, message: clip(`Octopus removed the saved mailbox settings, but ${listed}, so the Email interface keeps using ${them}. Remove ${them} there to disconnect.`) };
+  return { ...state, message: clip(`Phobos removed the saved mailbox settings, but ${listed}, so the Email interface keeps using ${them}. Remove ${them} there to disconnect.`) };
 }
 
 module.exports = { schemaVersion: 1, probe, connect, disconnect };

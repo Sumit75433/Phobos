@@ -169,7 +169,7 @@ function ArtifactEndResourceCard({ resource }: { resource: ArtifactEndResource }
       <button
         aria-label={`Open ${resource.filename}`}
         className="peer/end-resource absolute inset-0 cursor-interaction border-0 bg-transparent group-hover/end-resource:bg-token-list-hover-background/30 focus-visible:ring-1 focus-visible:ring-token-focus-border focus-visible:outline-none focus-visible:ring-inset"
-        draggable={Boolean(window.octopusTransport?.startClientFileDrag)}
+        draggable={Boolean(window.phobosTransport?.startClientFileDrag)}
         onClick={() => openArtifactFiles(resource.reference)}
         onDragStart={(event) => {
           event.preventDefault();

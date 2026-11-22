@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { clientCommands, type ClientCommandId } from "../../clientActions";
 import { useCustomGestures, customGestureCommandLabel, type CustomGesture } from "../../customGestures";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { FingerCurls } from "../../airHandEngine";
 import { cancelGestureTrace, revealGestureTrace, startGestureTrace, useGestureTraceStatus, type GestureTraceStatus } from "../../gestureTraceRecorder";
 import { GESTURE_GUIDE, type GestureGuideId } from "../gestures/gestureGuide";
@@ -50,7 +50,7 @@ const CURL_LABELS: Record<keyof FingerCurls, string> = {
   little: "Little",
 };
 
-export function GestureManager({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
+export function GestureManager({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
   const preferences = useGestureShortcutPreferences(accessProfile);
   const setPreferences = useSetGestureShortcutPreferences(accessProfile);
   const devicesView = useGestureDevices();
@@ -179,7 +179,7 @@ export function GestureManager({ accessProfile }: { accessProfile: OctopusClient
               </div>
             )}
             description={permission?.status === "denied"
-              ? "Camera access was denied. Enable it for Octopus in System Settings → Privacy & Security → Camera."
+              ? "Camera access was denied. Enable it for Phobos in System Settings → Privacy & Security → Camera."
               : "Frames stay in memory on this device, only long enough to find your hands."}
             label="Camera access"
           />

@@ -64,7 +64,7 @@ export function OpenSourceLicensesDialog({ onClose, open }: { onClose: () => voi
     >
       <OcDialogHeader
         closeLabel="Close open-source licenses"
-        description="Production dependencies bundled into the Octopus desktop renderer"
+        description="Production dependencies bundled into the Phobos desktop renderer"
         onClose={onClose}
         title="Open-source licenses"
         titleId="open-source-licenses-title"

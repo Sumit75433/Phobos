@@ -1,0 +1,41 @@
+[package]
+name = "phobos-run-authoring"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lib]
+doctest = false
+name = "phobos_run_authoring"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+json-patch.workspace = true
+phobos-file-write-contract = { path = "../../../../worker_environment_kind/system_room/packages/phobos-file-write-contract" }
+blake3.workspace = true
+sha2 = "0.10"
+url = "2"
+tokio = { workspace = true, features = ["sync", "time", "rt", "net", "fs"] }
+futures = { version = "0.3", default-features = false }
+tokio-tungstenite = { version = "0.28.0", features = ["rustls-tls-native-roots"] }
+
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-world-pyecho-life-runtime = { path = "../../../world_pyecho/packages/phobos-world-pyecho-life-runtime" }
+phobos-app-server-interface = { path = "../../../world_operator_chat/packages/phobos-app-server-interface" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-policy = { path = "../../../../../crates/phobos-policy" }
+phobos-run-record = { path = "../../../../../crates/phobos-run-record" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+
+[dev-dependencies]
+phobos-system-room-env = { path = "../../../../worker_environment_kind/system_room/packages/phobos-system-room-env" }
+proptest.workspace = true
+tempfile = "3.23.0"
+tokio-util = "0.7"

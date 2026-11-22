@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_memory_cron",
   "version": "1.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Memory consolidation",
     "description": "A trigger template: after a quiet period in your work, a run merges duplicate notes in Home memory, settles contradictions and folds stale notes into what is still true.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "book-open"
   },

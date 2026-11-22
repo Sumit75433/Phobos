@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import type { OctopusClientAccessProfile, OctopusDictationResponse } from "../../electron";
+import type { PhobosClientAccessProfile, PhobosDictationResponse } from "../../electron";
 import { transcribeDictation } from "../../projectionClient";
 import { applyDictationDictionary, useClientPreferences, useSetClientPreferences } from "../../clientPreferences";
 import { dictationAudioRequest, dictationHost, dictationMessage, dictationResult, notifyDictationRecordingsChanged } from "../../clientDictationRecordings";
@@ -12,7 +12,7 @@ const MIN_RECORDING_MS = 250;
 const TRANSCRIPTION_SAMPLE_RATE = 24_000;
 
 export function useLocalDictation({ accessProfile, composerId, onTranscriptStart, onTranscriptUpdate, onTranscriptCancel, onTranscriptInsert, onTranscriptSend }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   composerId: string;
   onTranscriptStart: () => void;
   onTranscriptUpdate: (transcript: string) => void;
@@ -60,7 +60,7 @@ export function useLocalDictation({ accessProfile, composerId, onTranscriptStart
     contextRef.current = null;
   }, []);
 
-  const transcribe = useCallback(async (attempt: RetryableDictation, operation: number, responsePromise?: Promise<OctopusDictationResponse>) => {
+  const transcribe = useCallback(async (attempt: RetryableDictation, operation: number, responsePromise?: Promise<PhobosDictationResponse>) => {
     const responseOutcome = responsePromise?.then((value) => ({ value }), (failure: unknown) => ({ failure }));
     changePhase("transcribing");
     setError("");

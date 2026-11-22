@@ -1,4 +1,4 @@
-export const CHAT_MESSAGE_REVEAL_EVENT = "octopus:chat-message-reveal";
+export const CHAT_MESSAGE_REVEAL_EVENT = "phobos:chat-message-reveal";
 
 export type ChatMessageRevealRequest = {
   runId: string;

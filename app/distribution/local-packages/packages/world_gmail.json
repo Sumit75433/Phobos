@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_gmail",
   "version": "1.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Gmail",
     "description": "Search, read, draft and send email with the Gmail app connected to your ChatGPT account.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "plugin",
     "icon": "mail"
   },

@@ -9,7 +9,7 @@ No network, model, real credential or cloud service is needed for verification.
 
 Use stable Rust with edition 2024 support (the recorded measurements used Rust
 1.99.1). Run these commands from this package directory. The package is independent
-of the Octopus workspace; all dependencies are pinned in Cargo.lock.
+of the Phobos workspace; all dependencies are pinned in Cargo.lock.
 
 ```sh
 cargo test --locked
@@ -19,7 +19,7 @@ cargo run --release --locked -- oracle-bench > oracle-benchmark.json
 ```
 
 After dependencies are cached, these commands can also run with `--offline`.
-No Octopus installation, model account or credential is required for the fixtures.
+No Phobos installation, model account or credential is required for the fixtures.
 The original measurements and command logs are retained; package-root paths in
 the logs have been replaced with `<package-root>` for publication.
 
@@ -183,13 +183,13 @@ commands passed 6/6 fixtures. Oracle rates have only five attacks and one benign
 trajectory; 200 timing repetitions per trajectory are NOT extra accuracy trials.
 See [BENCHMARK_REPORT.md](BENCHMARK_REPORT.md) for method and exact scope.
 
-## Local native Octopus integration smoke test
+## Local native Phobos integration smoke test
 
-On 2026-11-17, a separate, locally installed Octopus native `system_mcp` /
+On 2026-11-17, a separate, locally installed Phobos native `system_mcp` /
 `mcp_stdio_session` room exercised this proxy with `sandbox_mode="enforced"`
 under macOS Seatbelt. A dependency-free Python diagnostics MCP server was locked;
 `mcp.status`, `mcp.list_tools`, a call to the qualified
-`local_diag__octopus_host_summary` tool, and `mcp.close` completed successfully.
+`local_diag__phobos_host_summary` tool, and `mcp.close` completed successfully.
 The retained integration report and tool-completion records were inspected, and
 `verify-ledger` independently verified the resulting **7 hash-chained records**.
 
@@ -242,4 +242,4 @@ not a universal MCP gateway or production security certification.
 
 `__mock` is an internal evaluation fixture, not a production server.
 These local commands do not publish a package or release. This standalone source
-snapshot is distributed in the [Octopus examples collection](../README.md).
+snapshot is distributed in the [Phobos examples collection](../README.md).

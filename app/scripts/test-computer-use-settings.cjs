@@ -8,7 +8,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { createNativeDesktopSettingsHost } = require('../electron/nativeDesktopSettings.cjs');
 const { createDesktopPermissionHost } = require('../electron/desktopSurface.cjs');
-const { readComputerUsePreference, writeComputerUsePreference } = require('../../registry/worker_environment_kind/desktop_session/packages/octopus-system-gui-env/native/setup-preferences.cjs');
+const { readComputerUsePreference, writeComputerUsePreference } = require('../../registry/worker_environment_kind/desktop_session/packages/phobos-system-gui-env/native/setup-preferences.cjs');
 
 test('upfront status and setup share one verified helper and retain exact observed permission identity', async () => {
   let release, preparations = 0, nextPid = 100, valid = true, home = '/home';
@@ -63,7 +63,7 @@ test('closing an owner during shared preparation starts no helper', async () => 
 });
 
 test('saved enable selection is exact, private and atomic; missing is disabled and malformed refuses', async () => {
-  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-computer-setting-'));
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-computer-setting-'));
   const root = await fs.realpath(temporary); await fs.chmod(root, 0o700);
   try {
     assert.deepEqual(await readComputerUsePreference(root), { schema_version: 1, enabled: false });
@@ -81,10 +81,10 @@ test('saved enable selection is exact, private and atomic; missing is disabled a
 test('cold saved-app Settings binds typed child to current package/root/owner and refuses stale removal before dispatch', async () => {
   let generation='package-a',hold=false,nextPid=200;const calls=[],children=[];
   const owner={id:1,identity:'authenticated-owner',current(){}};
-  const host=createNativeDesktopSettingsHost({homePath:()=>'/home',prepareHelper:async()=>({home:'/home',program:'/native-helper',settingsProgram:'/installed/octopus-desktop-host',
+  const host=createNativeDesktopSettingsHost({homePath:()=>'/home',prepareHelper:async()=>({home:'/home',program:'/native-helper',settingsProgram:'/installed/phobos-desktop-host',
     directory:'/installed',preferenceRoot:'/declared-private-root',applicationIdentity:generation,timeout:1000,current(){}}),
     spawn(program,args,options){
-      assert.equal(program,'/installed/octopus-desktop-host');assert.deepEqual(args,['--application-settings','/declared-private-root']);
+      assert.equal(program,'/installed/phobos-desktop-host');assert.deepEqual(args,['--application-settings','/declared-private-root']);
       assert.deepEqual(Object.keys(options.env).sort(),['LANG','PATH']);
       const child=new EventEmitter();child.pid=++nextPid;child.stdout=new PassThrough();child.stderr=new PassThrough();child.kill=()=>{child.killed=true;};children.push(child);
       child.stdin=new Writable({write(bytes,_encoding,done){const action=JSON.parse(bytes);calls.push(action);done();if(hold)return;

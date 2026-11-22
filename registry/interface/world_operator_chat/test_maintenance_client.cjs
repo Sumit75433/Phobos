@@ -130,7 +130,7 @@ module.exports = { maintenanceFixture };
 
 if (require.main === module) {
   const test = require("node:test"), { plannedAdditionalRunWrites } = require("./client/topologyPlan.cjs");
-  const registry = path.join(os.tmpdir(), "octopus-maintenance-guard-registry"), runs = path.join(os.tmpdir(), "octopus-maintenance-guard-runs");
+  const registry = path.join(os.tmpdir(), "phobos-maintenance-guard-registry"), runs = path.join(os.tmpdir(), "phobos-maintenance-guard-runs");
   const guard = (plan) => plannedAdditionalRunWrites(plan, runs, registry);
   const changeSource = (plan, change) => { const source = JSON.parse(plan.run_record_content); change(source, source.interface_state[plan.model_interface_id].maintenance_observer); plan.run_record_content = JSON.stringify(source); };
   test("retained declaration decode needs neither a live source frontier nor current companion bytes", () => {

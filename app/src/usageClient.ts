@@ -1,16 +1,16 @@
 import type {
-  OctopusCodexUsageReadRequest,
-  OctopusCodexUsageSnapshot,
+  PhobosCodexUsageReadRequest,
+  PhobosCodexUsageSnapshot,
 } from "./electron";
 
 export function hasCodexUsageBridge(): boolean {
-  return typeof window.octopusTransport?.readCodexUsage === "function";
+  return typeof window.phobosTransport?.readCodexUsage === "function";
 }
 
 export async function readCodexUsage(
-  request: OctopusCodexUsageReadRequest,
-): Promise<OctopusCodexUsageSnapshot> {
-  const read = window.octopusTransport?.readCodexUsage;
-  if (!read) throw new Error("Codex usage is available in the Octopus desktop app");
+  request: PhobosCodexUsageReadRequest,
+): Promise<PhobosCodexUsageSnapshot> {
+  const read = window.phobosTransport?.readCodexUsage;
+  if (!read) throw new Error("Codex usage is available in the Phobos desktop app");
   return read(request);
 }

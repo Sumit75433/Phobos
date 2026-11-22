@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { ChatApplicationChoice, ChatExecutionContext, ChatUnavailableApplicationChoice, ChatWorkerChoice } from "../../chatRuns";
-import type { OctopusProviderInterface } from "../../electron";
+import type { PhobosProviderInterface } from "../../electron";
 import {
   AGENT_PRESET_ICONS,
   DEFAULT_AGENT_PRESET_ICON,
@@ -39,7 +39,7 @@ type Props = {
   preset: ClientAgentDefinition | null;
   presets: readonly ClientAgentDefinition[];
   projects: readonly ClientChatProject[];
-  providers: readonly OctopusProviderInterface[];
+  providers: readonly PhobosProviderInterface[];
   readOnly?: boolean;
   modelsLoading?: boolean;
   modelError?: string;
@@ -205,7 +205,7 @@ export function AgentPresetDialog({ busy = false, contexts, initialProjectEeId, 
 
   return (
     <OcDialog
-      ariaLabelledBy="octopus-agent-preset-title"
+      ariaLabelledBy="phobos-agent-preset-title"
       initialFocusRef={readOnly ? undefined : inputRef}
       onClose={onCancel}
       open={open}
@@ -216,17 +216,17 @@ export function AgentPresetDialog({ busy = false, contexts, initialProjectEeId, 
         <OcDialogHeader
           className="p-0 pb-3"
           description={readOnly
-            ? "This Lab Agent is projected fixture data. Agent authoring is available only in the live Octopus OS."
+            ? "This Lab Agent is projected fixture data. Agent authoring is available only in the live Phobos OS."
             : preset
             ? "Changes become defaults for future tasks. Existing runs keep their original configuration."
             : "Configure a reusable Agent for future tasks. Creating an Agent does not create a run."}
           onClose={onCancel}
           title={readOnly && preset ? preset.name : preset ? `Edit ${preset.name}` : "Create agent"}
-          titleId="octopus-agent-preset-title"
+          titleId="phobos-agent-preset-title"
         />
         <div className="vertical-scroll-fade-mask -mr-2 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-2 [&>*]:shrink-0">
           <section className="flex w-full flex-col gap-2">
-            <label className="text-base text-token-foreground" htmlFor="octopus-agent-name">Agent name</label>
+            <label className="text-base text-token-foreground" htmlFor="phobos-agent-name">Agent name</label>
             <div className="flex items-center gap-2.5">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-token-foreground/[0.035]">
                 <AgentPresetLogo color={selectedProject?.color} icon={icon} size={34} />
@@ -234,7 +234,7 @@ export function AgentPresetDialog({ busy = false, contexts, initialProjectEeId, 
               <OcTextField
                 className="min-w-0 flex-1"
                 disabled={busy || readOnly}
-                id="octopus-agent-name"
+                id="phobos-agent-name"
                 inputRef={inputRef}
                 label="Agent name"
                 maxLength={80}
@@ -465,13 +465,13 @@ function defaultAgentIconForProject(
   return AGENT_PRESET_ICONS.find((candidate) => !used.has(candidate)) ?? DEFAULT_AGENT_PRESET_ICON;
 }
 
-function defaultsForContext(context: ChatExecutionContext | null, providers: readonly OctopusProviderInterface[]) {
+function defaultsForContext(context: ChatExecutionContext | null, providers: readonly PhobosProviderInterface[]) {
   const sourceWorkers = context?.workers.filter((worker) => worker.authoringProfile && worker.agentSourceTemplate) ?? [];
   const worker = sourceWorkers.length === 1 ? sourceWorkers[0] : null;
   return { workerInterfaceId: worker?.id ?? "", ...defaultsForWorker(worker, providers) };
 }
 
-function defaultsForWorker(worker: ChatWorkerChoice | null, providers: readonly OctopusProviderInterface[]) {
+function defaultsForWorker(worker: ChatWorkerChoice | null, providers: readonly PhobosProviderInterface[]) {
   const allowedProviders = worker
     ? providers
       .filter((provider) => worker.providerInterfaceIds.includes(provider.id))
@@ -498,7 +498,7 @@ function validateSelection(input: {
   contexts: readonly ChatExecutionContext[];
   driverNames: readonly string[];
   name: string;
-  provider: OctopusProviderInterface | null;
+  provider: PhobosProviderInterface | null;
   providerInterfaceId: string;
   providerModel: string;
   reasoningEffort: string;
@@ -506,7 +506,7 @@ function validateSelection(input: {
   worker: ChatWorkerChoice | null;
 }): string {
   if (!input.name.trim()) return "Enter an agent name.";
-  if (!input.context) return "The selected project is not available in the current Octopus OS scope.";
+  if (!input.context) return "The selected project is not available in the current Phobos OS scope.";
   if (!input.worker) return "The selected Project has no reusable worker template.";
   if (
     !input.provider

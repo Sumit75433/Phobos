@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useClientPreferences, useSetClientPreferences, type SendShortcut } from "../../clientPreferences";
 import { OcButton, OcCard, OcGroup, OcSelect, OcSlider, OcSettingsRow, OcStatus, OcSwitch } from "../../design-system/components";
 import { type GlyphName } from "../IconGlyphs";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { useAppErrorToast } from "../../toasts";
 import { loadChatSettings, saveChatSettings } from "../chat/storage";
 import { providerDefaultModel, providerDefaultReasoningEffort } from "../chat/chatWorkspaceCapabilities";
@@ -16,7 +16,7 @@ import { ProviderSummary, useDeclaredProviders } from "./SettingsProviderState";
 import { readProjection, saveSetupFile } from "../../projectionClient";
 import { serializeSetupFile, setupFileFromHome, setupFileName } from "../../onboarding/setupFile";
 import { useClientExtensions } from "../../extensions/useClientExtensions";
-export function GeneralSection({ accessProfile, surfaces }: { accessProfile: OctopusClientAccessProfile; surfaces: ClientSurfaceDescriptor[] }) {
+export function GeneralSection({ accessProfile, surfaces }: { accessProfile: PhobosClientAccessProfile; surfaces: ClientSurfaceDescriptor[] }) {
   const preferences = useClientPreferences();
   const setClientPreferences = useSetClientPreferences();
   const providerState = useDeclaredProviders();
@@ -57,14 +57,14 @@ export function GeneralSection({ accessProfile, surfaces }: { accessProfile: Oct
       setSetupExport({ busy: false, note: saved.saved ? `Saved ${saved.name}.` : "", error: "" });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setSetupExport({ busy: false, note: "", error: message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, "") || "Octopus could not export this setup." });
+      setSetupExport({ busy: false, note: "", error: message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, "") || "Phobos could not export this setup." });
     }
   }
 
   useEffect(() => {
-    if (accessProfile !== "live" || !window.octopusTransport?.loginItemSettings) return;
+    if (accessProfile !== "live" || !window.phobosTransport?.loginItemSettings) return;
     let cancelled = false;
-    window.octopusTransport.loginItemSettings()
+    window.phobosTransport.loginItemSettings()
       .then((state) => {
         if (!cancelled) setLoginItem({ ...state, loading: false, error: "" });
       })
@@ -75,7 +75,7 @@ export function GeneralSection({ accessProfile, surfaces }: { accessProfile: Oct
   }, [accessProfile]);
 
   async function setOpenAtLogin(enabled: boolean) {
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.loginItemSettings) return;
     setLoginItem((current) => ({ ...current, loading: true, error: "" }));
     try {
@@ -153,7 +153,7 @@ export function GeneralSection({ accessProfile, surfaces }: { accessProfile: Oct
                 onCheckedChange={(showInternalRuns) => setClientPreferences({ showInternalRuns })}
               />
             )}
-            description="Include runs inside the Octopus OS scope that have no exact client interface. They open read-only and show artifact movement activity."
+            description="Include runs inside the Phobos OS scope that have no exact client interface. They open read-only and show artifact movement activity."
             label="Internal runs"
           />
           <OcSettingsRow {...settingsTargetProps("general.task-pane-width")}
@@ -270,7 +270,7 @@ export function GeneralSection({ accessProfile, surfaces }: { accessProfile: Oct
                 onCheckedChange={(enabled) => void setOpenAtLogin(enabled)}
               />
             ) : <OcStatus label="Administrator only" tone="muted" />}
-            description="Ask the operating system to launch the packaged Octopus application after sign-in."
+            description="Ask the operating system to launch the packaged Phobos application after sign-in."
             label="Open at login"
             meta={accessProfile === "live" && !loginItem.loading && !loginItem.supported ? "Available in packaged builds." : undefined}
           />
@@ -288,7 +288,7 @@ export function GeneralSection({ accessProfile, surfaces }: { accessProfile: Oct
         </OcCard>
       </OcGroup>
       {accessProfile === "live" ? (
-        <OcGroup title="Setup" description="Share this Home's structure or start another Octopus from it.">
+        <OcGroup title="Setup" description="Share this Home's structure or start another Phobos from it.">
           <OcCard>
             <OcSettingsRow {...settingsTargetProps("general.export-setup")}
               control={(
@@ -296,7 +296,7 @@ export function GeneralSection({ accessProfile, surfaces }: { accessProfile: Oct
                   Export setup…
                 </OcButton>
               )}
-              description="Save the space, its projects and the capabilities each project uses as a file. Another Octopus imports it on the first step of setup. Keys, accounts, tasks and history stay here."
+              description="Save the space, its projects and the capabilities each project uses as a file. Another Phobos imports it on the first step of setup. Keys, accounts, tasks and history stay here."
               label="Setup file"
               meta={setupExport.note || undefined}
             />

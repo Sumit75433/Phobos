@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.audio_device_session",
   "version": "1.0.2",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Audio Device Session",
     "description": "Microphone capture and speaker playback on this Mac's audio devices.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "microphone"
   },

@@ -165,7 +165,7 @@ const gate = () => { let open; const promise = new Promise((resolve) => { open =
 const subscribers = new Map();
 let currentHost = null;
 const emit = (name, ...args) => { for (const listener of [...subscribers.get(name) ?? []]) listener(...args); };
-w.octopusTransport = new Proxy({}, { get: (_, name) => {
+w.phobosTransport = new Proxy({}, { get: (_, name) => {
   if (typeof name !== "string" || name === "then") return undefined;
   if (currentHost?.transport[name]) return (...args) => { currentHost.calls.push([name, ...args]); return currentHost.transport[name](...args); };
   if (name.startsWith("on")) return (listener) => {
@@ -240,7 +240,7 @@ function fakeHost() {
     pendingClientPaneTransfers: async () => [],
     pendingClientPaneSourceFinalizations: async () => [],
     pendingClientPaneDestinationTransfers: async () => host.pendingDestinations ?? [],
-    beginClientPaneTransfer: () => ({ schema: "octopus.client-pane-transfer", schemaVersion: 1, sourceWindowId: host.windowId, transferId: `transfer-${host.calls.filter(([name]) => name === "beginClientPaneTransfer").length}` }),
+    beginClientPaneTransfer: () => ({ schema: "phobos.client-pane-transfer", schemaVersion: 1, sourceWindowId: host.windowId, transferId: `transfer-${host.calls.filter(([name]) => name === "beginClientPaneTransfer").length}` }),
     acceptClientPaneTransfer: async ({ transferId }) => host.accepting.get(transferId),
     showClientContextMenu: async ({ requestId }) => ({ requestId, id: host.nativeMenuChoice }),
     finalizeClientPaneTransfer: async ({ transferId }) => {
@@ -282,7 +282,7 @@ async function mount(host, { clientWindow = {}, seed, keepStorage = false, home 
   root = createRoot(container);
   const props = {
     accessProfile: "live", onLogOut() {},
-    clientWindow: { schema: "octopus.client-window", schemaVersion: 1, primary: true, scope: "main", windowId: "main", ...clientWindow },
+    clientWindow: { schema: "phobos.client-window", schemaVersion: 1, primary: true, scope: "main", windowId: "main", ...clientWindow },
     runtimeHost: { phase: "ready", ready: true, available: true, ownership: "fixture", pid: null, home: host.home, sourceRegistry: "", runtimeBinary: "", repoRoot: "", launchCwd: "", launchCommand: "", launchEnv: {}, endpoint: "", error: null, updatedAtMs: 1 },
   };
   root.render(React.createElement(ClientPreferencesProvider, { profile: "live" }, React.createElement(OperatorShell, props)));
@@ -292,7 +292,7 @@ async function mount(host, { clientWindow = {}, seed, keepStorage = false, home 
 
 const pane = (role) => document.querySelector(role === "primary" ? ".workspace-pane-primary" : ".workspace-pane-secondary");
 const stubIn = (role, kind) => pane(role)?.querySelector(`[data-stub="${kind}"]`) ?? null;
-const sidebarRow = (title) => [...document.querySelectorAll(".octopus-task-row")].find((row) => row.getAttribute("aria-label").startsWith(title)) ?? null;
+const sidebarRow = (title) => [...document.querySelectorAll(".phobos-task-row")].find((row) => row.getAttribute("aria-label").startsWith(title)) ?? null;
 const secondaryTabs = () => [...document.querySelectorAll('[aria-label="Secondary workspace tabs"] [role="tab"]')];
 const titlebarContext = () => document.querySelector(".app-titlebar-surface-context")?.textContent ?? "";
 const button = (label, scope = document) => scope.querySelector(`button[aria-label="${label}"]`);
@@ -307,7 +307,7 @@ async function openTask(runId) {
   await until(() => stubIn("primary", "chat")?.dataset.run === runId, () => `the primary pane never showed ${runId}: ${pane("primary")?.textContent}`);
 }
 
-const chatTab = (runId) => ({ id: `chat:octopus-os:${runId}`, target: { kind: "surface", runId, surfaceId: "chat", workspaceKey: "octopus-os" } });
+const chatTab = (runId) => ({ id: `chat:phobos-os:${runId}`, target: { kind: "surface", runId, surfaceId: "chat", workspaceKey: "phobos-os" } });
 const seedSecondary = (tabs, activeTabId = tabs[0]?.id ?? "", destination = { surfaceId: "voice" }, open = true) => ({ writeSecondaryPaneState }, host) => writeSecondaryPaneState("live", "home", host.windowScope, { activeTabId, open, tabs }, JSON.stringify([host.home, destination.surfaceId, destination.runId ?? ""]));
 const storedSecondary = async () => currentHost.stored();
 const commandsActive = (role) => stubIn(role, "chat")?.dataset.commandsActive ?? "";
@@ -350,7 +350,7 @@ test("the primary task owns the sidebar highlight and titlebar while commands fo
 test("dictation recovery opens its recording in existing Voice settings and Back restores the task", { timeout: 20_000 }, async () => {
   await mount(fakeHost());
   await openTask("run-1");
-  w.dispatchEvent(new w.CustomEvent("octopus:client-command", { detail: { id: "open_settings", source: "surface",
+  w.dispatchEvent(new w.CustomEvent("phobos:client-command", { detail: { id: "open_settings", source: "surface",
     settingsDestination: { sectionId: "voice-audio", dictationRecordingId: "recording-123" } } }));
   await until(() => document.querySelector('[data-stub="settings"]')?.props.recordingId === "recording-123", "recording destination did not reach Settings");
   assert.equal(document.querySelector('[data-stub="settings"]').props.sectionId, "voice-audio");
@@ -394,7 +394,7 @@ test("right-pane navigation opens the current task without changing the left pan
 
   button("New tab").click(); await settle();
   pane("secondary").querySelector('.workspace-pane-launcher-item[aria-haspopup="menu"]').click(); await settle();
-  document.querySelector('[data-action-id="surface:octopus-os:scheduled"]').click();
+  document.querySelector('[data-action-id="surface:phobos-os:scheduled"]').click();
   await until(() => stubIn("secondary", "scheduled"), "Triggers did not open on the right");
   assert.equal(typeof stubIn("secondary", "scheduled").props.onSelectChat, "function");
   stubIn("secondary", "scheduled").props.onSelectChat("run-1");
@@ -433,7 +433,7 @@ test("restored side tabs are dropped only after the registry and task list that 
   const host = fakeHost();
   host.holdRuns = gate();
   host.holdSurfaces = gate();
-  const notes = { id: "surface:octopus-os:notes", target: { kind: "surface", runId: "", surfaceId: "notes", workspaceKey: "octopus-os" } };
+  const notes = { id: "surface:phobos-os:notes", target: { kind: "surface", runId: "", surfaceId: "notes", workspaceKey: "phobos-os" } };
   await mount(host, { seed: seedSecondary([chatTab("run-gone"), chatTab("run-1"), notes], chatTab("run-1").id) });
   await until(() => secondaryTabs().length === 3, () => `restored tabs were not shown while loading: ${secondaryTabs().map((tab) => tab.textContent)}`);
   host.holdSurfaces.open(); host.holdSurfaces = null;
@@ -448,7 +448,7 @@ test("restored side tabs are dropped only after the registry and task list that 
 
 test("task sources open as one Sources tab per task, prefer the loaded history, and survive the shell losing its surface", { timeout: 20_000 }, async () => {
   const host = fakeHost();
-  host.messages["run-1"].push(messageRow("run-1", 3, "assistant", "octopus pricing", { event_kind: "web_search" }));
+  host.messages["run-1"].push(messageRow("run-1", 3, "assistant", "phobos pricing", { event_kind: "web_search" }));
   host.run("run-1").last_movement_seq = 3; host.seq = 3;
   await mount(host);
   await openTask("run-1");
@@ -479,7 +479,7 @@ test("task sources open as one Sources tab per task, prefer the loaded history, 
   assert.deepEqual(errors, []);
 });
 
-const transfer = (transferId, target, extra = {}) => ({ schema: "octopus.client-pane-transfer", schemaVersion: 1, sourceWindowId: "window-b", transferId, sourcePane: "secondary", sourceTabId: "tab-b", target, ...extra });
+const transfer = (transferId, target, extra = {}) => ({ schema: "phobos.client-pane-transfer", schemaVersion: 1, sourceWindowId: "window-b", transferId, sourcePane: "secondary", sourceTabId: "tab-b", target, ...extra });
 const toasts = (host) => host.called("logClientEvent").map(([event]) => event.message);
 const contextMenu = async (tab) => {
   tab.dispatchEvent(new w.MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 5, clientY: 5 }));
@@ -547,7 +547,7 @@ test("the source window releases a moved tab only while it still holds that targ
 test("an independent window hands over its whole surface from the titlebar and closes once the destination finalizes", { timeout: 20_000 }, async () => {
   const host = await mount(fakeHost(), { clientWindow: { primary: false, scope: "window-a", windowId: "window-a" } });
   await until(() => titlebarContext() === "Home", () => `unexpected titlebar: ${titlebarContext()}`);
-  const voice = { kind: "surface", runId: "", surfaceId: "voice", workspaceKey: "octopus-os" };
+  const voice = { kind: "surface", runId: "", surfaceId: "voice", workspaceKey: "phobos-os" };
   await drag(document.querySelector(".app-titlebar-surface-context"));
   assert.deepEqual(host.called("beginClientPaneTransfer"), [[{ sourcePane: "primary", sourceTabId: "client-window:window-a", target: voice }]]);
   const whole = (transferId, target) => ({ ...transfer(transferId, target), sourceWindowId: "window-a", sourcePane: "primary", sourceTabId: "client-window:window-a" });
@@ -615,7 +615,7 @@ test("dropping a pane dragged from another window accepts exactly that transfer"
     document.querySelector(".app-shell").dispatchEvent(event);
     return { event, dataTransfer };
   };
-  const payload = (sourceWindowId, transferId) => ({ schema: "octopus.client-pane-transfer", schemaVersion: 1, sourceWindowId, transferId });
+  const payload = (sourceWindowId, transferId) => ({ schema: "phobos.client-pane-transfer", schemaVersion: 1, sourceWindowId, transferId });
   const over = drop(payload("window-b", "t-1"), "dragover");
   assert.deepEqual([over.event.defaultPrevented, over.dataTransfer.dropEffect], [true, "move"]);
   drop(payload("main", "t-own")); drop({ schema: "other" }); await settle();
@@ -663,7 +663,7 @@ test("a window opened on a target starts focused on it with the sidebar collapse
 test("task actions open a task in a new window from the popover and from the native menu", { timeout: 20_000 }, async () => {
   const host = await mount(fakeHost());
   await openTask("run-1");
-  const target = { initialTarget: { kind: "surface", runId: "run-2", surfaceId: "chat", workspaceKey: "octopus-os" } };
+  const target = { initialTarget: { kind: "surface", runId: "run-2", surfaceId: "chat", workspaceKey: "phobos-os" } };
   button("Task actions for Task run-2").click();
   await until(() => document.querySelector('[role="menu"].task-actions-menu'), "the task actions menu never opened");
   [...document.querySelectorAll('.task-actions-menu [role="menuitem"]')].find((item) => item.textContent.includes("Open in new window")).click();
@@ -702,16 +702,16 @@ test("pins and preferences written by another window reach this window's sidebar
   host.runs.push(runRow("run-internal", { title: "Internal run", writable: false }));
   await mount(host);
   await openTask("run-1");
-  const titles = () => [...document.querySelectorAll(".octopus-task-row")].map((row) => row.getAttribute("aria-label").split(",")[0]);
+  const titles = () => [...document.querySelectorAll(".phobos-task-row")].map((row) => row.getAttribute("aria-label").split(",")[0]);
   const store = (key, value) => {
     window.localStorage.setItem(key, JSON.stringify(value));
     window.dispatchEvent(new w.StorageEvent("storage", { key, newValue: JSON.stringify(value), storageArea: window.localStorage }));
   };
   assert.deepEqual(titles(), ["Task run-1", "Task run-2"]);
-  store("octopus.shell.pinnedTasks.v2", ["run-2"]);
+  store("phobos.shell.pinnedTasks.v2", ["run-2"]);
   await until(() => [...document.querySelectorAll(".app-shell-sidebar-slot button[aria-expanded]")].some((toggle) => toggle.textContent === "Pinned"), "another window's pin never reached the sidebar");
   assert.deepEqual(titles(), ["Task run-2", "Task run-1"]);
-  store("octopus.client-preferences.v1", { showInternalRuns: true });
+  store("phobos.client-preferences.v1", { showInternalRuns: true });
   await until(() => titles().includes("Internal run"), () => `another window's preference never reached the sidebar: ${titles()}`);
 });
 

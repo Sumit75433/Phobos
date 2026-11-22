@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..');
 const projectionStore = { options: {}, nativeBrowserDownloadsForProjection: null };
 const projectedRoom = require('../electron/projection/workerEnvironments.cjs').workerEnvironmentsProjection(projectionStore);
 const input = () => ({
-  octopusHomeRoot: '/Home-A',
+  phobosHomeRoot: '/Home-A',
   formation: { worker_environment_id: 'room-a', formation_pin: 'a'.repeat(64), run: 'run-a', door_interface: 'door-a', worker_environment_kind: 'browser_session' },
   interfaceVarDir: '/fixture', kindCapabilities: [], lifecycle: 'active', openedAtMovementSeq: 10, lastActivityMovementSeq: 20, warnings: [],
   liveState: { status: 'running', viewer: { protocol: 'browser.native.v1', engine_handle: 'engine', host_generation: 'generation', browser_context_id: 'context', target_id: 'target-a' },
@@ -19,7 +19,7 @@ const input = () => ({
 });
 async function project(raw) {
   projectionStore.nativeBrowserTargetsForProjection = async (tuple) => {
-    assert.equal(tuple.octopusHome, '/Home-A'); assert.equal(tuple.browser_context_id, raw.liveState.viewer.browser_context_id);
+    assert.equal(tuple.phobosHome, '/Home-A'); assert.equal(tuple.browser_context_id, raw.liveState.viewer.browser_context_id);
     if (raw.observationError) throw raw.observationError;
     return raw.observation ?? { targets: raw.liveState.tabs, openIntent: null };
   };
@@ -72,7 +72,7 @@ test('native projection exposes only exact context members, never fabricates cur
 });
 
 test('closed browser pages retain Downloads actions only with an explicit history capability', async () => {
-  const modes = require('../../registry/worker_environment_kind/browser_session/packages/octopus-browser-session-env/native/engine-modes.json');
+  const modes = require('../../registry/worker_environment_kind/browser_session/packages/phobos-browser-session-env/native/engine-modes.json');
   const { workerEnvironmentPaneActions } = await compiled;
   try { for (const mode of ['standard', 'owned', 'disabled', 'undeclared']) {
     const engine = mode === 'disabled' ? { ...modes.standard, capabilities: { ...modes.standard.capabilities, persistentDownloadHistory: false } } : modes[mode];
@@ -174,7 +174,7 @@ test('actual task panel preserves composer DOM, draft and focus while browser ta
   await React.act(render); await flush();
   assert.equal(w.document.getElementById('composer'), composer); assert.equal(w.document.activeElement, composer); assert.equal(composer.value, 'unsent draft + new typing');
   assert.equal(w.document.querySelector('[data-native-target]').getAttribute('data-native-target'), 'room-a:browser:target-a');
-  const closes = []; w.octopusTransport = { closeNativeBrowserPage: async request => closes.push(request) };
+  const closes = []; w.phobosTransport = { closeNativeBrowserPage: async request => closes.push(request) };
   await React.act(() => w.document.querySelector('[aria-label="Close secondary pane"]').click()); await flush();
   assert.equal(state.tabs.length, 1); assert.equal(state.open, false); assert.equal(closes.length, 0);
   assert.equal(w.document.getElementById('composer'), composer); assert.equal(w.document.activeElement, composer); assert.equal(w.document.querySelector('[data-native-target]'), null);
@@ -195,7 +195,7 @@ test('actual task panel preserves composer DOM, draft and focus while browser ta
 
 test('a process room offers its direct terminal only for exact private coordinates of its own kind', async (t) => {
   const net = require('node:net');
-  const varDir = fs.mkdtempSync(path.join('/tmp', 'octopus-process-room-')), outside = fs.mkdtempSync(path.join('/tmp', 'octopus-process-foreign-'));
+  const varDir = fs.mkdtempSync(path.join('/tmp', 'phobos-process-room-')), outside = fs.mkdtempSync(path.join('/tmp', 'phobos-process-foreign-'));
   const servers = [];
   t.after(async () => { for (const server of servers) await new Promise(resolve => server.close(resolve)); fs.rmSync(varDir, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); });
   const listen = async (file) => { const server = net.createServer(); servers.push(server); await new Promise(resolve => server.listen(file, resolve)); return file; };

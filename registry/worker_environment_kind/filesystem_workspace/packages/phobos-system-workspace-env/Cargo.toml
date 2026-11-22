@@ -1,0 +1,47 @@
+[package]
+name = "phobos-system-workspace-env"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "phobos-workspace-fs-tool"
+path = "src/bin/workspace_fs_tool.rs"
+
+[[bin]]
+name = "phobos-workspace-exec-tool"
+path = "src/bin/workspace_exec_tool.rs"
+
+[[bin]]
+name = "phobos-filesystem-workspace-tool-door-life"
+path = "src/bin/tool_door_life.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+ignore = "0.4.23"
+regex = "1.12.3"
+similar = "2.7.0"
+blake3 = { workspace = true }
+base64 = "0.22.1"
+tracing = "0.1.44"
+
+phobos-applypatch = { path = "../phobos-applypatch" }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-file-search = { path = "../phobos-file-search" }
+phobos-file-system = { path = "../../../process_session/packages/phobos-file-system" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+phobos-util-pathuri = { path = "../../../process_session/packages/phobos-util-pathuri" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+phobos-workspace-substrate = { path = "../phobos-workspace-substrate" }
+
+[dev-dependencies]
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-verifiers = { path = "../../../../../crates/phobos-verifiers" }
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

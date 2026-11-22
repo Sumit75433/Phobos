@@ -97,7 +97,7 @@ function fakeElectron(world) {
     dock: { setIcon: () => {} },
     isPackaged: false,
     getAppPath: () => path.join(world.root, "app"),
-    getName: () => "Octopus",
+    getName: () => "Phobos",
     getVersion: () => "0.0.0",
     getPath: (name) => paths[name] ?? path.join(world.root, name),
     setPath: (name, value) => { paths[name] = value; },
@@ -289,13 +289,13 @@ function writeFixture(file, value, mode = 0o600) {
 }
 
 async function launchMain(options = {}) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-main-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-main-"));
   roots.push(root);
   const home = path.join(root, "home");
   const codexHome = path.join(root, "codex");
   const library = path.join(root, "library");
   for (const dir of [path.join(library, "packages"), path.join(library, "packs"), path.join(root, "repo", "registry", "interface")]) fs.mkdirSync(dir, { recursive: true });
-  writeFixture(path.join(root, "repo", "registry", ".octopus-source.json"), {});
+  writeFixture(path.join(root, "repo", "registry", ".phobos-source.json"), {});
   let releaseReady;
   const world = {
     root, home, codexHome,
@@ -307,7 +307,7 @@ async function launchMain(options = {}) {
     expiredTokens: new Set(),
     recoveryGate: null,
     scaleFactor: 2,
-    runtimeState: { phase: "unmanaged", ready: false, ownership: "none", pid: null, error: null, launchCwd: root, launchEnv: { OCTOPUS_HOME: home }, launchCommand: "octopus up" },
+    runtimeState: { phase: "unmanaged", ready: false, ownership: "none", pid: null, error: null, launchCwd: root, launchEnv: { PHOBOS_HOME: home }, launchCommand: "phobos up" },
     chatClient: null,
     ready: options.deferReady ? new Promise((resolve) => { releaseReady = resolve; }) : Promise.resolve(),
     ...options.world,
@@ -317,14 +317,14 @@ async function launchMain(options = {}) {
   const replaced = overrides(world);
   const env = {
     PATH: process.env.PATH,
-    OCTOPUS_HOME: home,
+    PHOBOS_HOME: home,
     CODEX_HOME: codexHome,
-    OCTOPUS_REPO_ROOT: path.join(root, "repo"),
-    OCTOPUS_RUNTIME_BIN: path.join(root, "bin", "octopus"),
-    OCTOPUS_SOURCE_REGISTRY: path.join(root, "repo", "registry"),
-    OCTOPUS_LOCAL_PACKAGE_REGISTRY: path.join(root, "repo", "registry"),
-    OCTOPUS_LOCAL_PACKAGE_LIBRARY: library,
-    OCTOPUS_INSTALLATION_ROOT: path.join(root, "install"),
+    PHOBOS_REPO_ROOT: path.join(root, "repo"),
+    PHOBOS_RUNTIME_BIN: path.join(root, "bin", "phobos"),
+    PHOBOS_SOURCE_REGISTRY: path.join(root, "repo", "registry"),
+    PHOBOS_LOCAL_PACKAGE_REGISTRY: path.join(root, "repo", "registry"),
+    PHOBOS_LOCAL_PACKAGE_LIBRARY: library,
+    PHOBOS_INSTALLATION_ROOT: path.join(root, "install"),
   };
   const fakeProcess = Object.create(process, {
     env: { value: env, enumerable: true },
@@ -357,41 +357,41 @@ async function launchMain(options = {}) {
     },
     emitApp: (name, ...args) => electron.module.app.emit(name, ...args),
     log: () => {
-      const file = path.join(home, "client", "logs", "octopus-client.jsonl");
+      const file = path.join(home, "client", "logs", "phobos-client.jsonl");
       return fs.existsSync(file) ? fs.readFileSync(file, "utf8").trim().split("\n").filter(Boolean).map((line) => JSON.parse(line)) : [];
     },
     eventsOf: (name) => world.events.filter(([candidate]) => candidate === name),
   };
   harness.unlock = async (win) => {
     const configured = fs.existsSync(path.join(home, "client-access.json"));
-    const result = await harness.invoke(configured ? "octopus:access-unlock" : "octopus:access-configure", win, PASSWORD);
+    const result = await harness.invoke(configured ? "phobos:access-unlock" : "phobos:access-configure", win, PASSWORD);
     return result.token;
   };
   return harness;
 }
 
-const surface = { kind: "surface", runId: "run-1", surfaceId: "chat", workspaceKey: "octopus-os" };
+const surface = { kind: "surface", runId: "run-1", surfaceId: "chat", workspaceKey: "phobos-os" };
 
 test("streaming dictation binds audio, events and finalization to the unlocked owner window and closes on lock", async () => {
   const main = await launchMain();
   const [primary] = main.windows();
   const request = { attemptId: require("node:crypto").randomUUID(), sampleRateHz: 24_000 };
-  assert.equal((await main.invoke("octopus:dictation-stream-start", primary, null, request)).ok, false);
+  assert.equal((await main.invoke("phobos:dictation-stream-start", primary, null, request)).ok, false);
   const token = await main.unlock(primary);
-  assert.equal((await main.invoke("octopus:dictation-stream-start", primary, token, request)).ok, true);
+  assert.equal((await main.invoke("phobos:dictation-stream-start", primary, token, request)).ok, true);
   const other = new main.electron.module.BrowserWindow({});
-  main.sendSync("octopus:dictation-stream-audio", other, token, request.attemptId, Buffer.from([0, 1]));
+  main.sendSync("phobos:dictation-stream-audio", other, token, request.attemptId, Buffer.from([0, 1]));
   assert.equal(main.eventsOf("dictation-audio").length, 0);
-  assert.equal((await main.invoke("octopus:dictation-stream-finish", other, token, request.attemptId)).ok, false);
-  main.sendSync("octopus:dictation-stream-audio", primary, token, request.attemptId, Buffer.from([0, 1]));
+  assert.equal((await main.invoke("phobos:dictation-stream-finish", other, token, request.attemptId)).ok, false);
+  main.sendSync("phobos:dictation-stream-audio", primary, token, request.attemptId, Buffer.from([0, 1]));
   assert.equal(main.eventsOf("dictation-audio").length, 1);
-  const final = await main.invoke("octopus:dictation-stream-finish", primary, token, request.attemptId);
+  const final = await main.invoke("phobos:dictation-stream-finish", primary, token, request.attemptId);
   assert.equal(final.value.text, "Final words");
-  assert.equal(primary.webContents.sentOn("octopus:dictation-stream-event")[0][0].text, "Final words");
-  assert.deepEqual(other.webContents.sentOn("octopus:dictation-stream-event"), []);
-  assert.equal((await main.invoke("octopus:dictation-stream-start", primary, token, request)).ok, true);
+  assert.equal(primary.webContents.sentOn("phobos:dictation-stream-event")[0][0].text, "Final words");
+  assert.deepEqual(other.webContents.sentOn("phobos:dictation-stream-event"), []);
+  assert.equal((await main.invoke("phobos:dictation-stream-start", primary, token, request)).ok, true);
   main.world.expiredTokens.add(token);
-  main.sendSync("octopus:dictation-stream-audio", primary, token, request.attemptId, Buffer.from([0, 1]));
+  main.sendSync("phobos:dictation-stream-audio", primary, token, request.attemptId, Buffer.from([0, 1]));
   assert.equal(main.eventsOf("dictation-audio").length, 1);
   assert.equal(main.eventsOf("dictation-close").length, 2);
 });
@@ -399,29 +399,29 @@ test("streaming dictation binds audio, events and finalization to the unlocked o
 test("dictation recording IPC requires access and returns saved audio or a safe failure", async () => {
   const main = await launchMain();
   const [primary] = main.windows();
-  const denied = await main.invoke("octopus:dictation-recordings-read", primary, null);
+  const denied = await main.invoke("phobos:dictation-recordings-read", primary, null);
   assert.equal(denied.ok, false);
   assert.equal(denied.error.code, "recording-storage");
   const token = await main.unlock(primary);
-  const initial = await main.invoke("octopus:dictation-recordings-read", primary, token);
+  const initial = await main.invoke("phobos:dictation-recordings-read", primary, token);
   assert.equal(initial.ok, true);
   assert.equal(initial.value.enabled, true);
   assert.deepEqual(initial.value.recordings, []);
   const bytes = Buffer.alloc(44 + 24_000 * 0.3 * 2);
   bytes.write("RIFF"); bytes.write("WAVE", 8);
-  const saved = await main.invoke("octopus:dictation-recording-save", primary, token, {
+  const saved = await main.invoke("phobos:dictation-recording-save", primary, token, {
     bytes, durationMs: 300, mediaType: "audio/wav", provider: "codex", sampleRateHz: 24_000,
   });
   assert.equal(saved.ok, true);
-  const recording = await main.invoke("octopus:dictation-recording-read", primary, token, saved.value.id);
+  const recording = await main.invoke("phobos:dictation-recording-read", primary, token, saved.value.id);
   assert.equal(recording.ok, true);
   assert.deepEqual(recording.value.bytes, bytes);
-  const refused = await main.invoke("octopus:dictation-recording-read", primary, token, "../../outside");
+  const refused = await main.invoke("phobos:dictation-recording-read", primary, token, "../../outside");
   assert.equal(refused.ok, false);
   assert.equal(refused.error.code, "recording-storage");
-  const deleted = await main.invoke("octopus:dictation-recording-delete", primary, token, saved.value.id);
+  const deleted = await main.invoke("phobos:dictation-recording-delete", primary, token, saved.value.id);
   assert.deepEqual(deleted, { ok: true, value: null });
-  assert.deepEqual((await main.invoke("octopus:dictation-recordings-read", primary, token)).value.recordings, []);
+  assert.deepEqual((await main.invoke("phobos:dictation-recordings-read", primary, token)).value.recordings, []);
 });
 
 test("Help reports work independently of the main renderer and export the reviewed snapshot", async () => {
@@ -434,13 +434,13 @@ test("Help reports work independently of the main renderer and export the review
   const locked = main.windows().at(-1);
   assert.match(locked.options.webPreferences.preload, /supportPreload\.cjs$/);
   assert.equal(locked.options.webPreferences.sandbox, true);
-  const { report: basic } = await main.invoke("octopus:support-collect", locked, { includeDetails: false });
+  const { report: basic } = await main.invoke("phobos:support-collect", locked, { includeDetails: false });
   assert.equal(basic.access, "locked");
   assert.equal(basic.client_logs, undefined);
   assert.equal(basic.runtime_evidence, undefined);
-  await assert.rejects(main.invoke("octopus:support-collect", locked, { includeDetails: true }), /Unlock/);
-  await assert.rejects(main.invoke("octopus:support-collect", locked, { includeDetails: false, source: "choose" }), /Unlock/);
-  await assert.rejects(main.invoke("octopus:support-collect", primary, { includeDetails: false }), /report window/);
+  await assert.rejects(main.invoke("phobos:support-collect", locked, { includeDetails: true }), /Unlock/);
+  await assert.rejects(main.invoke("phobos:support-collect", locked, { includeDetails: false, source: "choose" }), /Unlock/);
+  await assert.rejects(main.invoke("phobos:support-collect", primary, { includeDetails: false }), /report window/);
   locked.destroy();
   await main.unlock(primary);
   primary.focus();
@@ -448,53 +448,53 @@ test("Help reports work independently of the main renderer and export the review
   const support = main.windows().at(-1);
   primary.webContents.emit("render-process-gone", {}, { reason: "crashed", exitCode: 1 });
   await until(() => main.log().some((item) => item.event === "client.renderer.gone"), "renderer crash was recorded");
-  const { report } = await main.invoke("octopus:support-collect", support, { includeDetails: true });
+  const { report } = await main.invoke("phobos:support-collect", support, { includeDetails: true });
   assert.equal(report.access, "live");
   assert.equal(report.schema_version, 2);
   assert.ok(report.runtime_evidence.ledger);
   assert.ok(report.client_logs.events.some((item) => item.message?.includes("Renderer exited: crashed")));
   const request = { reportId: report.report_id, description: "Setup is waiting" };
-  await main.invoke("octopus:support-copy", support, request);
+  await main.invoke("phobos:support-copy", support, request);
   assert.match(main.world.clipboard, /Setup is waiting/);
-  assert.deepEqual(await main.invoke("octopus:support-save", support, request), { saved: false });
+  assert.deepEqual(await main.invoke("phobos:support-save", support, request), { saved: false });
   const destination = path.join(main.world.root, "report.txt");
   main.world.saveResult = { canceled: false, filePath: destination };
-  assert.deepEqual(await main.invoke("octopus:support-save", support, request), { saved: true });
+  assert.deepEqual(await main.invoke("phobos:support-save", support, request), { saved: true });
   assert.equal(fs.readFileSync(destination, "utf8"), main.world.clipboard);
   assert.equal(fs.statSync(destination).mode & 0o777, 0o600);
-  await main.invoke("octopus:support-issue", support, request);
+  await main.invoke("phobos:support-issue", support, request);
   assert.match(main.eventsOf("external").at(-1)[1], /^https:\/\/github.com\/miuuyy\/Octopus-SI-OS\/issues\/new\?/);
-  await main.invoke("octopus:support-collect", support, { includeDetails: false });
-  await assert.rejects(main.invoke("octopus:support-copy", support, request), /Refresh/);
-  assert.equal(await main.invoke("octopus:support-collect", support, { includeDetails: false, source: "choose" }), null);
-  const saved = path.join(main.world.root, ".octopus-preserved");
+  await main.invoke("phobos:support-collect", support, { includeDetails: false });
+  await assert.rejects(main.invoke("phobos:support-copy", support, request), /Refresh/);
+  assert.equal(await main.invoke("phobos:support-collect", support, { includeDetails: false, source: "choose" }), null);
+  const saved = path.join(main.world.root, ".phobos-preserved");
   fs.mkdirSync(path.join(saved, "client/logs"), { recursive: true });
   fs.writeFileSync(path.join(saved, "host.json"), JSON.stringify({ host_manifest_version: 1 }));
-  const savedLog = path.join(saved, "client/logs/octopus-client.jsonl");
+  const savedLog = path.join(saved, "client/logs/phobos-client.jsonl");
   fs.writeFileSync(savedLog, JSON.stringify({ event: "renderer.toast", level: "error", detail: { message: "Saved Home failure" } }) + "\n");
   const before = fs.statSync(savedLog).mtimeMs;
   main.world.openResult = { canceled: false, filePaths: [saved] };
-  const captured = await main.invoke("octopus:support-collect", support, { includeDetails: true, source: "choose" });
-  assert.equal(captured.source.name, ".octopus-preserved");
+  const captured = await main.invoke("phobos:support-collect", support, { includeDetails: true, source: "choose" });
+  assert.equal(captured.source.name, ".phobos-preserved");
   assert.equal(captured.report.collection.mode, "saved_home");
   assert.equal(captured.report.runtime.phase, "not_observed");
   assert.deepEqual(captured.report.client_logs.events.map(item => item.message), ["Saved Home failure"]);
-  assert.equal((await main.invoke("octopus:support-collect", support, { includeDetails: false })).source.kind, "saved");
+  assert.equal((await main.invoke("phobos:support-collect", support, { includeDetails: false })).source.kind, "saved");
   assert.equal(fs.statSync(savedLog).mtimeMs, before);
   assert.deepEqual(fs.readdirSync(saved).sort(), ["client", "host.json"]);
-  assert.equal((await main.invoke("octopus:support-collect", support, { includeDetails: false, source: "current" })).source.kind, "current");
+  assert.equal((await main.invoke("phobos:support-collect", support, { includeDetails: false, source: "current" })).source.kind, "current");
   assert.equal(main.eventsOf("runtime-start").length, 0);
 });
 const names = (main, wanted) => main.world.events.map(([name]) => name).filter((name) => wanted.includes(name));
-const claimOf = (win) => win.options.webPreferences.additionalArguments?.[0]?.slice("--octopus-access-claim=".length);
+const claimOf = (win) => win.options.webPreferences.additionalArguments?.[0]?.slice("--phobos-access-claim=".length);
 
 async function openPeer(main, source, token, request = {}) {
-  const opening = main.invoke("octopus:client-window-open", source, token, request);
+  const opening = main.invoke("phobos:client-window-open", source, token, request);
   await settle();
   const peer = main.windows().at(-1);
-  const inherited = main.sendSync("octopus:access-inherit", peer, claimOf(peer));
-  const bootstrap = main.sendSync("octopus:client-window-bootstrap", peer);
-  await main.invoke("octopus:client-window-ready", peer, inherited, { windowId: bootstrap.windowId });
+  const inherited = main.sendSync("phobos:access-inherit", peer, claimOf(peer));
+  const bootstrap = main.sendSync("phobos:client-window-bootstrap", peer);
+  await main.invoke("phobos:client-window-ready", peer, inherited, { windowId: bootstrap.windowId });
   return { peer, bootstrap, opened: await opening };
 }
 
@@ -564,18 +564,18 @@ test("window appearance switches the macOS backdrop between translucent vibrancy
   const backdrop = () => {
     const calls = win.calls.filter(([name]) => name === "setBackgroundColor" || name === "setVibrancy");
     win.calls.length = 0;
-    const states = win.webContents.sentOn("octopus:window-state-changed");
+    const states = win.webContents.sentOn("phobos:window-state-changed");
     return [calls, states.at(-1)?.[0].opaqueSurface];
   };
   backdrop();
-  main.sendSync("octopus:window-appearance", win, { theme: "dark", translucent: true, preference: "dark" });
+  main.sendSync("phobos:window-appearance", win, { theme: "dark", translucent: true, preference: "dark" });
   assert.deepEqual(backdrop(), [[["setBackgroundColor", "#00000000"], ["setVibrancy", "under-window"]], false]);
   assert.equal(main.electron.module.nativeTheme.themeSource, "dark");
   const appearanceFile = path.join(main.world.userData, "window-appearance.json");
   assert.deepEqual(JSON.parse(fs.readFileSync(appearanceFile, "utf8")), { preference: "dark" });
   fs.chmodSync(main.world.userData, 0o500);
   try {
-    main.sendSync("octopus:window-appearance", win, { theme: "light", translucent: true, preference: "light" });
+    main.sendSync("phobos:window-appearance", win, { theme: "light", translucent: true, preference: "light" });
   } finally { fs.chmodSync(main.world.userData, 0o700); }
   assert.equal(main.electron.module.nativeTheme.themeSource, "light");
   if (process.getuid?.() !== 0) {
@@ -584,47 +584,47 @@ test("window appearance switches the macOS backdrop between translucent vibrancy
   }
   assert.deepEqual(fs.readdirSync(main.world.userData).filter((name) => name.endsWith(".tmp")), []);
   backdrop();
-  main.sendSync("octopus:window-appearance", win, { theme: "dark", translucent: false });
+  main.sendSync("phobos:window-appearance", win, { theme: "dark", translucent: false });
   assert.deepEqual(backdrop(), [[["setBackgroundColor", "#000000"], ["setVibrancy", null]], true]);
   assert.equal(main.electron.module.nativeTheme.themeSource, "system");
   win.bounds = { x: 0, y: 0, width: 1920, height: 1080 };
-  main.sendSync("octopus:window-appearance", win, { theme: "dark", translucent: true });
+  main.sendSync("phobos:window-appearance", win, { theme: "dark", translucent: true });
   assert.deepEqual(backdrop(), [[["setBackgroundColor", "#000000"], ["setVibrancy", null]], true], "a 4K-class backing store stays opaque");
-  assert.equal((await main.invoke("octopus:window-state", win)).opaqueSurface, true);
+  assert.equal((await main.invoke("phobos:window-state", win)).opaqueSurface, true);
 });
 
 test("a peer window inherits its opener's access through a one-window claim and opens only once its renderer is ready", async () => {
   const main = await launchMain({ files: { "window-state.json": { bounds: { x: 40, y: 50, width: 900, height: 700 } } } });
   const [primary] = main.windows();
-  await assert.rejects(main.invoke("octopus:client-window-open", primary, "stale-token", {}), /locked or expired/);
+  await assert.rejects(main.invoke("phobos:client-window-open", primary, "stale-token", {}), /locked or expired/);
   const token = await main.unlock(primary);
-  await assert.rejects(main.invoke("octopus:client-window-open", primary, token, { unexpected: true }), /unsupported field/);
+  await assert.rejects(main.invoke("phobos:client-window-open", primary, token, { unexpected: true }), /unsupported field/);
   assert.equal(main.windows().length, 1);
-  const opening = main.invoke("octopus:client-window-open", primary, token, { initialTarget: surface });
+  const opening = main.invoke("phobos:client-window-open", primary, token, { initialTarget: surface });
   let settled = false;
   void opening.then(() => { settled = true; });
   await settle();
   const peer = main.windows().at(-1);
   assert.deepEqual([peer.options.x, peer.options.y, peer.options.width, peer.options.height], [68, 78, 900, 700]);
   const claim = claimOf(peer);
-  assert.deepEqual(peer.options.webPreferences.additionalArguments, [`--octopus-access-claim=${claim}`]);
+  assert.deepEqual(peer.options.webPreferences.additionalArguments, [`--phobos-access-claim=${claim}`]);
   assert.deepEqual(peer.loads, [["file", path.join(appRoot, "dist/index.html"), undefined]]);
-  assert.equal(main.sendSync("octopus:access-inherit", primary, claim), "");
-  assert.equal(main.sendSync("octopus:access-inherit", peer, claim), token);
-  const bootstrap = main.sendSync("octopus:client-window-bootstrap", peer);
+  assert.equal(main.sendSync("phobos:access-inherit", primary, claim), "");
+  assert.equal(main.sendSync("phobos:access-inherit", peer, claim), token);
+  const bootstrap = main.sendSync("phobos:client-window-bootstrap", peer);
   assert.equal(bootstrap.primary, false);
   assert.deepEqual(bootstrap.initialTarget, surface);
-  assert.equal(main.sendSync("octopus:client-window-bootstrap", primary).windowId, "main");
+  assert.equal(main.sendSync("phobos:client-window-bootstrap", primary).windowId, "main");
   assert.equal(settled, false);
-  await assert.rejects(main.invoke("octopus:client-window-ready", peer, "other-token", { windowId: bootstrap.windowId }), /locked or expired/);
-  await main.invoke("octopus:quick-task-open", primary, token);
-  const { token: unboundToken } = await main.invoke("octopus:access-unlock", main.windows().at(-1), PASSWORD);
-  await assert.rejects(main.invoke("octopus:client-window-ready", peer, unboundToken, { windowId: bootstrap.windowId }), /authenticated peer bootstrap/);
-  await assert.rejects(main.invoke("octopus:client-window-ready", primary, token, { windowId: "main" }), /authenticated peer bootstrap/);
-  await main.invoke("octopus:client-window-ready", peer, token, { windowId: bootstrap.windowId });
+  await assert.rejects(main.invoke("phobos:client-window-ready", peer, "other-token", { windowId: bootstrap.windowId }), /locked or expired/);
+  await main.invoke("phobos:quick-task-open", primary, token);
+  const { token: unboundToken } = await main.invoke("phobos:access-unlock", main.windows().at(-1), PASSWORD);
+  await assert.rejects(main.invoke("phobos:client-window-ready", peer, unboundToken, { windowId: bootstrap.windowId }), /authenticated peer bootstrap/);
+  await assert.rejects(main.invoke("phobos:client-window-ready", primary, token, { windowId: "main" }), /authenticated peer bootstrap/);
+  await main.invoke("phobos:client-window-ready", peer, token, { windowId: bootstrap.windowId });
   assert.deepEqual(await opening, { opened: true, windowId: bootstrap.windowId });
 
-  const stalled = main.invoke("octopus:client-window-open", primary, token, {});
+  const stalled = main.invoke("phobos:client-window-open", primary, token, {});
   await settle();
   const unready = main.windows().at(-1);
   await assert.rejects(stalled, /did not become ready/);
@@ -636,32 +636,32 @@ test("a pane moves between windows through begin, accept, commit, release and fi
   const [primary] = main.windows();
   const token = await main.unlock(primary);
   const { peer } = await openPeer(main, primary, token);
-  assert.deepEqual(main.sendSync("octopus:client-pane-transfer-begin", peer, "stale", { sourcePane: "secondary", sourceTabId: "chat:run-1", target: surface }),
+  assert.deepEqual(main.sendSync("phobos:client-pane-transfer-begin", peer, "stale", { sourcePane: "secondary", sourceTabId: "chat:run-1", target: surface }),
     { ok: false, error: { message: "Client access session is locked or expired" } });
-  const begun = main.sendSync("octopus:client-pane-transfer-begin", peer, token, { sourcePane: "secondary", sourceTabId: "chat:run-1", target: surface });
+  const begun = main.sendSync("phobos:client-pane-transfer-begin", peer, token, { sourcePane: "secondary", sourceTabId: "chat:run-1", target: surface });
   assert.equal(begun.ok, true);
   const transferId = begun.value.transferId;
-  const accepted = await main.invoke("octopus:client-pane-transfer-accept", primary, token, { transferId });
+  const accepted = await main.invoke("phobos:client-pane-transfer-accept", primary, token, { transferId });
   assert.deepEqual(accepted.target, surface);
-  const committed = main.invoke("octopus:client-pane-transfer-commit", primary, token, { transferId });
+  const committed = main.invoke("phobos:client-pane-transfer-commit", primary, token, { transferId });
   await settle();
   const completion = { ...begun.value, sourcePane: "secondary", sourceTabId: "chat:run-1", target: surface };
-  assert.deepEqual(peer.webContents.sentOn("octopus:client-pane-transfer-completed"), [[completion]]);
-  assert.deepEqual(await main.invoke("octopus:client-pane-transfer-pending", peer, token), [completion]);
-  assert.deepEqual(main.sendSync("octopus:client-pane-transfer-acknowledge", peer, token, { released: true, transferId }), { ok: true, value: { released: true, transferId } });
+  assert.deepEqual(peer.webContents.sentOn("phobos:client-pane-transfer-completed"), [[completion]]);
+  assert.deepEqual(await main.invoke("phobos:client-pane-transfer-pending", peer, token), [completion]);
+  assert.deepEqual(main.sendSync("phobos:client-pane-transfer-acknowledge", peer, token, { released: true, transferId }), { ok: true, value: { released: true, transferId } });
   assert.deepEqual(await committed, completion);
-  assert.deepEqual(await main.invoke("octopus:client-pane-transfer-destination-pending", primary, token), [{ ...completion, committed: true }]);
-  assert.deepEqual(await main.invoke("octopus:client-pane-transfer-resume", primary, token, { transferId }), completion);
-  assert.deepEqual(await main.invoke("octopus:client-pane-transfer-finalize", primary, token, { transferId }), { finalized: true, transferId });
-  assert.deepEqual(peer.webContents.sentOn("octopus:client-pane-transfer-finalized"), [[completion]]);
+  assert.deepEqual(await main.invoke("phobos:client-pane-transfer-destination-pending", primary, token), [{ ...completion, committed: true }]);
+  assert.deepEqual(await main.invoke("phobos:client-pane-transfer-resume", primary, token, { transferId }), completion);
+  assert.deepEqual(await main.invoke("phobos:client-pane-transfer-finalize", primary, token, { transferId }), { finalized: true, transferId });
+  assert.deepEqual(peer.webContents.sentOn("phobos:client-pane-transfer-finalized"), [[completion]]);
 
   for (const breakSource of [(win) => { win.webContents.destroyed = true; }, (win) => { win.webContents.send = () => { throw new Error("renderer went away"); }; }]) {
     const { peer: source } = await openPeer(main, primary, token);
-    const next = main.sendSync("octopus:client-pane-transfer-begin", source, token, { sourcePane: "secondary", sourceTabId: "surface:drivers", target: { ...surface, runId: "", surfaceId: "drivers" } });
-    await main.invoke("octopus:client-pane-transfer-accept", primary, token, { transferId: next.value.transferId });
+    const next = main.sendSync("phobos:client-pane-transfer-begin", source, token, { sourcePane: "secondary", sourceTabId: "surface:drivers", target: { ...surface, runId: "", surfaceId: "drivers" } });
+    await main.invoke("phobos:client-pane-transfer-accept", primary, token, { transferId: next.value.transferId });
     breakSource(source);
-    await assert.rejects(main.invoke("octopus:client-pane-transfer-commit", primary, token, { transferId: next.value.transferId }), /closed before commit delivery|renderer went away/);
-    assert.deepEqual(await main.invoke("octopus:client-pane-transfer-destination-pending", primary, token), []);
+    await assert.rejects(main.invoke("phobos:client-pane-transfer-commit", primary, token, { transferId: next.value.transferId }), /closed before commit delivery|renderer went away/);
+    assert.deepEqual(await main.invoke("phobos:client-pane-transfer-destination-pending", primary, token), []);
     source.destroy();
   }
 });
@@ -671,26 +671,26 @@ test("logging out locks the session, tells every window of that owner, closes it
   const [primary] = main.windows();
   const token = await main.unlock(primary);
   const { peer } = await openPeer(main, primary, token);
-  await main.invoke("octopus:quick-task-open", primary, token);
+  await main.invoke("phobos:quick-task-open", primary, token);
   const quickTask = main.windows().at(-1);
-  await main.invoke("octopus:support-open", primary, token);
+  await main.invoke("phobos:support-open", primary, token);
   const support = main.windows().at(-1);
-  await main.invoke("octopus:global-dictation-shortcut", primary, token, { enabled: true, shortcut: "Mod+Shift+KeyD" });
+  await main.invoke("phobos:global-dictation-shortcut", primary, token, { enabled: true, shortcut: "Mod+Shift+KeyD" });
   assert.equal(main.electron.shortcuts.size, 1);
-  await assert.rejects(main.invoke("octopus:access-lock", peer, "another-token"), /belongs to its authenticated full client window/);
+  await assert.rejects(main.invoke("phobos:access-lock", peer, "another-token"), /belongs to its authenticated full client window/);
   main.world.expiredTokens.add(token);
-  const status = await main.invoke("octopus:access-lock", primary, token);
+  const status = await main.invoke("phobos:access-lock", primary, token);
   assert.equal(status.authenticated, false);
-  assert.equal(primary.webContents.sentOn("octopus:client-access-locked").length, 1);
-  assert.equal(peer.webContents.sentOn("octopus:client-access-locked").length, 1);
+  assert.equal(primary.webContents.sentOn("phobos:client-access-locked").length, 1);
+  assert.equal(peer.webContents.sentOn("phobos:client-access-locked").length, 1);
   assert.equal(peer.isDestroyed(), true);
   assert.equal(quickTask.isDestroyed(), true);
   assert.equal(support.isDestroyed(), true);
   assert.equal(primary.isDestroyed(), false);
   assert.equal(main.electron.shortcuts.size, 0, "the owner's global dictation shortcut is released");
   main.world.expiredTokens.delete(token);
-  assert.equal((await main.invoke("octopus:access-status", primary, token)).authenticated, false);
-  await assert.rejects(main.invoke("octopus:access-lock", primary, token), /belongs to its authenticated full client window/);
+  assert.equal((await main.invoke("phobos:access-status", primary, token)).authenticated, false);
+  await assert.rejects(main.invoke("phobos:access-lock", primary, token), /belongs to its authenticated full client window/);
 });
 
 test("File > New Window opens a peer for the focused authenticated window, or reveals the primary when there is none", async () => {
@@ -704,37 +704,37 @@ test("File > New Window opens a peer for the focused authenticated window, or re
   newWindow().click();
   const peer = main.windows().at(-1);
   assert.notEqual(peer, primary);
-  assert.equal(main.sendSync("octopus:client-window-bootstrap", peer).primary, false);
-  assert.equal(main.sendSync("octopus:access-inherit", peer, claimOf(peer)), token);
+  assert.equal(main.sendSync("phobos:client-window-bootstrap", peer).primary, false);
+  assert.equal(main.sendSync("phobos:access-inherit", peer, claimOf(peer)), token);
 });
 
 test("quick task, Worker Environment popout and global dictation hand their request to the owner's client window", async () => {
   const main = await launchMain();
   const [primary] = main.windows();
   const token = await main.unlock(primary);
-  await main.invoke("octopus:quick-task-open", primary, token);
+  await main.invoke("phobos:quick-task-open", primary, token);
   const quickTask = main.windows().at(-1);
-  await assert.rejects(main.invoke("octopus:quick-task-open-main", quickTask, token, "bad\u0000run"), /bounded run id/);
-  assert.deepEqual(await main.invoke("octopus:quick-task-open-main", quickTask, token, "run-7"), { opened: true, runId: "run-7" });
-  assert.deepEqual(primary.webContents.sentOn("octopus:open-run-requested"), [["run-7"]]);
+  await assert.rejects(main.invoke("phobos:quick-task-open-main", quickTask, token, "bad\u0000run"), /bounded run id/);
+  assert.deepEqual(await main.invoke("phobos:quick-task-open-main", quickTask, token, "run-7"), { opened: true, runId: "run-7" });
+  assert.deepEqual(primary.webContents.sentOn("phobos:open-run-requested"), [["run-7"]]);
   assert.equal(primary.isFocused(), true);
   assert.equal(quickTask.isDestroyed(), true);
   const target = { workerEnvironmentId: "we-1", runId: "run-7", panelKind: "changes" };
-  await main.invoke("octopus:worker-environment-window-open-main", primary, token, target);
-  assert.deepEqual(primary.webContents.sentOn("octopus:open-worker-environment-requested"), [[target]]);
-  assert.deepEqual(await main.invoke("octopus:global-dictation-shortcut", primary, token, { enabled: true, shortcut: "Mod+Shift+KeyD" }),
+  await main.invoke("phobos:worker-environment-window-open-main", primary, token, target);
+  assert.deepEqual(primary.webContents.sentOn("phobos:open-worker-environment-requested"), [[target]]);
+  assert.deepEqual(await main.invoke("phobos:global-dictation-shortcut", primary, token, { enabled: true, shortcut: "Mod+Shift+KeyD" }),
     { enabled: true, shortcut: "CommandOrControl+Shift+D", registered: true });
   main.electron.shortcuts.get("CommandOrControl+Shift+D")();
-  assert.equal(primary.webContents.sentOn("octopus:global-dictation-requested").length, 1);
+  assert.equal(primary.webContents.sentOn("phobos:global-dictation-requested").length, 1);
 
-  await main.invoke("octopus:quick-task-open", primary, token);
+  await main.invoke("phobos:quick-task-open", primary, token);
   const secondQuickTask = main.windows().at(-1);
   primary.close();
-  await main.invoke("octopus:quick-task-open-main", secondQuickTask, token, "run-8");
+  await main.invoke("phobos:quick-task-open-main", secondQuickTask, token, "run-8");
   const replacement = main.windows().at(-1);
   assert.notEqual(replacement, primary);
-  assert.deepEqual(replacement.webContents.sentOn("octopus:open-run-requested"), [["run-8"]]);
-  assert.equal(main.sendSync("octopus:access-inherit", replacement, claimOf(replacement)), token);
+  assert.deepEqual(replacement.webContents.sentOn("phobos:open-run-requested"), [["run-8"]]);
+  assert.equal(main.sendSync("phobos:access-inherit", replacement, claimOf(replacement)), token);
 });
 
 test("the launch terminal belongs to the primary window, reuses its shell and opens the runtime's prepared command", async () => {
@@ -742,34 +742,34 @@ test("the launch terminal belongs to the primary window, reuses its shell and op
   const [primary] = main.windows();
   const token = await main.unlock(primary);
   const { peer } = await openPeer(main, primary, token);
-  await assert.rejects(main.invoke("octopus:launch-terminal-open", peer, "", { cols: 80, rows: 24 }), /primary Octopus window/);
-  await main.invoke("octopus:quick-task-open", primary, token);
-  await assert.rejects(main.invoke("octopus:launch-terminal-open", main.windows().at(-1), token, { cols: 80, rows: 24 }), /full client window/);
-  const opened = await main.invoke("octopus:launch-terminal-open", primary, "", { cols: 120, rows: 40 });
+  await assert.rejects(main.invoke("phobos:launch-terminal-open", peer, "", { cols: 80, rows: 24 }), /primary Phobos window/);
+  await main.invoke("phobos:quick-task-open", primary, token);
+  await assert.rejects(main.invoke("phobos:launch-terminal-open", main.windows().at(-1), token, { cols: 80, rows: 24 }), /full client window/);
+  const opened = await main.invoke("phobos:launch-terminal-open", primary, "", { cols: 120, rows: 40 });
   assert.equal(opened.sessionId, "launch-session");
   const [, owner, request] = main.eventsOf("terminal-open").at(-1);
   assert.deepEqual(owner, { scope: "launch", senderId: primary.webContents.id, token: "" });
-  assert.deepEqual(request, { terminalId: "launch", cwd: main.world.root, env: { OCTOPUS_HOME: main.world.home }, preparedCommand: "octopus up", cols: 120, rows: 40 });
+  assert.deepEqual(request, { terminalId: "launch", cwd: main.world.root, env: { PHOBOS_HOME: main.world.home }, preparedCommand: "phobos up", cols: 120, rows: 40 });
   main.world.existingLaunch = { terminalId: "launch", sessionId: "existing", running: true, transcript: "ready" };
   main.world.runtimeState = { ...main.world.runtimeState, phase: "ready", ready: true };
   const probes = main.eventsOf("probe").length;
-  assert.equal(await main.invoke("octopus:launch-terminal-open", primary, "", { cols: 100, rows: 30 }), main.world.existingLaunch);
+  assert.equal(await main.invoke("phobos:launch-terminal-open", primary, "", { cols: 100, rows: 30 }), main.world.existingLaunch);
   assert.deepEqual(main.eventsOf("terminal-open-existing").at(-1)[2], { terminalId: "launch", cols: 100, rows: 30 });
   assert.equal(main.eventsOf("probe").length, probes, "an existing launch shell wins before any readiness probe");
   main.world.existingLaunch = null;
-  await assert.rejects(main.invoke("octopus:launch-terminal-open", primary, "", { cols: 100, rows: 30 }), /already ready for this Home/);
+  await assert.rejects(main.invoke("phobos:launch-terminal-open", primary, "", { cols: 100, rows: 30 }), /already ready for this Home/);
   const [terminal] = main.world.terminalHosts;
   terminal.emit("data", { owner: { scope: "launch", senderId: primary.webContents.id, token: "" }, terminalId: "launch", sessionId: "launch-session", data: "ready in 4.2s" });
-  assert.deepEqual(primary.webContents.sentOn("octopus:terminal-data"), [[{ terminalId: "launch", sessionId: "launch-session", data: "ready in 4.2s" }]]);
+  assert.deepEqual(primary.webContents.sentOn("phobos:terminal-data"), [[{ terminalId: "launch", sessionId: "launch-session", data: "ready in 4.2s" }]]);
   terminal.emit("data", { owner: { scope: "launch", senderId: 9999, token: "" }, data: "orphan" });
   assert.deepEqual(main.eventsOf("terminal-close-sender").at(-1), ["terminal-close-sender", 9999]);
   terminal.emit("exit", { owner: { scope: "access", senderId: primary.webContents.id, token: "stale" }, exitCode: 0 });
   assert.deepEqual(main.eventsOf("terminal-close-owner").at(-1), ["terminal-close-owner", "stale"]);
   assert.deepEqual(main.world.runtimeHosts[0].options.launchEnv(), {
-    OCTOPUS_HOME: main.world.home,
-    OCTOPUS_SOURCE_REGISTRY: path.join(main.world.root, "repo", "registry"),
-    OCTOPUS_MACHINE_CODEX_AUTH_FILE: path.join(main.world.codexHome, "auth.json"),
-    OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE: path.join(main.world.codexHome, "auth.lock"),
+    PHOBOS_HOME: main.world.home,
+    PHOBOS_SOURCE_REGISTRY: path.join(main.world.root, "repo", "registry"),
+    PHOBOS_MACHINE_CODEX_AUTH_FILE: path.join(main.world.codexHome, "auth.json"),
+    PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE: path.join(main.world.codexHome, "auth.lock"),
   });
 });
 
@@ -778,18 +778,18 @@ test("quit waits for startup recovery, interrupts the launch shell, waits for th
   const main = await launchMain({ world: { recoveryGate: new Promise((resolve) => { releaseRecovery = resolve; }) } });
   const [primary] = main.windows();
   const token = await main.unlock(primary);
-  await main.invoke("octopus:terminal-open", primary, token, { terminalId: "shell" });
-  await main.invoke("octopus:quick-task-open", primary, token);
+  await main.invoke("phobos:terminal-open", primary, token, { terminalId: "shell" });
+  await main.invoke("phobos:quick-task-open", primary, token);
   const quickTask = main.windows().at(-1);
-  assert.deepEqual(await main.invoke("octopus:runtime-events-subscribe", quickTask, token), { subscribed: true });
-  assert.equal(quickTask.webContents.sentOn("octopus:runtime-host-state").length, 1);
+  assert.deepEqual(await main.invoke("phobos:runtime-events-subscribe", quickTask, token), { subscribed: true });
+  assert.equal(quickTask.webContents.sentOn("phobos:runtime-host-state").length, 1);
   main.world.events.length = 0;
   main.electron.module.app.quit();
   await settle(10);
   assert.deepEqual(names(main, ["quit", "exit"]), ["quit"], "the first quit is held for the close protocol");
   assert.equal(primary.isDestroyed(), true);
   main.world.runtimeHosts[0].emit("state", { phase: "unmanaged", ready: false });
-  assert.equal(quickTask.webContents.sentOn("octopus:runtime-host-state").length, 1, "no runtime state is published once cleanup started");
+  assert.equal(quickTask.webContents.sentOn("phobos:runtime-host-state").length, 1, "no runtime state is published once cleanup started");
   assert.equal(main.eventsOf("interrupt-launch").length, 0, "cleanup waits for the startup recovery in flight");
   main.world.events.push(["recovery-released"]);
   releaseRecovery();
@@ -802,62 +802,62 @@ test("the live projection is invalidated once, when the runtime first becomes re
   const main = await launchMain();
   const [primary] = main.windows();
   const token = await main.unlock(primary);
-  await main.invoke("octopus:projection-read", primary, token, { method: "projection.operator.os.scope" });
-  await main.invoke("octopus:runtime-events-subscribe", primary, token);
+  await main.invoke("phobos:projection-read", primary, token, { method: "projection.operator.os.scope" });
+  await main.invoke("phobos:runtime-events-subscribe", primary, token);
   const host = main.world.runtimeHosts[0];
   for (const phase of ["ready", "ready", "unmanaged", "ready"]) host.emit("state", { phase, ready: phase === "ready" });
   assert.equal(main.world.events.filter(([name, profile, value]) => name === "projection-invalidate" && profile === "live" && value === false).length, 1);
-  assert.deepEqual(primary.webContents.sentOn("octopus:runtime-host-state").slice(1).map(([state]) => state.phase), ["ready", "ready", "unmanaged", "ready"]);
+  assert.deepEqual(primary.webContents.sentOn("phobos:runtime-host-state").slice(1).map(([state]) => state.phase), ["ready", "ready", "unmanaged", "ready"]);
 });
 
 test("Touch ID status reads only the private preference and enrollment, and enabling, declining and unlocking go through the prompt", async () => {
   const unavailable = await launchMain({ world: { touchId: false } });
-  assert.deepEqual(await unavailable.invoke("octopus:touch-id-status", unavailable.windows()[0]), { available: false, enrolled: false, prompted: false });
+  assert.deepEqual(await unavailable.invoke("phobos:touch-id-status", unavailable.windows()[0]), { available: false, enrolled: false, prompted: false });
   for (const [mode, value, error] of [[0o644, { version: 1, prompted: true }, /permissions are too broad/], [0o600, { version: 1, prompted: false }, /unsupported shape/], [0o600, "not json", /not valid JSON/]]) {
     const broken = await launchMain();
     writeFixture(path.join(broken.world.userData, "touch-id-preference.json"), value, mode);
-    await assert.rejects(broken.invoke("octopus:touch-id-status", broken.windows()[0]), error);
+    await assert.rejects(broken.invoke("phobos:touch-id-status", broken.windows()[0]), error);
   }
   const linked = await launchMain();
   writeFixture(path.join(linked.world.root, "elsewhere.json"), { version: 1, prompted: true });
   fs.symlinkSync(path.join(linked.world.root, "elsewhere.json"), path.join(linked.world.userData, "touch-id-preference.json"));
-  await assert.rejects(linked.invoke("octopus:touch-id-status", linked.windows()[0]), /not a valid regular file/);
+  await assert.rejects(linked.invoke("phobos:touch-id-status", linked.windows()[0]), /not a valid regular file/);
 
   const main = await launchMain();
   const [primary] = main.windows();
-  assert.deepEqual(await main.invoke("octopus:touch-id-status", primary), { available: true, enrolled: false, prompted: false });
+  assert.deepEqual(await main.invoke("phobos:touch-id-status", primary), { available: true, enrolled: false, prompted: false });
   const token = await main.unlock(primary);
-  await assert.rejects(main.invoke("octopus:touch-id-set-enabled", primary, token, "yes"), /explicit enabled state/);
-  assert.deepEqual(await main.invoke("octopus:touch-id-set-enabled", primary, token, false), { available: true, enrolled: false, prompted: true });
+  await assert.rejects(main.invoke("phobos:touch-id-set-enabled", primary, token, "yes"), /explicit enabled state/);
+  assert.deepEqual(await main.invoke("phobos:touch-id-set-enabled", primary, token, false), { available: true, enrolled: false, prompted: true });
   assert.equal(fs.statSync(path.join(main.world.userData, "touch-id-preference.json")).mode & 0o777, 0o600);
   assert.equal(main.eventsOf("touch-id").length, 0);
-  assert.deepEqual(await main.invoke("octopus:touch-id-set-enabled", primary, token, true), { available: true, enrolled: true, prompted: true });
-  assert.deepEqual(main.eventsOf("touch-id"), [["touch-id", "Enable Touch ID to unlock Octopus"]]);
+  assert.deepEqual(await main.invoke("phobos:touch-id-set-enabled", primary, token, true), { available: true, enrolled: true, prompted: true });
+  assert.deepEqual(main.eventsOf("touch-id"), [["touch-id", "Enable Touch ID to unlock Phobos"]]);
   const sealedReads = main.eventsOf("safe-storage").length;
-  assert.deepEqual(await main.invoke("octopus:touch-id-status", primary), { available: true, enrolled: true, prompted: true });
+  assert.deepEqual(await main.invoke("phobos:touch-id-status", primary), { available: true, enrolled: true, prompted: true });
   assert.equal(main.eventsOf("safe-storage").length, sealedReads, "status never opens the sealed verifier");
-  await main.invoke("octopus:access-lock", primary, token);
-  const unlocked = await main.invoke("octopus:touch-id-unlock", primary);
-  assert.deepEqual(main.eventsOf("touch-id").at(-1), ["touch-id", "Unlock Octopus"]);
+  await main.invoke("phobos:access-lock", primary, token);
+  const unlocked = await main.invoke("phobos:touch-id-unlock", primary);
+  assert.deepEqual(main.eventsOf("touch-id").at(-1), ["touch-id", "Unlock Phobos"]);
   assert.ok(main.eventsOf("safe-storage").length > sealedReads);
-  assert.equal((await main.invoke("octopus:transport-defaults", primary, unlocked.token)).octopusHome, main.world.home);
-  assert.equal((await main.invoke("octopus:access-lock", primary, unlocked.token)).authenticated, false, "the Touch ID session belongs to the window that unlocked");
+  assert.equal((await main.invoke("phobos:transport-defaults", primary, unlocked.token)).phobosHome, main.world.home);
+  assert.equal((await main.invoke("phobos:access-lock", primary, unlocked.token)).authenticated, false, "the Touch ID session belongs to the window that unlocked");
   const enrollmentFile = path.join(main.world.userData, "touch-id-access.json");
   const enrollment = JSON.parse(fs.readFileSync(enrollmentFile, "utf8"));
   writeFixture(enrollmentFile, { ...enrollment, sealedVerifier: Buffer.from("tampered").toString("base64") });
-  await assert.rejects(main.invoke("octopus:touch-id-unlock", primary), /could not be verified/);
+  await assert.rejects(main.invoke("phobos:touch-id-unlock", primary), /could not be verified/);
   writeFixture(enrollmentFile, enrollment);
   main.world.sealKey = 2;
-  const rotated = await main.invoke("octopus:touch-id-unlock", primary);
+  const rotated = await main.invoke("phobos:touch-id-unlock", primary);
   const resealed = JSON.parse(fs.readFileSync(enrollmentFile, "utf8"));
   assert.equal(resealed.credentialFingerprint, enrollment.credentialFingerprint);
   assert.match(Buffer.from(resealed.sealedVerifier, "base64").toString(), /^sealed:2:[a-f0-9]{64}$/, "a verifier the OS asks to re-encrypt is sealed again under the current key");
-  await main.invoke("octopus:access-lock", primary, rotated.token);
+  await main.invoke("phobos:access-lock", primary, rotated.token);
   main.world.touchIdRefused = true;
-  await assert.rejects(main.invoke("octopus:touch-id-unlock", primary), /cancelled/);
+  await assert.rejects(main.invoke("phobos:touch-id-unlock", primary), /cancelled/);
   const again = await main.unlock(primary);
-  assert.deepEqual(await main.invoke("octopus:touch-id-set-enabled", primary, again, false), { available: true, enrolled: false, prompted: true });
-  await assert.rejects(main.invoke("octopus:touch-id-set-enabled", primary, again, true), /cancelled/);
+  assert.deepEqual(await main.invoke("phobos:touch-id-set-enabled", primary, again, false), { available: true, enrolled: false, prompted: true });
+  await assert.rejects(main.invoke("phobos:touch-id-set-enabled", primary, again, true), /cancelled/);
   assert.equal(fs.existsSync(enrollmentFile), false, "declining clears the enrollment and a refused prompt writes none");
 });
 
@@ -866,11 +866,11 @@ test("a client extension action runs with the Home, the Codex home and the verif
   const [primary] = main.windows();
   const token = await main.unlock(primary);
   const request = { actionId: "repair", extensionId: "fixture.extension", incident: { id: "incident-1", interfaceId: "world_provider_codex" } };
-  const result = await main.invoke("octopus:client-extension-action", primary, token, request);
+  const result = await main.invoke("phobos:client-extension-action", primary, token, request);
   assert.equal(result.ok, true);
-  assert.deepEqual(main.eventsOf("extension-action"), [["extension-action", { octopusHome: main.world.home, codexHome: main.world.codexHome, installedExtensionIds: ["fixture.extension"] }, request]]);
-  await main.invoke("octopus:quick-task-open", primary, token);
-  await assert.rejects(main.invoke("octopus:client-extension-action", main.windows().at(-1), token, request), /full client window/);
+  assert.deepEqual(main.eventsOf("extension-action"), [["extension-action", { phobosHome: main.world.home, codexHome: main.world.codexHome, installedExtensionIds: ["fixture.extension"] }, request]]);
+  await main.invoke("phobos:quick-task-open", primary, token);
+  await assert.rejects(main.invoke("phobos:client-extension-action", main.windows().at(-1), token, request), /full client window/);
 });
 
 function chatClient(world) {
@@ -905,10 +905,10 @@ test("chat turns, steering, turn control and artifact reads use the verified cha
   main.world.chatBatch = () => ({ artifacts: [{ source: "movement", from_interface_id: "world_provider_codex", from_interface_role: "provider", movement_seq: 1, recorded_at_unix_ms: 2, artifact_id: "a", content_hash: "h", checkpoint_id: "c" }], cursor: { offset: 0, seq: 1 } });
   const [primary] = main.windows();
   const token = await main.unlock(primary);
-  await main.invoke("octopus:projection-read", primary, token, { method: "projection.operator.os.scope" });
+  await main.invoke("phobos:projection-read", primary, token, { method: "projection.operator.os.scope" });
   const blobs = path.join(main.world.home, "ledger", "blobs");
   main.world.events.length = 0;
-  const turn = await main.invoke("octopus:submit-chat-turn", primary, token, { runId: "run-1", messageId: "m-1", text: "hello" });
+  const turn = await main.invoke("phobos:submit-chat-turn", primary, token, { runId: "run-1", messageId: "m-1", text: "hello" });
   assert.equal(turn.ok, true);
   assert.equal(turn.value.runId, "run-1");
   const [loader] = main.world.chatLoaderOptions;
@@ -921,7 +921,7 @@ test("chat turns, steering, turn control and artifact reads use the verified cha
   assert.equal(main.eventsOf("read-payload")[0][1].blobsRoot, blobs);
 
   main.world.events.length = 0;
-  const steered = await main.invoke("octopus:submit-chat-steer", primary, token, { runId: "run-1", messageId: "m-2", text: "steer" });
+  const steered = await main.invoke("phobos:submit-chat-steer", primary, token, { runId: "run-1", messageId: "m-2", text: "steer" });
   assert.equal(steered.ok, true);
   assert.deepEqual(steered.value, {
     interfaceId: "world_operator_chat_home", runId: "run-1", label: "operator.message", messageId: "m-2", attachmentCount: 0,
@@ -932,7 +932,7 @@ test("chat turns, steering, turn control and artifact reads use the verified cha
 
   main.world.storageError = Object.assign(new Error("Disk full. Your draft is retained."), { code: "home_storage_blocked", deliveryState: "not_sent" });
   main.world.events.length = 0;
-  for (const channel of ["octopus:submit-chat-turn", "octopus:submit-chat-steer"]) {
+  for (const channel of ["phobos:submit-chat-turn", "phobos:submit-chat-steer"]) {
     const refused = await main.invoke(channel, primary, token, { runId: "run-1", text: "Keep this draft" });
     assert.equal(refused.ok, false);
     assert.equal(refused.error.code, "home_storage_blocked");
@@ -942,18 +942,18 @@ test("chat turns, steering, turn control and artifact reads use the verified cha
   main.world.storageError = null;
 
   main.world.events.length = 0;
-  const control = await main.invoke("octopus:submit-operator-turn-control", primary, token, { interfaceId: "world_operator_chat_home", runId: "run-1", action: "pause", controlId: "control-1" });
+  const control = await main.invoke("phobos:submit-operator-turn-control", primary, token, { interfaceId: "world_operator_chat_home", runId: "run-1", action: "pause", controlId: "control-1" });
   assert.deepEqual(main.eventsOf("turn-control"), [["turn-control", { interfaceId: "world_operator_chat_home", runId: "run-1", action: "pause", controlId: "control-1" }]]);
   assert.equal(control.deliveryError.stage, "not-sent");
   assert.deepEqual(names(main, ["recover-workspace", "projection-read"]), [], "turn control neither recovers the workspace nor reads the projection");
 
   main.world.events.length = 0;
-  assert.deepEqual(await main.invoke("octopus:operator-chat-artifacts-read", primary, token, { runId: "run-1" }), main.world.chatBatch());
+  assert.deepEqual(await main.invoke("phobos:operator-chat-artifacts-read", primary, token, { runId: "run-1" }), main.world.chatBatch());
   assert.deepEqual(main.eventsOf("read-payload").map(([, input]) => [input.artifactId, input.blobsRoot, input.maxPayloadBytes]),
     [["a", blobs, 256 * 1024 * 1024], ["b", blobs, undefined]]);
   assert.deepEqual(main.eventsOf("read-projection").map(([, input]) => [input.artifactId, input.blobsRoot]), [["c", blobs]]);
   main.world.chatBatch = () => ({ artifacts: [{ from_interface_id: "world_provider_codex", from_interface_role: "" }], cursor: { offset: 0, seq: null } });
-  await assert.rejects(main.invoke("octopus:operator-chat-artifacts-read", primary, token, { runId: "run-1" }), (error) => /from_interface_role/.test(error.message));
+  await assert.rejects(main.invoke("phobos:operator-chat-artifacts-read", primary, token, { runId: "run-1" }), (error) => /from_interface_role/.test(error.message));
 });
 
 test("a client interface artifact asks the chat client only when it targets a chat interface", async () => {
@@ -962,13 +962,13 @@ test("a client interface artifact asks the chat client only when it targets a ch
   const [primary] = main.windows();
   const token = await main.unlock(primary);
   main.world.events.length = 0;
-  await main.invoke("octopus:submit-interface-artifact", primary, token, { interfaceId: "world_telegram", label: "note" });
+  await main.invoke("phobos:submit-interface-artifact", primary, token, { interfaceId: "world_telegram", label: "note" });
   assert.deepEqual(names(main, ["chat-client-load", "chat-artifact-check", "artifact-submitted"]), ["artifact-submitted"]);
   main.world.events.length = 0;
-  await main.invoke("octopus:submit-interface-artifact", primary, token, { interfaceId: "world_operator_chat_home", label: "note" });
+  await main.invoke("phobos:submit-interface-artifact", primary, token, { interfaceId: "world_operator_chat_home", label: "note" });
   assert.deepEqual(names(main, ["chat-client-load", "chat-artifact-check", "artifact-submitted"]), ["chat-client-load", "chat-artifact-check", "artifact-submitted"]);
   main.world.events.length = 0;
-  await assert.rejects(main.invoke("octopus:submit-interface-artifact", primary, token, { interfaceId: "world_operator_chat_home", label: "forbidden" }), /refuses this artifact/);
+  await assert.rejects(main.invoke("phobos:submit-interface-artifact", primary, token, { interfaceId: "world_operator_chat_home", label: "forbidden" }), /refuses this artifact/);
   assert.deepEqual(names(main, ["artifact-submitted"]), []);
 });
 
@@ -978,7 +978,7 @@ test("the renderer's transport declaration types the client window and pane tran
   const fixture = path.join(appRoot, "src", "clientWindowTransport.contract.ts");
   const text = `import type { ClientPaneDragPayload, ClientPaneTransferAcknowledgementRequest, ClientPaneTransferBeginRequest, ClientPaneTransferCompleted,
   ClientPaneTransferRequest, ClientWindowBootstrap, ClientWindowOpenOutcome, ClientWindowOpenRequest, ClientWindowReadyRequest } from "./shell/clientWindowModel";
-type Transport = NonNullable<Window["octopusTransport"]>;
+type Transport = NonNullable<Window["phobosTransport"]>;
 type Exact<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
 type Expected = {
   clientWindowBootstrap: () => ClientWindowBootstrap | null;

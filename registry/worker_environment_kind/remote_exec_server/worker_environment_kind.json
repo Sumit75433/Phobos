@@ -5,7 +5,7 @@
     "system_remote_exec"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-remote-exec-room-tool"
+    "target/debug/phobos-remote-exec-room-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "instance_config_files": [

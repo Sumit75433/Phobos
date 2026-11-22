@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.browser_session",
   "version": "1.0.3",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Browser Session",
     "description": "A real browser to open pages, fill forms, click through sites and go back.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "browser"
   },

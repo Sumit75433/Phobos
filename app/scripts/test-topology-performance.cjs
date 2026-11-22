@@ -90,7 +90,7 @@ test("60 voice parent updates preserve topology output and skip unrelated stage 
     } }).outputText;
     const mocks = {
       "./IconGlyphs": { Glyph: () => null }, "./WorldProjection": {}, "../toasts": { useAppErrorToast() {} },
-      "./OctopusLoadingLogo": { OctopusLoadingState: () => null },
+      "./PhobosLoadingLogo": { PhobosLoadingState: () => null },
       "./DashboardLabel": { DashboardLabel: ({ text }) => text, DashboardTooltip: ({ children }) => children },
       "./ArtifactTransferAnimation": { SystemArtifactTransfers: () => null, useArtifactTransferFeed: () => { renders++; return { feed: {}, error: "" }; } },
     };

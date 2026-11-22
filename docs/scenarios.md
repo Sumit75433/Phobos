@@ -1,6 +1,6 @@
 # Scenarios
 
-Four design examples show how Octopus can acquire a capability, change what
+Four design examples show how Phobos can acquire a capability, change what
 it listens for, change its own client, and tell a model what matters when you
 come back. They describe the intended use of
 the architecture, rather than tested, ready-to-use features. Each depends on a
@@ -113,4 +113,4 @@ decides, the model receives the fact, and the reason it checked the mail is a
 recorded movement.
 
 For the package structure behind these examples, see
-[Extending Octopus](contracts/EXTENSION_SURFACES.md).
+[Extending Phobos](contracts/EXTENSION_SURFACES.md).

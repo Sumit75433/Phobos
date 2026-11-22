@@ -18,7 +18,7 @@ function cloneFiles(pairs) {
 
 function cloneEntries(entries) {
   if (process.platform !== "darwin") throw new Error("macOS packaging requires clonefile support");
-  const planRoot = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-package-copy-"));
+  const planRoot = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-package-copy-"));
   try {
     const planPath = path.join(planRoot, "entries.json");
     fs.writeFileSync(planPath, JSON.stringify(entries), { encoding: "utf8", flag: "wx", mode: 0o600 });

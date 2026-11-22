@@ -36,12 +36,12 @@ class Contract(unittest.TestCase):
         self.ledger = root / "movements.jsonl"
         self.ledger.write_bytes(b"")
         self.env = {
-            "OCTOPUS_INTERFACE_ID": "world_test_watch",
-            "OCTOPUS_INTERFACE_DIR": str(self.interface),
-            "OCTOPUS_VAR_DIR": str(self.var),
-            "OCTOPUS_MOVEMENTS_JSONL": str(self.ledger),
-            "OCTOPUS_BLOBS_DIR": str(self.blobs),
-            "OCTOPUS_INTERFACE_HOST_IO_LIMITS": json.dumps({
+            "PHOBOS_INTERFACE_ID": "world_test_watch",
+            "PHOBOS_INTERFACE_DIR": str(self.interface),
+            "PHOBOS_VAR_DIR": str(self.var),
+            "PHOBOS_MOVEMENTS_JSONL": str(self.ledger),
+            "PHOBOS_BLOBS_DIR": str(self.blobs),
+            "PHOBOS_INTERFACE_HOST_IO_LIMITS": json.dumps({
                 "max_control_frame_bytes": 1048576, "max_manifest_bytes": 1048576,
                 "max_payload_bytes": 8388608, "max_stderr_bytes": 262144}),
             "PYTHONDONTWRITEBYTECODE": "1",
@@ -65,7 +65,7 @@ class Contract(unittest.TestCase):
 
     def blob(self, value):
         body = self.w.canonical_json(value)
-        digest = self.w.octopus_content_hash(body)
+        digest = self.w.phobos_content_hash(body)
         (self.blobs / digest).write_bytes(body)
         return digest
 

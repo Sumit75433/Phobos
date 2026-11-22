@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { Glyph } from "../IconGlyphs";
-import { OctopusTerminal } from "./OctopusTerminal";
+import { PhobosTerminal } from "./PhobosTerminal";
 import { createShellSession } from "./shellSession";
 import "./terminal.css";
 
 export function TerminalTab({ accessProfile, active, cwd, onNewTerminalTab, onTitleChange, terminalId }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   active: boolean;
   cwd?: string;
   onNewTerminalTab: () => void;
@@ -27,7 +27,7 @@ export function TerminalTab({ accessProfile, active, cwd, onNewTerminalTab, onTi
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-[var(--vscode-terminal-background)]">
-      <OctopusTerminal
+      <PhobosTerminal
         autoFocus={active}
         id={`terminal-panel-${terminalId}`}
         onNewTerminalTab={onNewTerminalTab}

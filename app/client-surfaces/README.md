@@ -14,7 +14,7 @@ The contract is versioned by:
 
 ```json
 {
-  "schema": "octopus.client_surface",
+  "schema": "phobos.client_surface",
   "schema_version": 1,
   "release_channel": "lab"
 }
@@ -99,7 +99,7 @@ A document may declare up to eight read-only projection sources:
 ```
 
 The result is available at `sources.movement_summary`. Sandbox documents receive
-the same object as `window.octopusSurface = { data, sources }`. Projection
+the same object as `window.phobosSurface = { data, sources }`. Projection
 failures fail the document closed and are rendered explicitly; stale or invented
 values are not substituted. Sources re-read whenever the ledger or run records
 change.
@@ -139,7 +139,7 @@ may request one by id; the iframe never supplies the resulting event or payload:
 {
   "kind": "sandbox",
   "html": "<button id=details>Open details</button>",
-  "javascript": "details.onclick=()=>octopusSurface.invoke('open-details')",
+  "javascript": "details.onclick=()=>phobosSurface.invoke('open-details')",
   "actions": {
     "open-details": { "event": "widget.open-details", "payload": { "section": "runs" } }
   }
@@ -149,10 +149,10 @@ may request one by id; the iframe never supplies the resulting event or payload:
 Unknown action ids are ignored. The admitted document remains the only source
 of the host action, so sandbox code cannot fabricate a client command or payload.
 
-The host event is `octopus:client-surface-action`. This is not an artifact send,
+The host event is `phobos:client-surface-action`. This is not an artifact send,
 tool call, or runtime side channel. Product code may handle navigation and local
 presentation actions. A future action that changes the world must still enter
-Octopus through an ordinary declared interface, artifact movement, policy gate,
+Phobos through an ordinary declared interface, artifact movement, policy gate,
 and evidence path.
 
 ## Admission and hot reload
@@ -173,7 +173,7 @@ contract:
   "passed": true,
   "details": {
     "verifier": "client_surface_document_v1",
-    "contract": "octopus.client_surface@1",
+    "contract": "phobos.client_surface@1",
     "document_id": "voice.weather",
     "revision": 1,
     "source_digest": "sha256:...",
@@ -184,7 +184,7 @@ contract:
 }
 ```
 
-This is deliberately shaped like an Octopus verifier verdict, but it is client
+This is deliberately shaped like a Phobos verifier verdict, but it is client
 admission today. When model-authored surface documents arrive as artifacts, the
 same document contract can be enforced by a removable verifier package on a
 checkpoint edge, for example:
@@ -204,7 +204,7 @@ Client admission is distinct from a runtime `MarkOutcomeAdmitted`; it does not
 claim that a checkpoint verifier ran.
 
 The Test authoring root may be overridden with the absolute
-`OCTOPUS_CLIENT_SURFACES_DIR`. Otherwise the source checkout uses
+`PHOBOS_CLIENT_SURFACES_DIR`. Otherwise the source checkout uses
 `app/client-surfaces`; a packaged client with no discoverable checkout uses its
 own application-data directory.
 
@@ -222,10 +222,10 @@ A model reaches this surface through the `client.mcp` operation
 `client.action.result`:
 
 ```json
-{ "schema": "octopus.client_action", "schema_version": 1, "action": "inspect_client", "request_id": "inspect-1" }
+{ "schema": "phobos.client_action", "schema_version": 1, "action": "inspect_client", "request_id": "inspect-1" }
 ```
 
-The result is an `octopus.client_inventory` description: the Extensions root and
+The result is an `phobos.client_inventory` description: the Extensions root and
 package layout, the contract files, the host vocabulary derived from these
 schemas (targets, native nodes, glyphs, projection sources and their
 parameters, host sources, client actions, limits), visible surfaces, every

@@ -44,13 +44,13 @@
 .sidebar-task-trailing > :not(.sidebar-task-action) { transition: opacity .12s ease; }
 .sidebar-task-age { color: var(--color-token-description-foreground); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .sidebar-task-action { position: absolute; top: 50%; right: 0; display: flex; justify-content: flex-end; opacity: 0; pointer-events: none; transform: translateY(-50%); transition: opacity .12s ease; }
-.octopus-task-row:hover .sidebar-task-action,
-.octopus-task-row:focus-visible .sidebar-task-action,
-.octopus-task-row:focus-within .sidebar-task-action {
+.phobos-task-row:hover .sidebar-task-action,
+.phobos-task-row:focus-visible .sidebar-task-action,
+.phobos-task-row:focus-within .sidebar-task-action {
   opacity: 1;
   pointer-events: auto;
 }
-.octopus-task-row:is(:hover, :focus-visible, :focus-within) .sidebar-task-trailing:has(> .sidebar-task-action) > :not(.sidebar-task-action) { opacity: 0; }
+.phobos-task-row:is(:hover, :focus-visible, :focus-within) .sidebar-task-trailing:has(> .sidebar-task-action) > :not(.sidebar-task-action) { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar-task-status-orbit,

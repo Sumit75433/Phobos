@@ -45,7 +45,7 @@
       "run_affordance_profile": {
         "catalog": {
           "label": "context.reference",
-          "text": "These operations compose ordinary Octopus runs through checked file effects. create_run starts a task in one call from the installation defaults. followup_task, send_message and interrupt_run reach a connected run; list_runs shows this run and its connected runs; wait_for_runs waits for their communication. To attach tools, rooms, context or routes to this run, use preview_current_run and then amend_current_run with the same amendment_key and either a change (entries to add or remove) or an explicit complete selection; inspect_authoring shows the current one. To edit the run's future contract directly, send authored: the content_hash your file.read returned and an RFC 6902 patch of that record, never the record itself. preview_run, preview_revision and revise_run work with exact authored files. A new run forms its authority from its own worker ceiling and EE chain; a descriptor on disk alone grants nothing.",
+          "text": "These operations compose ordinary Phobos runs through checked file effects. create_run starts a task in one call from the installation defaults. followup_task, send_message and interrupt_run reach a connected run; list_runs shows this run and its connected runs; wait_for_runs waits for their communication. To attach tools, rooms, context or routes to this run, use preview_current_run and then amend_current_run with the same amendment_key and either a change (entries to add or remove) or an explicit complete selection; inspect_authoring shows the current one. To edit the run's future contract directly, send authored: the content_hash your file.read returned and an RFC 6902 patch of that record, never the record itself. preview_run, preview_revision and revise_run work with exact authored files. A new run forms its authority from its own worker ceiling and EE chain; a descriptor on disk alone grants nothing.",
           "operations": [
             {
               "name": "inspect_authoring",
@@ -2348,7 +2348,7 @@
       ],
       "native_tool_namespace": {
         "name": "formed_interfaces",
-        "description": "Tools admitted through exact Octopus interface grants. Use their advertised methods and schemas. A native Code Mode result is a string: first line compact JSON, then optional image data URLs. Split at the first newline before JSON.parse; forward subsequent image URLs with image(). Tool result JSON carries tool, correlation_id, ok, body and error; interface operations use their declared schema. Inspect the complete returned value in JavaScript and emit selected evidence with text(). Transport failures are errors, never partial success. A model_projection head_tail preview lacks omitted fields. Artifact references do not grant reads, and payload paths are not an access shortcut. Code Mode store/load retain serializable values within the live session; no app/browser SDK is installed here."
+        "description": "Tools admitted through exact Phobos interface grants. Use their advertised methods and schemas. A native Code Mode result is a string: first line compact JSON, then optional image data URLs. Split at the first newline before JSON.parse; forward subsequent image URLs with image(). Tool result JSON carries tool, correlation_id, ok, body and error; interface operations use their declared schema. Inspect the complete returned value in JavaScript and emit selected evidence with text(). Transport failures are errors, never partial success. A model_projection head_tail preview lacks omitted fields. Artifact references do not grant reads, and payload paths are not an access shortcut. Code Mode store/load retain serializable values within the live session; no app/browser SDK is installed here."
       },
       "operator_continuity": {
         "replay_timeout_ms": 30000,
@@ -2546,7 +2546,7 @@
         "adapter": "openai-chat",
         "credential_owner_interface": "world_provider_alibaba_coding_plan",
         "registry_entry": "alibaba",
-        "model_env": "OCTOPUS_PROVIDER_ALIBABA_MODEL",
+        "model_env": "PHOBOS_PROVIDER_ALIBABA_MODEL",
         "allow_private_network": false,
         "limits": {
           "max_request_bytes": 33554432,
@@ -2594,8 +2594,8 @@
     },
     "residual_ambient": {
       "transport": "codex_app_server_cli",
-      "status": "declared_residual_not_octopus_authority",
-      "boundary": "Codex app-server has no raw model endpoint. Octopus suppresses known path-loaded ambient and declares the remaining interface-assembled frame as ledger evidence.",
+      "status": "declared_residual_not_phobos_authority",
+      "boundary": "Codex app-server has no raw model endpoint. Phobos suppresses known path-loaded ambient and declares the remaining interface-assembled frame as ledger evidence.",
       "spawn": {
         "subcommand": "app-server",
         "managed_cli": {
@@ -2678,7 +2678,7 @@
         {
           "name": "codex_core_system_developer_tool_policy",
           "suppressible_by_current_config": false,
-          "octopus_authority": false
+          "phobos_authority": false
         },
         {
           "name": "codex_env_context_input_item",
@@ -2691,13 +2691,13 @@
             "permission_profile"
           ],
           "suppressible_by_current_config": false,
-          "octopus_authority": false
+          "phobos_authority": false
         },
         {
           "name": "codex_update_plan_tool_spec",
           "suppressible_by_current_config": false,
-          "octopus_authority": false,
-          "execution_boundary": "interface handler fails closed on server-initiated native tool requests; Octopus tools execute only as artifacts through granted worker-environment interfaces"
+          "phobos_authority": false,
+          "execution_boundary": "interface handler fails closed on server-initiated native tool requests; Phobos tools execute only as artifacts through granted worker-environment interfaces"
         },
         {
           "name": "codex_incremental_tool_declarations",
@@ -2707,7 +2707,7 @@
           "adopted_by": "features.incremental_tools=true",
           "applies_when": "the selected model uses Responses Lite",
           "suppressible_by_current_config": true,
-          "octopus_authority": false,
+          "phobos_authority": false,
           "execution_boundary": "the declarations carry the interface-assembled tool catalog; catalog changes append to model history instead of replacing the request tool list"
         },
         {
@@ -2718,20 +2718,20 @@
           "adopted_by": "features.reasoning_effort_override=true",
           "applies_when": "the OpenAI provider serves a model that supports reasoning effort updates",
           "suppressible_by_current_config": true,
-          "octopus_authority": false,
-          "execution_boundary": "the effort is the one Octopus binds for the turn; Codex records a change as a model-history item and keeps the context window's request effort"
+          "phobos_authority": false,
+          "execution_boundary": "the effort is the one Phobos binds for the turn; Codex records a change as a model-history item and keeps the context window's request effort"
         }
       ],
       "suppressed_sources": [
         "CODEX_HOME/AGENTS.md via curated CODEX_HOME",
         "repo AGENTS.md/CLAUDE.md via project_doc_max_bytes=0 and repo-free cwd",
-        "non-Octopus product ambient instruction sources via explicit interface config pins",
+        "non-Phobos product ambient instruction sources via explicit interface config pins",
         "shell/exec/apply_patch/view_image via empty per-thread environments"
       ]
     },
     "transport": {
       "base_url": "https://coding-intl.dashscope.aliyuncs.com/v1",
-      "auth_env_key": "OCTOPUS_PROVIDER_ALIBABA_API_KEY",
+      "auth_env_key": "PHOBOS_PROVIDER_ALIBABA_API_KEY",
       "auth_header": "Authorization",
       "auth_value_prefix": "Bearer ",
       "headers": {},

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { OctopusDictationRecording, OctopusDictationRecordingState } from "../../electron";
+import type { PhobosDictationRecording, PhobosDictationRecordingState } from "../../electron";
 import { DICTATION_RECORDINGS_CHANGED, dictationAudioBlob, dictationAudioRequest, dictationHost, dictationMessage, dictationResult, notifyDictationRecordingsChanged } from "../../clientDictationRecordings";
 import { transcribeDictation } from "../../projectionClient";
 import { copyText } from "../../runtimeFormat";
@@ -12,7 +12,7 @@ import "./dictationRecordings.css";
 
 export function DictationRecordings({ recordingId = "", onShowAll }: { recordingId?: string; onShowAll?: () => void }) {
   const preferences = useClientPreferences();
-  const [state, setState] = useState<OctopusDictationRecordingState | null>(null);
+  const [state, setState] = useState<PhobosDictationRecordingState | null>(null);
   const [error, setError] = useState("");
   const [action, setAction] = useState<{ id: string; type: "transcribe" | "download" | "delete" } | null>(null);
   const alive = useRef(true);
@@ -37,7 +37,7 @@ export function DictationRecordings({ recordingId = "", onShowAll }: { recording
     };
   }, []);
 
-  async function act(entry: OctopusDictationRecording, type: "transcribe" | "download" | "delete") {
+  async function act(entry: PhobosDictationRecording, type: "transcribe" | "download" | "delete") {
     setAction({ id: entry.id, type });
     setError("");
     try {
@@ -85,7 +85,7 @@ export function DictationRecordings({ recordingId = "", onShowAll }: { recording
 }
 
 function DictationRecordingRow({ entry, selected, disabled, transcribing, onCopy, onAction }: {
-  entry: OctopusDictationRecording; selected: boolean; disabled: boolean; transcribing: boolean;
+  entry: PhobosDictationRecording; selected: boolean; disabled: boolean; transcribing: boolean;
   onCopy: () => Promise<boolean>; onAction: (type: "transcribe" | "download" | "delete") => void;
 }) {
   const trigger = useRef<HTMLButtonElement>(null);

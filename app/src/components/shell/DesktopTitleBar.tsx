@@ -2,11 +2,11 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import { AnimatePresence, motion, useMotionValueEvent, useTransform, type MotionValue } from "motion/react";
 import { Glyph, type GlyphName } from "../IconGlyphs";
 import { clientDialogOwnsCommands, formatKeyboardShortcuts, useKeyboardShortcuts } from "../../keyboardShortcuts";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { ShellTooltip } from "./ShellTooltip";
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   onPrimaryActionsHostChange?: (host: HTMLDivElement | null) => void;
   onPaneControlsHostChange?: (host: HTMLDivElement | null) => void;
   contentDisabled?: boolean;
@@ -82,7 +82,7 @@ export function DesktopTitleBar({
   onSlotWidthsChange,
 }: Props) {
   const shortcuts = useKeyboardShortcuts(accessProfile);
-  const isElectron = Boolean(window.octopusTransport);
+  const isElectron = Boolean(window.phobosTransport);
   const [fullScreen, setFullScreen] = useState(false);
   const [nativeInset, setNativeInset] = useState(isElectron ? 76 : 0);
   const [secondaryPaneCollapsed, setSecondaryPaneCollapsed] = useState(() => secondaryPaneWidth.get() < 1);
@@ -101,7 +101,7 @@ export function DesktopTitleBar({
   });
 
   useEffect(() => {
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport) return;
     let cancelled = false;
     void transport.windowState().then((state) => {
@@ -115,7 +115,7 @@ export function DesktopTitleBar({
   }, []);
 
   useEffect(() => {
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport) return;
     const blocked = clientDialogOwnsCommands();
     transport.setHistoryNavigationState({ canNavigateBack: !blocked && canNavigateBack, canNavigateForward: !blocked && canNavigateForward });

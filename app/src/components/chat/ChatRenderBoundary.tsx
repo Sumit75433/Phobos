@@ -24,7 +24,7 @@ export class ChatRenderBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: ErrorInfo) {
     const componentStack = info.componentStack ?? "";
     this.setState({ componentStack });
-    void window.octopusTransport?.logClientEvent({
+    void window.phobosTransport?.logClientEvent({
       level: "error",
       event: "renderer.chat_surface_failure",
       message: `${this.props.title}: ${error.stack || error.message}\n${componentStack}`.slice(0, 8_000),
@@ -48,7 +48,7 @@ export class ChatRenderBoundary extends Component<Props, State> {
           <span>{this.props.detail}</span>
         </div>
         <div className="chat-render-failure-actions">
-          <OcButton onClick={() => void window.octopusTransport?.copyText(detail)} size="xs" variant="ghost">Copy details</OcButton>
+          <OcButton onClick={() => void window.phobosTransport?.copyText(detail)} size="xs" variant="ghost">Copy details</OcButton>
           <OcButton onClick={() => this.setState({ componentStack: "", error: null })} size="xs" variant="secondary">Try again</OcButton>
         </div>
       </section>

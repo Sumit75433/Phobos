@@ -5,7 +5,7 @@ ordinary run under policy.
 
 The shared worker-role artifact identifies the installed system with the agent:
 its goals, runs, interfaces, triggers, worker environments and their connections
-are Octopus, and a run is one part of its work. Maintaining and improving that
+are Phobos, and a run is one part of its work. Maintaining and improving that
 system is part of the role. Home and Task role artifacts specialize it; provider
 choice does not change the identity. This guidance is bound context, not
 additional authority or evidence of work elsewhere. The realtime provider's
@@ -232,10 +232,10 @@ consumers and related state, adapting its investigation and verification to the
 task. Schemas and detailed operation examples remain available on demand;
 general instructions do not repeat them or prescribe a universal checklist.
 
-The system library's `framework-authoring` entry carries portable Octopus
+The system library's `framework-authoring` entry carries portable Phobos
 development guidance: architecture principles, the four development axes and
 engineering discipline. The system-review trigger binds that library, and its
-role directs the run to read the entry before changing Octopus. The guide does
+role directs the run to read the entry before changing Phobos. The guide does
 not depend on a maintainer's private skill files or grant additional authority.
 
 The registry ships `skill.capture`, `skill.upsert`, `skill.search`,

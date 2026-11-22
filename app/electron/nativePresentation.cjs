@@ -8,7 +8,7 @@ const hash = value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 const runtimeVersion = value => typeof value === "string" && /^\d+\.\d+\.\d+$/.test(value);
 const assetName = "assets/pop-out-window-egg@3x.png";
 const assetDigest = "8979fa7ce7b7dabf97ab3e73c5e7652cbf5564a94ed7cd213fa070eebc2519ea";
-const settingsAssets = {"assets/SettingsAccessory.bundle/Contents/Info.plist": "9fc985fd70f134c1eb5971e4b93ad52aef8ba6df2157ab8ae532eb4684a1bbfe", "assets/SettingsAccessory.bundle/Contents/Resources/Assets.car": "f20daabb37db9e1a92f1af8d108c55683603b2c13633b3bc9d1d88524b41ccbb"};
+const settingsAssets = {"assets/SettingsAccessory.bundle/Contents/Info.plist": "616da77a0d5ea2259e27789d8b9bc74d49cc294401f74f6540239481cd2f76b9", "assets/SettingsAccessory.bundle/Contents/Resources/Assets.car": "f20daabb37db9e1a92f1af8d108c55683603b2c13633b3bc9d1d88524b41ccbb"};
 function regular(file, maximum) {
   if (!path.isAbsolute(file) || fs.realpathSync(file) !== file) throw new Error("Client presentation artifact path must be canonical");
   const stat = fs.lstatSync(file);
@@ -17,7 +17,7 @@ function regular(file, maximum) {
 }
 function sourceContract(manifest, receipt, manifestDigest, architecture) {
   const build = receipt?.build;
-  if (receipt?.schema_version !== 1 || receipt.id !== "octopus.client.presentation" || receipt.module !== "octopus-pip-receiver.node"
+  if (receipt?.schema_version !== 1 || receipt.id !== "phobos.client.presentation" || receipt.module !== "phobos-pip-receiver.node"
     || !["arm64", "x64"].includes(architecture) || receipt.architecture !== architecture
     || manifest?.schema_version !== 1 || manifest.platform !== "darwin" || manifest.module !== receipt.module || manifest.node_api_version !== 8
     || !manifest.architectures?.includes(architecture)

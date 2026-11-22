@@ -1206,8 +1206,8 @@ function buildFixtureProjection() {
       generated_at: new Date(now).toISOString(),
       generation: 1,
       mode: "lab",
-      repo_root: "lab://octopus-client",
-      durable_root: "lab://octopus-client/ledger",
+      repo_root: "lab://phobos-client",
+      durable_root: "lab://phobos-client/ledger",
       descriptor_counts: Object.fromEntries(descriptorInventory.map((row) => [row.registry, row.count])),
       ledger_rows: movements.length,
       warnings: [],
@@ -1314,7 +1314,7 @@ function fixtureScheduledInterfaces(now, chats, environments) {
         interface_match: { interface_type: "world", role: "user" },
         exclude_interface_match: { interface_driver_ref: "cron_life" },
       },
-      instructions: "Review recent work in Octopus. If something would make the system work better, make one small, reversible change and record it in the change journal.",
+      instructions: "Review recent work in Phobos. If something would make the system work better, make one small, reversible change and record it in the change journal.",
       ee_id: FIXTURE_ROOT_EE_ID,
       next_run_at_ms: now + 42 * 60_000,
       next_run_source: "driver_state",
@@ -1408,7 +1408,7 @@ function fixtureChatAgent(eeId, projectPresentations) {
   if (eeId === FIXTURE_ROOT_EE_ID) return { agent_id: null, agent_name: null, agent_icon: null, agent_color: null };
   return {
     agent_id: `lab_agent_${eeId}`,
-    agent_name: eeId === FIXTURE_PRIMARY_PROJECT_ID ? "Octopus Development" : "Research Development",
+    agent_name: eeId === FIXTURE_PRIMARY_PROJECT_ID ? "Phobos Development" : "Research Development",
     agent_icon: eeId === FIXTURE_PRIMARY_PROJECT_ID ? "glasses" : "curious",
     agent_color: projectPresentations.find((presentation) => presentation.ee_id === eeId)?.color || null,
   };
@@ -2003,7 +2003,7 @@ function fixtureWorkerEnvironmentSurfaces(kind, index) {
   });
   const terminal = surface(`${kind}_terminal`, "terminal", "Terminal", {
     lines: [
-      `$ octopus environment inspect lab_we_${index + 1}`,
+      `$ phobos environment inspect lab_we_${index + 1}`,
       `kind=${kind}`,
       "status=ready",
       "Demo environment ready. No host process was executed.",
@@ -2025,12 +2025,12 @@ function fixtureWorkerEnvironmentSurfaces(kind, index) {
   );
   if (kind === "browser_session") {
     return [connection, surface("browser_primary", "browser", "Browser", {
-      url: "https://example.test/octopus",
-      title: "Octopus Test Browser",
+      url: "https://example.test/phobos",
+      title: "Phobos Test Browser",
       heading: "Browser session",
       body: "A deterministic browser room fixture. Live mode requires a projected viewer endpoint.",
       pages: [
-        { url: "https://example.test/octopus", title: "Octopus Test Browser", heading: "Browser session", body: "A deterministic browser room fixture. Live mode requires a projected viewer endpoint." },
+        { url: "https://example.test/phobos", title: "Phobos Test Browser", heading: "Browser session", body: "A deterministic browser room fixture. Live mode requires a projected viewer endpoint." },
         { url: "https://example.test/artifacts", title: "Artifact viewer", heading: "Artifact projection", body: "This page is isolated demo state and has no network authority." },
         { url: "https://example.test/status", title: "Room status", heading: "Browser room ready", body: "Navigation, history, and reload are deterministic inside Test." },
       ],
@@ -2054,7 +2054,7 @@ function fixtureWorkerEnvironmentSurfaces(kind, index) {
         branch: "feature/project-status",
         worktree_git_root: FIXTURE_WORKSPACE_ROOT,
         worktree_workspace_root: FIXTURE_WORKSPACE_ROOT,
-        local_environment_config_path: ".octopus/environment.json",
+        local_environment_config_path: ".phobos/environment.json",
         worktree_output_text: `Prepared isolated demo worktree at ${FIXTURE_WORKSPACE_ROOT}`,
         setup_output_text: "Resolved project dependencies\nPrepared preview and review surfaces",
       }, { protocol: "worktree.status.fixture" }),
@@ -2089,7 +2089,7 @@ function fixtureWorkerEnvironmentSurfaces(kind, index) {
       terminal,
       files,
       surface("container_runtime", "container", "Runtime", {
-        name: "octopus-worker-7f2a",
+        name: "phobos-worker-7f2a",
         image: "ubuntu:24.04 · linux/arm64",
         state: "Running",
         cpu: "18%",
@@ -2097,7 +2097,7 @@ function fixtureWorkerEnvironmentSurfaces(kind, index) {
         uptime: "36m",
         network: "12.4 MB ↓ · 3.1 MB ↑",
         processes: [
-          { pid: "1", command: "octopus-room", cpu: "2.4%", memory: "94 MB" },
+          { pid: "1", command: "phobos-room", cpu: "2.4%", memory: "94 MB" },
           { pid: "28", command: "python worker.py", cpu: "14.8%", memory: "486 MB" },
           { pid: "77", command: "bash", cpu: "0.1%", memory: "7 MB" },
         ],
@@ -2131,7 +2131,7 @@ function fixtureWorkerEnvironmentSurfaces(kind, index) {
     return [connection, surface("mcp_stdio_runtime", "runtime", "MCP server", {
       server: {
         pid: 4217,
-        command: "octopus-mcp-stdio-room-tool",
+        command: "phobos-mcp-stdio-room-tool",
         pending_events: 2,
         protocol_version: "2025-06-18",
       },
@@ -2220,9 +2220,9 @@ function fixtureWorkerEnvironmentConnection(kind, index) {
   };
   if (kind === "container_session") return {
     ...common,
-    name: `octopus-worker-${suffix}`,
+    name: `phobos-worker-${suffix}`,
     provider: "Local container",
-    address: `docker+test://octopus-worker-${suffix}`,
+    address: `docker+test://phobos-worker-${suffix}`,
     transport: "Container process room",
     workspace: "/workspace",
     persistence: "Persistent filesystem",
@@ -2368,7 +2368,7 @@ function labFixtureConnectionApplication() {
       connection: {
         disclosure: [
           "Lumen Mail reads and sends messages only in tasks you connect to it.",
-          "Your sign-in stays in this Octopus Home. Disconnect anytime to remove it.",
+          "Your sign-in stays in this Phobos Home. Disconnect anytime to remove it.",
         ],
         help: { label: "About Lumen Mail", url: "https://example.com/" },
       },
@@ -2499,7 +2499,7 @@ function labApplicationRows(entries, data) {
       removal_block_reason: !installed
         ? "Application is not installed."
         : managed
-          ? "This application is supplied by the Octopus installation and cannot be removed independently."
+          ? "This application is supplied by the Phobos installation and cannot be removed independently."
           : connected.length
             ? `Disconnect this application from ${connected.length} task${connected.length === 1 ? "" : "s"} before removing it.`
             : "",
@@ -2634,7 +2634,7 @@ function fixtureChatExecutionContexts(data) {
       : {};
     const agent = environment.ee_id === FIXTURE_ROOT_EE_ID ? null : {
       id: `lab_agent_${environment.ee_id}`,
-      name: environment.ee_id === FIXTURE_PRIMARY_PROJECT_ID ? "Octopus Development" : "Research Development",
+      name: environment.ee_id === FIXTURE_PRIMARY_PROJECT_ID ? "Phobos Development" : "Research Development",
       icon: environment.ee_id === FIXTURE_PRIMARY_PROJECT_ID ? "glasses" : "curious",
     };
     return fixtureRow({
@@ -2923,7 +2923,7 @@ function fixtureSearchWatermark(data) {
 
 function fixtureSearchScope(runIds) {
   return {
-    kind: "octopus_os_task_transcripts",
+    kind: "phobos_os_task_transcripts",
     task_count: runIds.length,
     run_count: runIds.length,
     message_classes: ["operator", "terminal_agent", "terminal_error"],

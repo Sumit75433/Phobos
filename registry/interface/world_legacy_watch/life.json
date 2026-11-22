@@ -13,7 +13,7 @@
       ],
       "required_files": [
         "registry/interface/world_legacy_watch/legacy_watch_life.py",
-        "registry/interface/world_legacy_watch/octopus_content_hash.py"
+        "registry/interface/world_legacy_watch/phobos_content_hash.py"
       ],
       "env": {
         "PYTHONDONTWRITEBYTECODE": "1"

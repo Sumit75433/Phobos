@@ -1,0 +1,19 @@
+[package]
+name = "phobos-worker-env-floor"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[lib]
+name = "phobos_worker_env_floor"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+phobos-substrate-contract = { path = "../phobos-substrate-contract" }
+phobos-util-abspath = { path = "../phobos-util-abspath" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+
+[dev-dependencies]
+serde_json.workspace = true

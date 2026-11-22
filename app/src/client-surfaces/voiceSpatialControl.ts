@@ -10,7 +10,7 @@ export type VoiceSpatialInteraction = Readonly<{
   scale?: number;
 }>;
 
-const VOICE_SPATIAL_INTERACTION_EVENT = "octopus:voice-spatial-interaction";
+const VOICE_SPATIAL_INTERACTION_EVENT = "phobos:voice-spatial-interaction";
 
 export function emitVoiceSpatialInteraction(interaction: VoiceSpatialInteraction): void {
   window.dispatchEvent(new CustomEvent(VOICE_SPATIAL_INTERACTION_EVENT, { detail: interaction }));

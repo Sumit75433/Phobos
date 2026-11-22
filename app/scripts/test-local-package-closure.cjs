@@ -64,7 +64,7 @@ async function copyBaseline(activeRegistryRoot) {
 }
 
 async function assertInterfaceImportClosure(publicationExecutable) {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-interface-import-closure-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-interface-import-closure-")));
   try {
     const source = path.join(root, "source");
     const active = path.join(root, "active");
@@ -75,14 +75,14 @@ async function assertInterfaceImportClosure(publicationExecutable) {
     const executable = path.join(owner, "packages", "bin", "life");
     const manifestFile = path.join(library, "packages", "application.importer.json");
     const manifest = (includeOwner) => ({
-      schema: "octopus.local_package",
+      schema: "phobos.local_package",
       schema_version: 1,
       id: "application.importer",
       version: "1.0.0",
       product_kind: "application",
       product_id: "world_importer",
       release_status: "optional",
-      display: { name: "Importer", description: "Explicit interface import closure fixture.", developer: "Octopus", category: "provider" },
+      display: { name: "Importer", description: "Explicit interface import closure fixture.", developer: "Phobos", category: "provider" },
       members: [
         { registry_kind: "interface", owner: "world_importer", primary: true },
         ...(includeOwner ? [{ registry_kind: "interface", owner: "world_code_owner" }] : []),
@@ -177,9 +177,9 @@ function buildTopologyBinary() {
   const result = spawnSync("cargo", [
     "build",
     "-p",
-    "octopus-operator-chat-client",
+    "phobos-operator-chat-client",
     "--bin",
-    "octopus-operator-chat-topology",
+    "phobos-operator-chat-topology",
   ], {
     cwd: repoRoot,
     encoding: "utf8",
@@ -204,27 +204,27 @@ async function assertPackageCopyBudget(packageIds, executable, root) {
 
 async function run(preparedExecutable) {
   if (!preparedExecutable) buildTopologyBinary();
-  const executable = preparedExecutable ?? path.join(repoRoot, "target", "debug", "octopus-operator-chat-topology");
+  const executable = preparedExecutable ?? path.join(repoRoot, "target", "debug", "phobos-operator-chat-topology");
   await assertInterfaceImportClosure(executable);
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-codex-pack-closure-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-codex-pack-closure-")));
   try {
-    const binary = path.join(root, "target", "debug", "octopus-operator-chat-topology");
+    const binary = path.join(root, "target", "debug", "phobos-operator-chat-topology");
     await fs.mkdir(path.dirname(binary), { recursive: true });
     await fs.copyFile(executable, binary);
     await fs.chmod(binary, 0o700);
-    const octopusHomeRoot = path.join(root, "octopus-home");
-    const activeRegistryRoot = path.join(octopusHomeRoot, "registry");
-    const stateRoot = path.join(octopusHomeRoot, "client", "package-state");
-    const eeInstancesRoot = path.join(octopusHomeRoot, "state", "ee_instances");
-    const runRecordsRoot = path.join(octopusHomeRoot, "state", "runs");
+    const phobosHomeRoot = path.join(root, "phobos-home");
+    const activeRegistryRoot = path.join(phobosHomeRoot, "registry");
+    const stateRoot = path.join(phobosHomeRoot, "client", "package-state");
+    const eeInstancesRoot = path.join(phobosHomeRoot, "state", "ee_instances");
+    const runRecordsRoot = path.join(phobosHomeRoot, "state", "runs");
     await Promise.all([
       copyBaseline(activeRegistryRoot),
       fs.mkdir(eeInstancesRoot, { recursive: true }),
       fs.mkdir(runRecordsRoot, { recursive: true }),
-      fs.mkdir(path.join(octopusHomeRoot, "ledger"), { recursive: true }),
+      fs.mkdir(path.join(phobosHomeRoot, "ledger"), { recursive: true }),
     ]);
-    await fs.writeFile(path.join(octopusHomeRoot, "ledger", "movements.jsonl"), "", "utf8");
-    await writeJson(path.join(octopusHomeRoot, "host.json"), {
+    await fs.writeFile(path.join(phobosHomeRoot, "ledger", "movements.jsonl"), "", "utf8");
+    await writeJson(path.join(phobosHomeRoot, "host.json"), {
       host_manifest_version: 1,
       root_refs: {
         run_records_root: runRecordsRoot,
@@ -286,7 +286,7 @@ async function run(preparedExecutable) {
     assert.equal(result.changed, true);
 
     for (const owner of await fs.readdir(path.join(activeRegistryRoot, "interface"))) {
-      if (owner === ".octopus-publication") continue;
+      if (owner === ".phobos-publication") continue;
       const descriptor = JSON.parse(await fs.readFile(path.join(activeRegistryRoot, "interface", owner, "interface.json"), "utf8"));
       const continuity = descriptor.interface_driver_config?.private_config?.operator_continuity;
       for (const contract of Object.values(continuity ?? {}).filter(value => value && typeof value === "object")) {
@@ -313,7 +313,7 @@ async function run(preparedExecutable) {
       sourceRegistry: () => sourceRegistryRoot,
       localPackageRegistry: () => sourceRegistryRoot,
       localPackageLibrary: () => libraryRoot,
-      octopusHome: () => octopusHomeRoot,
+      phobosHome: () => phobosHomeRoot,
       projectEePolicies: async () => ({ environments: [], issues: [] }),
     });
     try {
@@ -332,7 +332,7 @@ async function run(preparedExecutable) {
     const home = installedPack.workspace_setup.home;
     const task = installedPack.workspace_setup.task;
     const plan = await planOperatorChatSurface({
-      octopusHome: () => octopusHomeRoot,
+      phobosHome: () => phobosHomeRoot,
       installationRoot: () => root,
       registryRoot: () => activeRegistryRoot,
       eeInstancesRoot: () => eeInstancesRoot,
@@ -378,7 +378,7 @@ async function run(preparedExecutable) {
       params: {},
     };
     const taskPlan = await planOperatorChatSurface({
-      octopusHome: () => octopusHomeRoot,
+      phobosHome: () => phobosHomeRoot,
       installationRoot: () => root,
       registryRoot: () => activeRegistryRoot,
       eeInstancesRoot: () => eeInstancesRoot,
@@ -471,8 +471,8 @@ async function boundedAgentPresetFixture(executable) {
   const { createOperatorChatClientLoader } = require("../electron/operatorChatClientContract.cjs");
   const { planClientAgentTemplate, readClientAgentCatalog } = require("../electron/clientAgentCatalog.cjs");
   const { initializeWorkspace, commitClientAuthoringTransaction } = require("../electron/workspaceSetup.cjs");
-  const { mutateOctopusOsWorkspace } = require("../electron/projection.cjs");
-  const root = await fs.realpath(await fs.mkdtemp("/private/tmp/octopus-cu-preset-"));
+  const { mutatePhobosOsWorkspace } = require("../electron/projection.cjs");
+  const root = await fs.realpath(await fs.mkdtemp("/private/tmp/phobos-cu-preset-"));
   const home = path.join(root, "home");
   const active = path.join(home, "registry");
   const roots = { publication: require("./support/native-publication.cjs").nativePublication(executable), sourceRegistryRoot, activeRegistryRoot: active, libraryRoot, stateRoot: path.join(home, "client", "package-state") };
@@ -485,7 +485,7 @@ async function boundedAgentPresetFixture(executable) {
     const selected = [...new Set([recipe.component_package_id, "world_operator_chat", recipe.provider_interface_id].flatMap((id) =>
       catalog.packages.find((entry) => entry.id === id).install_packages.map((entry) => entry.id)))];
     await assertPackageCopyBudget(selected, executable, root);
-    const binary = path.join(root, "target", "debug", "octopus-operator-chat-topology");
+    const binary = path.join(root, "target", "debug", "phobos-operator-chat-topology");
     await fs.mkdir(path.dirname(binary), { recursive: true });
     await fs.copyFile(executable, binary);
     await fs.chmod(binary, 0o700);
@@ -507,7 +507,7 @@ async function boundedAgentPresetFixture(executable) {
     childProcess.spawn = (command, args, options) => {
       assert.equal(command, binary);
       plannerCalls += 1;
-      const child = originalSpawn(command, args, { ...options, timeout: 30000, env: { PATH: process.env.PATH, OCTOPUS_HOME: home, TMPDIR: root } });
+      const child = originalSpawn(command, args, { ...options, timeout: 30000, env: { PATH: process.env.PATH, PHOBOS_HOME: home, TMPDIR: root } });
       let outputBytes = 0;
       for (const stream of [child.stdout, child.stderr]) stream.on("data", (chunk) => { outputBytes += chunk.length; if (outputBytes > 16 * 1024 * 1024) child.kill("SIGKILL"); });
       return child;
@@ -517,7 +517,7 @@ async function boundedAgentPresetFixture(executable) {
     const functions = mainSource.slice(mainSource.indexOf("async function planWorkspaceHomeSurface("), mainSource.indexOf("function getCodexUsageReader("));
     const planners = vm.runInNewContext(`${functions}; ({planWorkspaceHomeSurface, planWorkspaceAgentPreset, withWorkspaceAgentPreset})`, {
       path, createHash: crypto.createHash, planClientAgentTemplate, withInstalledAgentPreset,
-      resolveOctopusHome: () => home, resolveInstallationRoot: () => root, loadOperatorChatClient: loader.load, clientSetupPackageRoots: () => roots,
+      resolvePhobosHome: () => home, resolveInstallationRoot: () => root, loadOperatorChatClient: loader.load, clientSetupPackageRoots: () => roots,
       requiredString: (value) => { assert.equal(typeof value, "string"); assert.ok(value.trim()); return value; },
     });
     const choice = { packId: pack.id, expectedPackManifestDigest: pack.manifest_digest, presetId: recipe.id, projectKeys: ["desktop"], providerInterfaceId: providerId, providerModel: model, reasoningEffort: effort };
@@ -531,10 +531,10 @@ async function boundedAgentPresetFixture(executable) {
       projects: [{ key: "desktop", parentKey: "root", templateName: "project", name: "Desktop", goal: "Desktop tasks", presentation: { icon: "folder", color: "blue" } }],
       agentPresets: [choice],
     };
-    const browserSetup = require(path.join(active, "worker_environment_kind", "browser_session", "packages", "octopus-browser-session-env", "native", "setup-host.cjs"));
-    const desktopSetup = require(path.join(active, "worker_environment_kind", "desktop_session", "packages", "octopus-system-gui-env", "native", "setup-preferences.cjs"));
+    const browserSetup = require(path.join(active, "worker_environment_kind", "browser_session", "packages", "phobos-browser-session-env", "native", "setup-host.cjs"));
+    const desktopSetup = require(path.join(active, "worker_environment_kind", "desktop_session", "packages", "phobos-system-gui-env", "native", "setup-preferences.cjs"));
     let nativeHomePlan;
-    const workspace = await initializeWorkspace({ publication: roots.publication, octopusHomeRoot: home, registryRoot: active, request, planOperatorSurface: async input => {
+    const workspace = await initializeWorkspace({ publication: roots.publication, phobosHomeRoot: home, registryRoot: active, request, planOperatorSurface: async input => {
       const plan = await planners.planWorkspaceHomeSurface(input);
       if (input.request.clientSurfaceRole === "home") nativeHomePlan = plan;
       return plan;
@@ -564,7 +564,7 @@ async function boundedAgentPresetFixture(executable) {
     assert.equal(catalogFile.document.project_sources.length, 2);
     assert.ok(catalogFile.document.project_sources.every(source => source.source_worker_interface === taskRecipe.worker_interface_id));
     const agent = catalogFile.document.agents[0];
-    const sidecarPath = path.join(active, "interface", workspace.homeInterfaceId, "octopus_os.json");
+    const sidecarPath = path.join(active, "interface", workspace.homeInterfaceId, "phobos_os.json");
     const sidecar = JSON.parse(await fs.readFile(sidecarPath));
     const homeSidecarDigest = crypto.createHash("sha256").update(await fs.readFile(sidecarPath)).digest("hex");
     const mutableHome = await check.readMutableWorkspaceSidecar(validationRoots, { homeInterfaceId: workspace.homeInterfaceId, homeSidecarDigest }, homeSidecarDigest);
@@ -592,13 +592,13 @@ async function boundedAgentPresetFixture(executable) {
     const scope = { status: "ready", root_ee_id: workspace.rootEeId, home_run_id: workspace.homeRunId, home_interface_id: workspace.homeInterfaceId, home_sidecar_digest: crypto.createHash("sha256").update(await fs.readFile(sidecarPath)).digest("hex"), agent_catalog_path: catalogFile.file, agent_catalog_digest: catalogFile.digest, agent_project_sources: catalogFile.document.project_sources, agent_presentations: catalogFile.document.agents, environments, task_authoring_profiles: sidecar.task_authoring_profiles, client_runs: [], read_only_runs: [] };
     const add = { action: "add_agent_preset", operationId: "cu_add_preset_001", home, workspace: { rootEeId: workspace.rootEeId, homeRunId: workspace.homeRunId, homeInterfaceId: workspace.homeInterfaceId, expectedHomeSidecarDigest: scope.home_sidecar_digest, expectedAgentCatalogDigest: scope.agent_catalog_digest }, projectEeId: agent.project_ee_id, ...choice };
     delete add.projectKeys;
-    const result = await mutateOctopusOsWorkspace(active, home, scope, add, {
+    const result = await mutatePhobosOsWorkspace(active, home, scope, add, {
       withAgentPreset: (input, operation) => planners.withWorkspaceAgentPreset(input, eeRoot, operation),
-      commitClientAuthoring: (plan) => commitClientAuthoringTransaction({ publication: roots.publication, octopusHomeRoot: home, registryRoot: active, plan: { operationId: "cu_add_commit_001", label: plan.label, writes: plan.writes.map((write) => ({ destination: write.file, expectedBeforeDigest: write.beforeDigest, content: `${JSON.stringify(write.next, null, 2)}\n`, tag: write.file, publishBarrier: write.file === plan.publishBarrierPath })), removals: [] } }),
+      commitClientAuthoring: (plan) => commitClientAuthoringTransaction({ publication: roots.publication, phobosHomeRoot: home, registryRoot: active, plan: { operationId: "cu_add_commit_001", label: plan.label, writes: plan.writes.map((write) => ({ destination: write.file, expectedBeforeDigest: write.beforeDigest, content: `${JSON.stringify(write.next, null, 2)}\n`, tag: write.file, publishBarrier: write.file === plan.publishBarrierPath })), removals: [] } }),
     });
     assert.equal(result.action, "add_agent_preset");
     assert.equal((await readClientAgentCatalog(home)).document.agents.length, 2);
-    await assert.rejects(mutateOctopusOsWorkspace(active, home, scope, add, {}), /unavailable/);
+    await assert.rejects(mutatePhobosOsWorkspace(active, home, scope, add, {}), /unavailable/);
     const projectPath = path.join(eeRoot, `${agent.project_ee_id}.json`);
     const project = JSON.parse(await fs.readFile(projectPath));
     await writeJson(projectPath, { ...project, policy_narrowing: { allowed_interfaces: [homeRecipe.worker_interface_id] } });

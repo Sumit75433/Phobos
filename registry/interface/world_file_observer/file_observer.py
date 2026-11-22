@@ -128,7 +128,7 @@ class FileObserver:
         self.config = validate_config(config, boundary.INTERFACE_ID)
         self.state_path = os.path.join(boundary.VAR_DIR, "file-observer-state.json")
         contract = {key: value for key, value in self.config.items() if key != "poll_interval_ms"}
-        self.config_hash = boundary.octopus_content_hash(boundary.canonical_json(contract))
+        self.config_hash = boundary.phobos_content_hash(boundary.canonical_json(contract))
         try:
             self.state = json.loads(boundary.stable_read(
                 self.state_path, boundary.IO_LIMITS["max_control_frame_bytes"],
@@ -175,7 +175,7 @@ class FileObserver:
             return
         boundary = self.boundary
         manifest_bytes = boundary.stable_read(pending["manifest_path"], boundary.IO_LIMITS["max_manifest_bytes"], "pending observation manifest", private=True)
-        if boundary.octopus_content_hash(manifest_bytes) != pending["manifest_hash"]:
+        if boundary.phobos_content_hash(manifest_bytes) != pending["manifest_hash"]:
             raise ValueError("pending observation manifest integrity mismatch")
         manifest = object_keys(json.loads(manifest_bytes), {"label", "payload_path", "payload_content_hash"}, "observation manifest")
         payload_hash = boundary.content_hexdigest(manifest["payload_content_hash"])
@@ -183,7 +183,7 @@ class FileObserver:
         if manifest["label"] != source["label"] or manifest["payload_path"] != expected:
             raise ValueError("pending observation manifest does not match the configured source")
         payload = boundary.stable_read(expected, boundary.IO_LIMITS["max_payload_bytes"], "pending observation payload", private=True)
-        if boundary.octopus_content_hash(payload) != payload_hash:
+        if boundary.phobos_content_hash(payload) != payload_hash:
             raise ValueError("pending observation payload integrity mismatch")
         row["admitted_seq"] = boundary.hand_artifact_idempotent(pending["manifest_path"], source["label"], pending["manifest_hash"])
         row["pending"] = None
@@ -196,7 +196,7 @@ class FileObserver:
             if row is not None:
                 self.deliver_pending(source, row)
             content = read_snapshot(source)
-            digest = boundary.octopus_content_hash(content) if content is not None else None
+            digest = boundary.phobos_content_hash(content) if content is not None else None
             if row is not None and row["content_hash"] == digest:
                 continue
             revision = 1 if row is None else row["revision"] + 1

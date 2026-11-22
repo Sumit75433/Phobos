@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_provider_chatgpt",
   "version": "1.1.0",
@@ -8,7 +8,7 @@
   "release_status": "optional",
   "display": {
     "name": "ChatGPT",
-    "description": "Sign in with your ChatGPT account and use its models through the declared Octopus provider.",
+    "description": "Sign in with your ChatGPT account and use its models through the declared Phobos provider.",
     "developer": "OpenAI",
     "category": "provider",
     "icon": "sparkles"

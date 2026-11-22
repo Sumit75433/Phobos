@@ -121,14 +121,14 @@ export function buildClientInventory(input: {
     }];
   });
   return {
-    schema: "octopus.client_inventory",
+    schema: "phobos.client_inventory",
     schema_version: 1,
     observed_at: new Date().toISOString(),
     extensions_root: snapshot.root,
     packages_root: packagesRoot,
     package_layout: "<packages_root>/<extension id>/extension.json; the directory name equals the manifest id",
     contract: snapshot.contract
-      ? { manifest: "octopus.client_extension@1", document: "octopus.client_surface@1", files: snapshot.contract.files }
+      ? { manifest: "phobos.client_extension@1", document: "phobos.client_surface@1", files: snapshot.contract.files }
       : null,
     review: "A new or changed package becomes pending; the owner reviews and installs its exact revision in the client. Every manifest edit is a new revision.",
     host: hostVocabulary(),
@@ -247,7 +247,7 @@ function hostVocabulary(): Record<string, unknown> {
         javascript_chars: sandbox.javascript?.maxLength,
         initial_height: range(sandbox.initial_height),
         actions: sandbox.actions?.maxProperties,
-        runtime: "window.octopusSurface = {data, sources}; octopusSurface.invoke(actionId) requests a declared render.actions entry. No network, forms, frames, host DOM or bridges. Uncaught errors are reported as runtime issues.",
+        runtime: "window.phobosSurface = {data, sources}; phobosSurface.invoke(actionId) requests a declared render.actions entry. No network, forms, frames, host DOM or bridges. Uncaught errors are reported as runtime issues.",
       },
     },
     glyphs: defs.glyph.enum,

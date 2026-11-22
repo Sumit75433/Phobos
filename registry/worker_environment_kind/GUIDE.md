@@ -34,19 +34,19 @@ import from the owning kind's folder, as with interfaces; byte-for-byte clones
 of code per kind are not the model.
 
 Every door life and tool process is built on the door runtime that
-`process_session` owns (`octopus-process-session-tool-runtime`, imported by
-the other kinds as `octopus-tool-door-runtime`): the ledger cursor, the grant
+`process_session` owns (`phobos-process-session-tool-runtime`, imported by
+the other kinds as `phobos-tool-door-runtime`): the ledger cursor, the grant
 and formation checks, recovery, and the small room glue every door needs -
 decoding and admitting a `tool.call`, matching its coordinates to the
 formation, reading the descriptor's operation, emitting result artifacts. A
 kind's package keeps only what its room does.
 
 A door life and its tool processes are applications of the OS, not part of
-the kernel: they link neither `octopus-runtime` nor `octopus-app-server`. Run
-records are read through `octopus-run-record`; a checked run write goes through
+the kernel: they link neither `phobos-runtime` nor `phobos-app-server`. Run
+records are read through `phobos-run-record`; a checked run write goes through
 the authoring package that `system_interface_authoring` owns.
 
-The box crate (`crates/octopus-worker-env`) holds only the descriptor
+The box crate (`crates/phobos-worker-env`) holds only the descriptor
 dictionary, the fail-closed registry and formation, a generic lease, and the
 `WorkerEnvDriver` trait with its surface traits and authorization gate. The
 room's **behavior** - boundary projection, materialization, patch, exec,
@@ -60,8 +60,8 @@ worktree - lives in the kind's package.
   "substrate_family": "process_exec",
   "door_driver_refs": ["system_coder_env"],
   "tool_process_bins": [
-    "target/debug/octopus-coder-exec-tool",
-    "target/debug/octopus-coder-fs-tool"
+    "target/debug/phobos-coder-exec-tool",
+    "target/debug/phobos-coder-fs-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": ["exec"],

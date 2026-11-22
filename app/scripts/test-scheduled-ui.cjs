@@ -361,7 +361,7 @@ test("a change journal undoes only files still holding the recorded result", asy
   const { mutateScheduledInterface } = require("../electron/projection.cjs");
   const os = require("node:os");
   const crypto = require("node:crypto");
-  const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "octopus-journal-")));
+  const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phobos-journal-")));
   const sha = (text) => crypto.createHash("sha256").update(text).digest("hex");
   const registry = path.join(home, "registry");
   const modified = path.join(registry, "interface", "world_a", "interface.json");
@@ -388,7 +388,7 @@ test("setup arms each selected pack trigger once as a template copy bound into i
   const { setupTriggerEntries, setupTriggerProof, armSetupTriggers } = require("../electron/projection.cjs");
   const os = require("node:os");
   const repoRegistry = path.join(appRoot, "..", "registry");
-  const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "octopus-setup-triggers-")));
+  const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phobos-setup-triggers-")));
   const registry = path.join(home, "registry");
   for (const kind of ["interface", "tool"]) {
     for (const entry of fs.readdirSync(path.join(repoRegistry, kind), { withFileTypes: true }).filter((row) => row.isDirectory())) {
@@ -479,7 +479,7 @@ test("filtered inactivity keeps its scope through projection, edit, pause and re
     indexedArtifactLabelRows: async () => [], operatorOsScope: () => ({ client_runs: [] }), operatorChatRunIndex: async () => [],
   });
   const [row] = await store.scheduledInterfaceRows({
-    octopusHome: home, structureMemo: new Map(),
+    phobosHome: home, structureMemo: new Map(),
     runRecords: [{ run_id: "run_observer", checkpoints: [{ status: "projected", interface: interfaceId }] }],
     descriptors: { interface: [{ id: interfaceId, interface_driver_ref: "cron_life",
       activation_sidecars: [{ ...activation.document, descriptor_path: file }] }] },

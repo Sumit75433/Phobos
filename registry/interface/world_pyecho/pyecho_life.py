@@ -6,12 +6,12 @@ import stat
 import sys
 import time
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-VAR_DIR = os.path.abspath(os.environ["OCTOPUS_VAR_DIR"])
-MOVEMENTS_JSONL = os.path.abspath(os.environ["OCTOPUS_MOVEMENTS_JSONL"])
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+VAR_DIR = os.path.abspath(os.environ["PHOBOS_VAR_DIR"])
+MOVEMENTS_JSONL = os.path.abspath(os.environ["PHOBOS_MOVEMENTS_JSONL"])
 CURSOR_PATH = os.path.join(VAR_DIR, "ledger-cursor.json")
 PAYLOADS_DIR = os.path.join(VAR_DIR, "payloads")
 RECEIPTS_DIR = os.path.join(VAR_DIR, "receipts")
@@ -59,7 +59,7 @@ def require_string(value, name, maximum=4096):
 
 def load_io_limits():
     value = require_keys(
-        json.loads(os.environ["OCTOPUS_INTERFACE_HOST_IO_LIMITS"]),
+        json.loads(os.environ["PHOBOS_INTERFACE_HOST_IO_LIMITS"]),
         {
             "max_control_frame_bytes",
             "max_manifest_bytes",
@@ -309,14 +309,14 @@ def next_movement(cursor):
 
 
 def materialize_payload(content):
-    blobs_dir = os.path.abspath(os.environ["OCTOPUS_BLOBS_DIR"])
+    blobs_dir = os.path.abspath(os.environ["PHOBOS_BLOBS_DIR"])
     manifest_hash = content_hexdigest(content)
     manifest = stable_read(
         os.path.join(blobs_dir, manifest_hash),
         IO_LIMITS["max_manifest_bytes"],
         "cached artifact manifest",
     )
-    if octopus_content_hash(manifest) != manifest_hash:
+    if phobos_content_hash(manifest) != manifest_hash:
         raise ValueError("pyecho cached artifact manifest hash mismatch")
     descriptor = require_keys(
         json.loads(manifest),
@@ -333,7 +333,7 @@ def materialize_payload(content):
         IO_LIMITS["max_payload_bytes"],
         "cached artifact payload",
     )
-    if octopus_content_hash(payload) != payload_hash:
+    if phobos_content_hash(payload) != payload_hash:
         raise ValueError("pyecho cached artifact payload hash mismatch")
     return payload
 
@@ -342,7 +342,7 @@ def materialize_artifact(label, payload, stem):
     require_string(label, "pyecho artifact label", 256)
     if len(payload) > IO_LIMITS["max_payload_bytes"]:
         raise ValueError("pyecho artifact payload exceeds max_payload_bytes")
-    payload_hash = octopus_content_hash(payload)
+    payload_hash = phobos_content_hash(payload)
     payload_path = os.path.join(PAYLOADS_DIR, f"{stem}-{payload_hash}.payload")
     try:
         existing = stable_read(
@@ -363,7 +363,7 @@ def materialize_artifact(label, payload, stem):
     manifest_bytes = canonical_json(manifest)
     if len(manifest_bytes) > IO_LIMITS["max_manifest_bytes"]:
         raise ValueError("pyecho artifact manifest exceeds max_manifest_bytes")
-    manifest_hash = octopus_content_hash(manifest_bytes)
+    manifest_hash = phobos_content_hash(manifest_bytes)
     manifest_path = os.path.join(
         PAYLOADS_DIR,
         f"{stem}-{manifest_hash}.artifact.json",
@@ -441,7 +441,7 @@ def arrival_identity(label, artifact_hash):
             "interface_id": INTERFACE_ID,
             "artifact_id": artifact_id,
             "label": "pyecho.arrival.idempotency",
-            "bytes": list(bytes.fromhex(octopus_content_hash(artifact_id.encode("utf-8")))),
+            "bytes": list(bytes.fromhex(phobos_content_hash(artifact_id.encode("utf-8")))),
         }
     ]
 

@@ -1,0 +1,43 @@
+[package]
+name = "phobos-system-room-env"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "phobos_system_room_env"
+path = "src/lib.rs"
+
+[[bin]]
+name = "phobos-artifact-send-tool"
+path = "src/bin/phobos-artifact-send-tool.rs"
+
+[[bin]]
+name = "phobos-artifact-bound-tool"
+path = "src/bin/phobos-artifact-bound-tool.rs"
+
+[dependencies]
+fs2 = "0.4"
+libc = "0.2.182"
+serde = { workspace = true }
+serde_json = { workspace = true }
+json-patch.workspace = true
+phobos-file-write-contract = { path = "../phobos-file-write-contract" }
+phobos-file-storage = { path = "../../../../../crates/phobos-file-storage" }
+phobos-context-collections = { path = "../../../../interface/system_context/packages/phobos-context-collections" }
+tokio = { workspace = true }
+
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+
+[dev-dependencies]
+sha2 = "0.10"
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "process", "rt-multi-thread"] }

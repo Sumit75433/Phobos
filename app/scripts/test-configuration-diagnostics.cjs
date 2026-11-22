@@ -20,7 +20,7 @@ async function fingerprint(root) {
 }
 
 async function run() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-diagnostic-contract-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-diagnostic-contract-")));
   try {
     const roots = Object.fromEntries(["sourceRegistryRoot", "activeRegistryRoot", "libraryRoot", "stateRoot"].map((key) => [key, path.join(root, key)]));
     roots.publication = require("./support/native-publication.cjs").nativePublication();
@@ -31,8 +31,8 @@ async function run() {
     const original = { id: "world_fixture", config: { token: "default" }, contract: 1 };
     await json(sourceFile, original);
     await json(path.join(roots.libraryRoot, "packages/fixture.json"), {
-      schema: "octopus.local_package", schema_version: 1, id: "fixture", version: "1.0.0", product_kind: "application", product_id: "world_fixture", release_status: "optional",
-      display: { name: secret, description: secret, developer: "Octopus", category: "provider" },
+      schema: "phobos.local_package", schema_version: 1, id: "fixture", version: "1.0.0", product_kind: "application", product_id: "world_fixture", release_status: "optional",
+      display: { name: secret, description: secret, developer: "Phobos", category: "provider" },
       members: [{ registry_kind: "interface", owner: "world_fixture", configuration: [
         { path: "interface.json", fields: [{ pointer: "/config/token", schema: { type: "string" } }] },
       ] }],
@@ -82,9 +82,9 @@ async function run() {
     const hash = crypto.createHash("sha256").update(await fs.readFile(sourceFile)).digest("hex");
     const baseline = { schema_version: 2, source_id: "fixture-source", source_registry: root,
       files: { [relative]: { sha256: hash, mode: (await fs.stat(sourceFile)).mode & 0o777 } } };
-    const manifestPath = path.join(roots.activeRegistryRoot, ".octopus-source-manifest.json");
+    const manifestPath = path.join(roots.activeRegistryRoot, ".phobos-source-manifest.json");
     await json(manifestPath, baseline);
-    await json(path.join(roots.sourceRegistryRoot, ".octopus-source.json"), { schema_version: 1, id: "fixture-source" });
+    await json(path.join(roots.sourceRegistryRoot, ".phobos-source.json"), { schema_version: 1, id: "fixture-source" });
     const fileReport = (registryFile = relative) => createClientDoctorReport({ roots, registryFile });
     report = await fileReport();
     assert.equal(report.observation.origin, "baseline_recorded");

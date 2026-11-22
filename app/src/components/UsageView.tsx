@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
-  OctopusCodexUsageBucket,
-  OctopusCodexUsageSnapshot,
-  OctopusCodexUsageWindowDays,
+  PhobosCodexUsageBucket,
+  PhobosCodexUsageSnapshot,
+  PhobosCodexUsageWindowDays,
 } from "../electron";
 import { OcIconButton, OcSegmented } from "../design-system/components";
 import { hasCodexUsageBridge, readCodexUsage } from "../usageClient";
-import { OctopusLoadingState } from "./OctopusLoadingLogo";
+import { PhobosLoadingState } from "./PhobosLoadingLogo";
 import "./UsageView.css";
 
 type UsageMetric = "cost" | "tokens";
@@ -15,7 +15,7 @@ type UsageWindowValue = "7" | "30" | "90";
 
 type UsageState = {
   loading: boolean;
-  snapshot: OctopusCodexUsageSnapshot | null;
+  snapshot: PhobosCodexUsageSnapshot | null;
   error: string;
 };
 
@@ -72,7 +72,7 @@ const PLOT_TOP = 8;
 
 export function UsageView({ query }: { query: string }) {
   const [windowValue, setWindowValue] = useState<UsageWindowValue>("30");
-  const windowDays = Number(windowValue) as OctopusCodexUsageWindowDays;
+  const windowDays = Number(windowValue) as PhobosCodexUsageWindowDays;
   const [metric, setMetric] = useState<UsageMetric>("cost");
   const [breakdown, setBreakdown] = useState<UsageBreakdown>("model");
   const [refreshGeneration, setRefreshGeneration] = useState(0);
@@ -81,7 +81,7 @@ export function UsageView({ query }: { query: string }) {
   useEffect(() => {
     let cancelled = false;
     if (!hasCodexUsageBridge()) {
-      setState({ loading: false, snapshot: null, error: "Usage reads local Codex transcripts in the Octopus desktop app." });
+      setState({ loading: false, snapshot: null, error: "Usage reads local Codex transcripts in the Phobos desktop app." });
       return () => { cancelled = true; };
     }
     setState((previous) => ({ ...previous, loading: true, error: "" }));
@@ -163,7 +163,7 @@ export function UsageView({ query }: { query: string }) {
       ) : null}
 
       {state.loading && !state.snapshot ? (
-        <OctopusLoadingState className="usage-loading" label="Scanning local Codex transcripts" />
+        <PhobosLoadingState className="usage-loading" label="Scanning local Codex transcripts" />
       ) : (
         <>
           <section className="usage-feature-grid">
@@ -408,7 +408,7 @@ function OpenAIMark() {
   );
 }
 
-function buildUsageModel(snapshot: OctopusCodexUsageSnapshot | null) {
+function buildUsageModel(snapshot: PhobosCodexUsageSnapshot | null) {
   const buckets = snapshot?.buckets ?? [];
   const totals = buckets.reduce((sum, bucket) => addBucket(sum, bucket), { ...EMPTY_TOTALS });
   const models = groupRows(buckets, (bucket) => bucket.model || "Unknown model");
@@ -424,7 +424,7 @@ function buildUsageModel(snapshot: OctopusCodexUsageSnapshot | null) {
   };
 }
 
-function groupRows(buckets: OctopusCodexUsageBucket[], keyOf: (bucket: OctopusCodexUsageBucket) => string): UsageRow[] {
+function groupRows(buckets: PhobosCodexUsageBucket[], keyOf: (bucket: PhobosCodexUsageBucket) => string): UsageRow[] {
   const grouped = new Map<string, UsageRow>();
   for (const bucket of buckets) {
     const key = keyOf(bucket);
@@ -434,7 +434,7 @@ function groupRows(buckets: OctopusCodexUsageBucket[], keyOf: (bucket: OctopusCo
   return Array.from(grouped.values()).sort((left, right) => right.costUsd - left.costUsd || right.totalTokens - left.totalTokens || left.label.localeCompare(right.label));
 }
 
-function addBucket(total: UsageTotals, bucket: OctopusCodexUsageBucket): UsageTotals {
+function addBucket(total: UsageTotals, bucket: PhobosCodexUsageBucket): UsageTotals {
   return {
     totalTokens: total.totalTokens + bucket.totalTokens,
     cachedInputTokens: total.cachedInputTokens + bucket.cachedInputTokens,
@@ -531,12 +531,12 @@ function enumerateDays(sinceDay: string, untilDay: string): string[] {
   return days;
 }
 
-function formatWindow(snapshot: OctopusCodexUsageSnapshot | null, windowDays: number): string {
+function formatWindow(snapshot: PhobosCodexUsageSnapshot | null, windowDays: number): string {
   if (!snapshot) return `Last ${windowDays} days`;
   return `${formatDayShort(snapshot.sinceDay)} to ${formatDayShort(snapshot.untilDay)}`;
 }
 
-function formatPricingStatus(snapshot: OctopusCodexUsageSnapshot | null): string {
+function formatPricingStatus(snapshot: PhobosCodexUsageSnapshot | null): string {
   if (!snapshot) return "Unavailable";
   if (snapshot.pricing.status === "unavailable") return "Unavailable";
   return snapshot.pricing.status === "fresh" ? "Current" : "Cached";

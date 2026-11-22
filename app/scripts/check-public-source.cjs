@@ -28,7 +28,7 @@ const requiredRepositoryFiles = [
   "docs/development.md",
   "docs/getting-started.md",
   "LICENSE",
-  "registry/.octopus-source.json",
+  "registry/.phobos-source.json",
   "app/distribution/generated-outputs.json",
   "app/schemas/package_publication.schema.json",
   "app/schemas/client_extension_publication.schema.json",
@@ -60,16 +60,16 @@ const forbiddenTrackedRoots = new Set([
   "output",
   "outputs",
   "screenshots",
-  ".octopus",
-  ".octopus-home",
+  ".phobos",
+  ".phobos-home",
   "client",
   "client-state",
   "interface-hand-in",
   "interfaces",
   "ledger",
   "logs",
-  "octopus-home",
-  "octopus_home",
+  "phobos-home",
+  "phobos_home",
   "state",
   "target",
   "node_modules",
@@ -85,11 +85,11 @@ const requiredIgnoreEntries = [
   ".env.*",
   "!.env.example",
   ".claude/settings.local.json",
-  "/.octopus/",
-  "/.octopus-home/",
-  "/octopus-home/",
-  "/octopus-home-*/",
-  "/octopus_home/",
+  "/.phobos/",
+  "/.phobos-home/",
+  "/phobos-home/",
+  "/phobos-home-*/",
+  "/phobos_home/",
   "/client/",
   "/client-state/",
   "/interface-hand-in/",
@@ -100,10 +100,10 @@ const requiredIgnoreEntries = [
   "/host.json",
   "/client-access.json",
   "/client-lab-access.json",
-  "/.octopus-source-manifest.json",
+  "/.phobos-source-manifest.json",
   "/publications/",
-  "*.octopus-package",
-  "*.octopus-client-extension",
+  "*.phobos-package",
+  "*.phobos-client-extension",
 ];
 
 async function main() {
@@ -220,7 +220,7 @@ function currentBoundaryPaths() {
   const candidates = [
     ".claude/settings.local.json",
     ".env",
-    ".octopus-source-manifest.json",
+    ".phobos-source-manifest.json",
     "client-access.json",
     "client-lab-access.json",
     "host.json",
@@ -233,18 +233,18 @@ function validateTrackedPath(relativeValue, issues) {
   if (isGeneratedSourcePath(relative, generatedOutputs)) issues.push(`tracked generated build output: ${relative}`);
   if (relative === ".claude/settings.local.json") issues.push("tracked editor-local policy: .claude/settings.local.json");
   const first = relative.split("/")[0];
-  if (forbiddenTrackedRoots.has(first) || first.startsWith("octopus-home-")) {
+  if (forbiddenTrackedRoots.has(first) || first.startsWith("phobos-home-")) {
     issues.push(`tracked private or local-only root: ${relative}`);
   }
   if ([
     ".env",
-    ".octopus-source-manifest.json",
+    ".phobos-source-manifest.json",
     "client-access.json",
     "client-lab-access.json",
     "host.json",
   ].includes(relative)) issues.push(`tracked private root file: ${relative}`);
   if (relative === ".gitmodules" || /^docs\/(references|ai|archive2)\//.test(relative)
-    || ["docs/octopus_architecture.md", "docs/octopus_os_distribution_and_welcome_plan.md"].includes(relative)
+    || ["docs/phobos_architecture.md", "docs/phobos_os_distribution_and_welcome_plan.md"].includes(relative)
     || /^(logs.*\.md|notes\.md|goal\.md|design\.md|CLAUDE\.md)$/i.test(relative)) {
     issues.push(`tracked private authoring or reference material: ${relative}`);
   }
@@ -294,18 +294,18 @@ async function scanSourceRoot(root, directory, issues, privateRoots) {
 }
 
 async function validateRegistryIdentity(issues) {
-  const file = path.join(repoRoot, "registry", ".octopus-source.json");
+  const file = path.join(repoRoot, "registry", ".phobos-source.json");
   try {
     const { value } = await readJsonRegular(file, "source registry identity", 64 * 1024);
     if (
       value.schema_version !== 1
       || typeof value.id !== "string"
       || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value.id)
-    ) issues.push("registry/.octopus-source.json has an invalid source identity");
+    ) issues.push("registry/.phobos-source.json has an invalid source identity");
   } catch (error) {
     issues.push(errorMessage(error));
   }
-  if (fsSync.existsSync(path.join(repoRoot, "registry", ".octopus-source-manifest.json"))) {
+  if (fsSync.existsSync(path.join(repoRoot, "registry", ".phobos-source-manifest.json"))) {
     issues.push("source registry contains an Active Registry install manifest");
   }
 }

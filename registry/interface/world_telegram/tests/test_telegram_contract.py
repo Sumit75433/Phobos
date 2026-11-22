@@ -14,9 +14,9 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-import octopus_operation_catalog as catalog
+import phobos_operation_catalog as catalog
 import telegram_contract as contract
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 import telegram_render as render
 from telegram_wire import BotApi
 from telegram_wire import TelegramWireError
@@ -200,12 +200,12 @@ class LifeTests(unittest.TestCase):
         root = Path(self.temp.name)
         (root / "blobs").mkdir()
         self.environment = mock.patch.dict(os.environ, {
-            "OCTOPUS_INTERFACE_ID": "world_telegram",
-            "OCTOPUS_INTERFACE_DIR": str(ROOT),
-            "OCTOPUS_VAR_DIR": str(root / "var"),
-            "OCTOPUS_MOVEMENTS_JSONL": str(root / "movements.jsonl"),
-            "OCTOPUS_BLOBS_DIR": str(root / "blobs"),
-            "OCTOPUS_LEDGER_INDEX_SQLITE": str(root / "ledger-index.sqlite"),
+            "PHOBOS_INTERFACE_ID": "world_telegram",
+            "PHOBOS_INTERFACE_DIR": str(ROOT),
+            "PHOBOS_VAR_DIR": str(root / "var"),
+            "PHOBOS_MOVEMENTS_JSONL": str(root / "movements.jsonl"),
+            "PHOBOS_BLOBS_DIR": str(root / "blobs"),
+            "PHOBOS_LEDGER_INDEX_SQLITE": str(root / "ledger-index.sqlite"),
             "TELEGRAM_BOT_TOKEN": "123456:" + "B" * 35,
             "TELEGRAM_ALLOWED_USERS": "111",
             "TELEGRAM_HOME_CHAT": "",
@@ -275,7 +275,7 @@ class LifeTests(unittest.TestCase):
             image = event["media"][index - 1]
             self.assertEqual((image["mime_type"], image["artifact"]["label"], base64.b64decode(image["payload_base64"])), ("image/jpeg", "telegram.file", data))
             self.assertEqual(Path(image["artifact"]["payload_path"]).read_bytes(), data)
-            self.assertEqual(image["artifact"]["payload_content_hash"], octopus_content_hash(data))
+            self.assertEqual(image["artifact"]["payload_content_hash"], phobos_content_hash(data))
         self.config["media"]["max_images_per_event"] = 1
         self.assertEqual(len(self.life.download_files([update["message"] for update in photos], "again")[1]), 1)
 
@@ -351,10 +351,10 @@ class LifeTests(unittest.TestCase):
             {"seq": 7, "kind": "InterfaceOutbound", "from": {"Interface": "world_provider_x"}, "to": {"Interface": "world_telegram"}, "artifact": {"content": [0] * 32},
              "invocation_metadata": {"runtime": {"run": "run_t", "ee": "ee_t", "worker": "system_worker_operator_task", "checkpoint": "cp_t", "interface": "world_telegram", "epoch": 0}}},
         ]
-        Path(os.environ["OCTOPUS_MOVEMENTS_JSONL"]).write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+        Path(os.environ["PHOBOS_MOVEMENTS_JSONL"]).write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
         self.assertEqual(self.boundary.read_outbound(0, self.config), [(7, [0] * 32, "run_t")])
         self.assertEqual(self.boundary.read_outbound(8, self.config), [])
-        Path(os.environ["OCTOPUS_MOVEMENTS_JSONL"]).write_text('{"seq":9}', encoding="utf-8")
+        Path(os.environ["PHOBOS_MOVEMENTS_JSONL"]).write_text('{"seq":9}', encoding="utf-8")
         self.boundary._LEDGER_FALLBACK.update({"offset": 0, "size": 0, "identity": None})
         with self.assertRaisesRegex(RuntimeError, "partial"):
             self.boundary.read_ledger(0, 16, 1024)

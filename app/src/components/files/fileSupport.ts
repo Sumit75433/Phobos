@@ -1,6 +1,6 @@
 import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
-import { EXTENSION_TO_FILE_FORMAT, type VirtualFileMetrics, type FileContents } from "@octopus/files-diffs";
+import { EXTENSION_TO_FILE_FORMAT, type VirtualFileMetrics, type FileContents } from "@phobos/files-diffs";
 
 export type FileMetrics = VirtualFileMetrics;
 

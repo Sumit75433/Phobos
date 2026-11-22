@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_email",
   "version": "3.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Email",
     "description": "Hand the mail you allow to the tasks you connect, and let them reply, send and file email from your mailbox.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "email"
   },

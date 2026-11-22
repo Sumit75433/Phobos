@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.desktop_session",
   "version": "1.3.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Desktop Session",
     "description": "The Mac desktop and its apps: observe the screen, click, type, scroll and drag.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "desktop"
   },

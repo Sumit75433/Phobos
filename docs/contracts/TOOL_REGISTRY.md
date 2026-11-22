@@ -22,7 +22,7 @@ registry/tool/<tool-id>/tool.json
   "interface": "system_coder_env",
   "handler_config": { "operation": "read_file" },
   "process": {
-    "bin": "target/debug/octopus-coder-fs-tool",
+    "bin": "target/debug/phobos-coder-fs-tool",
     "inherit_env": ["PATH"],
     "authority": {
       "read_root_slots": ["registry_worker_environment_kind_root", "repo_root"],
@@ -47,7 +47,7 @@ registry/tool/<tool-id>/tool.json
 - `process` - the tool's own executable and the authority it runs under: root
   slots, paths, environment, network.
   In the source tree `bin` names a workspace build such as
-  `target/debug/octopus-coder-fs-tool`; package materialization copies that
+  `target/debug/phobos-coder-fs-tool`; package materialization copies that
   binary into its owning room kind and rewrites `bin` to
   `owner://packages/bin/<binary>` in the installed registry.
 - `handler_config` - opaque JSON for that executable. Together with `id`, it

@@ -14,11 +14,11 @@ const { absolutePath, artifactLabel, assertAdmitted, contentHashHex, endpointInt
 
 async function releaseOperatorTaskWorkerEnvironments(options, request) {
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const runId = safeSegment(request?.runId, "runId");
   const expectedDigest = contentHashHex(request?.expectedDigest, "expectedDigest");
   const timeoutMs = numberValue(request?.timeoutMs, 45_000);
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const runPath = path.join(runsDir, `${runId}.json`);
 
   return withRunAuthoringLock(runId, async () => {
@@ -36,9 +36,9 @@ async function releaseOperatorTaskWorkerEnvironments(options, request) {
     if (clientState.client_surface_role !== "task") {
       throw new Error(`operator chat run '${runId}' is not a deletable task surface`);
     }
-    const exactInterfaces = await ownedOperatorTaskInterfaces(octopusHome, identity.interfaceId);
+    const exactInterfaces = await ownedOperatorTaskInterfaces(phobosHome, identity.interfaceId);
     const formations = await operatorTaskWorkerEnvironmentRecords(
-      octopusHome,
+      phobosHome,
       initial.value,
       runId,
       exactInterfaces,
@@ -55,16 +55,16 @@ async function releaseOperatorTaskWorkerEnvironments(options, request) {
       };
     }
 
-    const movementsPath = path.join(octopusHome, "ledger", "movements.jsonl");
+    const movementsPath = path.join(phobosHome, "ledger", "movements.jsonl");
     const artifactRoot = path.join(
       absolutePath(options.clientArtifactsRoot(identity.interfaceId), "clientArtifactsRoot"),
       "operator-chat",
       "worker-environment-lifecycle",
     );
     await fs.mkdir(artifactRoot, { recursive: true });
-    await waitForInterfaceSocket(octopusHome, identity.interfaceId, timeoutMs);
+    await waitForInterfaceSocket(phobosHome, identity.interfaceId, timeoutMs);
     const mandatoryRoleBindings = await exactWorkerRoleArtifactBindings(
-      octopusHome,
+      phobosHome,
       initial.value.worker,
     );
 
@@ -128,7 +128,7 @@ async function releaseOperatorTaskWorkerEnvironments(options, request) {
         })),
       );
       const verdict = await options.handInArtifact({
-        endpoint: interfaceEndpoint(octopusHome, identity.interfaceId),
+        endpoint: interfaceEndpoint(phobosHome, identity.interfaceId),
         interfaceId: identity.interfaceId,
         manifest: {
           label: WORKER_ENVIRONMENT_RELEASE_LABEL,
@@ -189,9 +189,9 @@ function lifecycleCheckpoint(
   };
 }
 
-async function exactWorkerRoleArtifactBindings(octopusHome, workerId) {
+async function exactWorkerRoleArtifactBindings(phobosHome, workerId) {
   const worker = safeSegment(workerId, "operator task worker interface");
-  const interfaceRoot = await fs.realpath(path.join(octopusHome, "registry", "interface"));
+  const interfaceRoot = await fs.realpath(path.join(phobosHome, "registry", "interface"));
   const workerRoot = path.join(interfaceRoot, worker);
   const workerRootStat = await fs.lstat(workerRoot);
   if (workerRootStat.isSymbolicLink() || !workerRootStat.isDirectory()) {
@@ -230,8 +230,8 @@ function nextLifecycleCheckpointEpoch(checkpoints) {
   return maximum + 1;
 }
 
-async function ownedOperatorTaskInterfaces(octopusHome, ownerInterfaceId) {
-  const root = path.join(octopusHome, "registry", "interface");
+async function ownedOperatorTaskInterfaces(phobosHome, ownerInterfaceId) {
+  const root = path.join(phobosHome, "registry", "interface");
   const rootStat = await fs.lstat(root);
   if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) {
     throw new Error("operator task interface registry must be a plain directory");
@@ -240,19 +240,19 @@ async function ownedOperatorTaskInterfaces(octopusHome, ownerInterfaceId) {
   const owned = new Set();
   for (const entry of entries) {
     if (!entry.isDirectory() || !/^[A-Za-z0-9_-]+$/.test(entry.name)) continue;
-    const sidecarPath = path.join(root, entry.name, "octopus_os.json");
+    const sidecarPath = path.join(root, entry.name, "phobos_os.json");
     const sidecarStat = await fs.lstat(sidecarPath).catch((error) => {
       if (error?.code === "ENOENT") return null;
       throw error;
     });
     if (!sidecarStat) continue;
     if (sidecarStat.isSymbolicLink() || !sidecarStat.isFile()) {
-      throw new Error(`Octopus OS interface '${entry.name}' has a non-regular sidecar`);
+      throw new Error(`Phobos OS interface '${entry.name}' has a non-regular sidecar`);
     }
     const sidecar = await readJsonIfPresent(sidecarPath);
-    if (!sidecar || sidecar.workspace !== "octopus_os") continue;
+    if (!sidecar || sidecar.workspace !== "phobos_os") continue;
     if (sidecar.interface !== entry.name) {
-      throw new Error(`Octopus OS interface '${entry.name}' has drifted sidecar identity`);
+      throw new Error(`Phobos OS interface '${entry.name}' has drifted sidecar identity`);
     }
     if (sidecar.owner_interface === ownerInterfaceId) owned.add(entry.name);
   }
@@ -262,11 +262,11 @@ async function ownedOperatorTaskInterfaces(octopusHome, ownerInterfaceId) {
   return owned;
 }
 
-async function operatorTaskWorkerEnvironmentRecords(octopusHome, run, runId, exactInterfaces) {
+async function operatorTaskWorkerEnvironmentRecords(phobosHome, run, runId, exactInterfaces) {
   const worker = requiredString(run.worker, `operator chat task '${runId}' worker`);
   const records = [];
   for (const interfaceId of [...exactInterfaces].sort()) {
-    const root = path.join(octopusHome, "interfaces", interfaceId, "worker-environments");
+    const root = path.join(phobosHome, "interfaces", interfaceId, "worker-environments");
     let entries;
     try {
       const rootStat = await fs.lstat(root);
@@ -299,7 +299,7 @@ async function operatorTaskWorkerEnvironmentRecords(octopusHome, run, runId, exa
         throw new Error(`worker-environment record '${recordPath}' violates its lifecycle identity`);
       }
       if (formation.run !== runId) {
-        await validateTaskWriterFormation(octopusHome, run, formation, exactInterfaces);
+        await validateTaskWriterFormation(phobosHome, run, formation, exactInterfaces);
         if (formation.requires_release && record.lifecycle !== "released") {
           throw new Error(`task writer '${formation.run}' retains an unreleased worker environment`);
         }
@@ -319,7 +319,7 @@ async function operatorTaskWorkerEnvironmentRecords(octopusHome, run, runId, exa
   ));
 }
 
-async function validateTaskWriterFormation(octopusHome, run, formation, exactInterfaces) {
+async function validateTaskWriterFormation(phobosHome, run, formation, exactInterfaces) {
   const writerId = safeSegment(formation.run, "task writer run");
   const declarations = Object.entries(requiredObject(run.interface_state, "task interface state"))
     .flatMap(([owner, state]) => {
@@ -339,7 +339,7 @@ async function validateTaskWriterFormation(octopusHome, run, formation, exactInt
     || !exactInterfaces.has(target.source) || !exactInterfaces.has(target.door) || target.source === target.door) {
     throw new Error(`task writer '${writerId}' differs from its exact task declaration`);
   }
-  const file = path.join(await resolveRunRecordsRoot(octopusHome), `${writerId}.json`);
+  const file = path.join(await resolveRunRecordsRoot(phobosHome), `${writerId}.json`);
   const stat = await fs.lstat(file);
   if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(`task writer '${writerId}' must be a plain file`);
   const current = await readJsonIfPresent(file);

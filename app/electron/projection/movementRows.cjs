@@ -114,7 +114,7 @@ function isClientSurfaceDocumentPayload(value) {
     value
     && typeof value === "object"
     && !Array.isArray(value)
-    && value.schema === "octopus.client_surface"
+    && value.schema === "phobos.client_surface"
     && value.schema_version === 1,
   );
 }
@@ -727,7 +727,7 @@ function taskSearchSnippet(value, normalizedIndex, needleLength) {
 
 async function readChangeJournal(projection, runId, firing) {
   try {
-    const plan = await changeJournalPlan(projection.octopusHome, projection.registryRoot, runId, firing);
+    const plan = await changeJournalPlan(projection.phobosHome, projection.registryRoot, runId, firing);
     if (!plan) return null;
     const { writes, ...journal } = plan;
     return journal;

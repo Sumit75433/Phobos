@@ -1,0 +1,47 @@
+[package]
+name = "phobos-interface-activation-app-server-transport"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[lib]
+name = "phobos_interface_activation_app_server_transport"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+phobos-app-server-interface = { path = "../phobos-app-server-interface" }
+phobos-run-authoring = { path = "../../../system_interface_authoring/packages/phobos-run-authoring" }
+json-patch.workspace = true
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+phobos-policy = { path = "../../../../../crates/phobos-policy" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+sha2 = "0.10"
+url = "2"
+tokio = { workspace = true, features = ["rt", "sync", "net", "fs", "time", "macros", "process"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+tracing = "0.1.44"
+# This package owns Unix/WebSocket transport and Home consent execution.
+# Pure wire contracts live in phobos-app-server-interface; checked run evidence
+# belongs to phobos-run-authoring. Provider-specific protocols remain
+# in their declared provider packages.
+futures = { version = "0.3", default-features = false, features = ["std"] }
+tokio-tungstenite = "0.28.0"
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-world-pyecho-life-runtime = { path = "../../../world_pyecho/packages/phobos-world-pyecho-life-runtime" }
+phobos-run-record = { path = "../../../../../crates/phobos-run-record" }
+phobos-util-abspath = { path = "../../../../worker_environment_kind/process_session/packages/phobos-util-abspath" }
+
+[dev-dependencies]
+# The default-bind contract test drives the real activation start (async) against
+# a temp phobos home and asserts the CONVENTIONAL socket is bound when the
+# listen env var is unset (and that the arm stays dormant without the opt-in).
+tokio = { workspace = true, features = ["rt", "sync", "macros", "time", "net"] }
+tempfile = "3.23.0"

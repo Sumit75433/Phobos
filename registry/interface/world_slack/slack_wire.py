@@ -227,7 +227,7 @@ class SlackApi:
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler(proxies), NoRedirect())
 
     def _request(self, url, token, body=None, headers=None, method=None, safe_retry=False, maximum=None):
-        request_headers = {"User-Agent": "octopus-world-slack/1", "Accept": "application/json"}
+        request_headers = {"User-Agent": "phobos-world-slack/1", "Accept": "application/json"}
         if token:
             request_headers["Authorization"] = f"Bearer {token}"
         if headers:
@@ -445,7 +445,7 @@ class WebSocket:
             "Connection: Upgrade\r\n"
             f"Sec-WebSocket-Key: {key}\r\n"
             "Sec-WebSocket-Version: 13\r\n"
-            "User-Agent: octopus-world-slack/1\r\n\r\n"
+            "User-Agent: phobos-world-slack/1\r\n\r\n"
         ).encode("ascii")
         sock.sendall(request)
         response = bytearray()

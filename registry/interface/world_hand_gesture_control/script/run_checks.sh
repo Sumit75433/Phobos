@@ -24,4 +24,4 @@ swiftc -O -parse-as-library "${FILES[@]}" Tests/CalibrationChecks/main.swift -o 
 
 echo "Running checks..."
 "$OUT"
-python3 Tests/OctopusBridgeChecks/main.py
+python3 Tests/PhobosBridgeChecks/main.py

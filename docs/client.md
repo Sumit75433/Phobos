@@ -1,6 +1,6 @@
 # Desktop client
 
-> **The desktop client is optional.** The Octopus runtime does not depend on
+> **The desktop client is optional.** The Phobos runtime does not depend on
 > this app. You can run it without a GUI or write a different client over the
 > same interfaces, descriptors, and recorded evidence. The screens below are
 > one presentation of that architecture, not required runtime components.
@@ -8,10 +8,10 @@
 The [terminal client](cli.md) provides chat, tasks, results, and operator
 responses against the same Home without opening this app.
 
-The Octopus desktop client currently supports **macOS 14 and later**. Its
+The Phobos desktop client currently supports **macOS 14 and later**. Its
 interaction design is inspired by the ChatGPT desktop app: a conversation,
 voice controls, a sidebar, and work opened beside the conversation. It is an
-Octopus client over Octopus runs, interfaces, and policy. Signing in with
+Phobos client over Phobos runs, interfaces, and policy. Signing in with
 ChatGPT connects a model provider; it does not make ChatGPT the runtime.
 
 Start with [Getting started](getting-started.md) to build and set up the app.
@@ -23,17 +23,17 @@ Screenshots show a development installation, including its incomplete setups.
 
 | Destination | Use it for |
 | --- | --- |
-| **Home** | The ongoing conversation with Octopus: text, voice calls, current activity, and widgets. |
+| **Home** | The ongoing conversation with Phobos: text, voice calls, current activity, and widgets. |
 | **Tasks** | Work grouped into Projects, reusable Agents, individual tasks, triggers, and archived tasks. |
 | **Dashboard** | Inspect Topology, Registry, Worker Environments, and Movements. These views explain what is running and what crossed an interface. |
 | **Inbox** | Review activity and requests that need attention, then open the associated work. |
 | **Applications** | Install and configure providers, connectors, plugins, and context packages; choose where they are available. |
 | **Drivers** | Install and configure the environments in which tools act: files, worktrees, browsers, desktops, containers, and remote execution. |
 
-The avatar menu offers **Settings** and **Lock Octopus**. For a connected ChatGPT
+The avatar menu offers **Settings** and **Lock Phobos**. For a connected ChatGPT
 account, **Usage** shows remaining limits and reset times when available.
 When the account belongs to more than one workspace, the avatar menu lists them
-with the current one checked; choosing another switches the workspace Octopus
+with the current one checked; choosing another switches the workspace Phobos
 uses for new requests, and the model list reloads. **Settings → Account** shows
 the account, plan and workspace, lists the workspaces with **Switch**, and offers
 **Add account** and **Log out**. Adding an account signs in another ChatGPT
@@ -43,7 +43,7 @@ Switching requires an unlocked session; if the workspace list cannot be loaded,
 the menu says so and tries again the next time it opens. The
 sign-in is shared with Codex on this computer (see
 [Codex CLI](getting-started.md#codex-cli)).
-**Lock Octopus** locks local access and returns to the
+**Lock Phobos** locks local access and returns to the
 [password screen](getting-started.md#first-setup). The model provider stays signed
 in. Unlock with your password, or
 Touch ID if you enabled it. **Surfaces** controls additional views;
@@ -100,22 +100,22 @@ There are two distinct audio features:
 dictionary, and the floating call controls used outside Home. A selectable
 synthesized voice is offered only when the speech interface declares one.
 
-**Settings → Appearance → Octopuses**, off by default, adds octopuses drawn as
+**Settings → Appearance → Phoboses**, off by default, adds phoboses drawn as
 ASCII glyph tiles that never stop swimming; the Home wave field stays behind
 them, quieter. Each one picks its next destination in open water, away from the
 others and so that together they stay spread across the screen, and steers
 around the visible text, response, and composer instead of crossing them. On
-Home, three monochrome octopuses swim at different depths, harder while Octopus
+Home, three monochrome phoboses swim at different depths, harder while Phobos
 is thinking, rippling while it speaks. On the new-task screen, each recent task
-gets one octopus in its agent's colour, brisk while its agent works and slower
+gets one phobos in its agent's colour, brisk while its agent works and slower
 while it waits or is idle. Clicking empty space sends a short wave of digits
-that crumbles as it spreads and passes through the octopuses without moving
+that crumbles as it spreads and passes through the phoboses without moving
 them.
 
-When a voice call starts, the Home octopuses jet away from the orb toward the
+When a voice call starts, the Home phoboses jet away from the orb toward the
 nearest edge and dissolve, while the waves gather into the call orb exactly as
-they do without octopuses. When the call ends and the orb returns to the waves,
-the octopuses swim back in from open edges one after another.
+they do without phoboses. When the call ends and the orb returns to the waves,
+the phoboses swim back in from open edges one after another.
 
 Audio exchanged through runtime interfaces remains part of the artifact contract:
 microphone or speech interfaces produce audio or transcript artifacts; receiving interfaces decide how to
@@ -203,7 +203,7 @@ See the [movement and metadata example](contracts/LEDGER_INDEX.md#reading-a-move
 
 **Dashboard → Worker Environments** lists the rooms where work touches the
 world: a browser session, a Git worktree, a terminal, a desktop. Tabs separate
-rooms opened for tasks, rooms opened for Home, and the system rooms Octopus
+rooms opened for tasks, rooms opened for Home, and the system rooms Phobos
 opens for its own upkeep. Each row shows what the room is, which task uses it,
 whether it is open, and when it was last active; opening a row shows the room
 live, its changes, or its files.
@@ -233,13 +233,13 @@ Installation and access are separate:
    application declares a connection check, the client verifies what you enter
    against the real service, walks you through browser sign-in or pairing, and
    shows the connected account. Gmail, GitHub and Google Drive work through the
-   apps linked to your ChatGPT account, and Octopus keeps no GitHub or Google
+   apps linked to your ChatGPT account, and Phobos keeps no GitHub or Google
    token: the card shows the account each one uses (the Gmail mailbox, the
    GitHub login, the Google Drive account), with the ChatGPT account beneath
-   it. If an app is already linked there, Octopus still asks you to **Connect**
+   it. If an app is already linked there, Phobos still asks you to **Connect**
    once before tasks can use it. **Manage in ChatGPT** opens the page where you
    switch, add or unlink its accounts, and for GitHub the repositories its app
-   reaches; Disconnect in Octopus does not unlink it from ChatGPT. Image
+   reaches; Disconnect in Phobos does not unlink it from ChatGPT. Image
    Generation needs no key: it uses the ChatGPT account signed in on this Mac
    and shows that account with its plan, which must be a paid one. Unity MCP
    connects to the local server MCP for Unity starts from the Unity Editor and
@@ -344,14 +344,14 @@ source and delivery path is:
 
 ```text
 repository registry/ + app/distribution/local-packages/
-    → packaging: startup baseline + local package library inside Octopus.app
+    → packaging: startup baseline + local package library inside Phobos.app
     → Install: selected package files and receipts in the chosen Home
     → project/task setup: explicit descriptor and binding changes
 ```
 
 During source development, the library resolves to the checkout. A packaged
 app uses the copy bundled inside it. Clicking Install materializes those local
-files; it does not fetch a newer Driver from an Octopus server. Building the
+files; it does not fetch a newer Driver from a Phobos server. Building the
 app can download dependencies, and an installed integration can contact its
 external service during use. Those are separate network operations.
 
@@ -361,7 +361,7 @@ The current client has no hosted Extension marketplace or automatic app
 updater. A new build supplies a new bundled library; local Home changes still
 need to be reconciled through the package lifecycle.
 
-To add a capability, start with [Extending Octopus](contracts/EXTENSION_SURFACES.md).
+To add a capability, start with [Extending Phobos](contracts/EXTENSION_SURFACES.md).
 To understand updates and local JSON changes, read
 [Source and Home](development.md#source-and-home).
 
@@ -496,17 +496,17 @@ evidence. A client widget cannot grant itself tool or runtime access.
 
 ## Cost and local data
 
-Octopus is MIT-licensed and has no paid Octopus tier in this preview. You supply
+Phobos is MIT-licensed and has no paid Phobos tier in this preview. You supply
 the model/provider access. Account limits, API charges, voice services, remote
 compute, and other connected services remain those providers' costs. There is
 no single per-task price: it depends on the selected model and work performed.
 
 The **Home screen** is a conversation. The **Home directory**, normally
-`~/.octopus`, is the private state of an installation: its active registry,
+`~/.phobos`, is the private state of an installation: its active registry,
 runs, ledger, and interface data. The client keeps its preferences and
 Extensions in that Home's `client/` directory. The launch selection and
 provider authentication live elsewhere, such as Codex credentials under
-`~/.codex`, so changing `OCTOPUS_HOME` alone does not isolate provider accounts.
+`~/.codex`, so changing `PHOBOS_HOME` alone does not isolate provider accounts.
 
 Task history reads use bounded concurrency. Indexed movements, file verification
 and sealed response streams are processed in batches that yield to the client's

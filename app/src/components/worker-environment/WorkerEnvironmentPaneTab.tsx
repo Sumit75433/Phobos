@@ -1,9 +1,9 @@
 import type { AdmittedClientSurfaceDocument } from "../../client-surfaces/types";
 import "../icon-glyphs/worker";
 import type { TopologySnapshot } from "../../data/topology";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { Glyph } from "../IconGlyphs";
-import { OctopusEmptyState } from "../OctopusSurface";
+import { PhobosEmptyState } from "../PhobosSurface";
 import type { ProjectedAssistantCodeComment } from "../chat/assistantDirectives";
 import { WorkerEnvironmentSurfacePanel } from "./RunEnvironmentView";
 import {
@@ -15,7 +15,7 @@ import {
 } from "./workerEnvironmentPane";
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   assistantCodeComments?: ProjectedAssistantCodeComment[];
   snapshot: TopologySnapshot;
   surfaces: AdmittedClientSurfaceDocument[];
@@ -27,13 +27,13 @@ export function WorkerEnvironmentPaneTab({ accessProfile, assistantCodeComments 
   if (!resolved) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col bg-token-main-surface-primary" role="status">
-        <OctopusEmptyState
+        <PhobosEmptyState
           className="h-full min-h-0 flex-1 select-none"
           description={snapshot.projection.mode === "connecting"
             ? snapshot.projection.detail
             : "This room is no longer projected by the runtime. Its tab stays until you close it."}
           icon={<Glyph name="ee" size={32} />}
-          title={snapshot.projection.mode === "connecting" ? "Connecting to Octopus" : "Worker Environment is not projected"}
+          title={snapshot.projection.mode === "connecting" ? "Connecting to Phobos" : "Worker Environment is not projected"}
         />
       </div>
     );
@@ -42,7 +42,7 @@ export function WorkerEnvironmentPaneTab({ accessProfile, assistantCodeComments 
   if (target.clientSurface && !document) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col bg-token-main-surface-primary" role="status">
-        <OctopusEmptyState
+        <PhobosEmptyState
           className="h-full min-h-0 flex-1 select-none"
           description="The exact admitted client-surface revision behind this tab is no longer projected. Close the tab and reopen the current revision."
           icon={<Glyph name="plugins" size={32} />}
@@ -55,7 +55,7 @@ export function WorkerEnvironmentPaneTab({ accessProfile, assistantCodeComments 
   if (!document && !surface && (target.surfaceId || target.filePath || target.panelKind && target.panelKind !== "overview")) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col bg-token-main-surface-primary" role="status">
-        <OctopusEmptyState
+        <PhobosEmptyState
           className="h-full min-h-0 flex-1 select-none"
           description="The exact projected surface behind this tab is no longer available. Close the tab and reopen a surface from the current room projection."
           icon={<Glyph name="ee" size={32} />}

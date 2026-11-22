@@ -1,6 +1,6 @@
-export const CLIENT_SURFACE_ACTION_EVENT = "octopus:client-surface-action" as const;
-export const MCP_RESOURCE_ACTION_EVENT = "octopus:mcp-resource-action" as const;
-export const OCTOPUS_OPERATOR_DIFF_REVIEW_SEND_EVENT = "octopus:operator-diff-review-send" as const;
+export const CLIENT_SURFACE_ACTION_EVENT = "phobos:client-surface-action" as const;
+export const MCP_RESOURCE_ACTION_EVENT = "phobos:mcp-resource-action" as const;
+export const PHOBOS_OPERATOR_DIFF_REVIEW_SEND_EVENT = "phobos:operator-diff-review-send" as const;
 
 export type McpResourceActionDetail = {
   schemaVersion: 1;

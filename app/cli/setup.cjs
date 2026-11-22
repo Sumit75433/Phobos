@@ -7,7 +7,7 @@ const { initializeWorkspace, readWorkspaceSetupState, workspaceInitializeRequest
 const { applyLocalApplicationPack, readLocalPackageCatalog, withLocalPackageInstallation, withInstalledAgentPreset } = require("../electron/localPackages.cjs");
 const { createOperatorChatClientLoader } = require("../electron/operatorChatClientContract.cjs");
 const { createClientProviderMetadata, validateProviderModelSelection } = require("../electron/clientProviderMetadata.cjs");
-const { readProviderInterfaceDescriptors, mutateOctopusOsWorkspace, setupTriggerEntries, setupTriggerProof, armSetupTriggers, setupTriggerTaskPlanner } = require("../electron/projection.cjs");
+const { readProviderInterfaceDescriptors, mutatePhobosOsWorkspace, setupTriggerEntries, setupTriggerProof, armSetupTriggers, setupTriggerTaskPlanner } = require("../electron/projection.cjs");
 const { projectionReadRequest } = require("../electron/projectionReadContract.cjs");
 const { planClientAgentTemplate } = require("../electron/clientAgentCatalog.cjs");
 const { commitProjectionClientAuthoring } = require("../electron/clientWorkspaceAuthoring.cjs");
@@ -22,7 +22,7 @@ async function setupEnvironment(environment, options = {}) {
   await environment.start({ onProgress: progress, timeoutMs: options.timeoutMs, signal: options.signal });
   requireDistribution(environment);
   const registryRoot = environment.packageRoots.activeRegistryRoot;
-  const roots = { octopusHomeRoot: environment.home, registryRoot,
+  const roots = { phobosHomeRoot: environment.home, registryRoot,
     publication: environment.packageRoots.publication, retirementBarrier: taskRetirementBarrier(environment) };
   const owners = createSetupOwners(environment, options);
   const store = createClientSetupStore({ root: path.join(environment.home, "client", "setup-state"), owners });
@@ -64,7 +64,7 @@ async function setupEnvironment(environment, options = {}) {
 
 async function finishSetup(environment, store, operationId, options) {
   const setup = await store.read(operationId);
-  const workspace = await readWorkspaceSetupState({ octopusHomeRoot: environment.home, registryRoot: environment.packageRoots.activeRegistryRoot,
+  const workspace = await readWorkspaceSetupState({ phobosHomeRoot: environment.home, registryRoot: environment.packageRoots.activeRegistryRoot,
     publication: environment.packageRoots.publication, retirementBarrier: taskRetirementBarrier(environment) });
   if (setup?.status !== "complete" || workspace.status !== "configured"
     || workspace.receipt.operation_id !== operationId || workspace.receipt.request_digest !== setup.plan.workspace.request_digest) {
@@ -77,7 +77,7 @@ async function finishSetup(environment, store, operationId, options) {
 
 function createSetupOwners(environment, options = {}) {
   const registryRoot = environment.packageRoots.activeRegistryRoot;
-  const roots = { octopusHomeRoot: environment.home, registryRoot,
+  const roots = { phobosHomeRoot: environment.home, registryRoot,
     publication: environment.packageRoots.publication, retirementBarrier: taskRetirementBarrier(environment) };
   const loader = createOperatorChatClientLoader({
     packageRoots: () => environment.packageRoots,
@@ -94,7 +94,7 @@ function createSetupOwners(environment, options = {}) {
     const client = await loader.load();
     if (typeof client.planOperatorChatSurface !== "function") throw new Error("Installed operator chat package has no topology planner.");
     return client.planOperatorChatSurface({
-      octopusHome: () => environment.home, installationRoot: () => environment.installationRoot,
+      phobosHome: () => environment.home, installationRoot: () => environment.installationRoot,
       registryRoot: () => registryRoot, eeInstancesRoot: () => eeInstancesRoot,
     }, request);
   }
@@ -205,9 +205,9 @@ function createSetupOwners(environment, options = {}) {
           if (state.status === "not_configured") await initializeWorkspace({ ...roots, request: plan.workspace.request,
             planOperatorSurface: planSurface, planAgentPreset: agentPlanner,
             planBrowserNativeHost: (request) => packagePlanner("driver.browser_session", "browser_session",
-              "packages/octopus-browser-session-env/native/setup-host.cjs", "planBrowserNativeHost", request),
+              "packages/phobos-browser-session-env/native/setup-host.cjs", "planBrowserNativeHost", request),
             planDesktopApplicationPreferences: (request) => packagePlanner("driver.desktop_session", "desktop_session",
-              "packages/octopus-system-gui-env/native/setup-preferences.cjs", "planDesktopApplicationPreferences", request),
+              "packages/phobos-system-gui-env/native/setup-preferences.cjs", "planDesktopApplicationPreferences", request),
             onProgress: options.onProgress });
           else if (state.status !== "configured" || state.receipt.operation_id !== context.operationId
             || state.receipt.request_digest !== plan.workspace.request_digest) throw new Error("Another setup already owns this Home, or workspace evidence is degraded.");
@@ -222,7 +222,7 @@ function createSetupOwners(environment, options = {}) {
               : { action: "configure_driver", driverName: entry.product_id,
                 projects: target.targets.map((row) => ({ eeId: row.eeId, expectedDigest: row.recordDigest,
                   available: true, selectedByDefault: entry.default_for_new_tasks, hostSlots: row.hostSlots })) };
-            await mutateOctopusOsWorkspace(registryRoot, environment.home, target.scope, request, {
+            await mutatePhobosOsWorkspace(registryRoot, environment.home, target.scope, request, {
               commitClientAuthoring: (request) => commitProjectionClientAuthoring(environment.home, registryRoot, request,
                 { publication: environment.packageRoots.publication, retirementBarrier: taskRetirementBarrier(environment) }),
             });

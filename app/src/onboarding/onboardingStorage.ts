@@ -1,5 +1,5 @@
-export const ONBOARDING_STORAGE_KEY = "octopus.onboarding.v1";
-const WELCOME_PROGRESS_KEY = "octopus.welcome-progress.v1";
+export const ONBOARDING_STORAGE_KEY = "phobos.onboarding.v1";
+const WELCOME_PROGRESS_KEY = "phobos.welcome-progress.v1";
 
 export type WelcomeProgress = { step: number; heroSeen: boolean };
 

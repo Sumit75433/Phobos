@@ -4,7 +4,7 @@ import { appToast } from "../toasts";
 export function useClientPaneDropZone(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     const element = document.querySelector<HTMLElement>(".workspace-pane-manager");
     if (!bridge || !element) return;
     const update = () => {

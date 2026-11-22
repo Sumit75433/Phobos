@@ -4,10 +4,10 @@
     "max_row_bytes": 1048576
   },
   "transport": {
-    "api_base_env": "OCTOPUS_TELEGRAM_API_BASE",
+    "api_base_env": "PHOBOS_TELEGRAM_API_BASE",
     "api_base_default": "https://api.telegram.org",
-    "proxy_env": "OCTOPUS_TELEGRAM_PROXY",
-    "fallback_ips_env": "OCTOPUS_TELEGRAM_FALLBACK_IPS",
+    "proxy_env": "PHOBOS_TELEGRAM_PROXY",
+    "fallback_ips_env": "PHOBOS_TELEGRAM_FALLBACK_IPS",
     "fallback_ips": [
       "149.154.167.220",
       "149.154.166.110"

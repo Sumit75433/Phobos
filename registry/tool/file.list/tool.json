@@ -2,7 +2,7 @@
   "id": "file.list",
   "interface": "system_room",
   "process": {
-    "bin": "target/debug/octopus-file-read-tool",
+    "bin": "target/debug/phobos-file-read-tool",
     "authority": {
       "read_root_slots": [],
       "write_root_slots": [],

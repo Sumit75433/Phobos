@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/client_extension_manifest.schema.json",
-  "title": "Octopus Client Extension Manifest",
+  "$id": "https://phobos.local/schemas/client_extension_manifest.schema.json",
+  "title": "Phobos Client Extension Manifest",
   "type": "object",
   "required": [
     "schema",
@@ -17,7 +17,7 @@
     "contribution"
   ],
   "properties": {
-    "schema": { "const": "octopus.client_extension" },
+    "schema": { "const": "phobos.client_extension" },
     "schema_version": { "const": 1 },
     "id": { "$ref": "#/$defs/id" },
     "version": {
@@ -29,7 +29,7 @@
     "description": { "type": "string", "minLength": 1, "maxLength": 320 },
     "developer": { "type": "string", "minLength": 1, "maxLength": 96 },
     "category": { "enum": ["widget", "tab", "repair", "input"] },
-    "glyph": { "$ref": "https://octopus.local/schemas/client_surface_document.schema.json#/$defs/glyph" },
+    "glyph": { "$ref": "https://phobos.local/schemas/client_surface_document.schema.json#/$defs/glyph" },
     "default_installed": { "type": "boolean" },
     "contribution": {
       "oneOf": [
@@ -47,7 +47,7 @@
           "required": ["kind", "document"],
           "properties": {
             "kind": { "const": "surface" },
-            "document": { "$ref": "https://octopus.local/schemas/client_surface_document.schema.json" }
+            "document": { "$ref": "https://phobos.local/schemas/client_surface_document.schema.json" }
           },
           "additionalProperties": false
         },

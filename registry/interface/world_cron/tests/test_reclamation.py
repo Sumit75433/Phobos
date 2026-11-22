@@ -89,7 +89,7 @@ class Reclamation(unittest.TestCase):
         m = self.module
         m.private_directory(m.PAYLOADS_DIR)
         raw = m.canonical_json({'payload_path': str(self.root / 'outside'), 'payload_content_hash': 'a' * 64})
-        digest = m.octopus_content_hash(raw)
+        digest = m.phobos_content_hash(raw)
         path = Path(m.PAYLOADS_DIR) / ('artifact-' + digest + '.artifact.json')
         m.atomic_write_bytes(str(path), raw)
         with self.assertRaisesRegex(ValueError, 'escapes'):

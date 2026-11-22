@@ -403,7 +403,7 @@ function numberValue(value, fallback) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-async function interfaceArtifactTransferProjection(octopusHomeRoot, row, readinessCache) {
+async function interfaceArtifactTransferProjection(phobosHomeRoot, row, readinessCache) {
   const interfaceId = stringValue(row?.rule_id ?? row?.id ?? row?.template_name);
   const activationRefs = interfaceActivationRefs(row?.activation_sidecars);
   const activation = arrayValue(row?.activation_sidecars)
@@ -440,10 +440,10 @@ async function interfaceArtifactTransferProjection(octopusHomeRoot, row, readine
     : "";
   if (!socketPath && config.bind_interface_socket_when_env_unset === true) {
     const digest = crypto.createHash("sha256").update(safeId).digest("hex").slice(0, 24);
-    socketPath = path.join(octopusHomeRoot, "app-server-control", `${digest}.sock`);
+    socketPath = path.join(phobosHomeRoot, "app-server-control", `${digest}.sock`);
   }
   if (!socketPath && config.bind_conventional_socket_when_env_unset === true) {
-    socketPath = path.join(octopusHomeRoot, "app-server-control", "app-server-control.sock");
+    socketPath = path.join(phobosHomeRoot, "app-server-control", "app-server-control.sock");
   }
   if (!socketPath) {
     return {

@@ -6,10 +6,10 @@ const { Cdp, EXIT, createRedactor, failure, readSelectedAuth, sleep, writeJson }
 async function walk(args) {
   if (args.length !== 2 || args[0] !== "--manifest" || !path.isAbsolute(args[1])) throw failure("Usage: walk-onboarding.cjs --manifest /absolute/private/launch.json (created by dev:onboarding).", EXIT.arguments);
   const manifest = JSON.parse(fs.readFileSync(args[1], "utf8"));
-  if (manifest.schema_version !== 1 || !/^http:\/\/127\.0\.0\.1:\d+$/.test(manifest.endpoint) || !manifest.browserPath?.startsWith("/devtools/browser/") || manifest.bundleRoot !== path.join(manifest.repoRoot, "app/build/Octopus.app") || !manifest.home.startsWith("/private/tmp/octopus-onb-") || !manifest.reportRoot.startsWith(path.join(manifest.repoRoot, ".private/onboarding") + path.sep)) throw failure("The launch manifest is not an isolated packaged onboarding run.", EXIT.arguments);
+  if (manifest.schema_version !== 1 || !/^http:\/\/127\.0\.0\.1:\d+$/.test(manifest.endpoint) || !manifest.browserPath?.startsWith("/devtools/browser/") || manifest.bundleRoot !== path.join(manifest.repoRoot, "app/build/Phobos.app") || !manifest.home.startsWith("/private/tmp/phobos-onb-") || !manifest.reportRoot.startsWith(path.join(manifest.repoRoot, ".private/onboarding") + path.sep)) throw failure("The launch manifest is not an isolated packaged onboarding run.", EXIT.arguments);
   process.kill(manifest.appPid, 0);
   let report = JSON.parse(fs.readFileSync(manifest.reportFile, "utf8"));
-  const credentialFile = process.env.OCTOPUS_ONBOARDING_REDACTION_FILE;
+  const credentialFile = process.env.PHOBOS_ONBOARDING_REDACTION_FILE;
   const credentialRedactor = credentialFile ? readSelectedAuth(credentialFile).redact : createRedactor();
   const password = crypto.randomBytes(24).toString("base64url");
   const redact = (value) => credentialRedactor(String(value).split(password).join("[REDACTED]"));
@@ -70,19 +70,19 @@ async function walk(args) {
     await cdp.send("Input.insertText", { text });
   }
   async function readSetupEvidence() {
-    const evidence = await evaluate("Promise.all([window.octopusTransport.clientSetupReadCurrent(),window.octopusTransport.workspaceSetupState()]).then(([setup,workspace])=>({setup,workspace}))");
+    const evidence = await evaluate("Promise.all([window.phobosTransport.clientSetupReadCurrent(),window.phobosTransport.workspaceSetupState()]).then(([setup,workspace])=>({setup,workspace}))");
     writeJson(path.join(manifest.reportRoot, "setup-state.json"), evidence, redact);
     return evidence;
   }
   async function captureRuntimeEvidence(name) {
-    const evidence = await evaluate("window.octopusTransport.bootStatus().then(async boot=>({boot,terminal:boot.ready?await window.octopusTransport.openLaunchTerminal({}):null}))");
+    const evidence = await evaluate("window.phobosTransport.bootStatus().then(async boot=>({boot,terminal:boot.ready?await window.phobosTransport.openLaunchTerminal({}):null}))");
     writeJson(path.join(manifest.reportRoot, `${name}-runtime.json`), evidence, redact);
   }
   async function assertNoDeliveryFailure(scope) {
     const error = await evaluate(`document.querySelector(${JSON.stringify(`${scope} .composer-queue-row[data-message-status="unknown"],${scope} .composer-queue-row[data-message-status="failed"]`)})?.innerText||''`);
     if (error) throw failure(`Native message delivery failed: ${error}`, boundaryCode);
   }
-  const projection = (method) => evaluate(`window.octopusTransport.projectionRead({contract_version:1,method:${JSON.stringify(method)}})`);
+  const projection = (method) => evaluate(`window.phobosTransport.projectionRead({contract_version:1,method:${JSON.stringify(method)}})`);
   async function readAgentCatalog() {
     const response = await projection("projection.operator.chat.contexts");
     return (response.contexts || []).flatMap((context) => (context.workers || [])
@@ -94,9 +94,9 @@ async function walk(args) {
     writeJson(path.join(manifest.reportRoot, "task-agent-catalog-before.json"), initialAgents, redact);
     await waitFor("create Agent action", () => has('button[aria-label^="Create agent"]:not(:disabled)'));
     await click('button[aria-label^="Create agent"]');
-    await waitFor("create Agent dialog", () => has(".agent-preset-dialog #octopus-agent-name"));
+    await waitFor("create Agent dialog", () => has(".agent-preset-dialog #phobos-agent-name"));
     const name = "Onboarding Calculator " + crypto.randomBytes(6).toString("hex");
-    await type(".agent-preset-dialog #octopus-agent-name", name);
+    await type(".agent-preset-dialog #phobos-agent-name", name);
     const projectControl = await evaluate("[...document.querySelectorAll('.agent-preset-dialog .oc-select-field')].find(e=>e.querySelector('.oc-field__label')?.textContent==='Project')?.querySelector('button')?.id");
     if (!projectControl) throw failure("The Agent dialog has no Project selector.", EXIT.task);
     await click(`.agent-preset-dialog button[id=${JSON.stringify(projectControl)}]`);
@@ -107,7 +107,7 @@ async function walk(args) {
     await waitFor("Agent Project selected", () => evaluate(`document.querySelector(${JSON.stringify(`.agent-preset-dialog button[id=${JSON.stringify(projectControl)}]`)})?.innerText.trim()===${JSON.stringify(projectName)}`));
     const homes = (await projection("projection.operator.chats.list")).chats.filter((run) => run.client_surface_role === "home");
     if (homes.length !== 1 || !homes[0].provider_interface_id) throw failure("The replied Home has no unique provider binding for the Agent Model choice.", EXIT.task);
-    const providerCatalog = await evaluate("window.octopusTransport.providerInterfaces()");
+    const providerCatalog = await evaluate("window.phobosTransport.providerInterfaces()");
     const modelProvider = providerCatalog.providers.filter((provider) => provider.id === homes[0].provider_interface_id);
     if (modelProvider.length !== 1 || !modelProvider[0].label) throw failure("The replied Home provider has no unique declared Model label.", EXIT.task);
     const modelControl = await evaluate("[...document.querySelectorAll('.agent-preset-dialog .oc-select-field')].find(e=>e.querySelector('.oc-field__label')?.textContent==='Model')?.querySelector('button')?.id");
@@ -124,7 +124,7 @@ async function walk(args) {
     await snapshot("create-task-agent");
     await click('.agent-preset-dialog button[type="submit"]');
     const agent = await waitFor("created Agent descriptor", async () => {
-      if (await has(".agent-preset-dialog #octopus-agent-name")) return false;
+      if (await has(".agent-preset-dialog #phobos-agent-name")) return false;
       const matches = (await readAgentCatalog()).filter((candidate) => candidate.name === name);
       if (matches.length > 1) throw failure("The created Agent has conflicting descriptor identities.", EXIT.task);
       return matches[0];
@@ -156,7 +156,7 @@ async function walk(args) {
     cdp = await Cdp.connect(page.webSocketDebuggerUrl);
     await cdp.send("Runtime.enable");
     await cdp.send("Page.enable");
-    const appInfo = await evaluate("window.octopusTransport.appInfo()");
+    const appInfo = await evaluate("window.phobosTransport.appInfo()");
     if (!appInfo.isPackaged) throw failure("The renderer is not a packaged app.", EXIT.launch);
     mark("owned packaged renderer", { appInfo, pageUrl: page.url });
     enterBoundary("welcome", EXIT.welcome);
@@ -170,13 +170,13 @@ async function walk(args) {
     enterBoundary("sign-in", EXIT.signIn);
     if (manifest.mode === "unauthenticated") {
       await waitFor("sign-in action", () => has(".welcome-signin:not(:disabled)"));
-      const account = await evaluate("window.octopusTransport.chatgptAccount()");
+      const account = await evaluate("window.phobosTransport.chatgptAccount()");
       if (account.signedIn) throw failure("The unauthenticated environment unexpectedly has an account.", EXIT.signIn);
       await snapshot("sign-in-action");
       await click(".welcome-signin");
       const loginState = await waitFor("native sign-in launch", async () => {
         if ((await body()).includes("Finish signing in") && await has(".welcome-signin:disabled")) return "pending";
-        if (await has(".launch-scene") && (await evaluate("window.octopusTransport.chatgptAccount()")).signedIn) return "completed";
+        if (await has(".launch-scene") && (await evaluate("window.phobosTransport.chatgptAccount()")).signedIn) return "completed";
         return null;
       });
       await snapshot("sign-in-action-result");
@@ -193,20 +193,20 @@ async function walk(args) {
       return;
     }
     await waitFor("reused credential accepted", () => has(".launch-scene"));
-    const account = await evaluate("window.octopusTransport.chatgptAccount()");
+    const account = await evaluate("window.phobosTransport.chatgptAccount()");
     if (!account.signedIn) throw failure("The explicitly selected credential was not accepted by the installed provider.", EXIT.signIn);
     mark("selected credential accepted", { accountSignedIn: true, reusedCredentialOnly: true });
     enterBoundary("boot", EXIT.boot);
     await waitFor("launch terminal", () => has(".launch-scene[data-phase=terminal] .xterm-helper-textarea"));
-    const beforeBoot = await evaluate("window.octopusTransport.bootStatus()");
+    const beforeBoot = await evaluate("window.phobosTransport.bootStatus()");
     if (beforeBoot.ready) throw failure("The isolated Home was already booted before its launch action.", EXIT.boot);
-    if (!beforeBoot.launchCommand?.includes(path.join(manifest.appRoot, "bin/octopus"))) throw failure("The launch action does not name the bundled runtime.", EXIT.boot);
+    if (!beforeBoot.launchCommand?.includes(path.join(manifest.appRoot, "bin/phobos"))) throw failure("The launch action does not name the bundled runtime.", EXIT.boot);
     writeJson(path.join(manifest.reportRoot, "boot-before.json"), beforeBoot, redact);
     await snapshot("launch-terminal");
     await evaluate("document.querySelector('.xterm-helper-textarea').focus()");
     await key("Enter", "Enter", 13, "\r");
     await waitFor("runtime boot and password", () => has(".welcome-lock-form input[type=password]"), 180000);
-    const afterBoot = await evaluate("window.octopusTransport.bootStatus()");
+    const afterBoot = await evaluate("window.phobosTransport.bootStatus()");
     if (!afterBoot.ready) throw failure("The client showed a password before the fresh runtime was ready.", EXIT.boot);
     writeJson(path.join(manifest.reportRoot, "boot-after.json"), afterBoot, redact);
     try { await captureRuntimeEvidence("boot"); } catch (error) { report.runtimeCaptureError = redact(error.message); }
@@ -225,7 +225,7 @@ async function walk(args) {
     await waitFor("workspace setup", () => has(".setup-step"));
     mark("fresh local password configured");
     enterBoundary("setup", EXIT.setup);
-    for (const [step, title] of [["space", "How will you use Octopus?"], ["projects", "Name the areas you care about"], ["capabilities", "Choose what Octopus can use"], ["review", "Ready to set up"]]) {
+    for (const [step, title] of [["space", "How will you use Phobos?"], ["projects", "Name the areas you care about"], ["capabilities", "Choose what Phobos can use"], ["review", "Ready to set up"]]) {
       await waitFor(`setup ${step}`, () => evaluate(`document.querySelector('.setup-step h1')?.textContent===${JSON.stringify(title)}`));
       if (step === "space") {
         const workSelector = ".setup-presets button";
@@ -253,8 +253,8 @@ async function walk(args) {
     mark("client setup receipt verified");
     enterBoundary("home", EXIT.home);
     await waitFor("Home composer", () => has(".home-response-stage__composer .ProseMirror[contenteditable=true]"));
-    const defaults = await evaluate("window.octopusTransport.defaults()");
-    if (defaults.octopusHome !== manifest.home || defaults.registryRoot !== path.join(manifest.home, "registry")) throw failure("Home projected a different data boundary.", EXIT.home);
+    const defaults = await evaluate("window.phobosTransport.defaults()");
+    if (defaults.phobosHome !== manifest.home || defaults.registryRoot !== path.join(manifest.home, "registry")) throw failure("Home projected a different data boundary.", EXIT.home);
     await snapshot("home-ready");
     mark("fresh Home ready", { defaults, ...ledgerEvidence("home-ready", false) });
     enterBoundary("home-reply", EXIT.homeReply);
@@ -303,8 +303,8 @@ async function walk(args) {
       await click(".chat-conversation-pane .composer-primary-action");
       await waitFor("actual ordinary task reply", async () => {
         await assertNoDeliveryFailure(".chat-conversation-pane");
-        const text = await evaluate("[...document.querySelectorAll('.chat-conversation-pane .octopus-markdown-root')].filter(e=>!e.closest('[data-thread-user-message-id]')).map(e=>e.innerText).join('\\n')");
-        if (!new RegExp(`${taskNonce}:\\s*56(?:\\s|$)`).test(text) || await has(".chat-conversation-pane .octopus-streaming-markdown")) return false;
+        const text = await evaluate("[...document.querySelectorAll('.chat-conversation-pane .phobos-markdown-root')].filter(e=>!e.closest('[data-thread-user-message-id]')).map(e=>e.innerText).join('\\n')");
+        if (!new RegExp(`${taskNonce}:\\s*56(?:\\s|$)`).test(text) || await has(".chat-conversation-pane .phobos-streaming-markdown")) return false;
         report.taskReply = { promptNonce: taskNonce, reply: text };
         return true;
       }, 300000);
@@ -331,7 +331,7 @@ async function walk(args) {
       } catch (readError) { report.setupReadError = redact(readError.message); }
       writeJson(path.join(manifest.reportRoot, "renderer-errors.json"), cdp.events, redact);
       try { await captureRuntimeEvidence("failure"); } catch (captureError) { report.runtimeCaptureError = redact(captureError.message); }
-      const clientLog = path.join(manifest.home, "client/logs/octopus-client.jsonl");
+      const clientLog = path.join(manifest.home, "client/logs/phobos-client.jsonl");
       if (fs.existsSync(clientLog)) fs.writeFileSync(path.join(manifest.reportRoot, "failure-client.log"), redact(fs.readFileSync(clientLog, "utf8").slice(-64000)), { mode: 0o600 });
     }
     save();

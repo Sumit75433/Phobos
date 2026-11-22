@@ -1,6 +1,6 @@
 # Policy - the formation contract
 
-Policy is what the rest of Octopus depends on. Every rule on this page is
+Policy is what the rest of Phobos depends on. Every rule on this page is
 relied on elsewhere.
 
 ## The design goal
@@ -74,7 +74,7 @@ Policy is **composed by an algorithm, not stored as a flat list.** This is the
 reason the architecture reduces everything to primitives: so policy can be
 assembled from them.
 
-If Octopus had no workers and no worker environments - just "sessions" - then
+If Phobos had no workers and no worker environments - just "sessions" - then
 forming an environment's policy would mean summing a flat list of everything
 that exists. Because there are primitives, forming policy is a deterministic
 script that composes over the EE and its nesting, the worker pin, interfaces,
@@ -374,7 +374,7 @@ grant covers the record moves it with an ordinary file write that changes only
 that field; the ledger proves the edit, the run's provider adopts it, and each
 arrival forms its grant in the place the record names at that moment. A run
 never changes its own place. The provider proves the place on every input; an
-edit made outside Octopus, or by the run itself, is unproven, so each turn
+edit made outside Phobos, or by the run itself, is unproven, so each turn
 fails with a clear error while it stands, and restoring the proven place heals
 the run; the failed turns leave nothing that outlives the restore. A room over
 run records already lets its holder create runs in any EE, so moving runs adds

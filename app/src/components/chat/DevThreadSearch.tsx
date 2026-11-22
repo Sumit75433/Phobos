@@ -17,13 +17,13 @@ type Hit = {
 
 type DomMatch = { range: Range; exact: boolean };
 
-const HIGHLIGHT_NAME = "octopus-dev-thread-search";
+const HIGHLIGHT_NAME = "phobos-dev-thread-search";
 const CONTEXT_CHARS = 32;
 const CONTEXT_MATCH_CHARS = 14;
 const MAX_EXPANSION_DEPTH = 6;
 type SearchInstance = { list: () => HTMLElement | null; open: () => void };
-const registry: { installed: boolean; instances: SearchInstance[] } = ((globalThis as { __octopusDevThreadSearch?: { installed: boolean; instances: SearchInstance[] } })
-  .__octopusDevThreadSearch ??= { installed: false, instances: [] });
+const registry: { installed: boolean; instances: SearchInstance[] } = ((globalThis as { __phobosDevThreadSearch?: { installed: boolean; instances: SearchInstance[] } })
+  .__phobosDevThreadSearch ??= { installed: false, instances: [] });
 const instances = registry.instances;
 
 export function DevThreadSearch({
@@ -371,7 +371,7 @@ function collapsedToggles(root: HTMLElement): HTMLElement[] {
 }
 
 function disclosureContainer(toggle: HTMLElement): HTMLElement | null {
-  return toggle.closest<HTMLElement>(".octopus-agent-activity, .octopus-exec-activity, .activity-file-row, .activity-code-block, .octopus-turn-activity")
+  return toggle.closest<HTMLElement>(".phobos-agent-activity, .phobos-exec-activity, .activity-file-row, .activity-code-block, .phobos-turn-activity")
     ?? toggle.parentElement?.parentElement
     ?? null;
 }

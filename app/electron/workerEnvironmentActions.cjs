@@ -169,7 +169,7 @@ async function performLocked(options, request, workerEnvironmentId, snapshots) {
   }
   return {
     action,
-    outsideOctopusEvidence: true,
+    outsidePhobosEvidence: true,
     paths: requestedPaths,
     projectionRevision,
     runId,
@@ -210,7 +210,7 @@ async function mutateGitIndex({ action, gitPaths, revalidate, root }) {
   const indexPath = await gitIndexPath(root);
   const indexDirectory = path.dirname(indexPath);
   const nonce = `${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const temporaryIndex = path.join(indexDirectory, `.octopus-index-${nonce}`);
+  const temporaryIndex = path.join(indexDirectory, `.phobos-index-${nonce}`);
   const temporaryLock = `${temporaryIndex}.lock`;
   const initial = await readGitIndexState(indexPath);
   try {
@@ -848,7 +848,7 @@ async function writeFileState(root, relativePath, state, observed) {
     if (written.exists) throw new Error(`Operator action failed to remove its target: ${relativePath}`);
     return written;
   }
-  const temporary = path.join(parent, `.${path.basename(target)}.octopus-operator-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const temporary = path.join(parent, `.${path.basename(target)}.phobos-operator-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
   try {
     await fs.writeFile(temporary, state.bytes, { flag: "wx", mode: state.mode || 0o644 });
     await assertExpectedState(root, relativePath, observed, observed);

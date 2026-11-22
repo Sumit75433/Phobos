@@ -43,7 +43,7 @@ async function until(predicate, label) {
 }
 const digest = (letter) => letter.repeat(64);
 const application = (id, extra = {}) => ({
-  id, name: `Application ${id}`, description: "Keeps notes", category: "connector", developer: "Octopus", version: "1.0.0", icon: "", logo: "", logo_dark: "", logo_data_url: "",
+  id, name: `Application ${id}`, description: "Keeps notes", category: "connector", developer: "Phobos", version: "1.0.0", icon: "", logo: "", logo_dark: "", logo_data_url: "",
   logo_dark_data_url: "", interfaces: [], artifact_bindings: [], installed: false, materialized: true, partially_materialized: false, valid: true, missing_interface_ids: [],
   descriptor_path: "", manifest_path: "", manifest_digest: "", package_id: `package.${id}`, installed_digest: digest("b"), source_available: true, source_kind: "local",
   source_digest: digest("a"), install_packages: [], source_file_count: 1, receipt_state: "stale", receipt_digest: digest("c"), managed: true, install_block_reason: "",
@@ -58,9 +58,9 @@ test("repairing a stale or receipt-less application asks the host to repair exac
     "projection.operator.os.applications": { applications: [application("stale"), application("missing", { receipt_state: "missing", receipt_digest: "" })], projects: [], errors: [] },
     "projection.operator.os.local_packages": { packs: [], errors: [] },
   };
-  w.octopusTransport = new Proxy({
+  w.phobosTransport = new Proxy({
     projectionRead: async (request) => structuredClone(projections[request.method] ?? {}),
-    mutateOctopusOsWorkspace: async (request) => { mutations.push(structuredClone(request)); return { status: "complete" }; },
+    mutatePhobosOsWorkspace: async (request) => { mutations.push(structuredClone(request)); return { status: "complete" }; },
   }, { get: (target, name) => target[name] ?? (typeof name === "string" && name.startsWith("on") ? () => () => {} : () => new Promise(() => {})) });
   root.render(React.createElement(ApplicationsView, { accessProfile: "live", searchFocusTick: 0 }));
   const repairButton = (name) => [...container.querySelectorAll("button")].find((candidate) => {
@@ -90,13 +90,13 @@ test("install review uses dialog sections and a catalogue refresh preserves the 
     install_packages: [{ id: "system", name: "System Room", installed: true, source_digest: digest("a") },
       { id: "package.fresh", name: "Application fresh", installed: false, source_digest: digest("a") }],
   });
-  w.octopusTransport = new Proxy({
+  w.phobosTransport = new Proxy({
     projectionRead: async (request) => {
       if (request.method !== "projection.operator.os.applications") return { packs: [], errors: [] };
       if (initial) { initial = false; return { applications: [fresh], projects: [], errors: [] }; }
       return new Promise((resolve) => reads.push(resolve));
     },
-    mutateOctopusOsWorkspace: async () => ({ status: "complete" }),
+    mutatePhobosOsWorkspace: async () => ({ status: "complete" }),
   }, { get: (target, name) => target[name] ?? (typeof name === "string" && name.startsWith("on") ? () => () => {} : () => new Promise(() => {})) });
   root.render(React.createElement(ApplicationsView, { key: "refresh", accessProfile: "live", searchFocusTick: 0 }));
   const install = () => [...container.querySelectorAll("button")].find((button) => button.textContent === "Install");

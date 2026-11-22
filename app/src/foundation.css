@@ -1,11 +1,11 @@
-@layer octopus-foundation, properties, theme, base, components, utilities;
+@layer phobos-foundation, properties, theme, base, components, utilities;
 
-@import "./design-system/octopus-tokens.css" layer(octopus-foundation);
-@import "./design-system/project-colors.css" layer(octopus-foundation);
-@import "./design-system/design-system.css" layer(octopus-foundation);
+@import "./design-system/phobos-tokens.css" layer(phobos-foundation);
+@import "./design-system/project-colors.css" layer(phobos-foundation);
+@import "./design-system/design-system.css" layer(phobos-foundation);
 @import "./design-system/status.css" layer(components);
 
-@layer octopus-foundation {
+@layer phobos-foundation {
   :root {
     --gray-0: #ffffff;
     --gray-100: #ededed;
@@ -142,7 +142,7 @@
     --ease-enter: cubic-bezier(0.19, 1, 0.22, 1);
     --ease-enter-snappy: cubic-bezier(0.23, 1, 0.32, 1);
     --thread-content-max-width: 48rem;
-    --octopus-window-zoom: 1;
+    --phobos-window-zoom: 1;
     color: var(--text);
     background: var(--bg);
     font-family: var(--font-ui);
@@ -153,7 +153,7 @@
     letter-spacing: 0;
   }
 
-  :is([data-octopus-window-type="browser"], [data-octopus-window-type="chrome-extension"], [data-octopus-window-type="electron"]) body {
+  :is([data-phobos-window-type="browser"], [data-phobos-window-type="chrome-extension"], [data-phobos-window-type="electron"]) body {
     --color-background-primary-soft-alpha: var(--color-background-elevated-secondary);
     --padding-panel-base: calc(var(--spacing) * 5);
     --padding-panel: var(--padding-panel-base);
@@ -356,11 +356,11 @@
     }
   }
 
-  :root[data-octopus-window-type="electron"] {
+  :root[data-phobos-window-type="electron"] {
     --vscode-font-weight: 430;
   }
 
-  :root[data-octopus-window-type="electron"] body {
+  :root[data-phobos-window-type="electron"] body {
     font-weight: var(--vscode-font-weight);
   }
 
@@ -380,20 +380,20 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  :root[data-octopus-window-type="electron"]:not(.electron-opaque),
-  :root[data-octopus-window-type="electron"]:not(.electron-opaque) body,
-  :root[data-octopus-window-type="electron"]:not(.electron-opaque) #root {
+  :root[data-phobos-window-type="electron"]:not(.electron-opaque),
+  :root[data-phobos-window-type="electron"]:not(.electron-opaque) body,
+  :root[data-phobos-window-type="electron"]:not(.electron-opaque) #root {
     background: transparent;
   }
 
-  :root[data-octopus-window-type="electron"].electron-opaque,
-  :root[data-octopus-window-type="electron"].electron-opaque body,
-  :root[data-octopus-window-type="electron"].electron-opaque #root {
+  :root[data-phobos-window-type="electron"].electron-opaque,
+  :root[data-phobos-window-type="electron"].electron-opaque body,
+  :root[data-phobos-window-type="electron"].electron-opaque #root {
     background-color: var(--color-background-surface-under);
     background-image: none;
   }
 
-  :root[data-octopus-window-type="electron"].electron-window-resizing #root {
+  :root[data-phobos-window-type="electron"].electron-window-resizing #root {
     visibility: hidden;
   }
 

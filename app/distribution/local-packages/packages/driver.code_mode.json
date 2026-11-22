@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.code_mode",
   "version": "1.0.1",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Code Mode",
     "description": "JavaScript with persistent bound context that reaches other tools through artifacts.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "code"
   },

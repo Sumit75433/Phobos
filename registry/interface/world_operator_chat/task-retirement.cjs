@@ -55,7 +55,7 @@ const nullableError = (value) => value === null || typeof value === "string" && 
 
 function absolutePath(value) {
   if (typeof value !== "string" || !path.isAbsolute(value) || path.normalize(value) !== value
-    || value.includes("\\") || /\p{Cc}/u.test(value) || value.split("/").includes(".octopus-publication")) {
+    || value.includes("\\") || /\p{Cc}/u.test(value) || value.split("/").includes(".phobos-publication")) {
     throw new Error("Task retirement directory path must be an ordinary absolute normalized path");
   }
   return value;
@@ -87,7 +87,7 @@ function preimage(value) {
   const entries = value.entries.map((entry) => {
     exact(entry, ["relative_path", "kind", "identity", "mode", "bytes", "digest"], "directory entry");
     if (typeof entry.relative_path !== "string" || !entry.relative_path || entry.relative_path.includes("\\")
-      || /\p{Cc}/u.test(entry.relative_path) || entry.relative_path.split("/").some((part) => !part || [".", "..", ".octopus-publication"].includes(part))
+      || /\p{Cc}/u.test(entry.relative_path) || entry.relative_path.split("/").some((part) => !part || [".", "..", ".phobos-publication"].includes(part))
       || previous !== undefined && compareRelativePaths(previous, entry.relative_path) >= 0
       || !["directory", "file", "symlink"].includes(entry.kind) || !unsigned(entry.mode) || entry.mode > 0o7777
       || !unsigned(entry.bytes) || (entry.kind === "directory" ? entry.bytes !== 0 || entry.digest !== null : !validHash(entry.digest))) {

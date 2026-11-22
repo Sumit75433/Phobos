@@ -231,7 +231,7 @@
   --diffs-min-number-column-width: 4ch;
 }
 
-.os-files-code-viewer octopus-files-diffs {
+.os-files-code-viewer phobos-files-diffs {
   display: block;
 }
 
@@ -362,7 +362,7 @@
   padding: 8px 8px 1px;
 }
 
-.os-files-octopus-tree {
+.os-files-phobos-tree {
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden;

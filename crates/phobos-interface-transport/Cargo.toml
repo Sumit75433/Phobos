@@ -1,0 +1,42 @@
+[package]
+name = "phobos-interface-transport"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[lib]
+name = "phobos_interface_transport"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+fs2 = "0.4"
+blake3.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["rt", "sync", "io-std", "io-util", "time", "process", "net"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+tracing = "0.1.44"
+notify.workspace = true
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-file-storage = { path = "../phobos-file-storage" }
+phobos-interface-projection = { path = "../phobos-interface-projection" }
+phobos-interfaces = { path = "../phobos-interfaces" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-run-record = { path = "../phobos-run-record" }
+phobos-verifiers = { path = "../phobos-verifiers" }
+schemars.workspace = true
+sha2 = "0.10"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.182"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+object = { version = "0.37.3", default-features = false, features = ["read", "std"] }
+phobos-util-pty = { path = "../../registry/worker_environment_kind/process_session/packages/phobos-util-pty" }
+
+[dev-dependencies]
+phobos-policy = { path = "../phobos-policy" }
+tempfile = "3.23.0"

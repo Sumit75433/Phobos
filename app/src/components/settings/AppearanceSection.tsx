@@ -33,8 +33,8 @@ import { OcDropdown } from "../../design-system/OcDropdown";
 import { Glyph } from "../IconGlyphs";
 import { MessageTooltip } from "../chat/MessageTooltip";
 import { ThemePreviewGraphic } from "./AppearanceThemePreview";
-import { octopusDiffThemeName, registerOctopusDiffThemes } from "./octopusDiffThemes";
-import { octopusDiffRawUnsafeCss } from "./octopusDiffUnsafeCss";
+import { phobosDiffThemeName, registerPhobosDiffThemes } from "./phobosDiffThemes";
+import { phobosDiffRawUnsafeCss } from "./phobosDiffUnsafeCss";
 import { SettingsHeading } from "./SettingsHeading";
 import { useAppErrorToast } from "../../toasts";
 import { copyText } from "../../runtimeFormat";
@@ -64,10 +64,10 @@ const themePreviewDiff = parseDiffFromFile(
   { name: "src/theme-preview.ts", contents: themePreviewBefore },
   { name: "src/theme-preview.ts", contents: themePreviewAfter },
 );
-const diffThemeRegistrationKey = Symbol.for("octopus.diff-themes.registered");
+const diffThemeRegistrationKey = Symbol.for("phobos.diff-themes.registered");
 const diffThemeRegistry = globalThis as typeof globalThis & { [diffThemeRegistrationKey]?: boolean };
 if (!diffThemeRegistry[diffThemeRegistrationKey]) {
-  registerOctopusDiffThemes();
+  registerPhobosDiffThemes();
   diffThemeRegistry[diffThemeRegistrationKey] = true;
 }
 
@@ -258,13 +258,13 @@ export function AppearanceSection() {
           <PreferenceRow
             control={(
               <OcSwitch
-                checked={appearance.octopuses}
-                label="Octopuses"
-                onCheckedChange={(octopuses) => setAppearance({ octopuses })}
+                checked={appearance.phoboses}
+                label="Phoboses"
+                onCheckedChange={(phoboses) => setAppearance({ phoboses })}
               />
             )}
-            description="Octopuses swim through the waves on Home and leave when a call starts; on the new-task screen each task's agent swims in its colour"
-            label="Octopuses"
+            description="Phoboses swim through the waves on Home and leave when a call starts; on the new-task screen each task's agent swims in its colour"
+            label="Phoboses"
           />
           <PreferenceRow
             control={(
@@ -276,7 +276,7 @@ export function AppearanceSection() {
                 value={appearance.uiFontSize}
               />
             )}
-            description="Adjust the base size used for the Octopus UI"
+            description="Adjust the base size used for the Phobos UI"
             label="UI font size"
           />
           <PreferenceRow
@@ -381,7 +381,7 @@ function ThemeDiffPreview({ appearance }: { appearance: AppearanceSettings }) {
     ? (systemDark ? "dark" : "light")
     : appearance.themeMode;
   const codeTheme = themeType === "dark" ? appearance.darkCodeTheme : appearance.lightCodeTheme;
-  const diffThemeName = octopusDiffThemeName(themeType, codeTheme);
+  const diffThemeName = phobosDiffThemeName(themeType, codeTheme);
   const options = useMemo(() => ({
     diffIndicators: appearance.diffMarkerStyle === "symbols" ? "classic" as const : "bars" as const,
     diffStyle: "split" as const,
@@ -392,7 +392,7 @@ function ThemeDiffPreview({ appearance }: { appearance: AppearanceSettings }) {
     overflow: "scroll" as const,
     theme: diffThemeName,
     themeType,
-    unsafeCSS: octopusDiffRawUnsafeCss,
+    unsafeCSS: phobosDiffRawUnsafeCss,
   }), [appearance.diffMarkerStyle, diffThemeName, themeType]);
 
   useEffect(() => {
@@ -898,7 +898,7 @@ function NumberUnitField({ label, value, min, max, onChange }: { label: string; 
   );
 }
 
-const THEME_SHARE_PREFIX = "octopus-theme-v1:";
+const THEME_SHARE_PREFIX = "phobos-theme-v1:";
 
 function themeShareString(appearance: AppearanceSettings, mode: ThemeKind): string {
   const light = mode === "light";

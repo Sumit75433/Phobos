@@ -5,7 +5,7 @@
     "system_gui"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-gui-session-tool"
+    "target/debug/phobos-gui-session-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "instance_config_files": [

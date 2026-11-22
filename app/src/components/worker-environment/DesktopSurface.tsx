@@ -36,7 +36,7 @@ export function DesktopSurface({ active = true, environment, surface }: {
   useEffect(() => {
     const current = ++generation.current, attachment = crypto.randomUUID(); viewId.current = attachment;
     let timer: ReturnType<typeof setTimeout> | undefined, revision = "";
-    const transport = window.octopusTransport?.desktopSurfaceRequest;
+    const transport = window.phobosTransport?.desktopSurfaceRequest;
     if (!active || !surface || surface.mode === "fixture" || !transport) return;
     const target = { workerEnvironmentId: environment.id, surfaceId: surface.id, runId: environment.runId, viewId: attachment };
     async function read() {
@@ -62,7 +62,7 @@ export function DesktopSurface({ active = true, environment, surface }: {
   }, [active, identity, refresh]);
 
   async function control(operation: DesktopSurfaceRequest["operation"]) {
-    const transport = window.octopusTransport?.desktopSurfaceRequest;
+    const transport = window.phobosTransport?.desktopSurfaceRequest;
     if (!surface || !transport || surface.readOnly || (controlPending.current && (operation !== "stop" || controlPending.current.operation === "stop"))) return;
     if (operation !== "stop" && !evidence) return;
     const pending = { operation }; controlPending.current = pending; setPendingControl(operation); setWarning(false);
@@ -87,7 +87,7 @@ export function DesktopSurface({ active = true, environment, surface }: {
     <div className="we-desktop-fixture-toolbar"><span /><span /><span /><strong>{dataText(surface.data, "title") || surface.label}</strong></div>
     <div><Glyph name="desktop" size={28} /><strong>{dataText(surface.data, "detail") || "Test desktop room"}</strong><small>No host desktop is connected.</small></div>
   </div></div>;
-  if (!surface || !window.octopusTransport?.desktopSurfaceRequest) return <LiveSurfaceEmpty glyph="desktop" title="Computer use unavailable" detail="This task has no connected application view." />;
+  if (!surface || !window.phobosTransport?.desktopSurfaceRequest) return <LiveSurfaceEmpty glyph="desktop" title="Computer use unavailable" detail="This task has no connected application view." />;
   const mode = evidence?.control.mode;
   const permissionsMissing = evidence && (!evidence.permissions.screen_capture || !evidence.permissions.accessibility);
   const state = mode === "stopped" ? "Stopped" : mode === "human" ? "You have control" : "Computer use";
@@ -131,7 +131,7 @@ function NativeApplicationView({ active, application, environment, surface, retr
   const [attached, setAttached] = useState(false);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    const transport = window.octopusTransport?.desktopApplicationView;
+    const transport = window.phobosTransport?.desktopApplicationView;
     if (!active || !frame.current) return;
     if (!transport) { setAttached(false); setError("Native application preview is unavailable."); return; }
     setError(""); setAttached(false);

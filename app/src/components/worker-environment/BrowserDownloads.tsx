@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useRef, useState, type MouseEvent } from "react";
 import type { WorkerEnvironmentProjection, WorkerEnvironmentSurfaceProjection } from "../../data/topology";
-import type { OctopusBrowserDownload, OctopusBrowserDownloadHistory, OctopusBrowserDownloadRequest, OctopusBrowserDownloadSnapshot, OctopusClientContextMenuItem } from "../../electron";
+import type { PhobosBrowserDownload, PhobosBrowserDownloadHistory, PhobosBrowserDownloadRequest, PhobosBrowserDownloadSnapshot, PhobosClientContextMenuItem } from "../../electron";
 import { OcButton, OcMenuSurface } from "../../design-system/components";
 import { Glyph } from "../IconGlyphs";
 import { formatBytes } from "../chat/format";
@@ -9,7 +9,7 @@ const activeStatuses = new Set(["started", "in_progress", "paused"]);
 const peekHistory = new Map<string, { sequence: number; availableAt: number }>();
 type Props = { active: boolean; environment: WorkerEnvironmentProjection; surface: WorkerEnvironmentSurfaceProjection; standalone?: boolean; openRequest?: number };
 
-export function browserDownloadIndicator(snapshot: OctopusBrowserDownloadSnapshot | null) {
+export function browserDownloadIndicator(snapshot: PhobosBrowserDownloadSnapshot | null) {
   const records = snapshot?.downloads ?? [], active = records.filter(record => activeStatuses.has(record.status));
   const total = active.reduce((sum, record) => sum + record.totalBytes, 0);
   const received = active.reduce((sum, record) => sum + Math.min(record.totalBytes, Math.max(0, record.receivedBytes)), 0);
@@ -23,7 +23,7 @@ export function browserDownloadIndicator(snapshot: OctopusBrowserDownloadSnapsho
   return { active: active.length, paused, percent, attention: failed || complete, label };
 }
 
-function statusText(record: OctopusBrowserDownload) {
+function statusText(record: PhobosBrowserDownload) {
   if (record.artifactError) return record.artifactError;
   const bytes = record.totalBytes > 0 && record.status !== "complete" ? `${formatBytes(record.receivedBytes)} of ${formatBytes(record.totalBytes)}` : formatBytes(record.receivedBytes);
   if (record.status === "in_progress") {
@@ -38,24 +38,24 @@ function statusText(record: OctopusBrowserDownload) {
 }
 
 export function BrowserDownloads({ active, environment, surface, standalone = false, openRequest = 0 }: Props) {
-  const [snapshot, setSnapshot] = useState<OctopusBrowserDownloadSnapshot | null>(null), [open, setOpen] = useState(standalone);
+  const [snapshot, setSnapshot] = useState<PhobosBrowserDownloadSnapshot | null>(null), [open, setOpen] = useState(standalone);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
-  const [historyMode, setHistoryMode] = useState(standalone), [history, setHistory] = useState<OctopusBrowserDownloadHistory | null>(null);
+  const [historyMode, setHistoryMode] = useState(standalone), [history, setHistory] = useState<PhobosBrowserDownloadHistory | null>(null);
   const [query, setQuery] = useState(""), deferredQuery = useDeferredValue(query), [historyPending, setHistoryPending] = useState(false);
   const historyEpoch = useRef(0);
-  const [error, setError] = useState(""), [pending, setPending] = useState<string | null>(null), [peek, setPeek] = useState<OctopusBrowserDownload | null>(null), [announcement, setAnnouncement] = useState("");
+  const [error, setError] = useState(""), [pending, setPending] = useState<string | null>(null), [peek, setPeek] = useState<PhobosBrowserDownload | null>(null), [announcement, setAnnouncement] = useState("");
   const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), acknowledged = useRef("");
   const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null), peekDeadline = useRef(0), peekRemaining = useRef(5000), paused = useRef(new Set<string>());
-  const initial = useRef(false), current = useRef<OctopusBrowserDownloadSnapshot | null>(null);
+  const initial = useRef(false), current = useRef<PhobosBrowserDownloadSnapshot | null>(null);
   const hostGeneration = String(surface.data.host_generation ?? "");
   const ownerKey = JSON.stringify([environment.id, surface.id, hostGeneration]), owner = useRef(ownerKey);
   owner.current = ownerKey;
   const sourceSequence = (surface.data.downloads as { sequence?: number } | null)?.sequence ?? 0;
-  const request = (action: OctopusBrowserDownloadRequest["action"], id?: string, promptForLocation?: boolean, historyQuery?: { text: string; offset: number }) => {
-    if (!window.octopusTransport?.nativeBrowserDownloads) return Promise.reject(new Error("Native download history is unavailable."));
-    return window.octopusTransport.nativeBrowserDownloads({ workerEnvironmentId: environment.id, surfaceId: surface.id, hostGeneration, action, ...(id === undefined ? {} : { id }), ...(promptForLocation === undefined ? {} : { promptForLocation }), ...(historyQuery === undefined ? {} : { query: historyQuery }) });
+  const request = (action: PhobosBrowserDownloadRequest["action"], id?: string, promptForLocation?: boolean, historyQuery?: { text: string; offset: number }) => {
+    if (!window.phobosTransport?.nativeBrowserDownloads) return Promise.reject(new Error("Native download history is unavailable."));
+    return window.phobosTransport.nativeBrowserDownloads({ workerEnvironmentId: environment.id, surfaceId: surface.id, hostGeneration, action, ...(id === undefined ? {} : { id }), ...(promptForLocation === undefined ? {} : { promptForLocation }), ...(historyQuery === undefined ? {} : { query: historyQuery }) });
   };
-  const accept = (next: OctopusBrowserDownloadSnapshot) => {
+  const accept = (next: PhobosBrowserDownloadSnapshot) => {
     if (!Array.isArray(next.downloads) || !Array.isArray(next.unacknowledgedIds) || !Number.isSafeInteger(next.sequence) || !next.preferences || typeof next.preferences.promptForLocation !== "boolean" || (next.preferences.directory !== null && typeof next.preferences.directory !== "string")) throw new Error("Invalid native download history.");
     if (current.current && next.sequence < current.current.sequence) return;
     const changed = next.downloads.filter(record => current.current && current.current.downloads.find(previous => previous.id === record.id)?.status !== record.status).sort((a, b) => b.sequence - a.sequence)[0];
@@ -89,7 +89,7 @@ export function BrowserDownloads({ active, environment, surface, standalone = fa
     }).catch(reason => { if (!cancelled) setError(String(reason?.message ?? reason)); });
     return () => { cancelled = true; };
   }, [active, environment.id, surface.id, hostGeneration, sourceSequence]);
-  const checkedHistory = (next: OctopusBrowserDownloadSnapshot, text: string, offset: number) => {
+  const checkedHistory = (next: PhobosBrowserDownloadSnapshot, text: string, offset: number) => {
     const page = next.history;
     if (!page || page.text !== text || page.offset !== offset || typeof page.hasMore !== "boolean" || !Array.isArray(page.downloads)
       || page.downloads.length > 100 || new Set(page.downloads.map(record => record.id)).size !== page.downloads.length) throw new Error("Invalid native download history page.");
@@ -150,24 +150,24 @@ export function BrowserDownloads({ active, environment, surface, standalone = fa
   }, [open, standalone]);
   const holdPeek = (reason: string) => { paused.current.add(reason); if (peekTimer.current !== null) { clearTimeout(peekTimer.current); peekTimer.current = null; peekRemaining.current = Math.max(0, peekDeadline.current - Date.now()); } };
   const resumePeek = (reason: string) => { paused.current.delete(reason); if (!paused.current.size && peek && peekTimer.current === null) { peekDeadline.current = Date.now() + peekRemaining.current; peekTimer.current = setTimeout(dismissPeek, peekRemaining.current); } };
-  const perform = async (action: OctopusBrowserDownloadRequest["action"], id?: string, promptForLocation?: boolean) => {
+  const perform = async (action: PhobosBrowserDownloadRequest["action"], id?: string, promptForLocation?: boolean) => {
     setPending(id ?? action); setError("");
     try { const next = await request(action, id, promptForLocation); if (owner.current !== ownerKey) return; accept(next); if (action === "open" || action === "show-in-folder") dismissPeek(); }
     catch (reason) { if (owner.current === ownerKey) setError(String((reason as Error)?.message ?? reason)); }
     finally { if (owner.current === ownerKey) setPending(null); }
   };
-  const menu = async (event: MouseEvent, record: OctopusBrowserDownload) => {
+  const menu = async (event: MouseEvent, record: PhobosBrowserDownload) => {
     event.preventDefault(); event.stopPropagation();
-    const actions: OctopusClientContextMenuItem[] = [];
+    const actions: PhobosClientContextMenuItem[] = [];
     if (record.status === "complete") actions.push({ id: "open", label: "Open", enabled: record.fileExists });
     actions.push({ id: "show-in-folder", label: "Show in Finder", enabled: record.fileExists });
     if (activeStatuses.has(record.status)) actions.push({ id: "cancel", label: "Stop", enabled: record.canCancel });
     actions.push({ id: "copy-address", label: "Copy address" }, { id: "copy-path", label: "Copy path" });
     if (!activeStatuses.has(record.status)) actions.push({ type: "separator" }, { id: "remove", label: "Remove from list" });
-    if (!window.octopusTransport?.showClientContextMenu) { setError("Native download actions are unavailable."); return; }
+    if (!window.phobosTransport?.showClientContextMenu) { setError("Native download actions are unavailable."); return; }
     try {
-      const result = await window.octopusTransport.showClientContextMenu({ requestId: crypto.randomUUID(), items: actions, position: { x: event.clientX, y: event.clientY } });
-      if (owner.current === ownerKey && result.id && actions.some(item => "id" in item && item.id === result.id)) await perform(result.id as OctopusBrowserDownloadRequest["action"], record.id);
+      const result = await window.phobosTransport.showClientContextMenu({ requestId: crypto.randomUUID(), items: actions, position: { x: event.clientX, y: event.clientY } });
+      if (owner.current === ownerKey && result.id && actions.some(item => "id" in item && item.id === result.id)) await perform(result.id as PhobosBrowserDownloadRequest["action"], record.id);
     } catch (reason) { if (owner.current === ownerKey) setError(String((reason as Error)?.message ?? reason)); }
   };
   const indicator = browserDownloadIndicator(snapshot);

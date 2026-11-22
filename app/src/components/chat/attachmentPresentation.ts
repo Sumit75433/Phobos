@@ -90,7 +90,7 @@ export async function readAttachmentBytes(file: AttachmentSource, scope?: Attach
     result = { base64: bytes.base64, mimeType: bytes.mime_type, contentHash: bytes.content_hash, size: bytes.size };
   } else {
     const stage = file.stage;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!stage?.contentHash || !transport?.readClientAttachmentPreview) throw new Error("The staged file preview is unavailable.");
     expectedHash = stage.contentHash;
     result = await transport.readClientAttachmentPreview({ id: stage.id, contentHash: stage.contentHash });

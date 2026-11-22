@@ -309,7 +309,7 @@ def report(data):
 
 def card(data):
     s = statistics(data)
-    return {"schema": "octopus.client_surface", "schema_version": 1, "release_channel": "stable",
+    return {"schema": "phobos.client_surface", "schema_version": 1, "release_channel": "stable",
             "id": "home.agent-ready-radar", "revision": 1, "title": "Agent-ready radar", "glyph": "sites",
             "target": {"kind": "voice.widget", "slot": "right", "order": 20,
                        "layout": {"min_width": 184, "preferred_width": 300, "max_width": 460,

@@ -15,7 +15,7 @@ function publishClientPresentation({ sourceRoot, buildReceipt, destination }) {
   require(path.join(sourceRoot, "build.cjs")).verifyReceipt(buildReceipt, buildReceipt.architecture);
   const binary = regular(buildReceipt.output), manifest = regular(path.join(sourceRoot, "manifest.json"));
   if (digest(binary) !== buildReceipt.output_sha256) throw new Error("Native presentation compiler output changed before client publication");
-  const receipt = { schema_version: 1, id: "octopus.client.presentation", module: "octopus-pip-receiver.node", architecture: buildReceipt.architecture,
+  const receipt = { schema_version: 1, id: "phobos.client.presentation", module: "phobos-pip-receiver.node", architecture: buildReceipt.architecture,
     compiled_output_sha256: buildReceipt.output_sha256, output_sha256: buildReceipt.output_sha256, build: buildReceipt, signing: null };
   sourceContract(JSON.parse(manifest), receipt, digest(manifest), buildReceipt.architecture);
   fs.mkdirSync(destination); fs.mkdirSync(path.join(destination, "assets"));

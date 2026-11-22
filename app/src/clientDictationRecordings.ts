@@ -1,21 +1,21 @@
-import type { OctopusDictationLocalResult, OctopusDictationRequest } from "./electron";
+import type { PhobosDictationLocalResult, PhobosDictationRequest } from "./electron";
 
-export const DICTATION_RECORDINGS_CHANGED = "octopus:dictation-recordings-changed";
+export const DICTATION_RECORDINGS_CHANGED = "phobos:dictation-recordings-changed";
 
-export async function dictationResult<T>(result: Promise<OctopusDictationLocalResult<T>>): Promise<T> {
-  let outcome: OctopusDictationLocalResult<T>;
+export async function dictationResult<T>(result: Promise<PhobosDictationLocalResult<T>>): Promise<T> {
+  let outcome: PhobosDictationLocalResult<T>;
   try { outcome = await result; }
-  catch { throw new Error("Dictation is unavailable. Reopen Octopus and try again."); }
+  catch { throw new Error("Dictation is unavailable. Reopen Phobos and try again."); }
   if (!outcome.ok) throw Object.assign(new Error(outcome.error.message), { code: outcome.error.code });
   return outcome.value;
 }
 
 export function dictationHost() {
-  if (!window.octopusTransport?.readDictationRecordings) throw new Error("Dictation recordings require the desktop app.");
-  return window.octopusTransport;
+  if (!window.phobosTransport?.readDictationRecordings) throw new Error("Dictation recordings require the desktop app.");
+  return window.phobosTransport;
 }
 
-export function dictationAudioRequest(bytes: ArrayBuffer, durationMs: number): OctopusDictationRequest {
+export function dictationAudioRequest(bytes: ArrayBuffer, durationMs: number): PhobosDictationRequest {
   return { attemptId: crypto.randomUUID(), bytes, durationMs, mediaType: "audio/wav", sampleRateHz: 24_000, provider: "codex", timeoutMs: 120_000 };
 }
 

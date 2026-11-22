@@ -1,6 +1,6 @@
 import type { ArtifactContextPreparedDetail, ArtifactPreviewModel, ArtifactReference } from "./types";
 
-export const ARTIFACT_CONTEXT_PREPARED_EVENT = "octopus:artifact-context-prepared";
+export const ARTIFACT_CONTEXT_PREPARED_EVENT = "phobos:artifact-context-prepared";
 
 export function prepareArtifactContext(input: {
   model: ArtifactPreviewModel;
@@ -23,7 +23,7 @@ export function prepareArtifactContext(input: {
     contextRef: `artifact-context:${input.reference.artifactId}:${crypto.randomUUID()}`,
     createdAtMs: Date.now(),
     prompt: promptParts.join("\n\n"),
-    schema: "octopus.client.artifact_context",
+    schema: "phobos.client.artifact_context",
     schemaVersion: 1,
     ...(selectionText ? { selection: { kind: "text" as const, text: selectionText } } : {}),
   };

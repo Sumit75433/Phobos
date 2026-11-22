@@ -1,7 +1,7 @@
 import { settingsTargetProps } from "./settingsCatalog";
 import { useEffect, useState } from "react";
 import { OcButton, OcCard, OcGroup, OcSettingsRow, OcStatus } from "../../design-system/components";
-import type { OctopusAppInfo, OctopusClientDoctorReport, OctopusTransportDefaults } from "../../electron";
+import type { PhobosAppInfo, PhobosClientDoctorReport, PhobosTransportDefaults } from "../../electron";
 import { useProjectionGeneration } from "../../projectionLive";
 import { useAppErrorToast } from "../../toasts";
 import { resetOnboardingState } from "../../onboarding/onboardingStorage";
@@ -12,24 +12,24 @@ import { FactRow, useDeclaredProviders } from "./SettingsProviderState";
 export function AboutSection() {
   const providerState = useDeclaredProviders();
   const generation = useProjectionGeneration();
-  const [info, setInfo] = useState<OctopusAppInfo | null>(null);
-  const [defaults, setDefaults] = useState<OctopusTransportDefaults | null>(null);
+  const [info, setInfo] = useState<PhobosAppInfo | null>(null);
+  const [defaults, setDefaults] = useState<PhobosTransportDefaults | null>(null);
   const [reportError, setReportError] = useState("");
   const [licensesOpen, setLicensesOpen] = useState(false);
   const [logsState, setLogsState] = useState<"idle" | "opening" | "opened" | "error">("idle");
-  const [doctorReport, setDoctorReport] = useState<OctopusClientDoctorReport | null>(null);
+  const [doctorReport, setDoctorReport] = useState<PhobosClientDoctorReport | null>(null);
   const [doctorState, setDoctorState] = useState<"idle" | "running" | "complete" | "error">("idle");
   const [welcomeState, setWelcomeState] = useState<"idle" | "ready" | "error">("idle");
   useAppErrorToast(welcomeState === "error" ? "Could not reset the welcome screen." : "");
   useAppErrorToast(logsState === "error" ? "Could not open the client logs directory." : "");
-  useAppErrorToast(doctorState === "error" ? "Doctor could not inspect the current Octopus Home." : "");
+  useAppErrorToast(doctorState === "error" ? "Doctor could not inspect the current Phobos Home." : "");
   useAppErrorToast(reportError);
 
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      window.octopusTransport?.appInfo?.() ?? Promise.resolve(null),
-      window.octopusTransport?.defaults?.() ?? Promise.resolve(null),
+      window.phobosTransport?.appInfo?.() ?? Promise.resolve(null),
+      window.phobosTransport?.defaults?.() ?? Promise.resolve(null),
     ])
       .then(([nextInfo, nextDefaults]) => {
         if (cancelled) return;
@@ -45,19 +45,19 @@ export function AboutSection() {
   async function openReport() {
     setReportError("");
     try {
-      if (!window.octopusTransport?.openProblemReport) throw new Error("Problem reports are available in the desktop app.");
-      await window.octopusTransport.openProblemReport();
+      if (!window.phobosTransport?.openProblemReport) throw new Error("Problem reports are available in the desktop app.");
+      await window.phobosTransport.openProblemReport();
     } catch (error) { setReportError(error instanceof Error ? error.message : String(error)); }
   }
 
   async function runDoctor() {
-    if (!window.octopusTransport?.runClientDoctor) {
+    if (!window.phobosTransport?.runClientDoctor) {
       setDoctorState("error");
       return;
     }
     setDoctorState("running");
     try {
-      setDoctorReport(await window.octopusTransport.runClientDoctor());
+      setDoctorReport(await window.phobosTransport.runClientDoctor());
       setDoctorState("complete");
     } catch {
       setDoctorState("error");
@@ -65,13 +65,13 @@ export function AboutSection() {
   }
 
   async function openLogs() {
-    if (!window.octopusTransport?.openClientLogs) {
+    if (!window.phobosTransport?.openClientLogs) {
       setLogsState("error");
       return;
     }
     setLogsState("opening");
     try {
-      await window.octopusTransport.openClientLogs();
+      await window.phobosTransport.openClientLogs();
       setLogsState("opened");
     } catch {
       setLogsState("error");
@@ -128,7 +128,7 @@ export function AboutSection() {
                 </OcButton>
               </div>
             )}
-            description="Reads run, ledger, package ownership, receipts, and bound context digests without changing Octopus Home."
+            description="Reads run, ledger, package ownership, receipts, and bound context digests without changing Phobos Home."
             label="Doctor"
           />
           {doctorReport?.findings.map((finding) => (
@@ -156,7 +156,7 @@ export function AboutSection() {
 
       <OcGroup title="Runtime facts" description="Read-only facts projected from the desktop and registry.">
         <OcCard>
-          <FactRow label="Octopus home" mono value={defaults?.octopusHome || "Not resolved"} />
+          <FactRow label="Phobos home" mono value={defaults?.phobosHome || "Not resolved"} />
           <FactRow label="Active registry" mono value={defaults?.registryRoot || providerState.registryRoot || "Not resolved"} />
           <FactRow label="Runtime state" mono value={defaults?.stateRoot || "Not resolved"} />
           <FactRow label="Movement ledger" mono value={defaults?.ledgerPath || "Not resolved"} />

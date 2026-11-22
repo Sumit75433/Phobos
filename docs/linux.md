@@ -1,6 +1,6 @@
 # Process isolation on Linux
 
-Octopus's Linux backend uses AppArmor to enforce a process's declared read, write, execute,
+Phobos's Linux backend uses AppArmor to enforce a process's declared read, write, execute,
 network, local IPC and signal authority. The same launch path serves verifier
 scripts, interface lives and tool processes. A missing platform service or a
 refused profile stops the launch before the target executes. Full-host grants
@@ -47,25 +47,25 @@ sudo apt-get install apparmor
 ```
 
 The Linux CLI runtime distribution includes the service as
-`bin/octopus-linux-process-authority`. To build the service separately from source:
+`bin/phobos-linux-process-authority`. To build the service separately from source:
 
 ```sh
-cargo build --locked --release -p octopus-linux-process-authority
+cargo build --locked --release -p phobos-linux-process-authority
 ```
 
-Install it for the Unix account that will run Octopus, replacing `operator`
+Install it for the Unix account that will run Phobos, replacing `operator`
 with that account's login:
 
 ```sh
-sudo sh registry/worker_environment_kind/process_session/packages/octopus-linux-process-authority/install-linux.sh \
-  "$PWD/target/release/octopus-linux-process-authority" operator
+sudo sh registry/worker_environment_kind/process_session/packages/phobos-linux-process-authority/install-linux.sh \
+  "$PWD/target/release/phobos-linux-process-authority" operator
 ```
 
-Start a new login session so the account receives its `octopus-process` group.
-Run Octopus as that account. The service does not start Octopus, execute tool
+Start a new login session so the account receives its `phobos-process` group.
+Run Phobos as that account. The service does not start Phobos, execute tool
 commands or change their Unix user. Its socket is available only to root and
 members of that group. Group membership authorizes use of the platform service;
-Octopus still forms every run's grant from its own declarations.
+Phobos still forms every run's grant from its own declarations.
 
 The service owns the profile compiler and a delegated cgroup subtree. Compiler
 warnings are errors, including a rule the kernel cannot enforce. A launch retains
@@ -86,7 +86,7 @@ where its declared file authority already lets it write that path. The service's
 control socket is granted by path to a process with sandbox delegation and
 denied by path to every other process.
 
-Library tests that launch confined processes (including `octopus-verifiers`) also
+Library tests that launch confined processes (including `phobos-verifiers`) also
 require this service to be installed and running. Without it they fail closed;
 installing the distribution AppArmor package alone is not sufficient.
 
@@ -100,7 +100,7 @@ both conditions have ended. A failed cleanup retains the profile and reports
 the error.
 
 Service restart preserves existing profiles, cgroups and their root-owned
-records under `/run/octopus-process-authority/leases`. It resumes collection
+records under `/run/phobos-process-authority/leases`. It resumes collection
 from those records without restarting commands. Stopping the service prevents
 new confined launches; it does not remove confinement from existing processes.
 Do not remove its retained state while those processes are alive.
@@ -117,8 +117,8 @@ No filesystem mount or second sandbox backend is involved.
 ## Diagnostics and scope
 
 ```sh
-systemctl status octopus-process-authority.service
-journalctl -u octopus-process-authority.service
+systemctl status phobos-process-authority.service
+journalctl -u phobos-process-authority.service
 ```
 
 The service reports profile compilation, peer identity, attachment and cleanup

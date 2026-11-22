@@ -11,7 +11,7 @@
           "cron": null,
           "fire_on_start": true,
           "timezone": "UTC",
-          "reminder_env": "OCTOPUS_CRON_REMINDER",
+          "reminder_env": "PHOBOS_CRON_REMINDER",
           "reminder_default": ""
         }
       }

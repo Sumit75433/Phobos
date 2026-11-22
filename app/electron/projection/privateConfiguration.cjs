@@ -229,15 +229,15 @@ function validateOwnerOnlyStat(label, stat, directory) {
   }
 }
 
-async function mutateApplicationPrivateConfiguration(registryRootValue, octopusHomeRootValue, request, options = {}) {
+async function mutateApplicationPrivateConfiguration(registryRootValue, phobosHomeRootValue, request, options = {}) {
   const run = applicationPrivateConfigurationMutationTail.then(() => (
-    mutateApplicationPrivateConfigurationUnlocked(registryRootValue, octopusHomeRootValue, request, options)
+    mutateApplicationPrivateConfigurationUnlocked(registryRootValue, phobosHomeRootValue, request, options)
   ));
   applicationPrivateConfigurationMutationTail = run.then(() => undefined, () => undefined);
   return run;
 }
 
-async function mutateApplicationPrivateConfigurationUnlocked(registryRootValue, octopusHomeRootValue, request, options) {
+async function mutateApplicationPrivateConfigurationUnlocked(registryRootValue, phobosHomeRootValue, request, options) {
   exactObjectKeys(
     request,
     ["applicationId", "interfaceId", "expectedDigest", "updates", "clears"],
@@ -253,7 +253,7 @@ async function mutateApplicationPrivateConfigurationUnlocked(registryRootValue, 
     throw new Error("application private configuration updates must be an object and clears must be an array");
   }
   const registryRoot = path.resolve(requiredString(registryRootValue, "registry root"));
-  const octopusHomeRoot = path.resolve(requiredString(octopusHomeRootValue, "Octopus home root"));
+  const phobosHomeRoot = path.resolve(requiredString(phobosHomeRootValue, "Phobos home root"));
   const applicationDirectory = path.join(registryRoot, "interface", applicationId);
   await requirePlainDirectory(applicationDirectory, `application registry owner ${applicationId}`);
   const applicationManifestPath = path.join(applicationDirectory, "application.json");
@@ -317,7 +317,7 @@ async function mutateApplicationPrivateConfigurationUnlocked(registryRootValue, 
   if (clears.some((name) => updates.has(name))) throw new Error("application private configuration cannot update and clear the same field");
   if (updates.size === 0 && clears.length === 0) throw new Error("application private configuration mutation contains no changes");
 
-  const interfacePrivateRoot = path.join(octopusHomeRoot, "interfaces");
+  const interfacePrivateRoot = path.join(phobosHomeRoot, "interfaces");
   await requirePlainDirectory(interfacePrivateRoot, `interface private root ${interfacePrivateRoot}`);
   const interfacePrivateDirectory = path.join(interfacePrivateRoot, interfaceId);
   let current;

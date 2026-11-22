@@ -8,8 +8,8 @@ import { decodeActivityReadState, decodeMarkActivity, decodeMarkKinds, decodeOpe
 export function useMarkActivity(profile: string, home: string, primary: boolean, open: boolean, visibleChatRunIds: readonly string[] = []) {
   const preferences = useClientPreferences();
   const generation = useProjectionGeneration();
-  const key = `octopus.mark-activity.${encodeURIComponent(profile)}.${encodeURIComponent(home)}.read.v1`;
-  const dismissedKey = `octopus.mark-activity.${encodeURIComponent(profile)}.${encodeURIComponent(home)}.dismissed.v1`;
+  const key = `phobos.mark-activity.${encodeURIComponent(profile)}.${encodeURIComponent(home)}.read.v1`;
+  const dismissedKey = `phobos.mark-activity.${encodeURIComponent(profile)}.${encodeURIComponent(home)}.dismissed.v1`;
   const [snapshot, setSnapshot] = useState<{ key: string; items: MarkActivityItem[]; kinds: string[] } | null>(null);
   const [failure, setFailure] = useState("");
   const [readFailure, setReadFailure] = useState("");

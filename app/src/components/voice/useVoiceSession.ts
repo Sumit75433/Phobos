@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import {
   abortInterfaceArtifactStream,
   appendInterfaceArtifactStream,
@@ -65,7 +65,7 @@ export type VoiceDeviceOption = {
   label: string;
 };
 
-export function useVoiceSession(accessProfile: OctopusClientAccessProfile) {
+export function useVoiceSession(accessProfile: PhobosClientAccessProfile) {
   const preferences = useClientPreferences();
   const setClientPreferences = useSetClientPreferences();
   const [phase, setPhase] = useState<VoicePhase>("idle");
@@ -261,7 +261,7 @@ export function useVoiceSession(accessProfile: OctopusClientAccessProfile) {
       const unresolved = !canRetireVoiceCall(call);
       if (!unresolved) callRef.current = null;
       if (unresolved && !message) message = "Your microphone is off, but the provider has not confirmed call closure.";
-      if (message) void window.octopusTransport?.logClientEvent?.({
+      if (message) void window.phobosTransport?.logClientEvent?.({
         level: "error", event: "renderer.voice_closure", message: `${call.correlationId}: ${message}`,
       }).catch(() => undefined);
       setError(message);
@@ -334,7 +334,7 @@ export function useVoiceSession(accessProfile: OctopusClientAccessProfile) {
       await assertVoiceControlReady(nextContext);
       if (!current()) return;
       recordVoiceStartup(call, "control ready");
-      const nativePermission = await window.octopusTransport?.requestMicrophoneAccess();
+      const nativePermission = await window.phobosTransport?.requestMicrophoneAccess();
       if (!current()) return;
       if (nativePermission && !nativePermission.granted) throw new MicrophonePermissionError(nativePermission.status);
       recordVoiceStartup(call, "microphone permission granted");
@@ -873,7 +873,7 @@ async function createVoiceRecording(input: {
     label: "realtime.session.recording",
     mediaType,
     payload: {
-      schema: "octopus.voice_recording",
+      schema: "phobos.voice_recording",
       schema_version: 1,
       correlation_id: input.call.correlationId,
       started_at: input.startedAt,
@@ -1330,7 +1330,7 @@ function createOutputMeterConnection(
 }
 
 function recordVoiceStartup(call: VoiceCall, stage: string) {
-  void window.octopusTransport?.logClientEvent?.({
+  void window.phobosTransport?.logClientEvent?.({
     level: "info", event: "renderer.voice_startup", message: `${call.correlationId}: ${stage}`,
   }).catch(() => undefined);
 }
@@ -1365,7 +1365,7 @@ function errorText(error: unknown): string {
 
 function microphoneError(error: unknown): string {
   if (error instanceof MicrophonePermissionError) {
-    return `Microphone access is ${error.status}. Allow Octopus in System Settings → Privacy & Security → Microphone.`;
+    return `Microphone access is ${error.status}. Allow Phobos in System Settings → Privacy & Security → Microphone.`;
   }
   const name = error instanceof DOMException ? error.name : "";
   if (name === "NotAllowedError" || name === "SecurityError") return "Allow microphone access to start voice";

@@ -24,11 +24,11 @@
   -webkit-app-region: no-drag;
 }
 
-:root[data-octopus-window-type="electron"] .welcome-top {
+:root[data-phobos-window-type="electron"] .welcome-top {
   padding-left: 98px;
 }
 
-:root[data-octopus-window-type="electron"] .welcome-top::before {
+:root[data-phobos-window-type="electron"] .welcome-top::before {
   position: absolute;
   inset: 0 0 0 76px;
   content: "";
@@ -141,7 +141,7 @@
   background: var(--button-secondary-hover);
 }
 
-.octopus-cloud {
+.phobos-cloud {
   display: block;
   width: 100%;
   height: 100%;
@@ -359,7 +359,7 @@
   height: min(62vh, 500px);
 }
 
-.welcome-idea-art .octopus-cloud {
+.welcome-idea-art .phobos-cloud {
   position: absolute;
   inset: 0;
 }
@@ -625,13 +625,13 @@
   pointer-events: none;
 }
 
-.octopus-loading-logo {
-  --octopus-loading-logo-highlight: var(--color-token-foreground, var(--text-strong));
-  --octopus-loading-logo-soft: color-mix(in srgb, var(--octopus-loading-logo-highlight) 4%, transparent);
-  --octopus-loading-logo-peak: color-mix(in srgb, var(--octopus-loading-logo-highlight) 48%, transparent);
-  --octopus-loading-logo-tail: color-mix(in srgb, var(--octopus-loading-logo-highlight) 8%, transparent);
+.phobos-loading-logo {
+  --phobos-loading-logo-highlight: var(--color-token-foreground, var(--text-strong));
+  --phobos-loading-logo-soft: color-mix(in srgb, var(--phobos-loading-logo-highlight) 4%, transparent);
+  --phobos-loading-logo-peak: color-mix(in srgb, var(--phobos-loading-logo-highlight) 48%, transparent);
+  --phobos-loading-logo-tail: color-mix(in srgb, var(--phobos-loading-logo-highlight) 8%, transparent);
   opacity: 0;
-  animation: octopus-loading-logo-fade-in 180ms ease-out 60ms forwards;
+  animation: phobos-loading-logo-fade-in 180ms ease-out 60ms forwards;
 }
 
 .app-loading-state {
@@ -653,37 +653,37 @@
   background: var(--color-token-main-surface-primary, #181818);
 }
 
-[data-theme="light"] .octopus-loading-logo {
-  --octopus-loading-logo-highlight: var(--color-token-main-surface-primary, #fff);
+[data-theme="light"] .phobos-loading-logo {
+  --phobos-loading-logo-highlight: var(--color-token-main-surface-primary, #fff);
 }
 
-.octopus-loading-logo-base {
+.phobos-loading-logo-base {
   display: block;
   object-fit: contain;
   opacity: 0.68;
 }
 
-[data-theme="light"] .octopus-loading-logo-base {
+[data-theme="light"] .phobos-loading-logo-base {
   filter: brightness(0);
   opacity: 0.24;
 }
 
-.octopus-loading-logo-overlay {
+.phobos-loading-logo-overlay {
   background-image: linear-gradient(
     112deg,
     transparent 22%,
-    var(--octopus-loading-logo-soft) 38%,
-    var(--octopus-loading-logo-peak) 49%,
-    var(--octopus-loading-logo-tail) 56%,
+    var(--phobos-loading-logo-soft) 38%,
+    var(--phobos-loading-logo-peak) 49%,
+    var(--phobos-loading-logo-tail) 56%,
     transparent 74%
   );
   background-position: 140% 0;
   background-repeat: no-repeat;
   background-size: 220% 100%;
-  animation: octopus-loading-logo-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: phobos-loading-logo-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-@keyframes octopus-loading-logo-shimmer {
+@keyframes phobos-loading-logo-shimmer {
   from {
     background-position: 140% 0;
   }
@@ -692,28 +692,28 @@
   }
 }
 
-@keyframes octopus-loading-logo-fade-in {
+@keyframes phobos-loading-logo-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .octopus-loading-logo {
+  .phobos-loading-logo {
     animation: none;
     opacity: 1;
   }
 
-  .octopus-loading-logo-overlay {
+  .phobos-loading-logo-overlay {
     animation: none;
   }
 }
 
-:root.reduce-motion .octopus-loading-logo,
-:root.reduce-motion .octopus-loading-logo-overlay {
+:root.reduce-motion .phobos-loading-logo,
+:root.reduce-motion .phobos-loading-logo-overlay {
   animation: none;
 }
 
-:root.reduce-motion .octopus-loading-logo {
+:root.reduce-motion .phobos-loading-logo {
   opacity: 1;
 }
 
@@ -6835,34 +6835,34 @@ button.detail-row.is-clickable:hover {
   --vscode-checkbox-foreground: var(--color-token-main-surface-primary, #181818);
 }
 
-.octopus-task-status-running {
+.phobos-task-status-running {
   color: #16a34a;
 }
 
-.octopus-task-status-waiting {
+.phobos-task-status-waiting {
   color: #d97706;
 }
 
-.octopus-task-status-attention {
+.phobos-task-status-attention {
   color: #dc2626;
 }
 
-[data-theme="dark"] .octopus-task-status-running,
-.electron-dark .octopus-task-status-running {
+[data-theme="dark"] .phobos-task-status-running,
+.electron-dark .phobos-task-status-running {
   color: var(--green, #40c977);
 }
 
-[data-theme="dark"] .octopus-task-status-waiting,
-.electron-dark .octopus-task-status-waiting {
+[data-theme="dark"] .phobos-task-status-waiting,
+.electron-dark .phobos-task-status-waiting {
   color: var(--amber, #ff8549);
 }
 
-[data-theme="dark"] .octopus-task-status-attention,
-.electron-dark .octopus-task-status-attention {
+[data-theme="dark"] .phobos-task-status-attention,
+.electron-dark .phobos-task-status-attention {
   color: var(--red, #fa423e);
 }
 
-.octopus-task-status-shimmer {
+.phobos-task-status-shimmer {
   background-image: linear-gradient(
     100deg,
     currentColor 0%,
@@ -6876,10 +6876,10 @@ button.detail-row.is-clickable:hover {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: octopus-task-status-shimmer 1.9s linear infinite;
+  animation: phobos-task-status-shimmer 1.9s linear infinite;
 }
 
-@keyframes octopus-task-status-shimmer {
+@keyframes phobos-task-status-shimmer {
   0% {
     background-position: 100% 0;
   }
@@ -6888,11 +6888,11 @@ button.detail-row.is-clickable:hover {
   }
 }
 
-.octopus-task-status-pulse {
-  animation: octopus-task-status-pulse 2.2s ease-in-out infinite;
+.phobos-task-status-pulse {
+  animation: phobos-task-status-pulse 2.2s ease-in-out infinite;
 }
 
-@keyframes octopus-task-status-pulse {
+@keyframes phobos-task-status-pulse {
   0%,
   100% {
     opacity: 1;
@@ -6903,13 +6903,13 @@ button.detail-row.is-clickable:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .octopus-task-status-shimmer {
+  .phobos-task-status-shimmer {
     animation: none;
     background-image: none;
     -webkit-text-fill-color: currentColor;
   }
 
-  .octopus-task-status-pulse {
+  .phobos-task-status-pulse {
     animation: none;
   }
 }

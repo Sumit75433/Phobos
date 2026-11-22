@@ -32,7 +32,7 @@ function fixture() {
   const source = ts.createSourceFile("main.cjs", readFileSync(path.join(app, "electron/main.cjs"), "utf8"), ts.ScriptTarget.Latest, true);
   const statements = source.statements.filter((node) => ts.isVariableStatement(node)
     ? node.declarationList.declarations.some((d) => d.name.getText(source) === "clientContextMenu")
-    : ts.isExpressionStatement(node) && ts.isCallExpression(node.expression) && node.expression.expression.getText(source) === "ipcMain.handle" && node.expression.arguments[0]?.text?.startsWith("octopus:client-context-menu"));
+    : ts.isExpressionStatement(node) && ts.isCallExpression(node.expression) && node.expression.expression.getText(source) === "ipcMain.handle" && node.expression.arguments[0]?.text?.startsWith("phobos:client-context-menu"));
   assert.equal(statements.length, 3);
   Function(...Object.keys(dependencies), statements.map((n) => n.getText(source)).join("\n"))(...Object.values(dependencies));
   function add(id) {
@@ -177,7 +177,7 @@ test("task controller revalidates native context menus and anchored titlebar men
   const finish = async (p, id) => React.act(async () => { p.resolve({ requestId: p.value.requestId, id }); await tick(); });
   const ids = (items) => items.flatMap((item) => item.type === "separator" ? [] : [item.id, ...ids(item.submenu ?? [])]);
   try {
-    w.octopusTransport = transport; await render();
+    w.phobosTransport = transport; await render();
     const p = await open(); assert.deepEqual(p.value.position, { x: 50, y: 60 });
     assert.deepEqual(ids(p.value.items), ["rename", "pin", "projected-title", "copy-menu", "copy-title", "copy", "open", "archive", "delete"]);
     assert.equal(w.document.querySelector('[role="menu"]'), null);
@@ -196,7 +196,7 @@ test("task controller revalidates native context menus and anchored titlebar men
     await render({ projectWorkspace: { ...props.projectWorkspace, pending: false } });
     const old = await open(), newer = await open(); await finish(old, "archive"); assert.deepEqual(effects, []); await finish(newer, "pin"); assert.deepEqual(effects.pop(), ["pin", ["task"]]);
     const failure = await open(); await React.act(async () => { failure.reject(new Error("native failed")); await tick(); }); assert.equal(errors.pop(), "native failed"); assert.equal(w.document.querySelector('[role="menu"]'), null);
-    w.octopusTransport = {}; await open(); assert.match(errors.pop(), /native task menu is unavailable/); assert.equal(w.document.querySelector('[role="menu"]'), null); w.octopusTransport = transport;
+    w.phobosTransport = {}; await open(); assert.match(errors.pop(), /native task menu is unavailable/); assert.equal(w.document.querySelector('[role="menu"]'), null); w.phobosTransport = transport;
     const rename = await open(); await finish(rename, "rename"); assert.ok(w.document.querySelector('[role="dialog"]'));
     await render({ projectWorkspace: { ...props.projectWorkspace, pending: true } }); const save = [...w.document.querySelectorAll('button')].find((b) => b.textContent === "Save"); assert.equal(save.disabled, true);
     await React.act(async () => w.document.querySelector('form').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }))); assert.deepEqual(effects, []);
@@ -244,9 +244,9 @@ test("task controller revalidates native context menus and anchored titlebar men
       assert.deepEqual(effects.pop(), ['pin', ['task']]);
       assert.equal(w.document.querySelector('[role="menu"]'), null);
     }
-    delete w.octopusTransport; await render(); await open(); assert.ok(w.document.querySelector('[role="menu"]'));
+    delete w.phobosTransport; await render(); await open(); assert.ok(w.document.querySelector('[role="menu"]'));
     await click('copy-menu'); await click('copy'); assert.deepEqual(effects.pop(), ['copy', 'task']);
-    w.octopusTransport = transport; const unmount = await open(); await React.act(async () => root.unmount()); await finish(unmount, "archive"); assert.deepEqual(effects, []); assert.ok(cancellations.length >= 5);
+    w.phobosTransport = transport; const unmount = await open(); await React.act(async () => root.unmount()); await finish(unmount, "archive"); assert.deepEqual(effects, []); assert.ok(cancellations.length >= 5);
   } finally {
     dom.window.close();
     if (previousNavigator) Object.defineProperty(globalThis, "navigator", previousNavigator);

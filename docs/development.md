@@ -25,31 +25,31 @@ Use [Getting started](getting-started.md) for the macOS build,
 
 | Crate | Role |
 | --- | --- |
-| `octopus-app` | The `octopus` binary: `up`, `down`, `restart`, `doctor`, `project-ee-policies`. Boots a Home and runs the arrival loop. |
-| `octopus-app-server` | The composition root: registry snapshot, artifact arrival handling, and the worker-policy wiring. |
-| `octopus-runtime` | Grant formation per arrival, admission, and outbound transfers. |
-| `octopus-run-record` | Run and checkpoint records, grant epochs, and the run-records index. Rooms and interfaces read and author runs through it without linking the runtime. |
-| `octopus-policy` | Policy shapes and their reduction: worker-interface ceilings and interface policy declarations. |
-| `octopus-ee` | EE templates, instances, and the EE tree. |
-| `octopus-interfaces` | Interface descriptors and worker-pin policy loading. |
-| `octopus-interface-transport` | Interface life processes, hand-in, activation, and live reconciliation. |
-| `octopus-interface-projection` | What an interface is handed: binding, affordance, metadata, and registry projections. |
-| `octopus-descriptors` | The one strict JSON gate every descriptor crosses, and descriptor hashing. |
-| `octopus-tool-registry` | Tool descriptor loading and argument validation. |
-| `octopus-tool-handlers` | The passive tool-call and tool-result contract. No executable family lives here. |
-| `octopus-worker-env` | Room descriptors, leasing, and the authorization gate. Room behavior lives in kind packages. |
-| `octopus-marks` | Mark descriptors and the verification input and verdict types. |
-| `octopus-verifiers` | The blind verifier runner: pins a package and executes its script. |
-| `octopus-ledger`, `octopus-ledger-store` | Movement types and the append-only log. |
-| `octopus-ledger-index` | The in-memory arrival index and the disposable SQLite index. |
-| `octopus-file-storage` | Bounded file reads and writes, ordered RFC 6902 patches, and publication verification. |
-| `octopus-schemas` | The published JSON Schemas. |
+| `phobos-app` | The `phobos` binary: `up`, `down`, `restart`, `doctor`, `project-ee-policies`. Boots a Home and runs the arrival loop. |
+| `phobos-app-server` | The composition root: registry snapshot, artifact arrival handling, and the worker-policy wiring. |
+| `phobos-runtime` | Grant formation per arrival, admission, and outbound transfers. |
+| `phobos-run-record` | Run and checkpoint records, grant epochs, and the run-records index. Rooms and interfaces read and author runs through it without linking the runtime. |
+| `phobos-policy` | Policy shapes and their reduction: worker-interface ceilings and interface policy declarations. |
+| `phobos-ee` | EE templates, instances, and the EE tree. |
+| `phobos-interfaces` | Interface descriptors and worker-pin policy loading. |
+| `phobos-interface-transport` | Interface life processes, hand-in, activation, and live reconciliation. |
+| `phobos-interface-projection` | What an interface is handed: binding, affordance, metadata, and registry projections. |
+| `phobos-descriptors` | The one strict JSON gate every descriptor crosses, and descriptor hashing. |
+| `phobos-tool-registry` | Tool descriptor loading and argument validation. |
+| `phobos-tool-handlers` | The passive tool-call and tool-result contract. No executable family lives here. |
+| `phobos-worker-env` | Room descriptors, leasing, and the authorization gate. Room behavior lives in kind packages. |
+| `phobos-marks` | Mark descriptors and the verification input and verdict types. |
+| `phobos-verifiers` | The blind verifier runner: pins a package and executes its script. |
+| `phobos-ledger`, `phobos-ledger-store` | Movement types and the append-only log. |
+| `phobos-ledger-index` | The in-memory arrival index and the disposable SQLite index. |
+| `phobos-file-storage` | Bounded file reads and writes, ordered RFC 6902 patches, and publication verification. |
+| `phobos-schemas` | The published JSON Schemas. |
 
 Adding a capability over an existing driver or room is descriptors and
 bindings. A genuinely new execution family is code inside its concrete owner
 folder under `registry/`. Do not put provider names, artifact semantics, or
 product behavior into the crates' decision paths. See
-[Extending Octopus](contracts/EXTENSION_SURFACES.md).
+[Extending Phobos](contracts/EXTENSION_SURFACES.md).
 
 The [file observer example](../registry/interface/world_file_observer/examples/binding_repair.py)
 demonstrates selected files becoming immutable input artifacts, a checkpoint
@@ -57,7 +57,7 @@ waiting for two independently verified snapshots, and catch-up after repairing
 an exact interface binding. Its `--read-root` argument grants an explicit
 existing directory; the command prints the proposed files and steps without
 installing them. The observer is an interface package, while waiting and
-replay use existing runtime mechanisms. Use `./octopus inspect <run-id> --json`
+replay use existing runtime mechanisms. Use `./phobos inspect <run-id> --json`
 to inspect the resulting checkpoint and movement evidence.
 
 ## Source and Home
@@ -75,10 +75,10 @@ client preferences and provider credentials have the separate locations below.
 | Location | Owner and purpose |
 | --- | --- |
 | `registry/`, `app/distribution/`, schemas | Versioned source: reusable code, descriptors, package definitions, and validation rules. |
-| `Octopus.app` | A built snapshot: client, runtime, startup baseline, and optional local packages. |
+| `Phobos.app` | A built snapshot: client, runtime, startup baseline, and optional local packages. |
 | `<home>/registry/` | Installed, active descriptors and package code, including local configuration and authorized mutations. |
 | Other Home files | Machine roots, runs, EEs, ledger, blobs, installation receipts, and private interface state. |
-| `<home>/client/` / provider state | The client profile of that Home, including preferences and Extensions / provider-owned credentials, which `OCTOPUS_HOME` does not isolate. |
+| `<home>/client/` / provider state | The client profile of that Home, including preferences and Extensions / provider-owned credentials, which `PHOBOS_HOME` does not isolate. |
 
 The normal loop is **edit the owning source or descriptor → run focused checks
 → build the changed distribution → exercise it against an explicitly selected
@@ -87,7 +87,7 @@ the renderer preview is the shorter loop described below. An edit in the
 checkout does not automatically update a packaged app or an already-installed
 package in a Home.
 
-Octopus is a research preview. Incompatible persisted formats require a fresh
+Phobos is a research preview. Incompatible persisted formats require a fresh
 Home through normal setup. There are no schema migrations, predecessor tables,
 automatic package adoption, or startup repairs of missing fields in old state.
 The bundled registry initializes a new Home once; later starts use the installed
@@ -132,9 +132,9 @@ the repository root, run the checks relevant to a change:
 
 ```sh
 cargo check --locked --workspace --all-targets
-cargo test --locked -p octopus-policy --lib
-cargo test --locked -p octopus-runtime --lib
-cargo test --locked -p octopus-ledger-index --lib
+cargo test --locked -p phobos-policy --lib
+cargo test --locked -p phobos-runtime --lib
+cargo test --locked -p phobos-ledger-index --lib
 ```
 
 For client setup and presentation contracts:
@@ -155,8 +155,8 @@ Code Mode, process session and file publication tests one at a time.
 Source/type checks and contract tests do not prove a
 fresh packaged setup, a real model reply, or physical device permissions.
 
-The generated-trace suites (`gate_trace_properties` in `octopus-runtime` and
-the `*_properties` modules of `octopus-run-authoring`) draw their cases from a
+The generated-trace suites (`gate_trace_properties` in `phobos-runtime` and
+the `*_properties` modules of `phobos-run-authoring`) draw their cases from a
 fixed seed, so a failure reports the same minimal trace on every machine. Set
 `PROPTEST_RNG_SEED` to search from another seed and `PROPTEST_CASES` to change
 how many cases each property runs.
@@ -175,7 +175,7 @@ newly published advisory can fail the job without a code change: resolve it
 with a lockfile update or a reasoned entry, never by lowering the audit level.
 Run the same checks locally with `node app/scripts/check-dependency-audit.cjs`
 and `cargo deny --locked check advisories`, at the repository root and in
-`registry/worker_environment_kind/container_session/packages/octopus-container-room/helper`.
+`registry/worker_environment_kind/container_session/packages/phobos-container-room/helper`.
 
 For the terminal client, `npm --prefix app run test:cli` checks transcript,
 interaction, transport, packaging, and setup contracts. `npm --prefix app run
@@ -188,7 +188,7 @@ index or runtime control API.
 Run the Doomsday latency budget separately in release mode:
 
 ```sh
-cargo test --locked --release -p octopus-app-server --test doomsday -- --ignored --nocapture
+cargo test --locked --release -p phobos-app-server --test doomsday -- --ignored --nocapture
 ```
 
 The budget is **1,000 ms of framework overhead** for a reference 5,000 ms model
@@ -229,7 +229,7 @@ staged-file inventory. It does not establish asset provenance or runtime accepta
 ## Releases
 
 A release is the packaged app as a disk image,
-`Octopus-<version>-macos-<arch>.dmg`, with `install.sh` and `checksums.txt`.
+`Phobos-<version>-macos-<arch>.dmg`, with `install.sh` and `checksums.txt`.
 The version is `version` in `app/package.json`; the packager writes it into
 the bundle, and the release tag is `v<version>`. The packager and release script
 require three numeric components (currently `0.1.0`), not an `-alpha` suffix.
@@ -283,7 +283,7 @@ Existing runs and ledgers are not upgraded.
 
 ## Updating an installation that runs from the checkout
 
-An installation whose launch agents start `app/build/Octopus.app` runs from the
+An installation whose launch agents start `app/build/Phobos.app` runs from the
 bundle `package:mac` rebuilds. Packaging deletes that bundle first and rebuilds
 it in place for several minutes, so a failed build, a crash or a reboot in the
 middle leaves nothing to start. `app/scripts/safe-self-update.cjs` separates
@@ -291,7 +291,7 @@ the steps and never removes the live bundle:
 
 ```sh
 node app/scripts/safe-self-update.cjs status
-node app/scripts/safe-self-update.cjs build      # into app/build/Octopus.staging.app
+node app/scripts/safe-self-update.cjs build      # into app/build/Phobos.staging.app
 node app/scripts/safe-self-update.cjs verify
 node app/scripts/safe-self-update.cjs packages status
 node app/scripts/safe-self-update.cjs restart --swap --caller-run=<run id> --detach --log=/private/tmp/self-update.log
@@ -300,13 +300,13 @@ node app/scripts/safe-self-update.cjs restart --swap --caller-run=<run id> --det
 | Command | What it does |
 | --- | --- |
 | `status` | The runtime's control-socket status, the revisions of the live, staged and previous bundles, and the turns in flight of every run. |
-| `build` | Runs `package-macos.cjs` with `OCTOPUS_PACKAGE_BUNDLE` set to `Octopus.staging.app` and checks that `Octopus.app` did not change. |
-| `verify` | Code signature; `build-info.json` equals `HEAD` with unmodified source (`--allow-modified-source` relaxes this); `octopus doctor` from the staged bundle against the Home; then a smoke test in a disposable Home under `/private/tmp`: install the chat and Codex packages with their dependencies, `doctor`, `up`, `restart`, `down`. `--no-smoke` skips the last part. |
+| `build` | Runs `package-macos.cjs` with `PHOBOS_PACKAGE_BUNDLE` set to `Phobos.staging.app` and checks that `Phobos.app` did not change. |
+| `verify` | Code signature; `build-info.json` equals `HEAD` with unmodified source (`--allow-modified-source` relaxes this); `phobos doctor` from the staged bundle against the Home; then a smoke test in a disposable Home under `/private/tmp`: install the chat and Codex packages with their dependencies, `doctor`, `up`, `restart`, `down`. `--no-smoke` skips the last part. |
 | `packages status` | Installed packages compared with the live bundle's package library, and baseline registry files that differ from the bundle. Read-only. |
 | `packages sync` | Repairs every installed package whose source changed and that has no local changes, through the client's own `repairLocalPackages`. Packages with local changes or errors are listed, never forced. `world_operator_chat` is repaired only with `--with-chat-client`; relaunch the client afterwards. `--only=a,b` narrows the set. |
-| `swap` | `Octopus.app` → `Octopus.prev.app`, `Octopus.staging.app` → `Octopus.app`: two renames, the first undone if the second fails. |
-| `restart` | Refuses while any run has a turn in flight, except `--caller-run` and each run named by a repeatable `--allow-in-flight-run <run id>` (`--force` overrides already-observed open turns, not changed or untrusted evidence). With `--swap` it swaps after the guard passes. It then sends `restart` to the control socket and waits up to 300 s for a new instance in phase `ready` in which no interface fails that was not already failing before. Otherwise it restores `Octopus.prev.app`, restarts again and exits 1, naming the regressed interfaces in `new_interface_failures`; when no runtime answers after the rollback it exits 1 naming the restored bundle to start. |
-| `rollback` | `Octopus.app` → `Octopus.failed.app`, `Octopus.prev.app` → `Octopus.app`. Restart afterwards. |
+| `swap` | `Phobos.app` → `Phobos.prev.app`, `Phobos.staging.app` → `Phobos.app`: two renames, the first undone if the second fails. |
+| `restart` | Refuses while any run has a turn in flight, except `--caller-run` and each run named by a repeatable `--allow-in-flight-run <run id>` (`--force` overrides already-observed open turns, not changed or untrusted evidence). With `--swap` it swaps after the guard passes. It then sends `restart` to the control socket and waits up to 300 s for a new instance in phase `ready` in which no interface fails that was not already failing before. Otherwise it restores `Phobos.prev.app`, restarts again and exits 1, naming the regressed interfaces in `new_interface_failures`; when no runtime answers after the rollback it exits 1 naming the restored bundle to start. |
+| `rollback` | `Phobos.app` → `Phobos.failed.app`, `Phobos.prev.app` → `Phobos.app`. Restart afterwards. |
 
 Every build ends with a notice of how much disk space the build output takes
 and how much is free on its volume. A build takes a lot of space: `target/` and
@@ -316,15 +316,15 @@ deleted when you need the space back.
 `build`, `swap`, `rollback`, `restart` and `packages sync` accept `--dry-run`,
 which prints the plan and changes nothing. Every command prints JSON and exits
 1 when its result is not `ok`. `--home` selects another Home (default
-`$OCTOPUS_HOME` or `~/.octopus`).
+`$PHOBOS_HOME` or `~/.phobos`).
 
 What the tool relies on, and its limits:
 
 - The runtime restarts by executing its own path again, and the launch agents
-  name `app/build/Octopus.app` by absolute path, so a renamed-in bundle is
+  name `app/build/Phobos.app` by absolute path, so a renamed-in bundle is
   picked up by `restart` and by launchd alike. The Electron client keeps
   running the old code until it is relaunched.
-- Use `restart`, never `octopus down`: a clean stop exits 0 and a launch agent
+- Use `restart`, never `phobos down`: a clean stop exits 0 and a launch agent
   with `KeepAlive` on unsuccessful exit does not start it again.
 - A restart stops the tool room that started it. From a run, pass `--detach
   --log=<file>` and read the log in the next turn.
@@ -370,7 +370,7 @@ Vite serves the renderer on the local address it prints. Electron-only operation
 and runtime-backed flows require the desktop app; the browser preview cannot
 stand in for their acceptance.
 
-Test the built `app/build/Octopus.app` with its bundled release runtime and
+Test the built `app/build/Phobos.app` with its bundled release runtime and
 capability executables. Use a dedicated test Home and the actual onboarding
 flow. Keep real user Homes, credentials, and accepted UI behavior intact. An
 integration needing login or macOS permissions must be exercised separately;
@@ -385,7 +385,7 @@ npm --prefix app run dev:onboarding -- --help
 After preparing the build prerequisites, run both modes from the repository root:
 
 ```sh
-OCTOPUS_NATIVE_NODE_HEADERS="$PWD/app/build/node-v24.22.1/include/node" \
+PHOBOS_NATIVE_NODE_HEADERS="$PWD/app/build/node-v24.22.1/include/node" \
   npm --prefix app run dev:onboarding -- --mode unauthenticated
 
 npm --prefix app run dev:onboarding -- --mode reused-auth \

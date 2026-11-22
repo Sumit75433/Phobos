@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { providerServiceTierAvailable } from "../chat/chatWorkspaceCapabilities";
 import type {
-  OctopusProviderInterface,
-  OctopusClientAccessProfile,
-  OctopusClientSetupPlan,
-  OctopusClientSetupProgress,
-  OctopusClientSetupState,
+  PhobosProviderInterface,
+  PhobosClientAccessProfile,
+  PhobosClientSetupPlan,
+  PhobosClientSetupProgress,
+  PhobosClientSetupState,
 } from "../../electron";
 import type {
   ClientExtensionActionStatus,
@@ -42,7 +42,7 @@ import { ChatGptSignInGate } from "./ChatGptSignInGate";
 import { chatgptSignInCompleted } from "../../onboarding/chatgptSignIn";
 import { OcButton } from "../../design-system/components";
 import { appToast } from "../../toasts";
-import { OctopusLoadingLogo, OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingLogo, PhobosLoadingState } from "../PhobosLoadingLogo";
 import {
   WorkspaceSetupOverlay,
   WorkspaceSetupProgress,
@@ -52,7 +52,7 @@ import {
 } from "./WorkspaceSetupOverlay";
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   children: ReactNode;
   runtimeHome: string;
 };
@@ -116,7 +116,7 @@ type WorkspacePack = {
   components: PackComponent[];
   extensions: PackExtension[];
   recipe: WorkspaceSetupHomeRecipe;
-  setupProvider: OctopusProviderInterface | null;
+  setupProvider: PhobosProviderInterface | null;
 };
 
 type LocalPackagesProjection = {
@@ -128,7 +128,7 @@ type GateSnapshot = {
   workspace: WorkspaceProjection;
   scope: ScopeProjection;
   localPackages: LocalPackagesProjection | null;
-  clientSetup: OctopusClientSetupState | null;
+  clientSetup: PhobosClientSetupState | null;
 };
 
 type DraftState = {
@@ -192,7 +192,7 @@ function WorkspaceHomeGate({ runtimeHome, children }: Pick<Props, "runtimeHome" 
   useChatgptAccount(false, runtimeHome);
   const structureGeneration = useProjectionStructureGeneration();
   const [snapshot, setSnapshot] = useState<GateSnapshot | null>(null);
-  const [setup, setSetup] = useState<OctopusClientSetupState | null>(null);
+  const [setup, setSetup] = useState<PhobosClientSetupState | null>(null);
   const [error, setError] = useState("");
   const [failedReads, setFailedReads] = useState(0);
   const [retry, setRetry] = useState(0);
@@ -240,13 +240,13 @@ function WorkspaceHomeGate({ runtimeHome, children }: Pick<Props, "runtimeHome" 
   return <WorkspaceAccountSetupGate runtimeHome={runtimeHome} setup={snapshot.clientSetup}>{children}</WorkspaceAccountSetupGate>;
 }
 
-function WorkspaceAccountSetupGate({ runtimeHome, children, setup }: Pick<Props, "runtimeHome" | "children"> & { setup: OctopusClientSetupState | null }) {
+function WorkspaceAccountSetupGate({ runtimeHome, children, setup }: Pick<Props, "runtimeHome" | "children"> & { setup: PhobosClientSetupState | null }) {
   const account = useChatgptAccount();
-  if (setup?.status !== "in_progress" && (!account.account?.signedIn || account.account.octopusHome !== runtimeHome)) return <ChatGptSignInGate />;
+  if (setup?.status !== "in_progress" && (!account.account?.signedIn || account.account.phobosHome !== runtimeHome)) return <ChatGptSignInGate />;
   return <WorkspaceSetupFlow accessProfile="live" initialSetup={setup}>{children}</WorkspaceSetupFlow>;
 }
 
-function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Props, "runtimeHome"> & { initialSetup: OctopusClientSetupState | null }) {
+function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Props, "runtimeHome"> & { initialSetup: PhobosClientSetupState | null }) {
   const extensions = useClientExtensions(accessProfile);
   const structureGeneration = useProjectionStructureGeneration();
   const [snapshot, setSnapshot] = useState<GateSnapshot | null>(null);
@@ -273,7 +273,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
       if (sequence === refreshSequence.current) {
         console.error("Workspace setup projection could not be read", error);
         const message = error instanceof Error ? error.message : String(error);
-        setSnapshotError(message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, "") || "Octopus could not verify the current workspace state.");
+        setSnapshotError(message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, "") || "Phobos could not verify the current workspace state.");
         setLoading(false);
       }
       throw error;
@@ -349,7 +349,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
     setApplyState({
       state: "running",
       label: "Resuming setup",
-      detail: "Your saved choices are being verified before Octopus continues.",
+      detail: "Your saved choices are being verified before Phobos continues.",
       percent: 0,
       error: "",
     });
@@ -363,7 +363,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
       setDraftState({ draft: clearCompletedWorkspaceSetupDraft(persisted), error: "" });
     }).catch((error) => {
       console.error("Workspace setup apply failed", error);
-      void window.octopusTransport?.logClientEvent?.({
+      void window.phobosTransport?.logClientEvent?.({
         level: "error", event: "workspace.setup.failed",
         message: error instanceof Error ? error.message : String(error),
       }).catch(() => {});
@@ -374,7 +374,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
         percent: null,
         error: error instanceof ProductSetupError
           ? error.productMessage
-          : "Octopus could not finish setup. Your choices are saved, so it is safe to try again.",
+          : "Phobos could not finish setup. Your choices are saved, so it is safe to try again.",
       });
     }).finally(() => {
       activeOperationId.current = "";
@@ -386,7 +386,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
   }, [refresh]);
 
   const resumeCurrent = useCallback((
-    setup: OctopusClientSetupState,
+    setup: PhobosClientSetupState,
     trustedDraft: WorkspaceSetupDraft | null = draftState.draft,
     allowSignIn = false,
   ): Promise<void> => {
@@ -394,7 +394,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
     setApplyState(allowSignIn ? {
       ...savedSetupProgress(setup),
       label: "Connecting ChatGPT",
-      detail: "Finish signing in in your browser. Octopus will continue once your account is verified.",
+      detail: "Finish signing in in your browser. Phobos will continue once your account is verified.",
     } : savedSetupProgress(setup));
     activeOperationId.current = setup.operationId;
     let resumedDraft: WorkspaceSetupDraft | null = null;
@@ -428,7 +428,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
       });
     }).catch((error) => {
       console.error("Saved client setup could not resume", error);
-      void window.octopusTransport?.logClientEvent?.({
+      void window.phobosTransport?.logClientEvent?.({
         level: "error", event: "workspace.setup.resume_failed",
         message: error instanceof Error ? error.message : String(error),
       }).catch(() => {});
@@ -439,7 +439,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
         percent: null,
         error: error instanceof ProductSetupError
           ? error.productMessage
-          : "Octopus could not finish the saved setup. Nothing was marked ready without proof.",
+          : "Phobos could not finish the saved setup. Nothing was marked ready without proof.",
       });
     }).finally(() => {
       activeOperationId.current = "";
@@ -583,7 +583,7 @@ function WorkspaceSetupFlow({ accessProfile, children, initialSetup }: Omit<Prop
           if (!setup) throw new Error("The prepared setup is no longer available.");
           await resumeCurrent(setup, draftState.draft, true);
         } catch {
-          setApplyState({ state: "failed", label: "Sign-in could not start", detail: "", percent: null, error: "Octopus could not reopen the prepared setup. Your choices are saved; try again." });
+          setApplyState({ state: "failed", label: "Sign-in could not start", detail: "", percent: null, error: "Phobos could not reopen the prepared setup. Your choices are saved; try again." });
         }
       }}
       onChange={changeDraft}
@@ -619,7 +619,7 @@ async function performApply({
   if (!setup) {
     setup = await beginClientSetup({ operationId: draft.operationId, plan });
   } else if (stableSetupJson(setup.plan) !== stableSetupJson(plan)) {
-    throw new ProductSetupError("Saved setup choices differ from the immutable setup already in progress. Octopus kept the earlier plan instead of replacing it.");
+    throw new ProductSetupError("Saved setup choices differ from the immutable setup already in progress. Phobos kept the earlier plan instead of replacing it.");
   }
   const completed = setup.status === "complete"
     ? setup
@@ -645,7 +645,7 @@ async function performApply({
   return true;
 }
 
-async function verifyExistingSignIn(operationId: string): Promise<OctopusClientSetupState> {
+async function verifyExistingSignIn(operationId: string): Promise<PhobosClientSetupState> {
   return resumeClientSetup(operationId, { allowSignIn: true });
 }
 
@@ -653,7 +653,7 @@ async function compileClientSetupPlan(
   draft: WorkspaceSetupDraft,
   pack: WorkspacePack,
   selection: ApplySelection,
-): Promise<OctopusClientSetupPlan> {
+): Promise<PhobosClientSetupPlan> {
   if (!pack.setupProvider?.models.some((model) => model.model === draft.providerModel && model.showInPicker)) {
     throw new ProductSetupError("Choose a model from the current provider catalog.");
   }
@@ -670,7 +670,7 @@ function compileClientSetupPlanWithDigest(
   pack: WorkspacePack,
   selection: ApplySelection,
   workspaceRequestDigest: string,
-): OctopusClientSetupPlan {
+): PhobosClientSetupPlan {
   const workspaceRequest = compileWorkspaceInitializeRequest(draft, pack.recipe, pack);
   const selectedPackageIds = new Set(selection.packageIds);
   const packages = selection.packageIds.map((packageId) => {
@@ -729,7 +729,7 @@ function compileClientSetupPlanWithDigest(
 }
 
 function assertSavedDraftMatchesSetup(
-  setup: OctopusClientSetupState,
+  setup: PhobosClientSetupState,
   draft: WorkspaceSetupDraft,
   snapshot: GateSnapshot,
   extensions: ClientExtensionRegistryState,
@@ -738,7 +738,7 @@ function assertSavedDraftMatchesSetup(
     throw new ProductSetupError("The saved choices belong to a different setup and were not applied.");
   }
   if (extensions.loading) {
-    throw new ProductSetupError("Client additions are still being checked. Octopus did not resume before those choices were verified.");
+    throw new ProductSetupError("Client additions are still being checked. Phobos did not resume before those choices were verified.");
   }
   const pack = requireWorkspacePack(snapshot.localPackages);
   const selection = compileApplySelection(draft, pack, extensions);
@@ -754,12 +754,12 @@ function assertSavedDraftMatchesSetup(
 }
 
 function proveCompletedClientSetup(
-  setup: OctopusClientSetupState,
+  setup: PhobosClientSetupState,
   snapshot: GateSnapshot,
   draft?: WorkspaceSetupDraft,
 ): void {
   if (setup.status !== "complete" || !setup.receiptDigest) {
-    throw new ProductSetupError("Setup stopped before Octopus could verify every selected part.");
+    throw new ProductSetupError("Setup stopped before Phobos could verify every selected part.");
   }
   const current = snapshot.clientSetup;
   if (
@@ -803,7 +803,7 @@ function completedSetupMatrix(snapshot: GateSnapshot, draft: WorkspaceSetupDraft
     return {
       mode: "blocked",
       title: "Completed setup does not match Home",
-      detail: "The aggregate setup receipt and the visible workspace disagree, so Octopus will not guess which one is current.",
+      detail: "The aggregate setup receipt and the visible workspace disagree, so Phobos will not guess which one is current.",
     };
   }
   if (draft?.step === "applying") {
@@ -819,7 +819,7 @@ function completedSetupMatrix(snapshot: GateSnapshot, draft: WorkspaceSetupDraft
       return {
         mode: "blocked",
         title: "Completed setup does not match the reviewed projects",
-        detail: "The initial project tree differs from the choices being applied, so Octopus did not open the workspace.",
+        detail: "The initial project tree differs from the choices being applied, so Phobos did not open the workspace.",
       };
     }
   }
@@ -838,7 +838,7 @@ function workspaceFailure(snapshot: GateSnapshot): GateMatrix | null {
     return {
       mode: "blocked",
       title: "Home and projects need attention",
-      detail: snapshot.scope.errors.join("\n") || "The current workspace does not form one valid Octopus OS scope.",
+      detail: snapshot.scope.errors.join("\n") || "The current workspace does not form one valid Phobos OS scope.",
     };
   }
   return null;
@@ -856,7 +856,7 @@ function resolveGateMatrix(
       return {
         mode: "blocked",
         title: "Another setup is already in progress",
-        detail: "Octopus kept the earlier setup plan and will not mix it with different saved choices.",
+        detail: "Phobos kept the earlier setup plan and will not mix it with different saved choices.",
         recovery: "discard_draft",
       };
     }
@@ -871,7 +871,7 @@ function resolveGateMatrix(
       const mismatch = savedDraftMismatch(setup, draft, snapshot, catalogResult, extensions);
       if (mismatch) return mismatch;
     }
-    return { mode: "resume", title: "Finishing setup", detail: "Octopus is continuing from the last verified step." };
+    return { mode: "resume", title: "Finishing setup", detail: "Phobos is continuing from the last verified step." };
   }
   const failure = workspaceFailure(snapshot);
   if (failure) return failure;
@@ -882,7 +882,7 @@ function resolveGateMatrix(
       return {
         mode: "blocked",
         title: "Workspace proof does not match Home",
-        detail: "The configured receipt and the visible Home identity disagree. Octopus will not open a different workspace silently.",
+        detail: "The configured receipt and the visible Home identity disagree. Phobos will not open a different workspace silently.",
       };
     }
     if (draft?.step === "applying" && receipt.operationId !== draft.operationId) {
@@ -896,7 +896,7 @@ function resolveGateMatrix(
     return {
       mode: "blocked",
       title: "Workspace verification is incomplete",
-      detail: "Home exists, but Octopus has no complete setup receipt for its local capabilities and provider account.",
+      detail: "Home exists, but Phobos has no complete setup receipt for its local capabilities and provider account.",
     };
   }
   if (snapshot.scope.status === "ready") {
@@ -905,19 +905,19 @@ function resolveGateMatrix(
       title: "Home has no setup receipt",
       detail: draft?.step === "applying"
         ? "The visible Home cannot be merged with the saved setup choices without durable proof."
-        : "Octopus found Home data without the durable setup proof required to open the workspace.",
+        : "Phobos found Home data without the durable setup proof required to open the workspace.",
     };
   }
   if (snapshot.scope.status === "unbound") return { mode: "setup", title: "", detail: "" };
   return {
     mode: "blocked",
     title: "Home is not ready",
-    detail: "Octopus found workspace data without a valid Home surface. Check the state again after local recovery finishes.",
+    detail: "Phobos found workspace data without a valid Home surface. Check the state again after local recovery finishes.",
   };
 }
 
 function savedDraftMismatch(
-  setup: OctopusClientSetupState,
+  setup: PhobosClientSetupState,
   draft: WorkspaceSetupDraft,
   snapshot: GateSnapshot,
   catalogResult: CatalogResult,
@@ -927,14 +927,14 @@ function savedDraftMismatch(
     return {
       mode: "resume",
       title: "Checking saved choices",
-      detail: "Octopus is verifying the saved setup choices against the setup already on this device.",
+      detail: "Phobos is verifying the saved setup choices against the setup already on this device.",
     };
   }
   if (catalogResult.error || !catalogResult.pack) {
     return {
       mode: "blocked",
       title: "Saved setup choices could not be checked",
-      detail: catalogResult.error || "The local setup catalog is unavailable, so Octopus did not discard or resume the saved choices.",
+      detail: catalogResult.error || "The local setup catalog is unavailable, so Phobos did not discard or resume the saved choices.",
       recovery: "discard_draft",
     };
   }
@@ -947,7 +947,7 @@ function savedDraftMismatch(
       title: "Saved setup choices changed",
       detail: error instanceof ProductSetupError
         ? error.productMessage
-        : "The saved choices no longer match the immutable setup on this device. Octopus did not replace either version.",
+        : "The saved choices no longer match the immutable setup on this device. Phobos did not replace either version.",
       recovery: "discard_draft",
     };
   }
@@ -956,7 +956,7 @@ function savedDraftMismatch(
 function buildCatalog(
   localPackages: LocalPackagesProjection,
   extensions: ClientExtensionRegistryState,
-  setup: OctopusClientSetupState | null,
+  setup: PhobosClientSetupState | null,
 ): CatalogResult {
   const pack = requireWorkspacePack(localPackages);
   const extensionById = new Map(extensions.extensions.map((extension) => [extension.manifest.id, extension]));
@@ -1144,10 +1144,10 @@ function assertApplyBoundary(snapshot: GateSnapshot, operationId: string): void 
     throw new ProductSetupError("The current workspace state needs repair before setup can continue.");
   }
   if (snapshot.clientSetup?.status === "in_progress" && snapshot.clientSetup.operationId !== operationId) {
-    throw new ProductSetupError("Another saved setup is still being finished. Octopus did not start a second one.");
+    throw new ProductSetupError("Another saved setup is still being finished. Phobos did not start a second one.");
   }
   if (snapshot.workspace.status === "configured" && snapshot.workspace.receipt?.operationId !== operationId) {
-    throw new ProductSetupError("Another workspace is already configured. Octopus did not replace it.");
+    throw new ProductSetupError("Another workspace is already configured. Phobos did not replace it.");
   }
   if (snapshot.workspace.status === "not_configured" && snapshot.scope.status !== "unbound") {
     throw new ProductSetupError("An existing Home cannot be replaced by Welcome setup.");
@@ -1166,7 +1166,7 @@ function assertConfiguredRequestBoundary(
       || snapshot.workspace.receipt.requestDigest !== requestDigest
     )
   ) {
-    throw new ProductSetupError("The saved setup choices do not match the configured workspace. Octopus did not change its capabilities.");
+    throw new ProductSetupError("The saved setup choices do not match the configured workspace. Phobos did not change its capabilities.");
   }
 }
 
@@ -1205,7 +1205,7 @@ function stableSetupJson(value: unknown): string {
 function componentConfigured(
   component: PackComponent,
   pack: WorkspacePack,
-  setup: OctopusClientSetupState | null,
+  setup: PhobosClientSetupState | null,
 ): boolean {
   if (!component.installed || component.receiptState !== "valid") return false;
   if (
@@ -1249,22 +1249,22 @@ function findProviderCredentialStatus(
 
 function providerStatusText(
   status: ClientExtensionActionStatus | null,
-  setup: OctopusClientSetupState | null,
+  setup: PhobosClientSetupState | null,
 ): string {
   if (setup?.status === "complete" && setup.plan.provider.required_state === "account_readable") {
     return "Provider account access was verified during setup.";
   }
   if (!status) return "Provider sign-in details are not available yet.";
   if (status.state === "configured") return "Sign-in details are present and will be verified with the provider during setup.";
-  if (status.state === "repair_available") return "Existing sign-in details can be repaired by the optional addition; otherwise Octopus will open the normal provider sign-in during Apply.";
-  if (status.state === "sign_in_required") return "Octopus will open the provider sign-in during Apply before Home becomes available.";
+  if (status.state === "repair_available") return "Existing sign-in details can be repaired by the optional addition; otherwise Phobos will open the normal provider sign-in during Apply.";
+  if (status.state === "sign_in_required") return "Phobos will open the provider sign-in during Apply before Home becomes available.";
   if (status.state === "waiting_for_interface") return "Provider sign-in will be checked after its interface is installed.";
   return "Provider sign-in status is currently unavailable.";
 }
 
 function requireWorkspacePack(localPackages: LocalPackagesProjection | null): WorkspacePack {
   if (!localPackages || localPackages.packs.length !== 1) {
-    throw new ProductSetupError("Octopus needs exactly one local workspace setup pack before Welcome can continue.");
+    throw new ProductSetupError("Phobos needs exactly one local workspace setup pack before Welcome can continue.");
   }
   return localPackages.packs[0];
 }
@@ -1282,7 +1282,7 @@ function capabilityKind(kind: PackComponent["productKind"]): WorkspaceSetupCapab
   return kind;
 }
 
-function savedSetupProgress(setup: OctopusClientSetupState): WorkspaceSetupApplyState {
+function savedSetupProgress(setup: PhobosClientSetupState): WorkspaceSetupApplyState {
   const pending = setup.steps.findIndex((step) => step.state === "pending");
   const index = pending < 0 ? setup.steps.length : pending;
   const step = setup.steps[index]?.step;
@@ -1296,8 +1296,8 @@ function savedSetupProgress(setup: OctopusClientSetupState): WorkspaceSetupApply
 }
 
 function clientSetupProgressLabel(
-  step: OctopusClientSetupProgress["step"],
-  phase: OctopusClientSetupProgress["phase"],
+  step: PhobosClientSetupProgress["step"],
+  phase: PhobosClientSetupProgress["phase"],
 ): string {
   if (phase === "sealed") return "Workspace verified";
   if (step === "packages") return phase === "verifying" ? "Checking local components" : "Installing local components";
@@ -1306,9 +1306,9 @@ function clientSetupProgressLabel(
   return phase === "verifying" ? "Checking Home and projects" : "Creating Home and projects";
 }
 
-function clientSetupProgressDetail(step: OctopusClientSetupProgress["step"]): string {
+function clientSetupProgressDetail(step: PhobosClientSetupProgress["step"]): string {
   if (step === "packages") return "Verifying and installing the selected local capabilities.";
-  if (step === "extensions") return "Applying the selected additions to the Octopus client.";
+  if (step === "extensions") return "Applying the selected additions to the Phobos client.";
   if (step === "provider") return "Confirming the account and opening the normal provider sign-in only when it is needed.";
   return "Publishing Home, the project tree, and new-task defaults.";
 }
@@ -1331,7 +1331,7 @@ function GateState({
           {tone === "danger" ? (
             <span className="welcome-tag">Needs attention</span>
           ) : (
-            <span className="setup-loading-logo"><OctopusLoadingLogo /></span>
+            <span className="setup-loading-logo"><PhobosLoadingLogo /></span>
           )}
           <h1 id="welcome-title" className="welcome-title">{title}</h1>
           <p className="welcome-body" data-tone={tone === "danger" ? "danger" : undefined}>{detail}</p>
@@ -1345,7 +1345,7 @@ function GateState({
 function OpeningState() {
   return (
     <main className="welcome flex min-h-0 items-center justify-center bg-token-main-surface-primary text-token-foreground">
-      <OctopusLoadingState className="app-loading-state" label="Opening Octopus" />
+      <PhobosLoadingState className="app-loading-state" label="Opening Phobos" />
     </main>
   );
 }
@@ -1364,7 +1364,7 @@ function readDraftForHostResume(trustedDraft: WorkspaceSetupDraft | null): Works
     return readWorkspaceSetupDraft();
   } catch (error) {
     if (trustedDraft === null) return null;
-    throw new ProductSetupError("The saved setup choices became unreadable. Octopus kept the durable setup plan and did not resume automatically.");
+    throw new ProductSetupError("The saved setup choices became unreadable. Phobos kept the durable setup plan and did not resume automatically.");
   }
 }
 
@@ -1386,7 +1386,7 @@ function resetApplyingDraft(
   setApplyState(APPLY_IDLE);
 }
 
-async function readGateSnapshot(includeCatalog = true, onSetup?: (setup: OctopusClientSetupState | null) => void): Promise<GateSnapshot> {
+async function readGateSnapshot(includeCatalog = true, onSetup?: (setup: PhobosClientSetupState | null) => void): Promise<GateSnapshot> {
   const clientSetup = await readCurrentClientSetup();
   onSetup?.(clientSetup);
   const [workspaceRaw, scopeRaw] = await Promise.all([
@@ -1433,34 +1433,34 @@ function parseWorkspaceReceipt(value: unknown): WorkspaceReceipt {
 }
 
 function parseScopeProjection(value: unknown): ScopeProjection {
-  const row = record(value, "Octopus OS scope projection");
-  const status = oneOf(row.status, ["unbound", "awaiting_home", "ready", "invalid"] as const, "Octopus OS scope status");
+  const row = record(value, "Phobos OS scope projection");
+  const status = oneOf(row.status, ["unbound", "awaiting_home", "ready", "invalid"] as const, "Phobos OS scope status");
   const rootEnvironment = row.root_environment === null
     ? null
-    : parseScopeProject(row.root_environment, "Octopus OS root environment");
-  const projects = array(row.projects, "Octopus OS projects").map((value, index) => (
-    parseScopeProject(value, `Octopus OS project ${index + 1}`)
+    : parseScopeProject(row.root_environment, "Phobos OS root environment");
+  const projects = array(row.projects, "Phobos OS projects").map((value, index) => (
+    parseScopeProject(value, `Phobos OS project ${index + 1}`)
   ));
   return {
     status,
-    rootEeId: optionalId(row.root_ee_id, "Octopus OS root"),
-    homeRunId: optionalId(row.home_run_id, "Octopus OS Home run"),
-    homeInterfaceId: optionalId(row.home_interface_id, "Octopus OS Home interface"),
+    rootEeId: optionalId(row.root_ee_id, "Phobos OS root"),
+    homeRunId: optionalId(row.home_run_id, "Phobos OS Home run"),
+    homeInterfaceId: optionalId(row.home_interface_id, "Phobos OS Home interface"),
     rootEnvironment,
     projects,
-    errors: stringArray(row.errors, "Octopus OS scope errors"),
+    errors: stringArray(row.errors, "Phobos OS scope errors"),
   };
 }
 
 function parseScopeProject(value: unknown, label: string): ScopeProject {
   const row = record(value, label);
   const config = optionalRecord(row.config, `${label} config`);
-  const octopusOs = optionalRecord(config.octopus_os, `${label} Octopus OS config`);
+  const phobosOs = optionalRecord(config.phobos_os, `${label} Phobos OS config`);
   return {
     eeId: id(row.ee_id, `${label} EE`),
     recordDigest: digest(row.record_digest, `${label} digest`),
-    applicationDefaults: optionalStringArray(octopusOs.application_defaults, `${label} Application defaults`),
-    driverDefaults: optionalStringArray(octopusOs.driver_defaults, `${label} Driver defaults`),
+    applicationDefaults: optionalStringArray(phobosOs.application_defaults, `${label} Application defaults`),
+    driverDefaults: optionalStringArray(phobosOs.driver_defaults, `${label} Driver defaults`),
   };
 }
 
@@ -1549,7 +1549,7 @@ function parseWorkspacePack(value: unknown, index: number): WorkspacePack {
   };
 }
 
-function parseSetupProvider(value: unknown): OctopusProviderInterface {
+function parseSetupProvider(value: unknown): PhobosProviderInterface {
   const provider = record(value, "setup provider");
   return {
     id: id(provider.id, "setup provider id"), label: text(provider.label, "setup provider label"),

@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_application_pack",
+  "schema": "phobos.local_application_pack",
   "schema_version": 1,
   "id": "codex",
   "version": "1.5.0",
@@ -14,7 +14,7 @@
     {
       "package_id": "world_system_review",
       "selection": "recommended",
-      "reason": "Offers a trigger that reviews recent work after a quiet period and improves Octopus when the evidence supports it."
+      "reason": "Offers a trigger that reviews recent work after a quiet period and improves Phobos when the evidence supports it."
     },
     {
       "package_id": "world_memory_cron",

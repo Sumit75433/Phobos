@@ -82,7 +82,7 @@ async function browserLeafCheck(coordinates) {
     naturalWidth = 1200; naturalHeight = 800;
     decode() { return new Promise((resolve) => decodes.push(resolve)); }
   }
-  dom.window.octopusTransport = {
+  dom.window.phobosTransport = {
     onCdpViewerEvent: (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
     openCdpViewer: (request) => f.open(request.attachmentId, request.visible),
     cdpViewerAction: (request) => f.manager.action("operator", f.sender, request),
@@ -99,7 +99,7 @@ async function browserLeafCheck(coordinates) {
       : name.endsWith("IconGlyphs") ? { Glyph: () => null }
       : name.endsWith("components") ? { OcButton: "button", OcMenuItem: "button", OcMenuSurface: "div", OcIconButton: ({ label, glyph, appearance, ...props }) => React.createElement("button", { ...props, "aria-label": label }) }
       : name.endsWith("MessageTooltip") ? { MessageTooltip: ({ children }) => children }
-      : name.endsWith("OctopusSurface") ? { OctopusEmptyState: () => null }
+      : name.endsWith("PhobosSurface") ? { PhobosEmptyState: () => null }
       : { LiveSurfaceEmpty: ({ title }) => React.createElement("div", null, title), ManualRoomControlWarning: () => null,
         dataText: (data, key) => typeof data[key] === "string" ? data[key] : "", isViewerUrl: (value) => /^https?:/.test(value) },
   });

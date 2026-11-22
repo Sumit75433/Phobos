@@ -1,9 +1,9 @@
-# Octopus desktop client
+# Phobos desktop client
 
 The React and Electron client presents Home, tasks, applications, drivers, and
 runtime evidence. Navigation, windows, onboarding, and local file preparation
 belong to the client. Autonomous model and tool execution crosses declared
-Octopus interfaces under policy.
+Phobos interfaces under policy.
 
 - [Build and first setup](../docs/getting-started.md)
 - [Using the desktop client](../docs/client.md)

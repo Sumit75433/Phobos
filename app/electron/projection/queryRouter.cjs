@@ -21,15 +21,15 @@ function queryRouterProjection(store) {
     await store.beforeRead();
     const { method, params } = parseProjectionReadRequest(request);
     if (method === "projection.operator.providers.list") {
-      const home = store.octopusHome();
+      const home = store.phobosHome();
       store.ensureProjectionWatchers();
       const providers = await readProviderInterfaceDescriptors(path.join(home, "registry"));
-      if (home !== store.octopusHome()) throw new Error("Provider catalogue Home changed during read");
+      if (home !== store.phobosHome()) throw new Error("Provider catalogue Home changed during read");
       return { providers };
     }
     if (method === "projection.interface_artifacts.list" || method === "projection.client_actions.list"
       || method === "projection.movements.list") {
-      const home = store.octopusHome();
+      const home = store.phobosHome();
       if (method === "projection.client_actions.list" && params.home !== home) {
         throw new Error("Client action read does not match the selected Home.");
       }
@@ -55,12 +55,12 @@ function queryRouterProjection(store) {
     if (method === "projection.interfaces.artifact_transfer.targets"
       && typeof exactInterface === "string" && exactInterface) {
       const interfaces = await store.readDescriptorRows(
-        path.join(store.octopusHome(), "registry"),
+        path.join(store.phobosHome(), "registry"),
         DESCRIPTOR_REGISTRIES.find((registry) => registry.kind === "interface"),
         [], null, new Set([exactInterface]),
       );
       const runProjection = params.run_id === undefined ? undefined : {
-        runRecords: (await readRunRecords(path.join(store.octopusHome(), "state", "runs"))).records,
+        runRecords: (await readRunRecords(path.join(store.phobosHome(), "state", "runs"))).records,
       };
       return { artifact_transfer_targets: limitRows(
         filterInterfaceArtifactTransferTargets(store.interfaceArtifactTransferTargetRowsFor(interfaces), params, runProjection), params,

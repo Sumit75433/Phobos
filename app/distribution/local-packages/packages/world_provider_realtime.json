@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_provider_realtime",
   "version": "1.1.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Live voice",
     "description": "Full duplex voice and durable semantic artifacts through an exact provider interface.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "provider",
     "icon": "audio-lines"
   },

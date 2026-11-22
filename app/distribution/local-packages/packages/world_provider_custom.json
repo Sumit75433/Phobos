@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_provider_custom",
   "version": "1.0.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Custom OpenAI-compatible",
     "description": "Any server that speaks the OpenAI Chat Completions API.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "provider",
     "icon": "sparkles"
   },

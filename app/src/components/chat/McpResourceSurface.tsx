@@ -280,7 +280,7 @@ function McpResourceBody({
         />
       ) : resourceUri ? (
         <McpState glyph="lock" title="Interactive resource unavailable">
-          This movement contains the resource URI but not its HTML bytes. Octopus does not fetch or imitate the app surface.
+          This movement contains the resource URI but not its HTML bytes. Phobos does not fetch or imitate the app surface.
         </McpState>
       ) : null}
 

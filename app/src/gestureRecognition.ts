@@ -144,7 +144,7 @@ class GestureRecognitionController {
     }
     this.publish({ ...IDLE_HANDS, phase: "requesting", error: "", cameraFps: null });
     try {
-      const nativePermission = await window.octopusTransport?.cameraAccessStatus?.();
+      const nativePermission = await window.phobosTransport?.cameraAccessStatus?.();
       if (generation !== this.generation) return;
       if (nativePermission && !nativePermission.granted) {
         this.publish({ phase: "denied", error: `Camera permission is ${nativePermission.status}.` });
@@ -622,13 +622,13 @@ export function attachGesturePreview(canvas: HTMLCanvasElement | null): void {
 export type CameraPermission = { granted: boolean; status: string };
 
 export async function readCameraPermission(): Promise<CameraPermission> {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (transport?.cameraAccessStatus) return transport.cameraAccessStatus();
   return { granted: true, status: "browser-managed" };
 }
 
 export async function requestCameraPermission(): Promise<CameraPermission> {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (transport?.requestCameraAccess) return transport.requestCameraAccess();
   return { granted: true, status: "browser-managed" };
 }

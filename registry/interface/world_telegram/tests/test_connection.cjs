@@ -86,7 +86,7 @@ function context(api, { values = {}, input = {}, launch = {} } = {}) {
   const saved = [];
   const progress = [];
   let current = { ...values };
-  const environment = { OCTOPUS_TELEGRAM_API_BASE: api.base, ...launch };
+  const environment = { PHOBOS_TELEGRAM_API_BASE: api.base, ...launch };
   const ctx = {
     descriptor, interfaceId: descriptor.id, input, privateDirectory: "/unused", signal: undefined,
     get values() { return current; },
@@ -129,12 +129,12 @@ test("probe reaches the Bot API like the interface and reports missing, rejected
   assert.deepEqual(paired, { state: "connected", account: { label: "@octo_bot", detail: `Through the Bot API server at ${api.authority}, for allowed user 4242` }, manage: MANAGE });
   assert.deepEqual(api.calls.map((call) => [call.method, call.token]), [["getMe", TOKEN]]);
   const proxy = await connectProxy();
-  const proxied = await connection.probe(context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { OCTOPUS_TELEGRAM_PROXY: proxy.url, TELEGRAM_ALLOW_ALL_USERS: "yes" } }).ctx);
+  const proxied = await connection.probe(context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { PHOBOS_TELEGRAM_PROXY: proxy.url, TELEGRAM_ALLOW_ALL_USERS: "yes" } }).ctx);
   assert.deepEqual(proxied.account, { label: "@octo_bot", detail: `Through the Bot API server at ${api.authority} via a proxy, for every Telegram user` });
   assert.deepEqual(proxy.tunnels, [api.authority]);
   const split = await connection.probe(context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { TELEGRAM_BOT_TOKEN: `555:${"B".repeat(35)}` } }).ctx);
   assert.equal(split.state, "error");
-  assert.match(split.message, /^TELEGRAM_BOT_TOKEN is set in this Mac's environment and saved in Octopus with a different value/);
+  assert.match(split.message, /^TELEGRAM_BOT_TOKEN is set in this Mac's environment and saved in Phobos with a different value/);
   assert.equal(api.calls.length, 2);
 });
 
@@ -175,8 +175,8 @@ test("the environment is checked before Telegram is called, and pairing leaves t
   const api = await telegram({ getMe: BOT, getWebhookInfo: { url: "" }, getUpdates: () => [{ update_id: 70, ...start(session.progress) }], sendMessage: { message_id: 4 } });
   const split = await connection.connect(context(api, { input: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { TELEGRAM_BOT_TOKEN: `555:${"B".repeat(35)}` } }).ctx);
   assert.match(split.message, /^TELEGRAM_BOT_TOKEN is set in this Mac's environment to a different value/);
-  const reserved = await connection.probe(context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { OCTOPUS_TELEGRAM_FALLBACK_IPS: "100.64.0.1, 203.0.113.5" } }).ctx);
-  assert.deepEqual(reserved, { state: "error", message: "OCTOPUS_TELEGRAM_FALLBACK_IPS must list public IPv4 addresses." });
+  const reserved = await connection.probe(context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { PHOBOS_TELEGRAM_FALLBACK_IPS: "100.64.0.1, 203.0.113.5" } }).ctx);
+  assert.deepEqual(reserved, { state: "error", message: "PHOBOS_TELEGRAM_FALLBACK_IPS must list public IPv4 addresses." });
   assert.equal(api.calls.length, 0);
   session = context(api, { input: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { TELEGRAM_HOME_CHAT: "-100500" } });
   assert.equal((await connection.connect(session.ctx)).state, "connected");
@@ -208,7 +208,7 @@ test("typed allowed users skip pairing, bad input fails clearly and disconnect s
   const cleared = context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_ALLOWED_USERS: "4242" } });
   const gone = await connection.disconnect(cleared.ctx);
   assert.deepEqual([gone.state, gone.manage], ["not_connected", MANAGE]);
-  assert.match(gone.message, /^Telegram is disconnected: Octopus removed the bot token and allowed users from this Mac\./);
+  assert.match(gone.message, /^Telegram is disconnected: Phobos removed the bot token and allowed users from this Mac\./);
   assert.deepEqual(cleared.saved, [{ TELEGRAM_BOT_TOKEN: null, TELEGRAM_ALLOWED_USERS: null, TELEGRAM_HOME_CHAT: null }]);
   const ambient = context(api, { values: { TELEGRAM_BOT_TOKEN: TOKEN }, launch: { TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_ALLOWED_USERS: "4242" } });
   const kept = await connection.disconnect(ambient.ctx);

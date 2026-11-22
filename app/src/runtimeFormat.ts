@@ -49,8 +49,8 @@ export function jsonText(value: unknown): string {
 }
 
 export async function copyText(value: string): Promise<boolean> {
-  if (window.octopusTransport?.copyText) {
-    await window.octopusTransport.copyText(value);
+  if (window.phobosTransport?.copyText) {
+    await window.phobosTransport.copyText(value);
     return true;
   }
   if (!navigator.clipboard?.writeText) return false;

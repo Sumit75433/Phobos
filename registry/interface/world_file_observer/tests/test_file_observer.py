@@ -34,12 +34,12 @@ class FileObserverContract(unittest.TestCase):
         for name, value in self.package.items():
             (self.interface_dir / Path(name).name).write_text(json.dumps(value))
         life = self.package["registry/interface/world_test_observer/life.json"]["processes"][0]
-        self.env = dict(os.environ, OCTOPUS_INTERFACE_ID=self.config["interface"],
-                        OCTOPUS_INTERFACE_DIR=str(self.interface_dir), OCTOPUS_VAR_DIR=str(self.root / "state"),
-                        OCTOPUS_MOVEMENTS_JSONL=str(self.root / "movements.jsonl"),
-                        OCTOPUS_INTERFACE_HOST_IO_LIMITS=json.dumps(life["io_limits"]),
+        self.env = dict(os.environ, PHOBOS_INTERFACE_ID=self.config["interface"],
+                        PHOBOS_INTERFACE_DIR=str(self.interface_dir), PHOBOS_VAR_DIR=str(self.root / "state"),
+                        PHOBOS_MOVEMENTS_JSONL=str(self.root / "movements.jsonl"),
+                        PHOBOS_INTERFACE_HOST_IO_LIMITS=json.dumps(life["io_limits"]),
                         PYTHONDONTWRITEBYTECODE="1")
-        self.env.pop("OCTOPUS_BLOBS_DIR", None)
+        self.env.pop("PHOBOS_BLOBS_DIR", None)
         with patch.dict(os.environ, self.env):
             spec = importlib.util.spec_from_file_location("test_observer_boundary", PYECHO / "pyecho_life.py")
             self.boundary = importlib.util.module_from_spec(spec)
@@ -50,8 +50,8 @@ class FileObserverContract(unittest.TestCase):
     def admit(self, path, label, digest):
         manifest = json.loads(Path(path).read_bytes())
         payload = Path(manifest["payload_path"]).read_bytes()
-        self.assertEqual(self.boundary.octopus_content_hash(payload), manifest["payload_content_hash"])
-        self.assertEqual(self.boundary.octopus_content_hash(Path(path).read_bytes()), digest)
+        self.assertEqual(self.boundary.phobos_content_hash(payload), manifest["payload_content_hash"])
+        self.assertEqual(self.boundary.phobos_content_hash(Path(path).read_bytes()), digest)
         self.deliveries.append((path, label, json.loads(payload)))
         return len(self.deliveries) + 10
 

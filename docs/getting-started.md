@@ -11,7 +11,7 @@ For the terminal client and its independent build command, see
 ## Install the app
 
 The [release workflow](../.github/workflows/release.yml) builds a disk image
-for Apple Silicon, `Octopus-<version>-macos-arm64.dmg`, with `checksums.txt`
+for Apple Silicon, `Phobos-<version>-macos-arm64.dmg`, with `checksums.txt`
 and `install.sh`. A version tag creates a **draft** release; it is not an
 available download until a maintainer publishes it on
 [GitHub Releases](https://github.com/miuuyy/Octopus-SI-OS/releases).
@@ -22,7 +22,7 @@ published, the latest-release URL returns 404 and you need the source build belo
 Requirements:
 
 - macOS 14 or later on Apple Silicon.
-- Command Line Tools for Xcode (`xcode-select --install`). Octopus runs
+- Command Line Tools for Xcode (`xcode-select --install`). Phobos runs
   `python3` and `git` from them; a Mac without them offers the install the
   first time something calls `python3`.
 - A ChatGPT account with access to the model you select.
@@ -34,31 +34,31 @@ curl -fsSL https://github.com/miuuyy/Octopus-SI-OS/releases/latest/download/inst
 ```
 
 The installer checks macOS and the Command Line Tools, verifies the disk
-image against `checksums.txt`, and copies `Octopus.app` to `/Applications`
+image against `checksums.txt`, and copies `Phobos.app` to `/Applications`
 (`~/Applications` when `/Applications` is not writable). Set
-`OCTOPUS_VERSION=<version>` to install a specific release, or
-`OCTOPUS_APPLICATIONS_DIR` to choose the folder.
+`PHOBOS_VERSION=<version>` to install a specific release, or
+`PHOBOS_APPLICATIONS_DIR` to choose the folder.
 
-To install by hand, download the disk image, drag Octopus to Applications,
+To install by hand, download the disk image, drag Phobos to Applications,
 and run this once before the first launch:
 
 ```sh
-xattr -dr com.apple.quarantine /Applications/Octopus.app
+xattr -dr com.apple.quarantine /Applications/Phobos.app
 ```
 
 The build is ad-hoc signed, not notarized by Apple. A browser marks the
 download as quarantined, and macOS then refuses to open the app. **Open
-Anyway** in System Settings would admit only the app itself: Octopus copies its
+Anyway** in System Settings would admit only the app itself: Phobos copies its
 tools into your Home when it installs packages, the copies keep the quarantine
 mark, and macOS would block them one by one. The installer above downloads
-with `curl`, so nothing it installs is quarantined. Do not run Octopus from the
+with `curl`, so nothing it installs is quarantined. Do not run Phobos from the
 mounted disk image.
 
-To update, quit Octopus and its runtime, then install the new release the same
-way. Octopus is a research preview: releases with incompatible persisted formats
+To update, quit Phobos and its runtime, then install the new release the same
+way. Phobos is a research preview: releases with incompatible persisted formats
 require a fresh Home through setup. Existing Homes are never migrated or repaired
 on startup; keep your sign-in credentials when resetting a disposable Home.
-To uninstall, delete `Octopus.app`; your Home (`~/.octopus` by default) and the
+To uninstall, delete `Phobos.app`; your Home (`~/.phobos` by default) and the
 Codex sign-in in `~/.codex` stay until you remove them.
 
 ## Build from source
@@ -104,13 +104,13 @@ does the same by hand). Fetch the verified headers, then package and open the ap
 
 ```sh
 headers="$(node app/native/runtime.cjs headers)" &&
-OCTOPUS_NATIVE_NODE_HEADERS="$headers" npm --prefix app run package:mac &&
-open -n ./app/build/Octopus.app
+PHOBOS_NATIVE_NODE_HEADERS="$headers" npm --prefix app run package:mac &&
+open -n ./app/build/Phobos.app
 ```
 
 Packaging builds the renderer, release runtime, capability executables, and
 provider bridge; it includes the managed Codex distribution and verifies an
-ad-hoc code signature. The output is `app/build/Octopus.app`, built for this
+ad-hoc code signature. The output is `app/build/Phobos.app`, built for this
 machine. It is not a notarized installer or a universal binary. Repackaging
 replaces that bundle in place.
 
@@ -133,10 +133,10 @@ your machine:
   use another model provider, configure an API-key, OpenAI-compatible, Claude
   CLI, Gemini or Vertex provider in **Applications**.
 - The access screen lets you configure or enter the local administrator password.
-- The embedded launch terminal prepares a command ending in `octopus up`.
+- The embedded launch terminal prepares a command ending in `phobos up`.
   Press Enter to run it and wait for the runtime's ready state.
 - Workspace setup asks for a starting structure, project names, and capabilities.
-  Review the choices and select **Set up Octopus**. To start from someone
+  Review the choices and select **Set up Phobos**. To start from someone
   else's setup instead, see [Setup files](#setup-files).
 
 ![Local client lock screen asking for the Administrator or Test password](images/client/client-lock.png)
@@ -161,15 +161,15 @@ permissions.
 
 ### Setup files
 
-A setup file (`<name>.octopus-setup.json`) is plain JSON with what the setup
+A setup file (`<name>.phobos-setup.json`) is plain JSON with what the setup
 wizard asks for: the space, the projects, the capabilities and where each one
 is available, and optionally the model. It never carries keys, accounts, tasks,
 history or memory.
 
 - **Import:** **Import setup…** on the wizard's first step fills every step
-  from the file. Check the steps and select **Set up Octopus**, then connect
+  from the file. Check the steps and select **Set up Phobos**, then connect
   accounts in **Applications**. A file that needs a component or model this
-  Octopus does not offer is refused, with the reason under the button.
+  Phobos does not offer is refused, with the reason under the button.
 - **Export:** **Export setup…** on the wizard's review step, or
   **Settings → General → Setup file** in a running Home.
 
@@ -180,7 +180,7 @@ history or memory.
 
 ```json
 {
-  "schema": "octopus.setup",
+  "schema": "phobos.setup",
   "schema_version": 1,
   "space": { "name": "Founder", "goal": "Operate life and work" },
   "projects": [
@@ -196,7 +196,7 @@ history or memory.
 }
 ```
 
-Octopus reads exactly these fields. `parent` is another project's `id` or
+Phobos reads exactly these fields. `parent` is another project's `id` or
 `null`. `projects` on a capability lists where it is offered, for the ones the
 wizard lets you limit to projects, such as drivers. `model` is optional. Icons
 and colors are the ones the project editor offers.
@@ -207,61 +207,61 @@ and colors are the ones the project editor offers.
 
 The app carries its own Codex CLI: a pinned upstream release, checked against
 its SHA-256 when the app is packaged. You do not need to install Codex, and a
-Codex CLI you installed yourself is neither used nor updated by Octopus.
+Codex CLI you installed yourself is neither used nor updated by Phobos.
 
 The sign-in is shared. **Sign in with ChatGPT** keeps its credential in the
 machine's Codex home, `~/.codex` unless `CODEX_HOME` says otherwise - the same
 place Codex CLI uses. So:
 
-- If Codex CLI on this Mac is already signed in with ChatGPT, Octopus starts
+- If Codex CLI on this Mac is already signed in with ChatGPT, Phobos starts
   signed in.
 - Signing in or out in either one changes it for both. Both take the same
-  write lock, `auth.lock` in that Codex home, so a token refresh in Octopus and
+  write lock, `auth.lock` in that Codex home, so a token refresh in Phobos and
   one in Codex CLI never overwrite each other.
 - Choosing another ChatGPT workspace or adding an account in
   **Settings → Account** also changes it for Codex CLI. Codex keeps one ChatGPT
   sign-in at a time, so adding an account replaces the current one.
-- Octopus needs a ChatGPT sign-in. If `~/.codex` holds an API-key login, setup
+- Phobos needs a ChatGPT sign-in. If `~/.codex` holds an API-key login, setup
   asks you to sign in with ChatGPT, and doing so replaces that login for Codex
   CLI as well.
 
-To keep them apart, launch Octopus once with its own Codex home:
+To keep them apart, launch Phobos once with its own Codex home:
 
 ```sh
-open -n --env OCTOPUS_HOME="$HOME/.octopus" --env CODEX_HOME="$HOME/.octopus/codex" /Applications/Octopus.app
+open -n --env PHOBOS_HOME="$HOME/.phobos" --env CODEX_HOME="$HOME/.phobos/codex" /Applications/Phobos.app
 ```
 
-Octopus remembers this pair in `~/Library/Application Support/Octopus/launch.json`
+Phobos remembers this pair in `~/Library/Application Support/Phobos/launch.json`
 and uses it for later launches from the Dock or Finder.
 
 ## Local data and diagnostics
 
-By default, the app uses `~/.octopus` as its Octopus Home. The active registry,
+By default, the app uses `~/.phobos` as its Phobos Home. The active registry,
 run and EE records, ledger, interface state, and client setup data live there.
 Provider sign-in uses the machine's Codex authentication boundary, normally
-under `~/.codex`; authentication is not contained entirely in the Octopus Home.
+under `~/.codex`; authentication is not contained entirely in the Phobos Home.
 Treat both locations as private.
 
-The commands below use the installed app at `/Applications/Octopus.app`; for a
-build from source, use `./app/build/Octopus.app` from the checkout root.
+The commands below use the installed app at `/Applications/Phobos.app`; for a
+build from source, use `./app/build/Phobos.app` from the checkout root.
 
 For a separate preview Home, launch the app with the environment variable:
 
 ```sh
-open -n --env OCTOPUS_HOME="$HOME/.octopus-preview" /Applications/Octopus.app
+open -n --env PHOBOS_HOME="$HOME/.phobos-preview" /Applications/Phobos.app
 ```
 
 Keep the Home path short: macOS Unix sockets have a path-length limit. This
-separates Octopus state, but does not create a separate provider account (see
+separates Phobos state, but does not create a separate provider account (see
 [Codex CLI](#codex-cli)).
 
 Inspect the selected default Home without booting:
 
 ```sh
-/Applications/Octopus.app/Contents/Resources/app/bin/octopus doctor
+/Applications/Phobos.app/Contents/Resources/app/bin/phobos doctor
 ```
 
-For a custom Home, pass the same `OCTOPUS_HOME` to diagnostics. A healthy boot or
+For a custom Home, pass the same `PHOBOS_HOME` to diagnostics. A healthy boot or
 doctor report does not prove that every provider or tool works. If setup fails,
 retain the displayed error and use the client's explicit retry/sign-in action;
 do not reset the Home or replace its descriptors to make an error disappear.

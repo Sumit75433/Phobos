@@ -1,8 +1,8 @@
-import type { OctopusClientContextMenuItem } from "../electron";
+import type { PhobosClientContextMenuItem } from "../electron";
 
-export const OPEN_CLIENT_TASK_ACTIONS_MENU_EVENT = "octopus:open-client-task-actions-menu";
-export const RENAME_CLIENT_TASK_EVENT = "octopus:rename-client-task";
-export const RESTORE_CLIENT_TASK_EVENT = "octopus:restore-client-task";
+export const OPEN_CLIENT_TASK_ACTIONS_MENU_EVENT = "phobos:open-client-task-actions-menu";
+export const RENAME_CLIENT_TASK_EVENT = "phobos:rename-client-task";
+export const RESTORE_CLIENT_TASK_EVENT = "phobos:restore-client-task";
 
 export type ClientTaskActionsMenuRequest = {
   runId: string;
@@ -77,7 +77,7 @@ function subscribeTaskAction(eventName: string, listener: (runId: string) => voi
 }
 
 export type ClientTaskMenuSnapshot = {
-  items: OctopusClientContextMenuItem[];
+  items: PhobosClientContextMenuItem[];
   signature: string;
   select: (id: string) => void;
 };
@@ -93,7 +93,7 @@ export function nativeTaskMenuLabel(label: string): string {
   return `${shortened}…`;
 }
 
-type NativeMenuTransport = Pick<NonNullable<Window["octopusTransport"]>, "showClientContextMenu" | "cancelClientContextMenu">;
+type NativeMenuTransport = Pick<NonNullable<Window["phobosTransport"]>, "showClientContextMenu" | "cancelClientContextMenu">;
 
 export function createNativeTaskMenuSession(
   readCurrent: (runId: string) => ClientTaskMenuSnapshot | null,

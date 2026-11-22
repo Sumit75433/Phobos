@@ -2,7 +2,7 @@ import type { ArtifactReference } from "../artifacts/types";
 import type { GlyphName } from "../IconGlyphs";
 import type { ChatRenderMessage } from "./types";
 
-export const OPEN_TASK_SOURCES_PANE_EVENT = "octopus:open-task-sources-pane";
+export const OPEN_TASK_SOURCES_PANE_EVENT = "phobos:open-task-sources-pane";
 
 export type TaskSourceRow = {
   activity: string;

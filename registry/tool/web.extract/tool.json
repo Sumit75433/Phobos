@@ -2,10 +2,10 @@
   "id": "web.extract",
   "interface": "system_web_search",
   "process": {
-    "bin": "target/debug/octopus-web-search-tool",
+    "bin": "target/debug/phobos-web-search-tool",
     "inherit_env": [
-      "OCTOPUS_WEB_EXTRACT_URL",
-      "OCTOPUS_WEB_SEARCH_API_KEY",
+      "PHOBOS_WEB_EXTRACT_URL",
+      "PHOBOS_WEB_SEARCH_API_KEY",
       "TAVILY_BASE_URL",
       "TAVILY_API_KEY",
       "EXA_BASE_URL",
@@ -13,7 +13,7 @@
       "FIRECRAWL_API_URL",
       "FIRECRAWL_API_KEY",
       "KEENABLE_BASE_URL",
-      "OCTOPUS_WEB_PROXY"
+      "PHOBOS_WEB_PROXY"
     ],
     "authority": {
       "read_root_slots": [],
@@ -38,16 +38,16 @@
     "default_provider": "custom",
     "request_timeout_ms": 60000,
     "max_response_bytes": 10000000,
-    "proxy_env": "OCTOPUS_WEB_PROXY",
+    "proxy_env": "PHOBOS_WEB_PROXY",
     "providers": {
       "custom": {
         "base_url": "",
-        "base_url_env": "OCTOPUS_WEB_EXTRACT_URL",
+        "base_url_env": "PHOBOS_WEB_EXTRACT_URL",
         "path": "",
         "method": "POST",
         "headers": {},
         "auth": {
-          "env": "OCTOPUS_WEB_SEARCH_API_KEY",
+          "env": "PHOBOS_WEB_SEARCH_API_KEY",
           "placement": "header",
           "name": "Authorization",
           "prefix": "Bearer ",
@@ -113,7 +113,7 @@
         "path": "/contents",
         "method": "POST",
         "headers": {
-          "x-exa-integration": "octopus"
+          "x-exa-integration": "phobos"
         },
         "auth": {
           "env": "EXA_API_KEY",
@@ -185,7 +185,7 @@
         "path": "/v1/fetch/public",
         "method": "GET",
         "headers": {
-          "X-Keenable-Title": "Octopus"
+          "X-Keenable-Title": "Phobos"
         },
         "query": {
           "argument_fields": {

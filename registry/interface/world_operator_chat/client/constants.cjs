@@ -26,7 +26,7 @@ const WORKER_ENVIRONMENT_RELEASE_LABEL = "worker_environment.release";
 
 const WORKER_ENVIRONMENT_RELEASED_LABEL = "worker_environment.released";
 
-const PROVIDER_ACCOUNT_EVIDENCE_SCHEMA = "octopus.provider_account_observation";
+const PROVIDER_ACCOUNT_EVIDENCE_SCHEMA = "phobos.provider_account_observation";
 
 const PROVIDER_ACCOUNT_REQUEST_LABEL = "provider.account.read";
 
@@ -50,9 +50,9 @@ const PROVIDER_MODELS_LIST_LABEL = "provider.models.list";
 
 const PROVIDER_MODELS_CATALOG_LABEL = "provider.models.catalog";
 
-const OPERATOR_MESSAGE_ADMISSION_SCHEMA = "octopus.operator_message_admission";
+const OPERATOR_MESSAGE_ADMISSION_SCHEMA = "phobos.operator_message_admission";
 
-const OPERATOR_MESSAGE_INTENT_SCHEMA = "octopus.operator_message_intent";
+const OPERATOR_MESSAGE_INTENT_SCHEMA = "phobos.operator_message_intent";
 
 const MAX_OPERATOR_ATTACHMENT_BYTES = 100 * 1024 * 1024;
 

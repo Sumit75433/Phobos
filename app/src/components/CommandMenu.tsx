@@ -6,7 +6,7 @@ import { clientCommands, dispatchClientCommand, type ClientCommandId } from "../
 import { clientExperimentEnabled, recordClientExperimentSignal, recordMenuCommandUse } from "../clientExperiments";
 import { formatKeyboardShortcuts, useKeyboardShortcuts } from "../keyboardShortcuts";
 import { appToast } from "../toasts";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import {
   clientTaskTitle,
   recordClientDestination,
@@ -56,7 +56,7 @@ const emptyTaskMessageSearch: TaskMessageSearchState = {
 
 type Props = {
   activeSurfaceId: string;
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   chatRuns: ChatRun[];
   onClose: () => void;
   onOpenRun: (runId: string) => void;
@@ -100,7 +100,7 @@ const commandPresentation: Partial<Record<ClientCommandId, { glyph: GlyphName; g
 
 const SHORTCUT_COACH_USES = 3;
 
-function coachShortcut(accessProfile: OctopusClientAccessProfile, command: { id: ClientCommandId; label: string }, shortcut: string) {
+function coachShortcut(accessProfile: PhobosClientAccessProfile, command: { id: ClientCommandId; label: string }, shortcut: string) {
   if (!shortcut || !clientExperimentEnabled(accessProfile, "shortcut_coach")) return;
   if (recordMenuCommandUse(accessProfile, command.id) !== SHORTCUT_COACH_USES) return;
   recordClientExperimentSignal(accessProfile, "shortcut_coach");
@@ -278,7 +278,7 @@ export function CommandMenu({
         run: () => {
           onOpenRun(run.runId);
           recordClientTaskOpened(accessProfile, run.runId);
-          recordClientDestination(accessProfile, { workspaceKey: "octopus-os", surfaceId: "chat", runId: run.runId });
+          recordClientDestination(accessProfile, { workspaceKey: "phobos-os", surfaceId: "chat", runId: run.runId });
         },
       }));
     const messageEntries = messageSearch.matches.map<CommandMenuEntry>(({ message, run, snippet }) => ({
@@ -290,7 +290,7 @@ export function CommandMenu({
       run: () => {
         onOpenRun(run.runId);
         recordClientTaskOpened(accessProfile, run.runId);
-        recordClientDestination(accessProfile, { workspaceKey: "octopus-os", surfaceId: "chat", runId: run.runId });
+        recordClientDestination(accessProfile, { workspaceKey: "phobos-os", surfaceId: "chat", runId: run.runId });
         requestChatMessageReveal({ runId: run.runId, messageId: message.id });
       },
     }));
@@ -320,7 +320,7 @@ export function CommandMenu({
           run: () => {
             onOpenRun(run.runId);
             recordClientTaskOpened(accessProfile, run.runId);
-            recordClientDestination(accessProfile, { workspaceKey: "octopus-os", surfaceId: "chat", runId: run.runId });
+            recordClientDestination(accessProfile, { workspaceKey: "phobos-os", surfaceId: "chat", runId: run.runId });
           },
         }];
       }
@@ -450,11 +450,11 @@ export function CommandMenu({
       }}
       role="dialog"
     >
-      <div className="octopus-command-menu fixed left-1/2 z-50 flex -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-token-border text-token-foreground" ref={dialogRef}>
+      <div className="phobos-command-menu fixed left-1/2 z-50 flex -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-token-border text-token-foreground" ref={dialogRef}>
         <input
           aria-activedescendant={orderedEntries[selectedIndex]?.id ? commandDomId(orderedEntries[selectedIndex].id) : undefined}
           aria-autocomplete="list"
-          aria-controls="octopus-command-menu-list"
+          aria-controls="phobos-command-menu-list"
           aria-expanded={open}
           className="command-menu-input w-full min-w-0 shrink-0 bg-transparent text-token-foreground outline-none placeholder:text-token-input-placeholder-foreground"
           onChange={(event) => {
@@ -467,7 +467,7 @@ export function CommandMenu({
           role="combobox"
           value={query}
         />
-        <div className="command-menu-list min-h-0 overflow-y-auto" id="octopus-command-menu-list" role="listbox">
+        <div className="command-menu-list min-h-0 overflow-y-auto" id="phobos-command-menu-list" role="listbox">
           {grouped.map(({ group, items }) => (
             <section aria-label={group} className="flex flex-col gap-1" key={group}>
               <div className="pe-2 ps-[calc(var(--spacing)*.75)] pt-2 text-sm text-token-description-foreground">{group}</div>

@@ -59,7 +59,7 @@ function InlineVisualization({ onOpen, path, target }: { onOpen: () => void; pat
       setError("This task has no Files surface that can resolve the visualization.");
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.readWorkerEnvironmentFile) {
       setSource("");
       setState("error");
@@ -96,7 +96,7 @@ function InlineVisualization({ onOpen, path, target }: { onOpen: () => void; pat
   useEffect(() => {
     const receive = (event: MessageEvent) => {
       if (event.source !== frameRef.current?.contentWindow || !event.data || typeof event.data !== "object") return;
-      if (event.data.type !== "octopus.inline-visualization.resize" || event.data.channelId !== channelId) return;
+      if (event.data.type !== "phobos.inline-visualization.resize" || event.data.channelId !== channelId) return;
       const next = Number(event.data.height);
       if (Number.isFinite(next)) setHeight(Math.max(160, Math.min(1_200, Math.ceil(next))));
     };
@@ -135,7 +135,7 @@ function InlineVisualization({ onOpen, path, target }: { onOpen: () => void; pat
 function visualizationDocument(source: string, channelId: string): string {
   const body = stripFrontMatter(source);
   const policy = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src data: blob:; media-src data: blob:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'\">";
-  const bridge = `<script>(()=>{const send=()=>parent.postMessage({type:"octopus.inline-visualization.resize",channelId:${JSON.stringify(channelId)},height:Math.ceil(document.documentElement.getBoundingClientRect().height)},"*");new ResizeObserver(send).observe(document.documentElement);addEventListener("load",send);send()})()</script>`;
+  const bridge = `<script>(()=>{const send=()=>parent.postMessage({type:"phobos.inline-visualization.resize",channelId:${JSON.stringify(channelId)},height:Math.ceil(document.documentElement.getBoundingClientRect().height)},"*");new ResizeObserver(send).observe(document.documentElement);addEventListener("load",send);send()})()</script>`;
   let documentSource = body;
   if (/<head(?:\s[^>]*)?>/i.test(documentSource)) documentSource = documentSource.replace(/<head(?:\s[^>]*)?>/i, (head) => `${head}${policy}`);
   else if (/<html(?:\s[^>]*)?>/i.test(documentSource)) documentSource = documentSource.replace(/<html(?:\s[^>]*)?>/i, (html) => `${html}<head>${policy}</head>`);

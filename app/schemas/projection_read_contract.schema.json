@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/projection_read_contract.schema.json",
-  "title": "Octopus Client Projection Read Request",
+  "$id": "https://phobos.local/schemas/projection_read_contract.schema.json",
+  "title": "Phobos Client Projection Read Request",
   "type": "object",
   "required": ["contract_version", "method"],
   "properties": {

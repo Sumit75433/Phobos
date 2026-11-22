@@ -45,7 +45,7 @@ function clientSurfacesProjection(store) {
         continue;
       }
       if (!isClientSurfaceDocumentPayload(payload)) {
-        errors.push(`${artifactId}: client.surface.document does not satisfy octopus.client_surface@1`);
+        errors.push(`${artifactId}: client.surface.document does not satisfy phobos.client_surface@1`);
         continue;
       }
       const text = JSON.stringify(payload);
@@ -103,7 +103,7 @@ function clientSurfacesProjection(store) {
         const request = await immutableClientAction(row);
         const receipts = results.get(row.artifact.id) ?? [];
         for (const { payload, row: receipt } of receipts) {
-          if (payload.schema !== "octopus.client_action_result" || payload.schema_version !== 1
+          if (payload.schema !== "phobos.client_action_result" || payload.schema_version !== 1
             || payload.phase !== "completed" || typeof payload.ok !== "boolean"
             || receipt.seq <= row.seq || payload.request_seq !== row.seq || payload.request_id !== request.action.request_id
             || payload.action !== request.action.action || !isDeepStrictEqual(payload.tool_call, request.toolCall)

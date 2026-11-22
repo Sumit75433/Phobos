@@ -12,7 +12,7 @@ export function AgentPresetLogo({ color, icon, size = 24 }: {
 }) {
   const fill = projectColor(color);
   const resolvedIcon = (AGENT_PRESET_ICONS as readonly string[]).includes(icon) ? icon : DEFAULT_AGENT_PRESET_ICON;
-  const maskImage = `url("./agent-icons/octopus-${resolvedIcon}.png")`;
+  const maskImage = `url("./agent-icons/phobos-${resolvedIcon}.png")`;
   return (
     <span
       aria-hidden="true"

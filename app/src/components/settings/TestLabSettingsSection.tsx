@@ -3,7 +3,7 @@ import { useState } from "react";
 import { OcButton, OcCard, OcDialog, OcDialogFooter, OcDialogHeader, OcGroup, OcSettingsRow, OcStatus } from "../../design-system/components";
 import { SettingsHeading } from "./SettingsHeading";
 import type { ClientSurfaceAdmissionVerdict } from "../../client-surfaces/types";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { replaceClientProfileStorageWithRecovery } from "../../clientLocalDataRecovery";
 
 import { FactRow } from "./SettingsProviderState";
@@ -13,7 +13,7 @@ export function TestLabSection({
   documentVerdicts,
   surfaceErrors,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   documentRoot: string;
   documentVerdicts: ClientSurfaceAdmissionVerdict[];
   surfaceErrors: string[];

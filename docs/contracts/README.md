@@ -19,10 +19,10 @@ rather than building on either.
 | [The ledger and its indexes](LEDGER_INDEX.md) | The movement log as truth; caches that can always be rebuilt. |
 | [Registry descriptors](REGISTRY_DESCRIPTORS.md) | One shape for every registry; naming; self-modification as file editing. |
 | [Memory, skills, and persona](MEMORY_AND_SKILLS.md) | Artifacts under policy, nothing more. |
-| [Extending Octopus](EXTENSION_SURFACES.md) | The cookbook. |
+| [Extending Phobos](EXTENSION_SURFACES.md) | The cookbook. |
 
 ## Vocabulary
 
 The [glossary](../glossary.md) defines every term used here, maps the app's
 words to the architecture's, and lists the common agent-framework words that
-Octopus deliberately does not have.
+Phobos deliberately does not have.

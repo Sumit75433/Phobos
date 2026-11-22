@@ -11,9 +11,9 @@ const { prepareContentAddressedPayloadBindings } = require('../electron/contentA
 const { createClientAttachmentStagingStore } = require('../electron/clientAttachments.cjs');
 
 test('attachment previews stay inside the admitted manifest and exact movement coordinates', async t => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-attachment-preview-')), blobs = path.join(root, 'ledger/blobs'), rows = [];
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-attachment-preview-')), blobs = path.join(root, 'ledger/blobs'), rows = [];
   await fs.mkdir(blobs, { recursive: true }); await fs.mkdir(path.join(root, 'registry/interface'), { recursive: true });
-  const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), octopusHome: () => root, sourceRegistry: () => path.join(root, 'registry') });
+  const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), phobosHome: () => root, sourceRegistry: () => path.join(root, 'registry') });
   t.after(async () => { store.close(); await fs.rm(root, { recursive: true, force: true }); });
   const bytes = Buffer.from('image bytes'), digest = crypto.createHash('sha256').update(bytes).digest('hex'), file = path.join(root, 'selected.png'); await fs.writeFile(file, bytes);
   const attachment = { name: 'selected.png', mime_type: 'image/png', size: bytes.length, payload_path: file, payload_content_hash: digest };
@@ -43,7 +43,7 @@ test('attachment previews stay inside the admitted manifest and exact movement c
 });
 
 test('staged attachment previews preserve handles and reject ownership, lifetime and byte substitutions', async t => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-stage-preview-')), store = createClientAttachmentStagingStore({ root: () => root });
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-stage-preview-')), store = createClientAttachmentStagingStore({ root: () => root });
   t.after(async () => { await store.abortAll(); await fs.rm(root, { recursive: true, force: true }); });
   const bytes = Buffer.from('image bytes'), meta = { name: 'image.png', label: 'operator.file', type: 'image/png', lastModified: 0 };
   const handle = await store.stageBytes('owner', meta, bytes), request = { id: handle.id, contentHash: handle.contentHash }, preview = () => store.readPreview('owner', request);
@@ -71,7 +71,7 @@ test('staged attachment previews preserve handles and reject ownership, lifetime
 });
 
 test('preview transport authenticates its window before and after reads and preload retains the access token', async () => {
-  const main = await fs.readFile(path.join(__dirname, '../electron/main.cjs'), 'utf8'), start = main.indexOf('ipcMain.handle("octopus:client-attachment-preview",');
+  const main = await fs.readFile(path.join(__dirname, '../electron/main.cjs'), 'utf8'), start = main.indexOf('ipcMain.handle("phobos:client-attachment-preview",');
   let handler, authenticated = true, live = true, endAccess = false, reads = 0;
   const sender = { mainFrame: {}, isDestroyed: () => !live }, event = { sender, senderFrame: sender.mainFrame }, request = { id: 'id', contentHash: 'hash' }, response = { base64: 'bytes', mimeType: 'image/png', contentHash: 'hash', size: 3 };
   const deps = { ipcMain: { handle: (_name, fn) => { handler = fn; } }, BrowserWindow: { fromWebContents: () => ({ webContents: sender, isDestroyed: () => !live }) }, getClientAccessController: () => ({ requireSession: token => { if (!authenticated || token !== 'owner') throw new Error('unauthorized'); } }), getClientAttachmentStagingStore: () => ({ readPreview: async (token, input) => { reads++; assert.equal(token, 'owner'); assert.equal(input, request); if (endAccess) authenticated = false; return response; } }) };
@@ -79,13 +79,13 @@ test('preview transport authenticates its window before and after reads and prel
   await assert.rejects(handler(event, 'other', request), /unauthorized/); await assert.rejects(handler({ ...event, senderFrame: {} }, 'owner', request), /active client window/);
   live = false; await assert.rejects(handler(event, 'owner', request), /active client window/); live = true; assert.equal(reads, 0);
   assert.equal(await handler(event, 'owner', request), response); endAccess = true; await assert.rejects(handler(event, 'owner', request), /unauthorized/);
-  let bridge; const electron = { contextBridge: { exposeInMainWorld: (_name, api) => { bridge = api; } }, ipcRenderer: { sendSync: () => 'owner', invoke: async (...args) => { assert.deepEqual(args, ['octopus:client-attachment-preview', 'owner', request]); return response; } } };
-  Function('require', 'process', await fs.readFile(path.join(__dirname, '../electron/preload.cjs'), 'utf8'))(() => electron, { argv: ['--octopus-access-claim=test'] });
+  let bridge; const electron = { contextBridge: { exposeInMainWorld: (_name, api) => { bridge = api; } }, ipcRenderer: { sendSync: () => 'owner', invoke: async (...args) => { assert.deepEqual(args, ['phobos:client-attachment-preview', 'owner', request]); return response; } } };
+  Function('require', 'process', await fs.readFile(path.join(__dirname, '../electron/preload.cjs'), 'utf8'))(() => electron, { argv: ['--phobos-access-claim=test'] });
   assert.equal(await bridge.readClientAttachmentPreview(request), response);
 });
 
 test('attachment chunks serialize before sealing and concurrent overflow cannot publish', async t => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-stage-contract-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-stage-contract-'));
   const store = createClientAttachmentStagingStore({ root: () => root });
   t.after(async () => { await store.abortAll(); await fs.rm(root, { recursive: true, force: true }); });
   const metadata = { name: 'proof.txt', label: 'attachment.file', type: 'text/plain', lastModified: 0, size: 6 };
@@ -120,7 +120,7 @@ test('attachment chunks serialize before sealing and concurrent overflow cannot 
 });
 
 test('durable attachment recovery preserves the client stage until payload binding finishes', async t => {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-attachment-contract-')));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-attachment-contract-')));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const sourcePath = path.join(root, 'stage'), durable = path.join(root, 'durable'), blobsRoot = path.join(root, 'blobs');
   await Promise.all([fs.mkdir(durable), fs.mkdir(blobsRoot), fs.writeFile(sourcePath, 'selected file')]);
@@ -153,7 +153,7 @@ test('durable attachment recovery preserves the client stage until payload bindi
 
 test('steering binds owned attachments and cleans up partially consumed selections', async () => {
   const source = await fs.readFile(path.join(__dirname, '../electron/main.cjs'), 'utf8');
-  const start = source.indexOf('ipcMain.handle("octopus:submit-chat-steer",');
+  const start = source.indexOf('ipcMain.handle("phobos:submit-chat-steer",');
   const end = source.indexOf('\nipcMain.handle(', start + 1);
   assert.ok(start >= 0 && end > start);
   let handler, submitted = 0;
@@ -165,7 +165,7 @@ test('steering binds owned attachments and cleans up partially consumed selectio
     ensureRuntimeHost: () => ({ assertStorageWritable: async () => {} }), runtimeHost: null,
     retainChatAttachmentsAfterStorageFailure: () => {},
     ...require('../electron/operatorChatSubmitResult.cjs'),
-    prepareLiveProjectionRead: async () => {}, resolveOctopusHome: () => '/fixture', path,
+    prepareLiveProjectionRead: async () => {}, resolvePhobosHome: () => '/fixture', path,
     getClientAttachmentStagingStore: () => ({ consume: async (_owner, stage) => { if (stage === 'bad') throw new Error('invalid stage'); return consumed; }, discard: async value => { discarded.push(value); } }),
     resolveInstallationRoot: () => '/installation', payloadArtifactBindings: value => value,
     prepareContentAddressedPayloadBindings: async input => { assert.deepEqual(input.attachments, [consumed]); await input.revalidate(); return [binding]; },
@@ -184,7 +184,7 @@ test('steering binds owned attachments and cleans up partially consumed selectio
 });
 
 test('artifact polling and exact hand-in lookup do not wait for unrelated policy or catalog projection', { timeout: 3000 }, async t => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-projection-contract-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-projection-contract-'));
   const ledger = path.join(root, 'ledger'), registry = path.join(root, 'registry');
   await fs.mkdir(path.join(ledger, 'blobs'), { recursive: true });
   const rows = [];
@@ -197,7 +197,7 @@ test('artifact polling and exact hand-in lookup do not wait for unrelated policy
   await fs.mkdir(path.join(registry, 'interface', 'provider'), { recursive: true });
   await fs.writeFile(path.join(registry, 'interface', 'provider', 'interface.json'), JSON.stringify({ id: 'provider', interface_type: 'world', role: 'provider', direction: 'bidirectional', source_names: ['test'] }));
   let policyReads = 0, beforeReads = 0;
-  const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), octopusHome: () => root, sourceRegistry: () => registry, beforeRead: async () => { beforeReads++; }, projectEePolicies: () => { policyReads++; return new Promise(() => {}); } });
+  const store = createProjectionStore({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), phobosHome: () => root, sourceRegistry: () => registry, beforeRead: async () => { beforeReads++; }, projectEePolicies: () => { policyReads++; return new Promise(() => {}); } });
   t.after(async () => { store.close(); await fs.rm(root, { recursive: true, force: true }); });
   const read = (method, params) => store.read({ contract_version: 1, method, params });
   const params = { run_id: 'test-run', interface_id: 'provider', labels: ['receipt'], after_seq: -1, limit: 2 };
@@ -228,7 +228,7 @@ test('artifact polling and exact hand-in lookup do not wait for unrelated policy
 });
 
 async function fixture(t, handIn) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-artifact-contract-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-artifact-contract-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const options = {
     clientArtifactsRoot: () => root,

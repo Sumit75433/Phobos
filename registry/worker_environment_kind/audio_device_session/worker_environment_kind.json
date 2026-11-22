@@ -5,7 +5,7 @@
     "audio_device"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-audio-device-session-tool"
+    "target/debug/phobos-audio-device-session-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": [

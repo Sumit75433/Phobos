@@ -18,9 +18,9 @@ class InactivityContract(unittest.TestCase):
             "seconds": 3600,
             "interface_match": {"interface_type": "world", "role": "user", "interface_driver_ref": "app_server"},
         }
-        slots = json.loads(os.environ["OCTOPUS_ROOT_SLOTS_JSON"])
+        slots = json.loads(os.environ["PHOBOS_ROOT_SLOTS_JSON"])
         slots["registry_interface_root"] = str(self.root / "interfaces")
-        os.environ["OCTOPUS_ROOT_SLOTS_JSON"] = json.dumps(slots)
+        os.environ["PHOBOS_ROOT_SLOTS_JSON"] = json.dumps(slots)
         self.interfaces = self.root / "interfaces"
         for name, role in (("world_user", "user"), ("world_background", "sensor")):
             folder = self.interfaces / name
@@ -132,9 +132,9 @@ class InactivityContract(unittest.TestCase):
         ees.mkdir()
         for ee, parent in (("ee_root", None), ("ee_project", "ee_root"), ("ee_other", "ee_root")):
             (ees / f"{ee}.json").write_text(json.dumps({"ee_id": ee, "parent_ee_id": parent}))
-        slots = json.loads(os.environ["OCTOPUS_ROOT_SLOTS_JSON"])
+        slots = json.loads(os.environ["PHOBOS_ROOT_SLOTS_JSON"])
         slots["ee_instances_root"] = str(ees)
-        os.environ["OCTOPUS_ROOT_SLOTS_JSON"] = json.dumps(slots)
+        os.environ["PHOBOS_ROOT_SLOTS_JSON"] = json.dumps(slots)
         for name, ee in (("run_a", "ee_project"), ("run_b", "ee_other")):
             value = json.loads((self.runs / f"{name}.json").read_text())
             (self.runs / f"{name}.json").write_text(json.dumps({**value, "ee": ee}))
@@ -152,9 +152,9 @@ class InactivityContract(unittest.TestCase):
         ees.mkdir()
         for ee, parent in (("ee_root", None), ("ee_project", "ee_root"), ("ee_other", None)):
             (ees / f"{ee}.json").write_text(json.dumps({"ee_id": ee, "parent_ee_id": parent}))
-        slots = json.loads(os.environ["OCTOPUS_ROOT_SLOTS_JSON"])
+        slots = json.loads(os.environ["PHOBOS_ROOT_SLOTS_JSON"])
         slots["ee_instances_root"] = str(ees)
-        os.environ["OCTOPUS_ROOT_SLOTS_JSON"] = json.dumps(slots)
+        os.environ["PHOBOS_ROOT_SLOTS_JSON"] = json.dumps(slots)
         for name, ee in placement.items():
             (self.runs / f"{name}.json").write_text(json.dumps({"id": name, "ee": ee, "checkpoints": [{"interface_binding": {"interface": "world_user"}}]}))
 

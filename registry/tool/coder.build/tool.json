@@ -12,7 +12,7 @@
     "allow_login_shell": true
   },
   "process": {
-    "bin": "target/debug/octopus-coder-exec-tool",
+    "bin": "target/debug/phobos-coder-exec-tool",
     "inherit_env": ["HOME", "PATH"],
     "authority": {
       "read_root_slots": ["registry_worker_environment_kind_root", "repo_root"],

@@ -1,0 +1,20 @@
+[package]
+name = "phobos-system-room-tool-runtime"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+rust-version = "1.85"
+
+[[bin]]
+name = "phobos-system-room-tool-door-life"
+path = "src/bin/tool_door_life.rs"
+
+[dependencies]
+tokio = { workspace = true, features = ["rt", "sync", "io-std", "io-util", "time", "process"] }
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true

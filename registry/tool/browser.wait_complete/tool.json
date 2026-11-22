@@ -5,7 +5,7 @@
     "operation": "wait_complete"
   },
   "process": {
-    "bin": "target/debug/octopus-browser-wait-completion-tool",
+    "bin": "target/debug/phobos-browser-wait-completion-tool",
     "private_read_subpaths": [
       {
         "path": "secrets/browser-native-host.auth"

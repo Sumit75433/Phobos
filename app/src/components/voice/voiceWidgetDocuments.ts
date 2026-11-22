@@ -45,7 +45,7 @@ export function buildVoiceWidgetDocuments(input: {
 }): AdmittedClientSurfaceDocument[] {
   return [
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.live-context",
@@ -84,7 +84,7 @@ export function buildVoiceWidgetDocuments(input: {
       },
     }),
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.insights",
@@ -137,7 +137,7 @@ export function buildVoiceWidgetDocuments(input: {
       },
     }),
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.task-progress",
@@ -184,7 +184,7 @@ export function buildVoiceWidgetDocuments(input: {
       },
     }),
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.upcoming-scheduled",
@@ -223,7 +223,7 @@ export function buildVoiceWidgetDocuments(input: {
       },
     }),
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.active-tools",
@@ -262,7 +262,7 @@ export function buildVoiceWidgetDocuments(input: {
       },
     }),
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.current-goals",
@@ -301,7 +301,7 @@ export function buildVoiceWidgetDocuments(input: {
       },
     }),
     compileWidget({
-      schema: "octopus.client_surface",
+      schema: "phobos.client_surface",
       schema_version: 1,
       release_channel: "lab",
       id: "builtin.voice.memory",

@@ -1,4 +1,4 @@
-module.exports = { assertNoExternalTaskTopologyReferences, assertNoRunRecordReferencesEe, assertRunPrivateStateIsOwned, assertRunUsesOnlyOwnedInterfaces, assertTaskWorkerEnvironmentsReleased, assertTaskWorkerPinRemainsTaskLocal, assertTopologyIsPrivateToRun, deleteOctopusOsReadOnlyTask, deleteOctopusOsTask, directJsonDigests, exactStringReferencePaths, filterDescriptorStringList, octopusOsOwnedArtifactTopology, octopusOsOwnedInterfaceIds, octopusOsOwnedToolTopology, octopusOsOwnedWriterRuns, octopusOsOwnedWriterRunsAtRoot, octopusOsTaskGroupArtifactTopology, octopusOsTaskLifecycleGroup, registryControlJsonFiles, removalSnapshot, requirePrivatePublicationDirectory, requireUnchangedRemoval, requiredGoal, runInterfaceReferences, scopeEnvironmentChain, scopedRecordPath, snapshotOwnedInterfaceDirectories, snapshotOwnedInterfaceStateDirectories, snapshotOwnedRegistryDirectories, snapshotReleasedRunWorkerEnvironmentStateDirectories, snapshotRemovalDirectory, snapshotRemovalFile, taskOwnedInterfaceIds, taskLifecycleHelpers, taskLifecycleRetirementRequest, taskTopologyPolicyWrites };
+module.exports = { assertNoExternalTaskTopologyReferences, assertNoRunRecordReferencesEe, assertRunPrivateStateIsOwned, assertRunUsesOnlyOwnedInterfaces, assertTaskWorkerEnvironmentsReleased, assertTaskWorkerPinRemainsTaskLocal, assertTopologyIsPrivateToRun, deletePhobosOsReadOnlyTask, deletePhobosOsTask, directJsonDigests, exactStringReferencePaths, filterDescriptorStringList, phobosOsOwnedArtifactTopology, phobosOsOwnedInterfaceIds, phobosOsOwnedToolTopology, phobosOsOwnedWriterRuns, phobosOsOwnedWriterRunsAtRoot, phobosOsTaskGroupArtifactTopology, phobosOsTaskLifecycleGroup, registryControlJsonFiles, removalSnapshot, requirePrivatePublicationDirectory, requireUnchangedRemoval, requiredGoal, runInterfaceReferences, scopeEnvironmentChain, scopedRecordPath, snapshotOwnedInterfaceDirectories, snapshotOwnedInterfaceStateDirectories, snapshotOwnedRegistryDirectories, snapshotReleasedRunWorkerEnvironmentStateDirectories, snapshotRemovalDirectory, snapshotRemovalFile, taskOwnedInterfaceIds, taskLifecycleHelpers, taskLifecycleRetirementRequest, taskTopologyPolicyWrites };
 
 const fs = require("node:fs/promises");
 const crypto = require("node:crypto");
@@ -6,7 +6,7 @@ const path = require("node:path");
 const { blake3 } = require("@noble/hashes/blake3");
 const { readOptionalRegularJsonDocument, readRegularJsonDocument, requirePlainDirectory, requireUnchangedJsonDigest, stableJson } = require("./jsonFiles.cjs");
 const { listDirectFiles, listWorkerEnvironmentRecordFiles, readDirectoryEntries } = require("./providerDescriptors.cjs");
-const { parseOctopusOsSidecar } = require("./sidecars.cjs");
+const { parsePhobosOsSidecar } = require("./sidecars.cjs");
 const { readClientTaskArchive } = require("./taskArchive.cjs");
 const { taskConnectionWrites, taskCoordinateEvidence } = require("./taskConnections.cjs");
 const { arrayValue, contentHashHex, exactObjectKeys, interfaceBindingId, isPlainRecord, isRunRecordJsonPath, objectOrEmpty, requiredArtifactBindingId, requiredDigest, requiredSafeRegistryId, requiredString, safeInterfacePathSegment, stringValue, validWorkerEnvironmentFormation } = require("./values.cjs");
@@ -25,11 +25,11 @@ function taskLifecycleHelpers(hooks, record) {
   return helpers;
 }
 
-async function octopusOsTaskLifecycleGroup(registryRoot, octopusHomeRoot, source, sourceInterfaces, lifecycle, sourceClientInterface) {
-  const sourceWriters = await octopusOsOwnedWriterRuns(octopusHomeRoot, source, sourceInterfaces);
+async function phobosOsTaskLifecycleGroup(registryRoot, phobosHomeRoot, source, sourceInterfaces, lifecycle, sourceClientInterface) {
+  const sourceWriters = await phobosOsOwnedWriterRuns(phobosHomeRoot, source, sourceInterfaces);
   const companions = lifecycle ? await lifecycle.readMaintenanceTaskTopology({
-    registryRoot, runRecordsRoot: path.join(octopusHomeRoot, "state", "runs"), sourceRecord: source, sourceClientInterface,
-    readWriterRuns: (record, interfaces) => octopusOsOwnedWriterRuns(octopusHomeRoot, record, interfaces),
+    registryRoot, runRecordsRoot: path.join(phobosHomeRoot, "state", "runs"), sourceRecord: source, sourceClientInterface,
+    readWriterRuns: (record, interfaces) => phobosOsOwnedWriterRuns(phobosHomeRoot, record, interfaces),
   }) : null;
   const records = new Map([...sourceWriters.records].map(([id, entry]) => [id, { ...entry, role: "writer", targetRun: source.id }]));
   for (const [id, entry] of companions?.records ?? []) {
@@ -58,11 +58,11 @@ function taskLifecycleRetirementRequest(sourcePath, source, group) {
   };
 }
 
-async function octopusOsTaskGroupArtifactTopology(registryRoot, source, group) {
+async function phobosOsTaskGroupArtifactTopology(registryRoot, source, group) {
   const targets = [{ document: source, interfaces: group.sourceInterfaces }, ...group.companions?.targets.values() ?? []];
   const ids = new Set(), writes = [];
   for (const target of targets) {
-    const owned = await octopusOsOwnedArtifactTopology(registryRoot, target.document, target.interfaces);
+    const owned = await phobosOsOwnedArtifactTopology(registryRoot, target.document, target.interfaces);
     for (const id of owned.ids) {
       if (ids.has(id)) throw new Error(`task '${source.id}' has an artifact owned by two companion targets`);
       ids.add(id);
@@ -72,9 +72,9 @@ async function octopusOsTaskGroupArtifactTopology(registryRoot, source, group) {
   return { ids, writes };
 }
 
-async function deleteOctopusOsTask(
+async function deletePhobosOsTask(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   scope,
   request,
   releaseTaskWorkerEnvironments,
@@ -90,10 +90,10 @@ async function deleteOctopusOsTask(
   ));
   if (!runProjection) {
     const readOnlyProjection = scope.readOnlyRuns.find((row) => stringValue(row?.run_id) === runId);
-    if (!readOnlyProjection) throw new Error(`task '${runId}' is absent from the Octopus OS scope`);
-    return deleteOctopusOsReadOnlyTask(
+    if (!readOnlyProjection) throw new Error(`task '${runId}' is absent from the Phobos OS scope`);
+    return deletePhobosOsReadOnlyTask(
       registryRoot,
-      octopusHomeRoot,
+      phobosHomeRoot,
       readOnlyProjection,
       request,
       commitClientAuthoring,
@@ -101,7 +101,7 @@ async function deleteOctopusOsTask(
   }
   let expectedDigest = requiredDigest(request?.expectedDigest, "expectedDigest");
   const runPath = await scopedRecordPath(
-    octopusHomeRoot,
+    phobosHomeRoot,
     runProjection.record_path,
     path.join("state", "runs"),
     `${runId}.json`,
@@ -121,11 +121,11 @@ async function deleteOctopusOsTask(
   const sourceInterfaces = await taskOwnedInterfaceIds(registryRoot, current.document, ownerInterface, runId);
   assertRunPrivateStateIsOwned(current.document, sourceInterfaces, runId);
   const lifecycle = taskLifecycleHelpers(hooks, current.document);
-  const group = await octopusOsTaskLifecycleGroup(
-    registryRoot, octopusHomeRoot, current.document, sourceInterfaces, lifecycle, ownerInterface,
+  const group = await phobosOsTaskLifecycleGroup(
+    registryRoot, phobosHomeRoot, current.document, sourceInterfaces, lifecycle, ownerInterface,
   );
   const { exactInterfaces, ownedWriters, companions } = group;
-  const connectionWrites = await taskConnectionWrites(octopusHomeRoot, scope,
+  const connectionWrites = await taskConnectionWrites(phobosHomeRoot, scope,
     new Set([runId, ...ownedWriters.ids]), exactInterfaces, hooks);
   const connectionDocuments = new Map(connectionWrites.map(write => [write.file, write]));
   let retirementSelection = companions ? taskLifecycleRetirementRequest(runPath, current, group) : null;
@@ -135,12 +135,12 @@ async function deleteOctopusOsTask(
       ...companions.targets,
     ]) });
   }
-  await assertTopologyIsPrivateToRun(octopusHomeRoot, runId, exactInterfaces, new Set(), ownedWriters.ids, connectionDocuments);
+  await assertTopologyIsPrivateToRun(phobosHomeRoot, runId, exactInterfaces, new Set(), ownedWriters.ids, connectionDocuments);
 
-  const registryHomeRoot = await fs.realpath(octopusHomeRoot);
+  const registryHomeRoot = await fs.realpath(phobosHomeRoot);
   const registryHome = await fs.realpath(registryRoot);
   if (path.dirname(registryHome) !== registryHomeRoot || path.basename(registryHome) !== "registry") {
-    throw new Error("Octopus OS registry root is outside the active Octopus home");
+    throw new Error("Phobos OS registry root is outside the active Phobos home");
   }
   const interfaceRoot = await fs.realpath(path.join(registryHome, "interface"));
   const interfaceDirectories = await snapshotOwnedRegistryDirectories(
@@ -148,8 +148,8 @@ async function deleteOctopusOsTask(
     exactInterfaces,
     "task interface",
   );
-  const ownedTools = await octopusOsOwnedToolTopology(registryHome, exactInterfaces, companions);
-  const ownedArtifacts = await octopusOsTaskGroupArtifactTopology(registryHome, current.document, group);
+  const ownedTools = await phobosOsOwnedToolTopology(registryHome, exactInterfaces, companions);
+  const ownedArtifacts = await phobosOsTaskGroupArtifactTopology(registryHome, current.document, group);
   const coordinates = await taskCoordinateEvidence(registryHome,
     [{ document: current.document, interfaces: sourceInterfaces }, ...companions?.targets.values() ?? []]);
   const catalogueEvidence = lifecycle ? await lifecycle.readTaskCatalogueEvidence({
@@ -157,7 +157,7 @@ async function deleteOctopusOsTask(
     records: [current.document, ...[...companions?.targets.values() ?? []].map((entry) => entry.document)],
     canonicalContentHash: (value) => Buffer.from(blake3(Buffer.from(stableJson(value)))).toString("hex"),
   }) : new Map();
-  await assertTopologyIsPrivateToRun(octopusHomeRoot, runId, exactInterfaces, ownedArtifacts.ids, ownedWriters.ids, connectionDocuments);
+  await assertTopologyIsPrivateToRun(phobosHomeRoot, runId, exactInterfaces, ownedArtifacts.ids, ownedWriters.ids, connectionDocuments);
   const policyWrites = await taskTopologyPolicyWrites(registryHome, exactInterfaces, ownedTools.ids);
   const plannedDocuments = new Map([...policyWrites, ...ownedArtifacts.writes].map((write) => [write.file, write.next]));
   for (const [file, entry] of coordinates) plannedDocuments.set(file, entry.projection);
@@ -201,15 +201,15 @@ async function deleteOctopusOsTask(
       throw new Error(`task '${runId}' interface ownership changed during release`);
     }
     assertRunPrivateStateIsOwned(releasedRun.document, releasedInterfaces, runId);
-    await assertTopologyIsPrivateToRun(octopusHomeRoot, runId, exactInterfaces, ownedArtifacts.ids, ownedWriters.ids, connectionDocuments);
-    const releasedGroup = await octopusOsTaskLifecycleGroup(
-      registryRoot, octopusHomeRoot, releasedRun.document, sourceInterfaces, lifecycle, ownerInterface,
+    await assertTopologyIsPrivateToRun(phobosHomeRoot, runId, exactInterfaces, ownedArtifacts.ids, ownedWriters.ids, connectionDocuments);
+    const releasedGroup = await phobosOsTaskLifecycleGroup(
+      registryRoot, phobosHomeRoot, releasedRun.document, sourceInterfaces, lifecycle, ownerInterface,
     );
     if (stableJson([...releasedGroup.exactInterfaces].sort()) !== stableJson([...exactInterfaces].sort())
       || stableJson(releasedGroup.ownedWriters.writes) !== stableJson(ownedWriters.writes)) {
       throw new Error(`task '${runId}' writer ownership changed during release`);
     }
-    const releasedArtifacts = await octopusOsTaskGroupArtifactTopology(registryHome, releasedRun.document, releasedGroup);
+    const releasedArtifacts = await phobosOsTaskGroupArtifactTopology(registryHome, releasedRun.document, releasedGroup);
     if (stableJson(releasedArtifacts.writes) !== stableJson(ownedArtifacts.writes)) {
       throw new Error(`task '${runId}' artifact ownership changed during release`);
     }
@@ -239,7 +239,7 @@ async function deleteOctopusOsTask(
   for (const write of ownedWriters.writes) await snapshotRemovalFile(write.file, write.beforeDigest, "task writer Run");
   await snapshotRemovalFile(runPath, expectedDigest, `task run ${runId}`);
   const committed = await commitClientAuthoring({
-    label: "delete Octopus OS task",
+    label: "delete Phobos OS task",
     writes: [...connectionWrites, ...policyWrites, ...ownedArtifacts.writes, ...ownedWriters.writes, { file: runPath, beforeDigest: expectedDigest, next: null }],
     removals: [
       ...interfaceDirectories,
@@ -261,9 +261,9 @@ async function deleteOctopusOsTask(
   };
 }
 
-async function deleteOctopusOsReadOnlyTask(
+async function deletePhobosOsReadOnlyTask(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   runProjection,
   request,
   commitClientAuthoring,
@@ -271,7 +271,7 @@ async function deleteOctopusOsReadOnlyTask(
   const runId = requiredSafeRegistryId(request?.runId, "runId");
   const expectedDigest = requiredDigest(request?.expectedDigest, "expectedDigest");
   const runPath = await scopedRecordPath(
-    octopusHomeRoot,
+    phobosHomeRoot,
     runProjection.record_path,
     path.join("state", "runs"),
     `${runId}.json`,
@@ -286,11 +286,11 @@ async function deleteOctopusOsReadOnlyTask(
   ) {
     throw new Error(`read-only task run '${runId}' has drifted topology`);
   }
-  await assertTopologyIsPrivateToRun(octopusHomeRoot, runId, new Set());
-  const registryHomeRoot = await fs.realpath(octopusHomeRoot);
+  await assertTopologyIsPrivateToRun(phobosHomeRoot, runId, new Set());
+  const registryHomeRoot = await fs.realpath(phobosHomeRoot);
   const registryHome = await fs.realpath(registryRoot);
   if (path.dirname(registryHome) !== registryHomeRoot || path.basename(registryHome) !== "registry") {
-    throw new Error("Octopus OS registry root is outside the active Octopus home");
+    throw new Error("Phobos OS registry root is outside the active Phobos home");
   }
   await assertNoExternalTaskTopologyReferences(
     registryHome,
@@ -305,7 +305,7 @@ async function deleteOctopusOsReadOnlyTask(
   );
   await snapshotRemovalFile(runPath, expectedDigest, `read-only task run ${runId}`);
   const committed = await commitClientAuthoring({
-    label: "delete read-only Octopus OS task",
+    label: "delete read-only Phobos OS task",
     writes: [{ file: runPath, beforeDigest: expectedDigest, next: null }],
     removals: workerEnvironmentState.directories,
     publishBarrierPath: runPath,
@@ -328,8 +328,8 @@ function requiredGoal(value) {
   return goal;
 }
 
-async function scopedRecordPath(octopusHomeRoot, projectedPath, relativeRoot, fallbackName) {
-  const root = await fs.realpath(path.join(octopusHomeRoot, relativeRoot));
+async function scopedRecordPath(phobosHomeRoot, projectedPath, relativeRoot, fallbackName) {
+  const root = await fs.realpath(path.join(phobosHomeRoot, relativeRoot));
   const candidate = stringValue(projectedPath) || path.join(root, fallbackName);
   const resolvedParent = await fs.realpath(path.dirname(candidate));
   if (resolvedParent !== root || path.basename(candidate) !== fallbackName) {
@@ -346,16 +346,16 @@ function scopeEnvironmentChain(eeId, byId, rootEeId) {
     if (seen.has(cursor)) throw new Error(`EE hierarchy cycles at '${cursor}'`);
     seen.add(cursor);
     const environment = byId.get(cursor);
-    if (!environment) throw new Error(`EE '${cursor}' is absent from the Octopus OS scope`);
+    if (!environment) throw new Error(`EE '${cursor}' is absent from the Phobos OS scope`);
     chain.push(environment);
     if (cursor === rootEeId) return chain.reverse();
     cursor = requiredSafeRegistryId(environment.parent_ee_id, `parent of EE ${cursor}`);
   }
-  throw new Error(`EE '${eeId}' is not below the Octopus OS root`);
+  throw new Error(`EE '${eeId}' is not below the Phobos OS root`);
 }
 
 async function taskOwnedInterfaceIds(registryRoot, run, ownerInterface, runId) {
-  const ids = await octopusOsOwnedInterfaceIds(registryRoot, ownerInterface);
+  const ids = await phobosOsOwnedInterfaceIds(registryRoot, ownerInterface);
   const providerId = requiredSafeRegistryId(run.interface_state[ownerInterface].provider_runtime_interface, "task provider interface");
   if (!ids.has(providerId)) throw new Error(`task '${runId}' has a provider outside its exact client topology`);
   const interfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
@@ -450,16 +450,16 @@ async function taskOwnedInterfaceIds(registryRoot, run, ownerInterface, runId) {
   return ids;
 }
 
-async function octopusOsOwnedInterfaceIds(registryRoot, ownerInterface) {
+async function phobosOsOwnedInterfaceIds(registryRoot, ownerInterface) {
   const interfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
   const entries = await fs.readdir(interfaceRoot, { withFileTypes: true });
   const ids = new Set();
   for (const entry of entries) {
     if (!entry.isDirectory() || !safeInterfacePathSegment(entry.name)) continue;
-    const sidecarPath = path.join(interfaceRoot, entry.name, "octopus_os.json");
-    const sidecar = await readOptionalRegularJsonDocument(sidecarPath, `Octopus OS sidecar ${entry.name}`);
+    const sidecarPath = path.join(interfaceRoot, entry.name, "phobos_os.json");
+    const sidecar = await readOptionalRegularJsonDocument(sidecarPath, `Phobos OS sidecar ${entry.name}`);
     if (!sidecar) continue;
-    const parsed = parseOctopusOsSidecar(sidecar.document, entry.name, sidecarPath);
+    const parsed = parsePhobosOsSidecar(sidecar.document, entry.name, sidecarPath);
     if (stringValue(parsed.owner_interface) === ownerInterface) ids.add(entry.name);
   }
   if (!ids.has(ownerInterface)) throw new Error(`task client interface '${ownerInterface}' has no exact topology sidecar`);
@@ -498,14 +498,14 @@ function assertRunPrivateStateIsOwned(run, exactInterfaces, runId) {
 }
 
 async function assertTaskWorkerPinRemainsTaskLocal(
-  octopusHomeRoot,
+  phobosHomeRoot,
   workerInterface,
   ownerInterface,
   run,
   exactInterfaces,
 ) {
-  const writers = await octopusOsOwnedWriterRuns(octopusHomeRoot, run, exactInterfaces);
-  const runRoot = await fs.realpath(path.join(octopusHomeRoot, "state", "runs"));
+  const writers = await phobosOsOwnedWriterRuns(phobosHomeRoot, run, exactInterfaces);
+  const runRoot = await fs.realpath(path.join(phobosHomeRoot, "state", "runs"));
   for (const file of await listDirectFiles(runRoot, isRunRecordJsonPath)) {
     let candidate;
     try {
@@ -524,12 +524,12 @@ async function assertTaskWorkerPinRemainsTaskLocal(
   }
 }
 
-async function octopusOsOwnedWriterRuns(octopusHomeRoot, run, exactInterfaces) {
-  const runRoot = await fs.realpath(path.join(octopusHomeRoot, "state", "runs"));
-  return octopusOsOwnedWriterRunsAtRoot(runRoot, run, exactInterfaces);
+async function phobosOsOwnedWriterRuns(phobosHomeRoot, run, exactInterfaces) {
+  const runRoot = await fs.realpath(path.join(phobosHomeRoot, "state", "runs"));
+  return phobosOsOwnedWriterRunsAtRoot(runRoot, run, exactInterfaces);
 }
 
-async function octopusOsOwnedWriterRunsAtRoot(runRoot, run, exactInterfaces) {
+async function phobosOsOwnedWriterRunsAtRoot(runRoot, run, exactInterfaces) {
   const ids = new Set(), writes = [], records = new Map();
   for (const [owner, state] of Object.entries(objectOrEmpty(run.interface_state))) {
     const provider = state?.run_authoring_binding;
@@ -626,8 +626,8 @@ async function octopusOsOwnedWriterRunsAtRoot(runRoot, run, exactInterfaces) {
   return { ids, writes, records };
 }
 
-async function assertTopologyIsPrivateToRun(octopusHomeRoot, runId, exactInterfaces, artifactIds = new Set(), ownedRunIds = new Set(), plannedRecords = new Map()) {
-  const runRoot = await fs.realpath(path.join(octopusHomeRoot, "state", "runs"));
+async function assertTopologyIsPrivateToRun(phobosHomeRoot, runId, exactInterfaces, artifactIds = new Set(), ownedRunIds = new Set(), plannedRecords = new Map()) {
+  const runRoot = await fs.realpath(path.join(phobosHomeRoot, "state", "runs"));
   for (const file of await listDirectFiles(runRoot, isRunRecordJsonPath)) {
     if (path.basename(file) === `${runId}.json` || ownedRunIds.has(path.basename(file, ".json"))) continue;
     const candidate = await readRegularJsonDocument(file, `run record ${file}`);
@@ -672,13 +672,13 @@ async function snapshotOwnedRegistryDirectories(root, ids, label) {
   return directories;
 }
 
-async function octopusOsOwnedToolTopology(registryRoot, exactInterfaces, companions = null) {
+async function phobosOsOwnedToolTopology(registryRoot, exactInterfaces, companions = null) {
   const toolRoot = await fs.realpath(path.join(registryRoot, "tool"));
   const entries = await fs.readdir(toolRoot, { withFileTypes: true });
   const ids = new Set();
   const directories = [];
   for (const entry of entries) {
-    if (entry.name === ".octopus-publication") { await requirePrivatePublicationDirectory(path.join(toolRoot, entry.name)); continue; }
+    if (entry.name === ".phobos-publication") { await requirePrivatePublicationDirectory(path.join(toolRoot, entry.name)); continue; }
     if (!entry.isDirectory() || !safeInterfacePathSegment(entry.name)) continue;
     const directory = path.join(toolRoot, entry.name);
     const descriptor = await readRegularJsonDocument(path.join(directory, "tool.json"), `tool descriptor ${entry.name}`);
@@ -695,7 +695,7 @@ async function octopusOsOwnedToolTopology(registryRoot, exactInterfaces, compani
   return { ids, directories };
 }
 
-async function octopusOsOwnedArtifactTopology(registryRoot, run, exactInterfaces) {
+async function phobosOsOwnedArtifactTopology(registryRoot, run, exactInterfaces) {
   const ids = new Set(), writes = [], documents = new Map();
   const artifactRoot = path.join(registryRoot, "artifact");
   const reference = (value) => {
@@ -767,7 +767,7 @@ async function taskTopologyPolicyWrites(registryRoot, exactInterfaces, ownedTool
   const writes = [];
   const interfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
   for (const entry of await fs.readdir(interfaceRoot, { withFileTypes: true })) {
-    if (entry.name === ".octopus-publication") { await requirePrivatePublicationDirectory(path.join(interfaceRoot, entry.name)); continue; }
+    if (entry.name === ".phobos-publication") { await requirePrivatePublicationDirectory(path.join(interfaceRoot, entry.name)); continue; }
     if (!entry.isDirectory() || exactInterfaces.has(entry.name)) continue;
     const file = path.join(interfaceRoot, entry.name, "policy.json");
     const policy = await readOptionalRegularJsonDocument(file, `worker policy ${entry.name}`);
@@ -783,7 +783,7 @@ async function taskTopologyPolicyWrites(registryRoot, exactInterfaces, ownedTool
   }
   const eeTemplateRoot = await fs.realpath(path.join(registryRoot, "ee_template"));
   for (const entry of await fs.readdir(eeTemplateRoot, { withFileTypes: true })) {
-    if (entry.name === ".octopus-publication") { await requirePrivatePublicationDirectory(path.join(eeTemplateRoot, entry.name)); continue; }
+    if (entry.name === ".phobos-publication") { await requirePrivatePublicationDirectory(path.join(eeTemplateRoot, entry.name)); continue; }
     if (!entry.isDirectory() || !safeInterfacePathSegment(entry.name)) continue;
     const file = path.join(eeTemplateRoot, entry.name, "ee_template.json");
     const descriptor = await readRegularJsonDocument(file, `EE template ${entry.name}`);
@@ -883,16 +883,16 @@ function exactStringReferencePaths(value, targets, cursor = "$", found = []) {
   return found;
 }
 
-async function snapshotOwnedInterfaceStateDirectories(octopusHomeRoot, exactInterfaces) {
+async function snapshotOwnedInterfaceStateDirectories(phobosHomeRoot, exactInterfaces) {
   return [
     ...await snapshotOwnedInterfaceDirectories(
-      octopusHomeRoot,
+      phobosHomeRoot,
       "interfaces",
       exactInterfaces,
       "interface private state",
     ),
     ...await snapshotOwnedInterfaceDirectories(
-      octopusHomeRoot,
+      phobosHomeRoot,
       "interface-hand-in",
       exactInterfaces,
       "interface hand-in state",
@@ -900,10 +900,10 @@ async function snapshotOwnedInterfaceStateDirectories(octopusHomeRoot, exactInte
   ];
 }
 
-async function assertTaskWorkerEnvironmentsReleased(octopusHomeRoot, exactInterfaces, runId, ownedWriters = new Map(), sourceRecord = null) {
+async function assertTaskWorkerEnvironmentsReleased(phobosHomeRoot, exactInterfaces, runId, ownedWriters = new Map(), sourceRecord = null) {
   for (const interfaceId of [...exactInterfaces].sort()) {
     const root = path.join(
-      octopusHomeRoot,
+      phobosHomeRoot,
       "interfaces",
       interfaceId,
       "worker-environments",
@@ -952,12 +952,12 @@ async function assertTaskWorkerEnvironmentsReleased(octopusHomeRoot, exactInterf
 }
 
 async function snapshotReleasedRunWorkerEnvironmentStateDirectories(
-  octopusHomeRoot,
+  phobosHomeRoot,
   run,
   runId,
 ) {
   const runWorker = requiredSafeRegistryId(run?.worker, `read-only task '${runId}' worker`);
-  const interfacesRoot = path.join(octopusHomeRoot, "interfaces");
+  const interfacesRoot = path.join(phobosHomeRoot, "interfaces");
   const records = await listWorkerEnvironmentRecordFiles(interfacesRoot);
   const directories = [];
   const ids = [];
@@ -1004,12 +1004,12 @@ async function snapshotReleasedRunWorkerEnvironmentStateDirectories(
 }
 
 async function snapshotOwnedInterfaceDirectories(
-  octopusHomeRoot,
+  phobosHomeRoot,
   rootName,
   exactInterfaces,
   label,
 ) {
-  const root = path.join(octopusHomeRoot, rootName);
+  const root = path.join(phobosHomeRoot, rootName);
   let rootStat;
   try {
     rootStat = await fs.lstat(root);
@@ -1018,7 +1018,7 @@ async function snapshotOwnedInterfaceDirectories(
     throw error;
   }
   if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) {
-    throw new Error(`Octopus ${label} root must be a directory and not a symbolic link`);
+    throw new Error(`Phobos ${label} root must be a directory and not a symbolic link`);
   }
   const directories = [];
   for (const interfaceId of [...exactInterfaces].sort()) {
@@ -1098,7 +1098,7 @@ async function requireUnchangedRemoval(removal) {
   if (removal.directFileDigests) {
     const current = new Map();
     for (const entry of await fs.readdir(removal.path, { withFileTypes: true })) {
-      if (entry.name === ".octopus-publication") { await requirePrivatePublicationDirectory(path.join(removal.path, entry.name)); continue; }
+      if (entry.name === ".phobos-publication") { await requirePrivatePublicationDirectory(path.join(removal.path, entry.name)); continue; }
       if (!entry.isFile() || entry.isSymbolicLink()) {
         throw new Error(`${removal.label} contains a non-file entry before deletion`);
       }
@@ -1121,8 +1121,8 @@ async function requirePrivatePublicationDirectory(directory) {
   }
 }
 
-async function assertNoRunRecordReferencesEe(octopusHomeRoot, eeId) {
-  const runRoot = await fs.realpath(path.join(octopusHomeRoot, "state", "runs"));
+async function assertNoRunRecordReferencesEe(phobosHomeRoot, eeId) {
+  const runRoot = await fs.realpath(path.join(phobosHomeRoot, "state", "runs"));
   for (const file of await listDirectFiles(runRoot, isRunRecordJsonPath)) {
     const candidate = await readRegularJsonDocument(file, `run record ${file}`);
     if (stringValue(candidate.document?.ee) === eeId) {

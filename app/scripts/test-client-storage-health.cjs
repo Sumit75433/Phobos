@@ -72,7 +72,7 @@ test("native storage failure remains blocked until a fresh writable probe withou
 test("runtime control requires interface_failures and reports exact life failures while healthy siblings remain ready", async () => {
   const nativeFs = require("node:fs/promises"), net = require("node:net");
   const { createRuntimeHost } = require("../electron/runtimeHost.cjs");
-  const home = await nativeFs.mkdtemp("/tmp/octopus-health-");
+  const home = await nativeFs.mkdtemp("/tmp/phobos-health-");
   const root = path.join(home, "state", "runtime-instance"), now = Date.now();
   await nativeFs.mkdir(root, { recursive: true });
   await nativeFs.writeFile(path.join(root, "state.json"), JSON.stringify({ schema_version: 3, pid: process.pid, phase: "ready", started_at_unix_ms: now, updated_at_unix_ms: now, launch_owner: null }));
@@ -121,7 +121,7 @@ test("turn and steering IPC preserve storage refusal and uncertain delivery with
 
 test("disk-full refusal retains the attachment's original owned stage and bytes", async (t) => {
   const nativeFs = require("node:fs/promises");
-  const root = await nativeFs.mkdtemp("/tmp/octopus-draft-");
+  const root = await nativeFs.mkdtemp("/tmp/phobos-draft-");
   const store = require("../electron/clientAttachments.cjs").createClientAttachmentStagingStore({ root: () => root });
   t.after(async () => { await store.abortAll(); await nativeFs.rm(root, { recursive: true, force: true }); });
   const handle = await store.stageBytes("owner", { name: "draft.txt", label: "operator.file", type: "text/plain", lastModified: 0 }, Buffer.from("original draft bytes"));
@@ -129,7 +129,7 @@ test("disk-full refusal retains the attachment's original owned stage and bytes"
   assert.throws(() => store.restore("another-owner", attachment), /cannot be restored/);
   const source = fs.readFileSync(path.resolve(__dirname, "../electron/main.cjs"), "utf8");
   const start = source.indexOf("function retainChatAttachmentsAfterStorageFailure(");
-  const end = source.indexOf('\nipcMain.handle("octopus:submit-chat-turn"', start);
+  const end = source.indexOf('\nipcMain.handle("phobos:submit-chat-turn"', start);
   const retain = Function("getClientAttachmentStagingStore", `${source.slice(start, end)}; return retainChatAttachmentsAfterStorageFailure;`)(() => store);
   retain("owner", attachments, Object.assign(new Error("write failed"), { code: "ENOSPC" }));
   assert.equal(attachments.length, 0);

@@ -140,7 +140,7 @@ async function checks() {
   }
   const noTTY = new PassThrough();
   const unopened = fakeClient();
-  await assert.rejects(runInteractive(unopened, { input: noTTY, output: noTTY }), { code: 'OCTOPUS_TTY_REQUIRED' });
+  await assert.rejects(runInteractive(unopened, { input: noTTY, output: noTTY }), { code: 'PHOBOS_TTY_REQUIRED' });
   assert.equal(unopened.calls.length, 0);
 
   const home = await session(fakeClient(), { initialPrompt: 'Hello Home' });
@@ -246,7 +246,7 @@ async function checks() {
   assert.equal(slowClient.calls.find((call) => call.method === 'send').input.text, 'submitted prompt');
   assert.equal((await slow.close()).draft, 'next draft');
 
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-cli-terminal-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-cli-terminal-'));
   try {
     const file = path.join(root, 'a file.txt');
     const folder = path.join(root, 'a folder');
@@ -405,7 +405,7 @@ def press_alone(key):
 try:
  wait_for(b'Home:')
  os.write(master, b'/help\r')
- wait_for(b'Talk to Octopus')
+ wait_for(b'Talk to Phobos')
  os.write(master, b'\x1b[200~PTY first line\nsecond line\x1b[201~')
  time.sleep(.1)
  os.write(master, b'\r')

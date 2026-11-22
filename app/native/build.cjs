@@ -10,7 +10,7 @@ function run(command, args) {
   return result.stdout.trim();
 }
 
-function buildClientFilesystem({ headers = process.env.OCTOPUS_NATIVE_NODE_HEADERS } = {}) {
+function buildClientFilesystem({ headers = process.env.PHOBOS_NATIVE_NODE_HEADERS } = {}) {
   if (process.platform !== "darwin") throw new Error("Client package cloning requires macOS");
   headers = verifyNodeHeaders(headers);
   if (!["arm64", "x64"].includes(process.arch)) throw new Error(`Unsupported client filesystem architecture: ${process.arch}`);
@@ -19,7 +19,7 @@ function buildClientFilesystem({ headers = process.env.OCTOPUS_NATIVE_NODE_HEADE
   const outputRoot = path.join(__dirname, "build");
   fs.mkdirSync(outputRoot, { recursive: true });
   const stage = fs.mkdtempSync(path.join(outputRoot, ".compile-"));
-  const name = "octopus-filesystem.node";
+  const name = "phobos-filesystem.node";
   try {
     const output = path.join(stage, name);
     run(compiler, ["-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-fvisibility=hidden", "-DNAPI_VERSION=8",

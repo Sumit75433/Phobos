@@ -6,7 +6,7 @@ const path = require("node:path");
 const test = require("node:test");
 const { createStoragePublisher, publishClientWrites } = require("./publication.cjs");
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-client-publication-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-client-publication-"));
 test.after(() => fs.rmSync(root, { recursive: true, force: true }));
 const hash = (text) => crypto.createHash("sha256").update(text).digest("hex");
 const write = (name, before = null) => ({ filePath: path.join(root, name), tag: name,
@@ -76,7 +76,7 @@ test("invalid batches never reach native publication", async () => {
 });
 
 test("conditioned batches retain every dependency and reject unsupported effects and post-refusal tails", async () => {
-  const condition = { octopus_home: root, preimages: [{ path: path.join(root, "ee.json"), sha256: hash("authority") },
+  const condition = { phobos_home: root, preimages: [{ path: path.join(root, "ee.json"), sha256: hash("authority") },
     { path: path.join(root, "absent-cursor"), sha256: null }] };
   let calls = 0;
   const publisher = createStoragePublisher("/distribution/topology", async (_binary, mode, request) => {

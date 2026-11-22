@@ -1,5 +1,5 @@
 import type { RunProjection, WorkerEnvironmentProjection, WorkerEnvironmentSurfaceProjection } from "../../data/topology";
-import type { OctopusWorkerEnvironmentGitSnapshot } from "../../electron";
+import type { PhobosWorkerEnvironmentGitSnapshot } from "../../electron";
 import { surfaceHasProjectedChanges } from "../worker-environment/changesProjection";
 import { workerEnvironmentPanelKind } from "../worker-environment/surfaceRegistry";
 import { MAX_ATTACHMENT_BYTES } from "./constants";
@@ -66,8 +66,8 @@ async function materializeReviewSource(run: RunProjection, candidate: Reviewable
   let revision = environment.revision;
   let gitContentRevision = "";
   if (directGit) {
-    const inspect = window.octopusTransport?.inspectWorkerEnvironmentGit;
-    if (!inspect) throw new Error("Direct Git review requires the Octopus desktop client.");
+    const inspect = window.phobosTransport?.inspectWorkerEnvironmentGit;
+    if (!inspect) throw new Error("Direct Git review requires the Phobos desktop client.");
     const snapshot = await inspect({
       runId: run.id,
       surfaceId: surface.id,
@@ -104,7 +104,7 @@ async function materializeReviewSource(run: RunProjection, candidate: Reviewable
 }
 
 function assertGitSnapshotIdentity(
-  snapshot: OctopusWorkerEnvironmentGitSnapshot,
+  snapshot: PhobosWorkerEnvironmentGitSnapshot,
   runId: string,
   workerEnvironmentId: string,
   surfaceId: string,

@@ -15,16 +15,16 @@ const protocol = { inputLabel: 'operator.message', terminalOutputLabel: 'interfa
   toolCallLabel: 'tool.call', hiddenActivityLabels: [] };
 
 function projectionStore(overrides = {}) {
-  return Object.assign(createProjectionContext({ resolveRepoRoot: () => repoRoot, octopusHome: () => os.tmpdir() }), overrides);
+  return Object.assign(createProjectionContext({ resolveRepoRoot: () => repoRoot, phobosHome: () => os.tmpdir() }), overrides);
 }
 function projectionFixture(fields = {}) {
-  return { octopusHome: os.tmpdir(), registryRoot: path.join(os.tmpdir(), 'registry'), operatorChatProtocol: protocol, descriptors: { interface: [{ id: 'provider', role: 'provider' }, { id: 'other-provider', role: 'provider' }], ee_template: [] },
+  return { phobosHome: os.tmpdir(), registryRoot: path.join(os.tmpdir(), 'registry'), operatorChatProtocol: protocol, descriptors: { interface: [{ id: 'provider', role: 'provider' }, { id: 'other-provider', role: 'provider' }], ee_template: [] },
     descriptorIndexes: { interface: new Map() }, eeInstances: [], runRecords: [], clientAgentCatalog: { document: { agents: [] } },
     structureMemo: new Map(), ledgerMemo: new Map(), ...fields };
 }
 
 test('durable metadata resolves exact binding refs and rejects ambiguous or changed content', (t) => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'octopus-metadata-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'phobos-metadata-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, 'metadata'));
   const refs = [{ id: 'bound', content: Array(32).fill(1) }];
@@ -94,7 +94,7 @@ test('trigger history groups delivery edges and uses the same task title as All 
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'oct-trigger-history-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const entry = { runId: 'task', chatInterfaceId: 'chat', surfaceRole: 'task', writable: true, inbound: [], activity: [] };
-  const projection = projectionFixture({ octopusHome: root, registryRoot: path.join(root, 'registry') });
+  const projection = projectionFixture({ phobosHome: root, registryRoot: path.join(root, 'registry') });
   const store = projectionStore({ operatorOsScope: () => ({ client_runs: [{ run_id: 'task', interface_id: 'chat' }, { run_id: 'other', interface_id: 'other_chat' }] }),
     operatorChatRunIndex: async () => [entry, { ...entry, runId: 'other', chatInterfaceId: 'other_chat' }] });
   t.after(() => store.close());
@@ -118,10 +118,10 @@ const prepareCronState = `
 import importlib.util, json, os, pathlib, sys
 root, cronOwner, due = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), int(sys.argv[3])
 os.environ.update(
-    OCTOPUS_INTERFACE_ID="world_cron", OCTOPUS_INTERFACE_DIR=str(root / "registry/interface/world_cron"),
-    OCTOPUS_VAR_DIR=str(root / "interfaces/world_cron"),
-    OCTOPUS_INTERFACE_DESCRIPTOR_JSON=(root / "registry/interface/world_cron/interface.json").read_text(),
-    OCTOPUS_INTERFACE_HOST_IO_LIMITS=json.dumps({key: 1048576 for key in
+    PHOBOS_INTERFACE_ID="world_cron", PHOBOS_INTERFACE_DIR=str(root / "registry/interface/world_cron"),
+    PHOBOS_VAR_DIR=str(root / "interfaces/world_cron"),
+    PHOBOS_INTERFACE_DESCRIPTOR_JSON=(root / "registry/interface/world_cron/interface.json").read_text(),
+    PHOBOS_INTERFACE_HOST_IO_LIMITS=json.dumps({key: 1048576 for key in
         ("max_control_frame_bytes", "max_manifest_bytes", "max_payload_bytes", "max_stderr_bytes")}),
 )
 spec = importlib.util.spec_from_file_location("cron_projection_test", cronOwner / "cron_life.py")
@@ -151,7 +151,7 @@ test("Triggers projects owner-written interval state", async (t) => {
   const store = scheduledInterfacesProjection({
     indexedArtifactLabelRows: async () => [], operatorOsScope: () => ({ client_runs: [] }), operatorChatRunIndex: async () => [],
   });
-  const projection = { octopusHome: root, structureMemo: new Map(), descriptors: { interface: [
+  const projection = { phobosHome: root, structureMemo: new Map(), descriptors: { interface: [
     { ...descriptor, activation_sidecars: [{ ...activation, descriptor_path: activationPath }] },
   ] }, runRecords: [{ run_id: "run_task", checkpoints: [{ status: "projected", interface: "world_cron" }] }] };
   const read = async () => { projection.structureMemo.clear(); return (await store.scheduledInterfaceRows(projection))[0]; };
@@ -183,10 +183,10 @@ test('Stop aliases match actual tasks titles without reading terminal history', 
   }));
   entries[0].inbound.unshift(movement(10, protocol.inputLabel, { text: 'Later input' }, { from: 'chat_home', to: 'provider', kind: 'InterfaceArrival' }));
   entries[0].outbound.push(movement(30, protocol.terminalOutputLabel, { reply: 'Delivered elsewhere' }, { to: 'chat_other' }));
-  const sidecar = (name) => ({ workspace: 'octopus_os', presentation: { name } });
+  const sidecar = (name) => ({ workspace: 'phobos_os', presentation: { name } });
   const projection = projectionFixture({ descriptors: { ee_template: [], interface: [
-    { id: 'chat_home', octopus_os_sidecar: sidecar('Home') }, { id: 'chat_task', octopus_os_sidecar: sidecar('Task title') },
-    { id: 'chat_named', octopus_os_sidecar: sidecar('run_named') }] } });
+    { id: 'chat_home', phobos_os_sidecar: sidecar('Home') }, { id: 'chat_task', phobos_os_sidecar: sidecar('Task title') },
+    { id: 'chat_named', phobos_os_sidecar: sidecar('run_named') }] } });
   const scope = { status: 'ready', home_run_id: 'run_home', home_interface_id: 'chat_home',
     client_runs: entries.map(entry => ({ run_id: entry.runId, interface_id: entry.chatInterfaceId, surface_role: entry.surfaceRole, archived: false })) };
   let allowPayload = true, allowHistory = true, inputReads = 0;
@@ -226,7 +226,7 @@ test('Stop aliases match actual tasks titles without reading terminal history', 
       assert.equal(aliases.find(row => row.run_id === task.id).title, task.title);
       assert.equal((await client.stop(task.title)).runId, task.id);
     }
-    projection.descriptors.interface[1].octopus_os_sidecar.presentation.name = tasks.find(task => task.isHome).title;
+    projection.descriptors.interface[1].phobos_os_sidecar.presentation.name = tasks.find(task => task.isHome).title;
     await assert.rejects(client.stop('Review notes'), /ambiguous/);
     allowHistory = true;
     const listed = await projectionReads.buildOperatorChatsList(projection);
@@ -242,7 +242,7 @@ test('Stop aliases match actual tasks titles without reading terminal history', 
 });
 
 test('artifact cache separates raw bytes, projection contracts and exact artifact identities', async (t) => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'octopus-artifact-cache-')), blobs = path.join(root, 'blobs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'phobos-artifact-cache-')), blobs = path.join(root, 'blobs');
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(blobs);
   const blob = (bytes) => { const hex = Buffer.from(blake3(bytes)).toString('hex'); fs.writeFileSync(path.join(blobs, hex), bytes); return hex; };
@@ -545,7 +545,7 @@ test('sensor watch state projects conditions and receipts without caching a spen
   const write = (name, value, dir = directory) => fs.writeFileSync(path.join(dir, name), JSON.stringify(value));
   write('watch.json', { terms: ['legacy', 'handover'], match_fields: ['subject', 'body'] });
   write('armed.json', { armed_at: '2026-11-15T00:00:00Z' });
-  const projection = projectionFixture({ octopusHome: root, descriptors: { interface: [{
+  const projection = projectionFixture({ phobosHome: root, descriptors: { interface: [{
     id: 'sensor', role: 'sensor', interface_type: 'world', direction: 'inbound', descriptor_path: path.join(directory, 'interface.json'),
   }], ee_template: [] }, runRecords: [{ run_id: 'task', checkpoints: [{ status: 'projected', interface: 'sensor' }] }] });
   const store = projectionStore({ operatorOsScope: () => ({ client_runs: [] }), operatorChatRunIndex: async () => [],
@@ -581,7 +581,7 @@ test('email triggers project recorded mailbox observations, not account data or 
   fs.mkdirSync(directory, { recursive: true }); fs.mkdirSync(privateDirectory, { recursive: true });
   const write = value => fs.writeFileSync(path.join(privateDirectory, 'mailbox-state.json'), JSON.stringify(value));
   fs.writeFileSync(path.join(directory, 'config.json'), JSON.stringify({ intake: { mailboxes: ['INBOX', 'Requests'] } }));
-  const projection = projectionFixture({ octopusHome: root, descriptors: { interface: [{
+  const projection = projectionFixture({ phobosHome: root, descriptors: { interface: [{
     id, role: 'service', interface_type: 'world', direction: 'bidirectional', interface_driver_ref: 'email_life',
     descriptor_path: path.join(directory, 'interface.json'),
     interface_driver_config: { private_config: { task_input_labels: ['email.event'] } },

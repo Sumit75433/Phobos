@@ -98,19 +98,19 @@ function closeLedgerChangeHub(movementsPath, hub) {
   hub.statWatcher = null;
 }
 
-async function readPersistedLiveCursor(octopusHome, interfaceId) {
-  const cursorPath = liveCursorPath(octopusHome, interfaceId);
+async function readPersistedLiveCursor(phobosHome, interfaceId) {
+  const cursorPath = liveCursorPath(phobosHome, interfaceId);
   const document = await readJsonIfPresent(cursorPath);
   if (document === null) return null;
   return normalizeLiveCursor(document);
 }
 
-function persistLiveCursor(octopusHome, interfaceId, cursor) {
+function persistLiveCursor(phobosHome, interfaceId, cursor) {
   if (!cursor || cursor.seq === null) return Promise.resolve();
-  const cursorPath = liveCursorPath(octopusHome, interfaceId);
+  const cursorPath = liveCursorPath(phobosHome, interfaceId);
   const previous = liveCursorWriteTails.get(cursorPath) ?? Promise.resolve();
   const write = previous.then(async () => {
-    const current = await readPersistedLiveCursor(octopusHome, interfaceId);
+    const current = await readPersistedLiveCursor(phobosHome, interfaceId);
     const next = current ? mergeLiveCursors(current, cursor) : cursor;
     if (current && !liveCursorIsAhead(next, current)) return;
     await fs.mkdir(path.dirname(cursorPath), { recursive: true, mode: 0o700 });
@@ -187,9 +187,9 @@ function mergeLiveCursors(current, candidate) {
   ));
 }
 
-function liveCursorPath(octopusHome, interfaceId) {
+function liveCursorPath(phobosHome, interfaceId) {
   return path.join(
-    octopusHome,
+    phobosHome,
     "interfaces",
     interfaceId,
     "ledger-cursor.client.json",

@@ -1,12 +1,12 @@
 import { OcLoadingRows } from "../../design-system/LoadingSkeleton";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { OctopusOsFileEntry, OctopusOsFileRoot } from "../../electron";
+import type { PhobosOsFileEntry, PhobosOsFileRoot } from "../../electron";
 import { OcDropdown } from "../../design-system/OcDropdown";
-import { OctopusFileTree } from "../OctopusSurface";
+import { PhobosFileTree } from "../PhobosSurface";
 import { Glyph } from "../IconGlyphs";
 
 export function FilesBreadcrumb({ root, path, label, onSelectFile }: {
-  root: OctopusOsFileRoot | null;
+  root: PhobosOsFileRoot | null;
   path?: string;
   label?: string;
   onSelectFile: (rootId: string, path: string) => void;
@@ -50,7 +50,7 @@ function BreadcrumbSegment({ activePath, current, directoryPath, label, onSelect
   directoryPath: string;
   label: string;
   onSelectFile: (rootId: string, path: string) => void;
-  root: OctopusOsFileRoot;
+  root: PhobosOsFileRoot;
 }) {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
@@ -81,7 +81,7 @@ function BreadcrumbDirectory({ activePath, directoryPath, expandActivePath, onSe
   const prefix = directoryPath ? `${directoryPath}/` : "";
   const selectedPath = activePath?.slice(prefix.length);
   const [expanded, setExpanded] = useState<string[]>(() => expandActivePath && selectedPath ? [selectedPath] : []);
-  const [directories, setDirectories] = useState<Record<string, OctopusOsFileEntry[]>>({});
+  const [directories, setDirectories] = useState<Record<string, PhobosOsFileEntry[]>>({});
   const [error, setError] = useState("");
   const requested = useRef(new Set<string>());
   const generationRef = useRef(0);
@@ -95,7 +95,7 @@ function BreadcrumbDirectory({ activePath, directoryPath, expandActivePath, onSe
       requested.current.add(path);
       const generation = generationRef.current;
       try {
-        const transport = window.octopusTransport;
+        const transport = window.phobosTransport;
         if (!transport?.listOsFiles) throw new Error("OS Files directory transport is unavailable");
         const result = await transport.listOsFiles({ rootId, path });
         if (result.rootId !== rootId || result.path !== path) throw new Error("OS Files returned a directory for a different root or path");
@@ -121,7 +121,7 @@ function BreadcrumbDirectory({ activePath, directoryPath, expandActivePath, onSe
   if (error) return <div className="os-files-breadcrumb-message is-error" role="alert" title={error}>Couldn't load folder contents</div>;
   if (!directories[directoryPath]) return <OcLoadingRows className="os-files-breadcrumb-message" label="Loading folder contents…" />;
   if (!paths.length) return <div className="os-files-breadcrumb-message">This folder is empty</div>;
-  return <OctopusFileTree
+  return <PhobosFileTree
     initialExpandedPaths={expanded}
     onExpandedPathsChange={(paths) => setExpanded((current) => current.length === paths.length && current.every((path, index) => path === paths[index]) ? current : paths)}
     onSelectPath={(path) => onSelectFile(prefix + path)}

@@ -382,11 +382,11 @@ async function writeContentAddressedPayload(root, label, bytes) {
   return file;
 }
 
-async function resolveRunRecordsRoot(octopusHome) {
-  const hostPath = path.join(octopusHome, "host.json");
+async function resolveRunRecordsRoot(phobosHome) {
+  const hostPath = path.join(phobosHome, "host.json");
   const host = await readJsonIfPresent(hostPath);
   const configured = stringValue(host?.root_refs?.run_records_root);
   const root = configured
-    || path.join(octopusHome, "state", "runs");
+    || path.join(phobosHome, "state", "runs");
   return absolutePath(root, "run_records_root");
 }

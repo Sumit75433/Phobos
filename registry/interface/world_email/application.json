@@ -4,7 +4,7 @@
   "name": "Email",
   "description": "Hand the mail you allow to the tasks you connect, and let them reply, send and file email from your mailbox.",
   "category": "connector",
-  "developer": "Octopus",
+  "developer": "Phobos",
   "version": "3.0.0",
   "icon": "email",
   "logo": "application-logo.png",
@@ -19,7 +19,7 @@
   ],
   "connection": {
     "disclosure": [
-      "Octopus signs in to your mailbox over an encrypted connection with an app password that stays on this computer.",
+      "Phobos signs in to your mailbox over an encrypted connection with an app password that stays on this computer.",
       "Only new mail from your own address and the senders you allow reaches your tasks; everything else stays where it is.",
       "Connected tasks can send, reply, forward, flag and move mail as you, and every send is recorded.",
       "Disconnect removes the saved address and app password from this computer; revoke the app password with your provider to end its access."

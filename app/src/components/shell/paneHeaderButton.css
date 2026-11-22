@@ -9,7 +9,7 @@
   gap: 4px;
   border: 1px solid transparent;
   border-radius: calc(var(--radius-lg-base) * var(--corner-radius-scale));
-  corner-shape: var(--octopus-corner-shape);
+  corner-shape: var(--phobos-corner-shape);
   color: var(--color-text-tertiary);
   background: transparent;
   font: inherit;

@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.git_worktree",
   "version": "1.0.1",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Git Worktree",
     "description": "A private Git worktree per task to edit files, run commands and inspect or abandon its diff.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "worktree"
   },

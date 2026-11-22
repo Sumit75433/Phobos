@@ -2,7 +2,7 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { commitClientAuthoringTransaction } = require("./workspaceSetup.cjs");
 
-function commitProjectionClientAuthoring(octopusHome, registryRoot, request, options = {}) {
+function commitProjectionClientAuthoring(phobosHome, registryRoot, request, options = {}) {
   const writes = Array.isArray(request?.writes) ? request.writes : [];
   const removals = Array.isArray(request?.removals) ? request.removals : [];
   const publishBarrierPath = path.resolve(request?.publishBarrierPath ?? "");
@@ -10,7 +10,7 @@ function commitProjectionClientAuthoring(octopusHome, registryRoot, request, opt
     throw new Error("Client authoring publication barrier is absent from its write set");
   }
   return commitClientAuthoringTransaction({
-    octopusHomeRoot: octopusHome,
+    phobosHomeRoot: phobosHome,
     registryRoot,
     publishFiles: options.publishFiles,
     publication: options.publication,

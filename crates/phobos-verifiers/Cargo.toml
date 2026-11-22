@@ -1,0 +1,28 @@
+[package]
+name = "phobos-verifiers"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "phobos_verifiers"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+tempfile = "3.23.0"
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-marks = { path = "../phobos-marks" }
+phobos-file-storage = { path = "../phobos-file-storage" }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+object = { version = "0.37.3", default-features = false, features = ["read", "std"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
+object = { version = "0.37.3", default-features = false, features = ["read", "std"] }

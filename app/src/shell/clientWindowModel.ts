@@ -96,7 +96,7 @@ export type ActiveClientSurfaceIdentityInput = {
 };
 
 export type ClientWindowBootstrap = {
-  schema: "octopus.client-window";
+  schema: "phobos.client-window";
   schemaVersion: 1;
   initialTarget?: TransferableWorkspacePaneTarget;
   reattachWindowId?: string;
@@ -119,7 +119,7 @@ export type ClientWindowReadyRequest = {
 };
 
 export type ClientPaneDragPayload = {
-  schema: "octopus.client-pane-transfer";
+  schema: "phobos.client-pane-transfer";
   schemaVersion: 1;
   sourceWindowId: string;
   transferId: string;
@@ -166,10 +166,10 @@ export type ClientPaneTransferAcknowledgementRequest = ClientPaneTransferRequest
   released: boolean;
 };
 
-export const CLIENT_PANE_DRAG_MIME = "application/x-octopus-client-pane";
+export const CLIENT_PANE_DRAG_MIME = "application/x-phobos-client-pane";
 
 export const MAIN_CLIENT_WINDOW_BOOTSTRAP: ClientWindowBootstrap = {
-  schema: "octopus.client-window",
+  schema: "phobos.client-window",
   schemaVersion: 1,
   primary: true,
   scope: "main",
@@ -313,7 +313,7 @@ export function clientWindowStateStorage(windowScope: string): Storage {
 }
 
 export function clientWindowStateKey(windowScope: string, key: string): string {
-  return windowScope === "main" ? key : `octopus.client-window.${windowScope}.${key}`;
+  return windowScope === "main" ? key : `phobos.client-window.${windowScope}.${key}`;
 }
 
 export function parseClientPaneDragPayload(value: string): ClientPaneDragPayload | null {
@@ -321,11 +321,11 @@ export function parseClientPaneDragPayload(value: string): ClientPaneDragPayload
     const parsed: unknown = JSON.parse(value);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
     const row = parsed as Record<string, unknown>;
-    if (row.schema !== "octopus.client-pane-transfer" || row.schemaVersion !== 1) return null;
+    if (row.schema !== "phobos.client-pane-transfer" || row.schemaVersion !== 1) return null;
     const sourceWindowId = boundedClientWindowText(row.sourceWindowId, 128);
     const transferId = boundedClientWindowText(row.transferId, 128);
     return sourceWindowId && transferId ? {
-      schema: "octopus.client-pane-transfer",
+      schema: "phobos.client-pane-transfer",
       schemaVersion: 1,
       sourceWindowId,
       transferId,
@@ -338,7 +338,7 @@ export function parseClientPaneDragPayload(value: string): ClientPaneDragPayload
 export function normalizeTransferableWorkspacePaneTarget(value: unknown): TransferableWorkspacePaneTarget | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const row = value as Record<string, unknown>;
-  const workspaceKey = row.workspaceKey === "dashboard" || row.workspaceKey === "octopus-os"
+  const workspaceKey = row.workspaceKey === "dashboard" || row.workspaceKey === "phobos-os"
     ? row.workspaceKey
     : null;
   if (!workspaceKey) return null;

@@ -8,7 +8,7 @@ import { JsonPanel } from "./JsonPanel";
 import { SurfaceCopyButton } from "./SurfaceCopyButton";
 import { appToast } from "../toasts";
 import { TopBar } from "./TopBar";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import {
   ProjectionResourceFailure,
   ProjectionResourceIssue,
@@ -72,7 +72,7 @@ const ALL = "All";
 const MOVEMENT_PAGE_SIZE = 500;
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   focusedMovement?: { id: string; sequence: number | null } | null;
   onClearMovement?: () => void;
   onQueryChange: (value: string) => void;

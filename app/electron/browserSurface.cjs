@@ -79,7 +79,7 @@ function createNativeBrowserSurfaceAdapter({ getHost, getHome, requireHome, reso
       return surface;
     } catch (error) {
       if (attachments.get(entry.id) === entry) {
-        if (!entry.sender.isDestroyed()) entry.sender.send("octopus:native-browser-viewer-event", {
+        if (!entry.sender.isDestroyed()) entry.sender.send("phobos:native-browser-viewer-event", {
           type: "error", attachmentId: entry.id, hostGeneration: entry.hostGeneration, mountGeneration: entry.generation,
           error: { code: "presentation_unavailable", message: error.message },
         });
@@ -89,7 +89,7 @@ function createNativeBrowserSurfaceAdapter({ getHost, getHome, requireHome, reso
     }
   }
   function failed(entry, error) {
-    if (!entry.sender.isDestroyed()) entry.sender.send("octopus:native-browser-viewer-event", {
+    if (!entry.sender.isDestroyed()) entry.sender.send("phobos:native-browser-viewer-event", {
       type: "error", attachmentId: entry.id, hostGeneration: entry.hostGeneration, mountGeneration: entry.generation,
       error: { code: "presentation_unavailable", message: error.message },
     });
@@ -275,7 +275,7 @@ function createNativeBrowserSurfaceAdapter({ getHost, getHome, requireHome, reso
           if (entry.state && (event.state.viewportSequence < entry.state.viewportSequence || event.state.modelViewport.revision < entry.state.modelViewport.revision)) return;
           entry.state = event.state;
         }
-        entry.sender.send("octopus:native-browser-viewer-event", event);
+        entry.sender.send("phobos:native-browser-viewer-event", event);
         if (event.type === "closed" || event.type === "error") detach(entry);
       } catch (error) { void failed(entry, error); }
     },

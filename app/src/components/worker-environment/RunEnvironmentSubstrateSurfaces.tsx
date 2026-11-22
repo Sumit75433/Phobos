@@ -6,13 +6,13 @@ import { OcButton, OcCard, OcGroup, OcIconButton, OcSettingsRow } from "../../de
 import type { GlyphName } from "../IconGlyphs";
 import { Glyph } from "../IconGlyphs";
 import {
-  OctopusLogBlock,
-  OctopusNoteLine,
-  OctopusPillRow,
-  OctopusRow,
-  OctopusSection,
-  OctopusSurfaceShell,
-} from "../OctopusSurface";
+  PhobosLogBlock,
+  PhobosNoteLine,
+  PhobosPillRow,
+  PhobosRow,
+  PhobosSection,
+  PhobosSurfaceShell,
+} from "../PhobosSurface";
 import { ChangesWorkspace, surfaceHasProjectedChanges } from "./ChangesWorkspace";
 import { workerEnvironmentPanelKind } from "./surfaceRegistry";
 import type { ProjectedAssistantCodeComment } from "../chat/assistantDirectives";
@@ -129,7 +129,7 @@ export function ConnectionSurface({ surface }: { surface?: WorkerEnvironmentSurf
 
   const state = dataText(surface.data, "state") || surface.status;
   return (
-    <OctopusSurfaceShell
+    <PhobosSurfaceShell
       glyph="interfaces"
       status={state}
       statusTone={normalizeStatus(state) === "active" ? "active" : normalizeStatus(state) === "error" ? "error" : "muted"}
@@ -137,7 +137,7 @@ export function ConnectionSurface({ surface }: { surface?: WorkerEnvironmentSurf
       title={dataText(surface.data, "name") || surface.label}
     >
       {address ? (
-        <OctopusSection title="View address">
+        <PhobosSection title="View address">
           <div className="flex min-h-9 items-center justify-between gap-2 px-3 py-1.5 text-sm">
             <code className="min-w-0 truncate font-mono text-xs text-token-foreground" title={address}>{address}</code>
             <span className="flex shrink-0 items-center">
@@ -159,15 +159,15 @@ export function ConnectionSurface({ surface }: { surface?: WorkerEnvironmentSurf
               ) : null}
             </span>
           </div>
-        </OctopusSection>
+        </PhobosSection>
       ) : null}
       {facts.length ? (
-        <OctopusSection title="Environment">
-          {facts.map(([label, value]) => <OctopusRow key={label} label={label} value={value} />)}
-        </OctopusSection>
+        <PhobosSection title="Environment">
+          {facts.map(([label, value]) => <PhobosRow key={label} label={label} value={value} />)}
+        </PhobosSection>
       ) : null}
-      <OctopusPillRow values={capabilities} />
-      <OctopusSection count={events.length} title="Lifecycle">
+      <PhobosPillRow values={capabilities} />
+      <PhobosSection count={events.length} title="Lifecycle">
         {events.length ? events.map((event, index) => (
           <div className="flex min-h-9 items-center gap-2.5 border-b border-token-border px-3 py-1.5 text-sm last:border-b-0" key={`${dataText(event, "time")}:${dataText(event, "label")}:${index}`}>
             <span className={`size-1.5 shrink-0 rounded-full ${normalizeStatus(dataText(event, "state")) === "active" ? "bg-token-charts-green" : normalizeStatus(dataText(event, "state")) === "error" ? "bg-token-charts-red" : "bg-token-description-foreground"}`} />
@@ -178,8 +178,8 @@ export function ConnectionSurface({ surface }: { surface?: WorkerEnvironmentSurf
             <span className="shrink-0 text-xs text-token-input-placeholder-foreground">{dataText(event, "time")}</span>
           </div>
         )) : <div className="px-3 py-2 text-sm text-token-description-foreground">No lifecycle events were projected.</div>}
-      </OctopusSection>
-    </OctopusSurfaceShell>
+      </PhobosSection>
+    </PhobosSurfaceShell>
   );
 }
 
@@ -191,20 +191,20 @@ export function ContainerSurface({ surface }: { surface?: WorkerEnvironmentSurfa
   const ports = dataRecordList(surface.data, "ports");
   const mounts = dataRecordList(surface.data, "mounts");
   return (
-    <OctopusSurfaceShell
+    <PhobosSurfaceShell
       glyph="ee"
       status={dataText(surface.data, "state") || surface.status}
       statusTone={surface.data.running === true ? "active" : "muted"}
       subtitle={dataText(surface.data, "image") || "No image evidence"}
       title={dataText(surface.data, "name") || surface.label}
     >
-      <OctopusSection title="Runtime">
-        <OctopusRow label="Health" value={dataText(surface.data, "health") || (surface.data.running === true ? "Running" : "—")} />
-        <OctopusRow label="Exit code" value={String(dataOptionalNumber(surface.data, "exit_code") ?? "—")} />
-        <OctopusRow label="Uptime" value={dataText(surface.data, "uptime") || "—"} />
-        <OctopusRow label="Network" value={dataText(surface.data, "network") || "—"} />
-      </OctopusSection>
-      <OctopusSection count={processes.length} title="Processes">
+      <PhobosSection title="Runtime">
+        <PhobosRow label="Health" value={dataText(surface.data, "health") || (surface.data.running === true ? "Running" : "—")} />
+        <PhobosRow label="Exit code" value={String(dataOptionalNumber(surface.data, "exit_code") ?? "—")} />
+        <PhobosRow label="Uptime" value={dataText(surface.data, "uptime") || "—"} />
+        <PhobosRow label="Network" value={dataText(surface.data, "network") || "—"} />
+      </PhobosSection>
+      <PhobosSection count={processes.length} title="Processes">
         {processes.length ? processes.map((process, index) => (
           <div className="flex min-h-9 items-center gap-3 border-b border-token-border px-3 py-1.5 text-sm last:border-b-0" key={`${dataText(process, "pid")}:${dataText(process, "command")}:${index}`}>
             <span className="w-12 shrink-0 font-mono text-xs text-token-text-secondary">{dataText(process, "pid") || "—"}</span>
@@ -213,10 +213,10 @@ export function ContainerSurface({ surface }: { surface?: WorkerEnvironmentSurfa
             <span className="shrink-0 text-xs text-token-text-secondary">{dataText(process, "memory") || "—"}</span>
           </div>
         )) : <div className="px-3 py-2 text-sm text-token-description-foreground">No process snapshot was projected.</div>}
-      </OctopusSection>
+      </PhobosSection>
       <ContainerEvidenceList items={ports} keyField="port" title="Ports" valueField="service" />
       <ContainerEvidenceList items={mounts} keyField="target" title="Mounts" valueField="source" />
-    </OctopusSurfaceShell>
+    </PhobosSurfaceShell>
   );
 }
 
@@ -227,11 +227,11 @@ function ContainerEvidenceList({ items, keyField, title, valueField }: {
   valueField: string;
 }) {
   return (
-    <OctopusSection count={items.length} title={title}>
+    <PhobosSection count={items.length} title={title}>
       {items.length ? items.map((item, index) => (
-        <OctopusRow key={`${dataText(item, keyField)}:${index}`} label={dataText(item, keyField) || "—"} value={dataText(item, valueField) || "—"} />
+        <PhobosRow key={`${dataText(item, keyField)}:${index}`} label={dataText(item, keyField) || "—"} value={dataText(item, valueField) || "—"} />
       )) : <div className="px-3 py-2 text-sm text-token-description-foreground">None projected</div>}
-    </OctopusSection>
+    </PhobosSection>
   );
 }
 
@@ -249,44 +249,44 @@ export function RuntimeSurface({ surface }: { surface?: WorkerEnvironmentSurface
   const error = dataText(surface.data, "error");
   const detail = dataText(surface.data, "detail");
   return (
-    <OctopusSurfaceShell
+    <PhobosSurfaceShell
       glyph="pulse"
       status={surface.status}
       statusTone={normalizeStatus(surface.status) === "active" ? "active" : normalizeStatus(surface.status) === "error" ? "error" : "muted"}
       subtitle={surface.protocol || undefined}
       title={surface.label}
     >
-      {error ? <OctopusLogBlock label="Runtime error" tone="error">{error}</OctopusLogBlock> : null}
-      {detail ? <OctopusNoteLine>{detail}</OctopusNoteLine> : null}
+      {error ? <PhobosLogBlock label="Runtime error" tone="error">{error}</PhobosLogBlock> : null}
+      {detail ? <PhobosNoteLine>{detail}</PhobosNoteLine> : null}
       {server ? (
-        <OctopusSection title="Server">
+        <PhobosSection title="Server">
           {Object.entries(server).map(([key, value]) => (
-            <OctopusRow key={key} label={key.replace(/_/g, " ")} value={renderSurfaceData(value)} />
+            <PhobosRow key={key} label={key.replace(/_/g, " ")} value={renderSurfaceData(value)} />
           ))}
-        </OctopusSection>
+        </PhobosSection>
       ) : null}
       {activeCells.length || pendingCalls.length ? (
-        <OctopusSection count={`${activeCells.length} active`} title="Room activity">
+        <PhobosSection count={`${activeCells.length} active`} title="Room activity">
           {activeCells.length ? (
             <div className="flex min-w-0 flex-wrap gap-1.5 border-b border-token-border px-3 py-2 last:border-b-0">
               {activeCells.map((cell) => <code className="rounded-md border border-token-border px-1.5 py-0.5 font-mono text-xs text-token-text-secondary" key={cell}>{cell}</code>)}
             </div>
           ) : null}
           {pendingCalls.map((call, index) => (
-            <OctopusRow
+            <PhobosRow
               key={`${dataText(call, "id")}:${index}`}
               label={dataText(call, "tool") || dataText(call, "name") || `Pending call ${index + 1}`}
               value={dataText(call, "status") || "pending"}
             />
           ))}
-        </OctopusSection>
+        </PhobosSection>
       ) : null}
-      {eventLog ? <OctopusLogBlock label="Runtime event log">{eventLog}</OctopusLogBlock> : null}
-      {stderrLog ? <OctopusLogBlock label="Runtime standard error" tone="error">{stderrLog}</OctopusLogBlock> : null}
+      {eventLog ? <PhobosLogBlock label="Runtime event log">{eventLog}</PhobosLogBlock> : null}
+      {stderrLog ? <PhobosLogBlock label="Runtime standard error" tone="error">{stderrLog}</PhobosLogBlock> : null}
       {!server && !activeCells.length && !pendingCalls.length && !eventLog && !stderrLog && !error && !detail ? (
         <LiveSurfaceEmpty detail="The room is formed, but its current live-state carries no inspectable runtime payload." glyph="pulse" title="No runtime details" />
       ) : null}
-    </OctopusSurfaceShell>
+    </PhobosSurfaceShell>
   );
 }
 
@@ -294,7 +294,7 @@ export function CustomEnvironmentSurface({ surface }: { surface?: WorkerEnvironm
   if (!surface) return <LiveSurfaceEmpty detail="No surface descriptor was projected." glyph="plugins" title="Surface unavailable" />;
   const entries = Object.entries(surface.data);
   return (
-    <OctopusSurfaceShell
+    <PhobosSurfaceShell
       glyph="plugins"
       status={surface.status}
       statusTone={normalizeStatus(surface.status) === "active" ? "active" : normalizeStatus(surface.status) === "error" ? "error" : "muted"}
@@ -302,15 +302,15 @@ export function CustomEnvironmentSurface({ surface }: { surface?: WorkerEnvironm
       title={surface.label}
     >
       {entries.length ? (
-        <OctopusSection title="Projected data">
+        <PhobosSection title="Projected data">
           {entries.map(([key, value]) => (
-            <OctopusRow key={key} label={key.replace(/_/g, " ")} value={renderSurfaceData(value)} />
+            <PhobosRow key={key} label={key.replace(/_/g, " ")} value={renderSurfaceData(value)} />
           ))}
-        </OctopusSection>
+        </PhobosSection>
       ) : (
         <LiveSurfaceEmpty detail="This custom surface descriptor carries no native client data." glyph="plugins" title={surface.label} />
       )}
-    </OctopusSurfaceShell>
+    </PhobosSurfaceShell>
   );
 }
 

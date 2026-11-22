@@ -1,5 +1,5 @@
 export function parseClientActionRequest(value) {
-  if (value?.schema !== "octopus.client_action_request") {
+  if (value?.schema !== "phobos.client_action_request") {
     const action = parseClientAction(value);
     if (action.action !== "open_surface") throw new Error("Client controls require a correlated tool request.");
     return { action, toolCall: null };
@@ -19,8 +19,8 @@ export function parseClientActionRequest(value) {
 export function parseClientAction(value) {
   const object = value && typeof value === "object" && !Array.isArray(value);
   const text = value => typeof value === "string" && value.length > 0 && value.length <= 256 && value.trim() === value;
-  if (!object || value.schema !== "octopus.client_action" || value.schema_version !== 1) {
-    throw new Error("Client action requires exact octopus.client_action v1 data.");
+  if (!object || value.schema !== "phobos.client_action" || value.schema_version !== 1) {
+    throw new Error("Client action requires exact phobos.client_action v1 data.");
   }
   if (value.action === "open_surface" && Object.keys(value).length === 4 && text(value.surface_id)) return value;
   if (value.action === "open_file" && Object.keys(value).length === 5 && text(value.request_id)

@@ -13,10 +13,10 @@ import time
 import urllib.parse
 
 import telegram_boundary as boundary
-from octopus_operation_catalog import RequestError
-from octopus_operation_catalog import answer
-from octopus_operation_catalog import load_catalog
-from octopus_operation_catalog import parse_request
+from phobos_operation_catalog import RequestError
+from phobos_operation_catalog import answer
+from phobos_operation_catalog import load_catalog
+from phobos_operation_catalog import parse_request
 from telegram_contract import FILE_KINDS
 from telegram_contract import TOKEN_RE
 from telegram_contract import access_from_environment
@@ -711,7 +711,7 @@ class Life:
             self.reply(catalog, key, answer(catalog["result_label"], spec["id"], correlation_id, result=result, error=error))
 
         if boundary.load_request(key) is not None:
-            respond(error={"code": "indeterminate_external_effect", "message": "Octopus stopped while Telegram was carrying out this request, so it may or may not have taken effect. It was not repeated; check the chat before trying again."})
+            respond(error={"code": "indeterminate_external_effect", "message": "Phobos stopped while Telegram was carrying out this request, so it may or may not have taken effect. It was not repeated; check the chat before trying again."})
             return
         handler = spec["handler_config"]
         read_only = handler.get("read_only") is True
@@ -767,7 +767,7 @@ class Life:
         info = self.api.call("getWebhookInfo", retry_safe=True)
         if isinstance(info, dict) and info.get("url"):
             self.api.call("deleteWebhook", {"drop_pending_updates": False})
-            boundary.stderr("Telegram bot delivered its updates to a webhook; Octopus removed the webhook to receive them by long polling", key="webhook")
+            boundary.stderr("Telegram bot delivered its updates to a webhook; Phobos removed the webhook to receive them by long polling", key="webhook")
 
     def intake_loop(self):
         intake = self.config["intake"]

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { OcButton, OcMenuItem, cx } from "../../design-system/components";
 import { OcDropdown } from "../../design-system/OcDropdown";
 import { Glyph } from "../IconGlyphs";
-import { OctopusSpinner } from "../navigation/OctopusSpinner";
+import { PhobosSpinner } from "../navigation/PhobosSpinner";
 import type { ApplicationConnectMode } from "./ApplicationConnectDialog";
 import type { ApplicationConnectionSummary } from "./applicationModel";
 
@@ -27,12 +27,12 @@ export function ApplicationConnectionControl({
 }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const unavailableTitle = connectAvailable ? undefined : "Connect applications from the Octopus desktop client.";
+  const unavailableTitle = connectAvailable ? undefined : "Connect applications from the Phobos desktop client.";
   if (summary.status === "none") return null;
   if (summary.status === "checking") {
     return (
       <OcButton aria-label={`Checking ${name} connection`} className="shrink-0 justify-center" disabled size="sm" variant="outline">
-        <OctopusSpinner className="icon-xxs" />
+        <PhobosSpinner className="icon-xxs" />
       </OcButton>
     );
   }
@@ -79,7 +79,7 @@ export function ApplicationConnectionControl({
         variant="outline"
       >
         <span className="flex items-center gap-1.5">
-          {disconnecting ? <OctopusSpinner className="icon-xxs" /> : (
+          {disconnecting ? <PhobosSpinner className="icon-xxs" /> : (
             <span aria-hidden="true" className={cx(
               "size-1.5 shrink-0 rounded-full",
               summary.status === "connected" ? "bg-token-charts-green" : summary.status === "expired" ? "bg-token-charts-orange" : "bg-token-charts-red",

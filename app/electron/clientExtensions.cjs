@@ -220,7 +220,7 @@ function createClientExtensionStore(options) {
       }
       if (existingResult.error) throw new Error(existingResult.error);
       const requestedReceipt = {
-        schema: "octopus.client_extension_lifecycle_receipt",
+        schema: "phobos.client_extension_lifecycle_receipt",
         schema_version: 1,
         extension_id: normalized.id,
         operation_id: normalized.operationId,
@@ -321,7 +321,7 @@ function createClientExtensionStore(options) {
   async function writeBootstrapReceipt(id, operationId, desiredState, revision) {
     const requestDigest = lifecycleRequestDigest(id, desiredState, revision);
     const receipt = {
-      schema: "octopus.client_extension_lifecycle_receipt",
+      schema: "phobos.client_extension_lifecycle_receipt",
       schema_version: 1,
       extension_id: id,
       operation_id: operationId,
@@ -625,7 +625,7 @@ function createClientExtensionStore(options) {
         await syncDirectory(credentialsRoot);
       } else {
         await writeJsonAtomic(file, {
-          schema: "octopus.client_extension_credentials",
+          schema: "phobos.client_extension_credentials",
           schema_version: 1,
           extension_id: id,
           sources,
@@ -878,7 +878,7 @@ function normalizeLifecycleReceipt(value) {
   if (Object.keys(value).length !== expected.length || expected.some((key) => !Object.prototype.hasOwnProperty.call(value, key))) {
     throw new Error("receipt fields do not match the lifecycle contract");
   }
-  if (value.schema !== "octopus.client_extension_lifecycle_receipt" || value.schema_version !== 1) {
+  if (value.schema !== "phobos.client_extension_lifecycle_receipt" || value.schema_version !== 1) {
     throw new Error("receipt has an unsupported schema");
   }
   if (value.desired_state !== "installed" && value.desired_state !== "available") {
@@ -905,7 +905,7 @@ function normalizeLifecycleReceipt(value) {
 function normalizeBuiltinCatalog(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("built-in client extension catalog must be an object");
   if (
-    value.schema !== "octopus.builtin_client_extension_catalog"
+    value.schema !== "phobos.builtin_client_extension_catalog"
     || value.schema_version !== 1
     || !Array.isArray(value.extensions)
     || Object.keys(value).some((key) => !["schema", "schema_version", "extensions"].includes(key))
@@ -1008,7 +1008,7 @@ function snapshotFingerprint(data) {
 function normalizeCredentialFile(value, id) {
   if (
     !value || typeof value !== "object" || Array.isArray(value)
-    || value.schema !== "octopus.client_extension_credentials"
+    || value.schema !== "phobos.client_extension_credentials"
     || value.schema_version !== 1
     || value.extension_id !== id
     || !value.sources || typeof value.sources !== "object" || Array.isArray(value.sources)

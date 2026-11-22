@@ -8,14 +8,14 @@ import sys
 import time
 import uuid
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-INTERFACE_DIR = os.environ["OCTOPUS_INTERFACE_DIR"]
-VAR_DIR = os.environ["OCTOPUS_VAR_DIR"]
-MOVEMENTS_JSONL = os.environ["OCTOPUS_MOVEMENTS_JSONL"]
-BLOBS_DIR = os.environ["OCTOPUS_BLOBS_DIR"]
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+INTERFACE_DIR = os.environ["PHOBOS_INTERFACE_DIR"]
+VAR_DIR = os.environ["PHOBOS_VAR_DIR"]
+MOVEMENTS_JSONL = os.environ["PHOBOS_MOVEMENTS_JSONL"]
+BLOBS_DIR = os.environ["PHOBOS_BLOBS_DIR"]
 
 
 def fail(message):
@@ -93,7 +93,7 @@ def finite_number(value, name, minimum=None, maximum=None):
 
 
 def load_contract():
-    descriptor = json.loads(os.environ["OCTOPUS_INTERFACE_DESCRIPTOR_JSON"])
+    descriptor = json.loads(os.environ["PHOBOS_INTERFACE_DESCRIPTOR_JSON"])
     exact_object(
         descriptor,
         {"id", "interface_type", "role", "direction", "source_names", "interface_driver_ref", "interface_driver_config"},
@@ -402,7 +402,7 @@ def cached_artifact(content_hash):
         fail("outbound artifact has no valid content hash")
     manifest_path = os.path.join(BLOBS_DIR, content_hash)
     manifest_bytes = stable_read(manifest_path, CONTRACT["max_wire_bytes"], "cached artifact manifest")
-    if octopus_content_hash(manifest_bytes) != content_hash:
+    if phobos_content_hash(manifest_bytes) != content_hash:
         fail("cached artifact manifest hash mismatch")
     manifest = json.loads(manifest_bytes)
     exact_object(manifest, {"label", "payload_path"}, {"payload_content_hash"})
@@ -412,7 +412,7 @@ def cached_artifact(content_hash):
         fail("cached artifact manifest has no valid payload_content_hash")
     payload_path = os.path.join(BLOBS_DIR, payload_hash)
     payload = stable_read(payload_path, CONTRACT["max_wire_bytes"], "cached artifact payload")
-    if octopus_content_hash(payload) != payload_hash:
+    if phobos_content_hash(payload) != payload_hash:
         fail("cached artifact payload hash mismatch")
     return label, payload
 
@@ -421,7 +421,7 @@ def artifact_file(label, payload, stem):
     payload_bytes = canonical_json(payload)
     if len(payload_bytes) > CONTRACT["max_wire_bytes"]:
         fail("artifact payload exceeds max_wire_bytes")
-    digest = octopus_content_hash(payload_bytes)
+    digest = phobos_content_hash(payload_bytes)
     safe_stem = "".join(character if character.isalnum() or character in "-_" else "-" for character in stem)[:96]
     payload_path = os.path.join(VAR_DIR, f"{safe_stem}-{digest}.payload.json")
     if os.path.exists(payload_path):
@@ -431,7 +431,7 @@ def artifact_file(label, payload, stem):
         atomic_bytes(payload_path, payload_bytes)
     manifest = {"label": label, "payload_path": payload_path, "payload_content_hash": digest}
     manifest_bytes = canonical_json(manifest)
-    manifest_digest = octopus_content_hash(manifest_bytes)
+    manifest_digest = phobos_content_hash(manifest_bytes)
     manifest_path = os.path.join(VAR_DIR, f"{safe_stem}-{manifest_digest}.artifact.json")
     if os.path.exists(manifest_path):
         if pathlib_bytes(manifest_path) != manifest_bytes:
@@ -468,7 +468,7 @@ class BridgeLife:
 
     def open_server(self):
         if len(SOCKET_PATH.encode("utf-8")) >= 104:
-            fail("bridge socket path exceeds the macOS AF_UNIX limit; use a shorter OCTOPUS_HOME")
+            fail("bridge socket path exceeds the macOS AF_UNIX limit; use a shorter PHOBOS_HOME")
         try:
             metadata = os.lstat(SOCKET_PATH)
         except FileNotFoundError:

@@ -2,7 +2,7 @@
   "id": "mcp.call_tool",
   "interface": "system_mcp",
   "process": {
-    "bin": "target/debug/octopus-mcp-stdio-room-tool",
+    "bin": "target/debug/phobos-mcp-stdio-room-tool",
     "coordinate_root_slots": ["interface_life_install_root"],
     "inherit_env": [
       "PATH"

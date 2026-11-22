@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "world_operator_chat",
   "version": "1.11.0",
@@ -7,9 +7,9 @@
   "product_id": "world_operator_chat",
   "release_status": "optional",
   "display": {
-    "name": "Octopus Home",
-    "description": "Creates the exact Home and task interfaces through which you work with Octopus.",
-    "developer": "Octopus",
+    "name": "Phobos Home",
+    "description": "Creates the exact Home and task interfaces through which you work with Phobos.",
+    "developer": "Phobos",
     "category": "connector",
     "icon": "house"
   },

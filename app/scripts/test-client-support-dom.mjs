@@ -6,7 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const output = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-support-dom-"));
+const output = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-support-dom-"));
 const dom = new JSDOM('<div id="root"></div>', { url: "https://client.test" });
 const w = dom.window;
 const channels = [];
@@ -23,10 +23,10 @@ try {
   const report = { report_id: "visible", captured_at: new Date().toISOString(), access: "live", application: { version: "1.0.0", revision: null } };
   let copied, failDetails = false, cancelChoice = false;
   let source = { kind: "current", name: "Current Home" };
-  w.octopusSupport = {
+  w.phobosSupport = {
     collect: async (details, choice) => {
       if (choice === "choose" && cancelChoice) return null;
-      if (choice) source = choice === "choose" ? { kind: "saved", name: ".octopus-preserved" } : { kind: "current", name: "Current Home" };
+      if (choice) source = choice === "choose" ? { kind: "saved", name: ".phobos-preserved" } : { kind: "current", name: "Current Home" };
       if (details && failDetails) throw new Error("Collection failed");
       return { report: { ...report, disclosure: details ? "detailed" : "metadata" }, source };
     },
@@ -48,9 +48,9 @@ try {
   assert.equal(button("Copy report").disabled, false);
   cancelChoice = false;
   await click(button("Choose saved Home…"));
-  assert.match(document.body.textContent, /Saved Home: .octopus-preserved/);
+  assert.match(document.body.textContent, /Saved Home: .phobos-preserved/);
   await click(button("Refresh"));
-  assert.match(document.body.textContent, /Saved Home: .octopus-preserved/);
+  assert.match(document.body.textContent, /Saved Home: .phobos-preserved/);
   await click(button("Use current Home"));
   assert.doesNotMatch(document.body.textContent, /Saved Home:/);
   failDetails = true;

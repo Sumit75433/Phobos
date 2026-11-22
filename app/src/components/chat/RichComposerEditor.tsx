@@ -119,14 +119,14 @@ export const RichComposerEditor = forwardRef<RichComposerEditorHandle, Props>(fu
         }
       },
     });
-    view.dom.dataset.octopusComposer = "true";
+    view.dom.dataset.phobosComposer = "true";
     view.dom.dataset.virtualkeyboard = "true";
     view.dom.setAttribute("aria-label", placeholderRef.current);
     view.dom.setAttribute("role", "textbox");
     view.dom.setAttribute("aria-multiline", "true");
     view.dom.spellcheck = spellCheck;
     view.dom.translate = false;
-    view.dom.style.fontSize = "var(--octopus-chat-font-size)";
+    view.dom.style.fontSize = "var(--phobos-chat-font-size)";
     view.dom.style.height = "auto";
     view.dom.style.minHeight = "2.5rem";
     view.dom.style.resize = "none";

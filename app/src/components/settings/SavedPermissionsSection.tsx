@@ -1,14 +1,14 @@
 import { OcLoadingRows } from "../../design-system/LoadingSkeleton";
 import { useEffect, useState } from "react";
 import { OcButton, OcCard, OcDialog, OcDialogFooter, OcDialogHeader, OcGroup, OcSettingsRow } from "../../design-system/components";
-import type { OctopusSavedApplicationPermissions, OctopusSavedBrowserPermissions } from "../../electron";
+import type { PhobosSavedApplicationPermissions, PhobosSavedBrowserPermissions } from "../../electron";
 import { useProjectionGeneration } from "../../projectionLive";
 import { settingsTargetProps } from "./settingsCatalog";
 
 export function SavedPermissionsSection() {
   const generation = useProjectionGeneration();
   const [revision, setRevision] = useState(0);
-  const [browser, setBrowser] = useState<OctopusSavedBrowserPermissions | null>(null);
+  const [browser, setBrowser] = useState<PhobosSavedBrowserPermissions | null>(null);
   const [browserError, setBrowserError] = useState("");
   const [browserLoading, setBrowserLoading] = useState(true);
   const [browserBusy, setBrowserBusy] = useState(false);
@@ -16,8 +16,8 @@ export function SavedPermissionsSection() {
     let cancelled = false;
     setBrowserLoading(true); setBrowserError("");
     const read = async () => {
-      if (!window.octopusTransport?.browserSavedPermissions) throw new Error("The native browser Settings connection is unavailable.");
-      return window.octopusTransport.browserSavedPermissions({ operation: "list" });
+      if (!window.phobosTransport?.browserSavedPermissions) throw new Error("The native browser Settings connection is unavailable.");
+      return window.phobosTransport.browserSavedPermissions({ operation: "list" });
     };
     void read().then(value => { if (!cancelled) setBrowser(value); })
       .catch(error => { if (!cancelled) { setBrowser(null); setBrowserError(String(error.message ?? error)); } })
@@ -29,8 +29,8 @@ export function SavedPermissionsSection() {
     if (!browser || browserBusy) return;
     setBrowserBusy(true); setBrowserError("");
     try {
-      if (!window.octopusTransport?.browserSavedPermissions) throw new Error("The native browser Settings connection is unavailable.");
-      setBrowser(await window.octopusTransport.browserSavedPermissions({ operation: "remove", home: browser.home, hostGeneration: browser.hostGeneration, id }));
+      if (!window.phobosTransport?.browserSavedPermissions) throw new Error("The native browser Settings connection is unavailable.");
+      setBrowser(await window.phobosTransport.browserSavedPermissions({ operation: "remove", home: browser.home, hostGeneration: browser.hostGeneration, id }));
     } catch (error) { setBrowserError(error instanceof Error ? error.message : String(error)); }
     finally { setBrowserBusy(false); }
   }
@@ -52,7 +52,7 @@ export function SavedPermissionsSection() {
 export function SavedApplicationPermissionsSection() {
   const generation = useProjectionGeneration();
   const [revision, setRevision] = useState(0);
-  const [applications, setApplications] = useState<OctopusSavedApplicationPermissions | null>(null);
+  const [applications, setApplications] = useState<PhobosSavedApplicationPermissions | null>(null);
   const [applicationError, setApplicationError] = useState("");
   const [applicationLoading, setApplicationLoading] = useState(true);
   const [applicationBusy, setApplicationBusy] = useState(false);
@@ -62,8 +62,8 @@ export function SavedApplicationPermissionsSection() {
     const read = async () => {
       setApplicationLoading(true);
       try {
-        if (!window.octopusTransport?.desktopSavedApplicationPermissions) throw new Error("The Computer Use Settings connection is unavailable.");
-        const result = await window.octopusTransport.desktopSavedApplicationPermissions({ operation: "list" });
+        if (!window.phobosTransport?.desktopSavedApplicationPermissions) throw new Error("The Computer Use Settings connection is unavailable.");
+        const result = await window.phobosTransport.desktopSavedApplicationPermissions({ operation: "list" });
         if (!cancelled) { setApplications(result); setApplicationError(""); }
       } catch (error) { if (!cancelled) { setApplications(null); setApplicationError(error instanceof Error ? error.message : String(error)); } }
       finally { if (!cancelled) setApplicationLoading(false); }
@@ -76,8 +76,8 @@ export function SavedApplicationPermissionsSection() {
     if (!applications || !removing || applicationBusy) return;
     setApplicationBusy(true); setApplicationError("");
     try {
-      if (!window.octopusTransport?.desktopSavedApplicationPermissions) throw new Error("The Computer Use Settings connection is unavailable.");
-      setApplications(await window.octopusTransport.desktopSavedApplicationPermissions({ sourceId: applications.sourceId, operation: "remove", bundleId: removing.bundle_id }));
+      if (!window.phobosTransport?.desktopSavedApplicationPermissions) throw new Error("The Computer Use Settings connection is unavailable.");
+      setApplications(await window.phobosTransport.desktopSavedApplicationPermissions({ sourceId: applications.sourceId, operation: "remove", bundleId: removing.bundle_id }));
       setRemoving(null); setRevision(value => value + 1);
     } catch (error) { setApplicationError(error instanceof Error ? error.message : String(error)); }
     finally { setApplicationBusy(false); }
@@ -95,7 +95,7 @@ export function SavedApplicationPermissionsSection() {
     </OcGroup>
     <OcDialog open={removing !== null} onClose={() => { if (!applicationBusy) setRemoving(null); }} size="compact" busy={applicationBusy}>
       <OcDialogHeader title={`Remove “${removing?.display_name ?? ""}” from always-allowed apps?`}
-        description={`Octopus will ask to use “${removing?.display_name ?? ""}” in the next computer use task.`} />
+        description={`Phobos will ask to use “${removing?.display_name ?? ""}” in the next computer use task.`} />
       <OcDialogFooter>
         <OcButton disabled={applicationBusy} onClick={() => setRemoving(null)} variant="ghost">Cancel</OcButton>
         <OcButton disabled={applicationBusy} onClick={() => void removeApplication()} tone="danger" variant="primary">Remove</OcButton>

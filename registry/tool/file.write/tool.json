@@ -2,7 +2,7 @@
   "id": "file.write",
   "interface": "system_room",
   "process": {
-    "bin": "target/debug/octopus-file-write-tool",
+    "bin": "target/debug/phobos-file-write-tool",
     "interrupted_effect_recovery": "reinvoke_exact_artifact",
     "authority": {
       "read_root_slots": [],

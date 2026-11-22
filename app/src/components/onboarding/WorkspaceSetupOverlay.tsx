@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { providerServiceTiers, providerServiceTierAvailable } from "../chat/chatWorkspaceCapabilities";
-import type { OctopusProviderInterface } from "../../electron";
+import type { PhobosProviderInterface } from "../../electron";
 import {
   compileWorkspaceSetupDraft,
   createWorkspaceSetupDraft,
@@ -15,7 +15,7 @@ import {
 } from "../../onboarding/workspaceSetup";
 import { OcCheckbox } from "../../design-system/components";
 import { Glyph, type GlyphName } from "../IconGlyphs";
-import { OctopusLoadingLogo } from "../OctopusLoadingLogo";
+import { PhobosLoadingLogo } from "../PhobosLoadingLogo";
 import {
   draftFromSetupFile,
   parseSetupFile,
@@ -55,7 +55,7 @@ export type WorkspaceSetupApplyState = {
 };
 
 type Props = {
-  provider: OctopusProviderInterface | null;
+  provider: PhobosProviderInterface | null;
   agentPresets: WorkspaceSetupAgentPreset[];
   draft: WorkspaceSetupDraft;
   catalog: WorkspaceSetupCatalogCapability[];
@@ -75,10 +75,10 @@ export type WorkspaceSetupFiles = {
 };
 
 const STEPS: Array<{ id: Exclude<WorkspaceSetupStep, "applying">; tag: string; title: string; body: string }> = [
-  { id: "space", tag: "Your space", title: "How will you use Octopus?", body: "This only prepares a starting structure. You can change every project later." },
+  { id: "space", tag: "Your space", title: "How will you use Phobos?", body: "This only prepares a starting structure. You can change every project later." },
   { id: "projects", tag: "Projects", title: "Name the areas you care about", body: "Projects keep related tasks together. Nest one only when it really belongs inside another." },
-  { id: "capabilities", tag: "Capabilities", title: "Choose what Octopus can use", body: "Included components form the working experience. Recommended additions stay optional." },
-  { id: "review", tag: "Review", title: "Ready to set up", body: "Octopus installs the selected components, creates Home and these projects, then verifies the result." },
+  { id: "capabilities", tag: "Capabilities", title: "Choose what Phobos can use", body: "Included components form the working experience. Recommended additions stay optional." },
+  { id: "review", tag: "Review", title: "Ready to set up", body: "Phobos installs the selected components, creates Home and these projects, then verifies the result." },
 ];
 
 const PRESETS: Array<{
@@ -258,7 +258,7 @@ export function WorkspaceSetupOverlay({
         <div className="welcome-footer-side welcome-footer-right">
           {!applying ? (
             <button className="welcome-next" type="button" disabled={!canContinue} onClick={continueForward}>
-              {activeStep === "review" ? "Set up Octopus" : "Continue"}
+              {activeStep === "review" ? "Set up Phobos" : "Continue"}
             </button>
           ) : applyState.state === "awaiting_sign_in" ? (
             <button className="welcome-next" type="button" onClick={() => void onSignIn()}>Sign in with ChatGPT</button>
@@ -305,7 +305,7 @@ function SetupFileAction({
 
 function setupFileMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
-  return message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, "") || "Octopus could not read or write the setup file.";
+  return message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, "") || "Phobos could not read or write the setup file.";
 }
 
 function SpaceStep({ draft, onChange }: { draft: WorkspaceSetupDraft; onChange: (draft: WorkspaceSetupDraft) => void }) {
@@ -417,7 +417,7 @@ function CapabilitiesStep({
   loading: boolean;
   onChange: (draft: WorkspaceSetupDraft) => void;
   onRetry: () => void;
-  provider: OctopusProviderInterface | null;
+  provider: PhobosProviderInterface | null;
 }) {
   if (loading) return <p className="setup-note">Loading available capabilities…</p>;
   if (!catalog.length) {
@@ -605,8 +605,8 @@ export function WorkspaceSetupProgress({ applyState }: { applyState: WorkspaceSe
 function SetupHeader() {
   return <header className="welcome-top">
     <div className="welcome-brand">
-      <img className="welcome-brand-mark" src="./octopus-logo.png" alt="" />
-      <span className="welcome-brand-name">Octopus&nbsp;OS</span>
+      <img className="welcome-brand-mark" src="./phobos-logo.png" alt="" />
+      <span className="welcome-brand-name">Phobos&nbsp;OS</span>
     </div>
   </header>;
 }
@@ -625,7 +625,7 @@ function ApplyingStep({ applyState }: { applyState: WorkspaceSetupApplyState }) 
   return (
     <section className="welcome-centered">
       {running ? (
-        <span className="setup-loading-logo"><OctopusLoadingLogo /></span>
+        <span className="setup-loading-logo"><PhobosLoadingLogo /></span>
       ) : (
         <span className="welcome-tag">{failed ? "Needs attention" : "Account"}</span>
       )}
@@ -633,7 +633,7 @@ function ApplyingStep({ applyState }: { applyState: WorkspaceSetupApplyState }) 
         {failed ? "Setup needs attention" : applyState.label || "Preparing your space"}
       </h1>
       <p className="welcome-body" data-tone={failed ? "danger" : undefined}>
-        {failed ? applyState.error : applyState.detail || "Your choices are being verified and applied. You can safely reopen Octopus if this window closes."}
+        {failed ? applyState.error : applyState.detail || "Your choices are being verified and applied. You can safely reopen Phobos if this window closes."}
       </p>
       {running ? (
         <div aria-label={applyState.label || "Applying setup"} className="setup-progress" role="status">

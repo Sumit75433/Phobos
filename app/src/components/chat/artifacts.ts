@@ -12,7 +12,7 @@ export async function fileToBridgeAttachment(attachment: ChatAttachment) {
       stage: attachment.stage,
     };
   }
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!attachment.file) throw new Error(`Attachment '${attachment.name}' has no staged file handle.`);
   if (!transport?.beginClientAttachmentStage || !transport.appendClientAttachmentStage || !transport.finalizeClientAttachmentStage || !transport.abortClientAttachmentStage) {
     throw new Error("Attachment staging is unavailable in this client host.");

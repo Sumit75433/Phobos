@@ -28,8 +28,8 @@ async function withOperatorRunAuthoringLock(runId, operation) {
   return withRunAuthoringLock(safeSegment(runId, "runId"), operation);
 }
 
-async function withOperatorWorkspaceTopologyLock(octopusHome, operation) {
-  const key = absolutePath(octopusHome, "octopusHome");
+async function withOperatorWorkspaceTopologyLock(phobosHome, operation) {
+  const key = absolutePath(phobosHome, "phobosHome");
   const previous = workspaceTopologyAuthoringLocks.get(key) ?? Promise.resolve();
   let release;
   const current = new Promise((resolve) => { release = resolve; });
@@ -99,16 +99,16 @@ async function syncDirectory(directory) {
   }
 }
 
-async function waitForInterfaceSocket(octopusHome, interfaceId, timeoutMs, previousSocket = null) {
-  const socketPath = interfaceSocketPath(octopusHome, interfaceId);
+async function waitForInterfaceSocket(phobosHome, interfaceId, timeoutMs, previousSocket = null) {
+  const socketPath = interfaceSocketPath(phobosHome, interfaceId);
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (previousSocket === null) {
       if (await socketAcceptsConnections(socketPath)) return;
     } else {
-      const current = await interfaceSocketIdentity(octopusHome, interfaceId);
+      const current = await interfaceSocketIdentity(phobosHome, interfaceId);
       if (current !== null && current !== previousSocket && await socketAcceptsConnections(socketPath)
-        && await interfaceSocketIdentity(octopusHome, interfaceId) === current) return;
+        && await interfaceSocketIdentity(phobosHome, interfaceId) === current) return;
     }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }

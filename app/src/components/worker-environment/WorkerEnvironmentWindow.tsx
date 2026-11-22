@@ -3,9 +3,9 @@ import "../icon-glyphs/worker";
 import { useClientSurfaces } from "../../shell/surfaceRegistry";
 import { useRuntimeTopology } from "../../runtimeTopology";
 import type {
-  OctopusClientAccessProfile,
-  OctopusWorkerEnvironmentPanelKind,
-  OctopusWorkerEnvironmentWindowTarget,
+  PhobosClientAccessProfile,
+  PhobosWorkerEnvironmentPanelKind,
+  PhobosWorkerEnvironmentWindowTarget,
 } from "../../electron";
 import type { RunProjection, WorkerEnvironmentProjection } from "../../data/topology";
 import { appToast } from "../../toasts";
@@ -13,7 +13,7 @@ import { Glyph } from "../IconGlyphs";
 import { RunEnvironmentView } from "./RunEnvironmentView";
 import { workerEnvironmentPanelKind, workerEnvironmentSurfaceIsLaunchable } from "./surfaceRegistry";
 
-const PANEL_KINDS = new Set<OctopusWorkerEnvironmentPanelKind>([
+const PANEL_KINDS = new Set<PhobosWorkerEnvironmentPanelKind>([
   "browser",
   "connection",
   "container",
@@ -31,8 +31,8 @@ type ResolvedEnvironment = {
   workerEnvironment: WorkerEnvironmentProjection;
 };
 
-export function WorkerEnvironmentWindow({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
-  const [target, setTarget] = useState<OctopusWorkerEnvironmentWindowTarget>(readInitialTarget);
+export function WorkerEnvironmentWindow({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
+  const [target, setTarget] = useState<PhobosWorkerEnvironmentWindowTarget>(readInitialTarget);
   const [pinned, setPinned] = useState(false);
   const topology = useRuntimeTopology(true, target.runId ? [target.runId] : []);
   const surfaceRegistry = useClientSurfaces(accessProfile);
@@ -41,23 +41,23 @@ export function WorkerEnvironmentWindow({ accessProfile }: { accessProfile: Octo
     [target, topology.environments],
   );
 
-  useEffect(() => window.octopusTransport?.onWorkerEnvironmentWindowTarget?.((next) => {
+  useEffect(() => window.phobosTransport?.onWorkerEnvironmentWindowTarget?.((next) => {
     const parsed = parseTarget(next);
     if (parsed) setTarget(parsed);
   }), []);
 
   useEffect(() => {
-    document.title = `${resolved?.workerEnvironment.label || "Worker Environment"} — Octopus`;
+    document.title = `${resolved?.workerEnvironment.label || "Worker Environment"} — Phobos`;
   }, [resolved?.workerEnvironment.label]);
 
   const openInMain = () => {
-    void window.octopusTransport?.openWorkerEnvironmentInMain?.(target).catch((error) => {
+    void window.phobosTransport?.openWorkerEnvironmentInMain?.(target).catch((error) => {
       appToast.danger(formatFailure(error));
     });
   };
 
   const togglePinned = () => {
-    void window.octopusTransport?.setWorkerEnvironmentWindowPinned?.(!pinned)
+    void window.phobosTransport?.setWorkerEnvironmentWindowPinned?.(!pinned)
       .then((outcome) => setPinned(outcome.pinned))
       .catch((error) => appToast.danger(formatFailure(error)));
   };
@@ -126,7 +126,7 @@ export function WorkerEnvironmentWindowAccessUnavailable() {
         <div className="worker-environment-window-title"><span>Worker Environment</span></div>
       </header>
       <section className="worker-environment-window-content">
-        <WorkerEnvironmentWindowUnavailable detail="Unlock the main application before opening a projected Worker Environment." title="Octopus is locked" />
+        <WorkerEnvironmentWindowUnavailable detail="Unlock the main application before opening a projected Worker Environment." title="Phobos is locked" />
       </section>
     </main>
   );
@@ -144,7 +144,7 @@ function WorkerEnvironmentWindowUnavailable({ detail, title }: { detail: string;
 
 function resolveWorkerEnvironment(
   environments: ReturnType<typeof useRuntimeTopology>["environments"],
-  target: OctopusWorkerEnvironmentWindowTarget,
+  target: PhobosWorkerEnvironmentWindowTarget,
 ): ResolvedEnvironment | null {
   for (const environment of environments) {
     for (const run of environment.runs) {
@@ -163,7 +163,7 @@ function resolveWorkerEnvironment(
   return null;
 }
 
-function readInitialTarget(): OctopusWorkerEnvironmentWindowTarget {
+function readInitialTarget(): PhobosWorkerEnvironmentWindowTarget {
   const params = new URLSearchParams(window.location.search);
   return parseTarget({
     runId: params.get("runId") || "",
@@ -179,12 +179,12 @@ function readInitialTarget(): OctopusWorkerEnvironmentWindowTarget {
   }) ?? { runId: "", workerEnvironmentId: "", panelKind: "overview" };
 }
 
-function parseTarget(value: unknown): OctopusWorkerEnvironmentWindowTarget | null {
+function parseTarget(value: unknown): PhobosWorkerEnvironmentWindowTarget | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>;
   const runId = boundedText(record.runId, 512);
   const workerEnvironmentId = boundedText(record.workerEnvironmentId, 512);
-  const panelKind = boundedText(record.panelKind, 32) as OctopusWorkerEnvironmentPanelKind;
+  const panelKind = boundedText(record.panelKind, 32) as PhobosWorkerEnvironmentPanelKind;
   if (!workerEnvironmentId || !PANEL_KINDS.has(panelKind)) return null;
   const surfaceId = boundedText(record.surfaceId, 512);
   const filePath = boundedText(record.filePath, 4_096);
@@ -210,7 +210,7 @@ function parseTarget(value: unknown): OctopusWorkerEnvironmentWindowTarget | nul
 function workerEnvironmentWindowTargetAvailable(
   environment: WorkerEnvironmentProjection,
   surfaces: ReturnType<typeof useClientSurfaces>["workerEnvironmentSurfaces"],
-  target: OctopusWorkerEnvironmentWindowTarget,
+  target: PhobosWorkerEnvironmentWindowTarget,
 ): boolean {
   if (target.clientSurface) {
     return surfaces.some((admitted) => {
@@ -250,7 +250,7 @@ function boundedText(value: unknown, limit: number): string {
 }
 
 function closeWindow() {
-  window.octopusTransport?.windowControl("close");
+  window.phobosTransport?.windowControl("close");
 }
 
 function formatFailure(value: unknown): string {

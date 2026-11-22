@@ -11,7 +11,7 @@ const { arrayValue, contentHashHex, ledgerArtifactId, ledgerArtifactLabel, numbe
 function operatorChatMessagesProjection(store) {
   async function operatorChatMessages(projection, runId) {
     const cached = projection.operatorChatMessagesCache.get(runId);
-    if (cached?.generation === store.projectionGeneration) return readAssistantTextEdits(store.octopusHome(), runId, await cached.promise);
+    if (cached?.generation === store.projectionGeneration) return readAssistantTextEdits(store.phobosHome(), runId, await cached.promise);
     const promise = buildOperatorChatMessages(projection, runId);
     projection.operatorChatMessagesCache.set(runId, { generation: store.projectionGeneration, promise });
     promise.catch(() => {
@@ -19,7 +19,7 @@ function operatorChatMessagesProjection(store) {
         projection.operatorChatMessagesCache.delete(runId);
       }
     });
-    return readAssistantTextEdits(store.octopusHome(), runId, await promise);
+    return readAssistantTextEdits(store.phobosHome(), runId, await promise);
   }
 
   async function buildOperatorChatMessages(projection, runId) {

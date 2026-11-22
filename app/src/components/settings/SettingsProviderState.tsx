@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { OcCard, OcSettingsRow, OcStatus } from "../../design-system/components";
-import type { OctopusProviderInterface } from "../../electron";
+import type { PhobosProviderInterface } from "../../electron";
 import { readProviderInterfaces } from "../../projectionClient";
 import { useProjectionGeneration } from "../../projectionLive";
 import { ProviderUsage } from "../ProviderUsage";
 
 export type ProviderState = {
-  providers: OctopusProviderInterface[];
+  providers: PhobosProviderInterface[];
   repoRoot: string;
   registryRoot: string;
   loading: boolean;
   error: string;
 };
 
-function SettingsProviderFacts({ provider }: { provider: OctopusProviderInterface }) {
+function SettingsProviderFacts({ provider }: { provider: PhobosProviderInterface }) {
   return (
     <dl className="settings-provider-facts">
       <div><dt>Model</dt><dd>{provider.model || "Not declared"}</dd></div>
@@ -24,7 +24,7 @@ function SettingsProviderFacts({ provider }: { provider: OctopusProviderInterfac
   );
 }
 
-export function ProviderSummary({ provider, compact = false }: { provider: OctopusProviderInterface; compact?: boolean }) {
+export function ProviderSummary({ provider, compact = false }: { provider: PhobosProviderInterface; compact?: boolean }) {
   return (
     <div className={`settings-provider-summary ${compact ? "is-compact" : ""}`}>
       <div className="settings-provider-title">
@@ -39,7 +39,7 @@ export function ProviderSummary({ provider, compact = false }: { provider: Octop
   );
 }
 
-export function ProviderCard({ provider }: { provider: OctopusProviderInterface }) {
+export function ProviderCard({ provider }: { provider: PhobosProviderInterface }) {
   return (
     <OcCard className="settings-provider-card">
       <ProviderSummary provider={provider} />

@@ -1,12 +1,12 @@
 const { randomUUID } = require("node:crypto");
 
-const CLIENT_WINDOW_SCHEMA = "octopus.client-window";
+const CLIENT_WINDOW_SCHEMA = "phobos.client-window";
 const CLIENT_WINDOW_SCHEMA_VERSION = 1;
 const CLIENT_WINDOW_READY_TIMEOUT_MS = 15_000;
 const CLIENT_PANE_TRANSFER_TIMEOUT_MS = 30_000;
-const CLIENT_PANE_TRANSFER_SCHEMA = "octopus.client-pane-transfer";
+const CLIENT_PANE_TRANSFER_SCHEMA = "phobos.client-pane-transfer";
 const CLIENT_PANE_TRANSFER_SCHEMA_VERSION = 1;
-const CLIENT_WORKSPACE_KEYS = new Set(["dashboard", "octopus-os"]);
+const CLIENT_WORKSPACE_KEYS = new Set(["dashboard", "phobos-os"]);
 const WORKER_ENVIRONMENT_PANEL_KINDS = new Set([
   "browser",
   "connection",
@@ -42,7 +42,7 @@ function createClientWindowRegistry(options = {}) {
     const webContentsId = windowWebContentsId(win);
     if (byWebContentsId.has(webContentsId)) throw new Error("Client window webContents is already registered.");
     const primary = value.primary === true;
-    if (primary && entries().some((entry) => entry.primary)) throw new Error("The primary Octopus client window already exists.");
+    if (primary && entries().some((entry) => entry.primary)) throw new Error("The primary Phobos client window already exists.");
     const accessToken = optionalOpaqueString(value.accessToken, "Client window access token", 1_024);
     const request = value.initialTarget === undefined
       ? {}

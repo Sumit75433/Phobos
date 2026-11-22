@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 
 export type GlyphName =
-  | "octopus"
+  | "phobos"
   | "home"
   | "homeFilled"
   | "tasks"
@@ -161,7 +161,7 @@ const glyphPackByName: Record<GlyphName, GlyphPackName> = {
   applicationsRailFilled: "navigation",
   driversRail: "navigation",
   driversRailFilled: "navigation",
-  octopus: "shell",
+  phobos: "shell",
   home: "shell",
   dashboard: "shell",
   registry: "shell",

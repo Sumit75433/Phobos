@@ -1,7 +1,7 @@
 import { useMotionValue } from "motion/react";
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import type { TopologySnapshot } from "../../data/topology";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { AdmittedClientSurfaceDocument } from "../../client-surfaces/types";
 import { appToast } from "../../toasts";
 import { isControllableNativeBrowserSurface, paneTargetTitle, resolvePaneSurface, resolveWorkerEnvironment, type WorkerEnvironmentPaneTarget } from "../worker-environment/workerEnvironmentPane";
@@ -17,7 +17,7 @@ export type TaskBrowserTabs = PaneTabState<TaskBrowserTab> & { open: boolean };
 export const emptyTaskBrowserTabs: TaskBrowserTabs = { activeTabId: "", tabs: [], open: false };
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   active: boolean;
   children: ReactNode;
   onChange: (update: (current: TaskBrowserTabs) => TaskBrowserTabs) => void;
@@ -44,8 +44,8 @@ export function TaskBrowserPane({ accessProfile, active, children, onChange, sna
         const room = resolveWorkerEnvironment(snapshot, tab.target.workerEnvironmentId);
         const surface = room && resolvePaneSurface(room.workerEnvironment, tab.target);
         if (isControllableNativeBrowserSurface(surface)) {
-          if (!window.octopusTransport?.closeNativeBrowserPage) throw new Error("The native browser is not connected.");
-          await window.octopusTransport.closeNativeBrowserPage({ home: snapshot.projection.endpoint, workerEnvironmentId: tab.target.workerEnvironmentId, surfaceId: surface.id });
+          if (!window.phobosTransport?.closeNativeBrowserPage) throw new Error("The native browser is not connected.");
+          await window.phobosTransport.closeNativeBrowserPage({ home: snapshot.projection.endpoint, workerEnvironmentId: tab.target.workerEnvironmentId, surfaceId: surface.id });
         }
         onChange((current) => ({ ...current, ...closePaneTab(current, id, false) }));
       }

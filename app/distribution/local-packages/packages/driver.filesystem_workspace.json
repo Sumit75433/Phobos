@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "driver.filesystem_workspace",
   "version": "1.0.4",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Filesystem Workspace",
     "description": "Your project folders: read and edit files, run commands and keep processes running.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "worker_environment",
     "icon": "folderOpen"
   },

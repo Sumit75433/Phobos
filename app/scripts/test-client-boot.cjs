@@ -54,7 +54,7 @@ export function LaunchTerminal(props) {
 }`,
   "./components/onboarding/WorkspaceSetupGate": passthrough("WorkspaceSetupGate"),
   "./components/shell/TrafficLights": nothing("TrafficLights"),
-  "./components/OctopusLoadingLogo": `import { createElement } from "react"; export function OctopusLoadingState({ label }) { return createElement("div", { className: "stub-loading" }, label); }`,
+  "./components/PhobosLoadingLogo": `import { createElement } from "react"; export function PhobosLoadingState({ label }) { return createElement("div", { className: "stub-loading" }, label); }`,
   "./onboarding/onboardingStorage": "const state = { completed: true, visitCount: 3 }; export const completeOnboarding = () => state; export const recordOnboardingVisit = () => state; export const resetOnboardingState = () => {};",
   "./clientAccess": "export const lockClientAccess = async () => ({}); export const readTouchIdStatus = async () => ({ available: false, enrolled: false, prompted: true }); export const setTouchIdEnabled = async () => ({}); export const unlockWithTouchId = async () => ({});",
   "./useClientAccess": `import { useState } from "react"; export function useClientAccess() { const [access, setAccess] = useState(globalThis.__boot.access); globalThis.__boot.setAccess = setAccess; return { access, accessError: null, setAccess }; }`,
@@ -67,8 +67,8 @@ export function LaunchTerminal(props) {
 const App = compile("src/App.tsx", appStubs, "App");
 const LaunchTerminal = compile("src/components/onboarding/LaunchTerminal.tsx", {
   "../../appearance": "export const useShouldReduceMotion = () => globalThis.__boot.reduceMotion;",
-  "../terminal/OctopusTerminal": "export function OctopusTerminal(props) { globalThis.__boot.terminals.push(props); return null; }",
-  "../OctopusLoadingLogo": nothing("OctopusLoadingLogo"),
+  "../terminal/PhobosTerminal": "export function PhobosTerminal(props) { globalThis.__boot.terminals.push(props); return null; }",
+  "../PhobosLoadingLogo": nothing("PhobosLoadingLogo"),
 }, "LaunchTerminal");
 const WorkspaceSetupGate = compile("src/components/onboarding/WorkspaceSetupGate.tsx", {
   "../chat/chatWorkspaceCapabilities": "export const providerServiceTierAvailable = () => false;",
@@ -90,7 +90,7 @@ export async function saveSetupFile() { return { saved: false }; }`,
   "../../onboarding/chatgptSignIn": "export const chatgptSignInCompleted = () => false;",
   "../../design-system/components": `import { createElement } from "react"; export function OcButton({ children, onClick }) { return createElement("button", { onClick, type: "button" }, children); }`,
   "../../toasts": "export const appToast = { danger(title, duration, options) { const toasts = globalThis.__boot.gate.toasts; let toast = toasts.find((item) => item.open && item.options.dedupeKey === options.dedupeKey); if (toast) Object.assign(toast, { title, options, count: toast.count + 1 }); else toasts.push(toast = { title, duration, options, open: true, count: 1 }); return { close() { toast.open = false; } }; } };",
-  "../OctopusLoadingLogo": `import { createElement } from "react"; export function OctopusLoadingLogo() { return null; } export function OctopusLoadingState({ label }) { return createElement("div", { className: "stub-loading" }, label); }`,
+  "../PhobosLoadingLogo": `import { createElement } from "react"; export function PhobosLoadingLogo() { return null; } export function PhobosLoadingState({ label }) { return createElement("div", { className: "stub-loading" }, label); }`,
   "./WorkspaceSetupOverlay": `${nothing("WorkspaceSetupOverlay", "WorkspaceSetupProgress")}\nexport const createDefaultWorkspaceSetupDraft = () => null;`,
 }, "WorkspaceSetupGate");
 const RuntimeTopologyProbe = compile("src/runtimeTopology.ts", {}, "useRuntimeTopology").then((useRuntimeTopology) => function Probe() {
@@ -111,7 +111,7 @@ function runtimeBridge(initial, extra = {}) {
     listenerCount: () => listeners.size,
     ...extra,
   };
-  window.octopusTransport = bridge;
+  window.phobosTransport = bridge;
   return bridge;
 }
 const runtime = (phase, ready = phase === "ready") => ({ phase, ready, ownership: "none", pid: null, error: null });
@@ -151,7 +151,7 @@ test("the launch terminal gates a stopped runtime before the password screen and
 test("an authenticated live window waits on the first probe, then shows the shell, and the launch scene crosses over into it", async () => {
   let resolveProbe;
   const bridge = await showApp(live, new Promise((resolve) => { resolveProbe = resolve; }));
-  assert.equal(document.querySelector(".stub-loading")?.textContent, "Opening Octopus");
+  assert.equal(document.querySelector(".stub-loading")?.textContent, "Opening Phobos");
   resolveProbe(runtime("unmanaged"));
   await settle();
   assert.ok(shown(".stub-launch"));
@@ -188,7 +188,7 @@ test("the launch scene shows the launch shell, greets first, and exits only afte
   const writes = [];
   const data = new Set();
   runtimeBridge(runtime("unmanaged"), {
-    openLaunchTerminal: async (dimensions) => { writes.push(["open", dimensions]); return { terminalId: "launch", sessionId: "s-1", running: true, transcript: "$ octopus up" }; },
+    openLaunchTerminal: async (dimensions) => { writes.push(["open", dimensions]); return { terminalId: "launch", sessionId: "s-1", running: true, transcript: "$ phobos up" }; },
     writeLaunchTerminal: async (...args) => { writes.push(["write", ...args]); return {}; },
     resizeLaunchTerminal: async (...args) => { writes.push(["resize", ...args]); return {}; },
     onTerminalData: (listener) => { data.add(listener); return () => data.delete(listener); },
@@ -217,7 +217,7 @@ test("the launch scene shows the launch shell, greets first, and exits only afte
   for (const listener of data) listener({ terminalId: "launch", sessionId: "s-1", data: "ready" });
   for (const listener of data) listener({ terminalId: "shell", sessionId: "s-9", data: "foreign" });
   assert.deepEqual(writes, [["open", { cols: 120, rows: 40 }], ["write", "s-1", "\r"], ["resize", "s-1", { cols: 100, rows: 30 }]]);
-  assert.deepEqual(output, ["$ octopus up", "ready"]);
+  assert.deepEqual(output, ["$ phobos up", "ready"]);
   await settle(750);
   assert.equal(document.querySelector(".launch-scene").dataset.phase, "terminal");
   await settle();
@@ -237,7 +237,7 @@ test("runtime host state updates the topology status in place without another pr
   const bridge = runtimeBridge(runtime("unmanaged"), {
     projectionRead: async (request) => {
       reads.push(request.method);
-      return { generation: 4, snapshotRaw: { projection: { octopus_home: "/fixture-home", ledger_rows: 3 } }, eeRaw: { ee_instances: [] }, runDetailsRaw: {} };
+      return { generation: 4, snapshotRaw: { projection: { phobos_home: "/fixture-home", ledger_rows: 3 } }, eeRaw: { ee_instances: [] }, runDetailsRaw: {} };
     },
     runtimeStatus: async () => ({ phase: "unmanaged", up: false }),
     onProjectionChanged: () => () => {},

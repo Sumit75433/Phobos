@@ -11,10 +11,10 @@ const repoRoot = path.resolve(appRoot, "..");
 
 function bundles(buildRoot = path.join(appRoot, "build")) {
   const at = (name) => path.join(buildRoot, name);
-  return { buildRoot, live: at("Octopus.app"), staging: at("Octopus.staging.app"), prev: at("Octopus.prev.app"), failed: at("Octopus.failed.app") };
+  return { buildRoot, live: at("Phobos.app"), staging: at("Phobos.staging.app"), prev: at("Phobos.prev.app"), failed: at("Phobos.failed.app") };
 }
 const installation = (bundle) => path.join(bundle, "Contents", "Resources", "app");
-const runtimeBinary = (bundle) => path.join(installation(bundle), "bin", "octopus");
+const runtimeBinary = (bundle) => path.join(installation(bundle), "bin", "phobos");
 
 function buildInfo(bundle) {
   try { return JSON.parse(fs.readFileSync(path.join(installation(bundle), "build-info.json"), "utf8")); } catch { return null; }
@@ -22,7 +22,7 @@ function buildInfo(bundle) {
 
 function requireBundle(bundle) {
   if (!fs.statSync(bundle, { throwIfNoEntry: false })?.isDirectory() || !buildInfo(bundle)) {
-    throw new Error(`${bundle} is not a packaged Octopus bundle`);
+    throw new Error(`${bundle} is not a packaged Phobos bundle`);
   }
   return bundle;
 }
@@ -91,12 +91,12 @@ function runtimeEnv(bundle, home) {
     HOME: os.homedir(), USER: user, LOGNAME: user, TMPDIR: os.tmpdir(),
     CODEX_HOME: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
     PATH: [path.join(root, "bin"), "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"].join(":"),
-    OCTOPUS_HOME: home, OCTOPUS_INSTALLATION_ROOT: root,
-    OCTOPUS_SOURCE_REGISTRY: path.join(root, "registry"), OCTOPUS_RUNTIME_BIN: runtimeBinary(bundle),
+    PHOBOS_HOME: home, PHOBOS_INSTALLATION_ROOT: root,
+    PHOBOS_SOURCE_REGISTRY: path.join(root, "registry"), PHOBOS_RUNTIME_BIN: runtimeBinary(bundle),
   };
 }
 
-function octopus(bundle, home, args, options = {}) {
+function phobos(bundle, home, args, options = {}) {
   return spawnSync(runtimeBinary(bundle), args, { env: runtimeEnv(bundle, home), encoding: "utf8", maxBuffer: 64 * 1024 * 1024, ...options });
 }
 
@@ -109,8 +109,8 @@ async function readClientTurns(bundle, home) {
     sourceRegistry: () => path.join(root, "registry"),
     localPackageRegistry: () => path.join(root, "local-packages", "registry"),
     localPackageLibrary: () => path.join(root, "local-packages"),
-    octopusHome: () => home,
-    projectEePolicies: async () => JSON.parse(octopus(bundle, home, ["project-ee-policies"]).stdout),
+    phobosHome: () => home,
+    projectEePolicies: async () => JSON.parse(phobos(bundle, home, ["project-ee-policies"]).stdout),
   });
   try {
     const scope = await store.read(projectionReadRequest("projection.operator.os.scope"));
@@ -317,8 +317,8 @@ const lastLines = (result) => `${result.stdout ?? ""}${result.stderr ?? ""}`.tri
 
 function buildStaging(layout, { dryRun = false } = {}) {
   const { node } = JSON.parse(fs.readFileSync(path.join(appRoot, "native", "runtime.json"), "utf8"));
-  const env = { ...process.env, OCTOPUS_PACKAGE_BUNDLE: layout.staging,
-    OCTOPUS_NATIVE_NODE_HEADERS: process.env.OCTOPUS_NATIVE_NODE_HEADERS || path.join(layout.buildRoot, `node-v${node}`, "include", "node") };
+  const env = { ...process.env, PHOBOS_PACKAGE_BUNDLE: layout.staging,
+    PHOBOS_NATIVE_NODE_HEADERS: process.env.PHOBOS_NATIVE_NODE_HEADERS || path.join(layout.buildRoot, `node-v${node}`, "include", "node") };
   const command = [process.execPath, path.join(__dirname, "package-macos.cjs")];
   if (dryRun) return { applied: false, command, bundle: layout.staging };
   const identity = () => {
@@ -410,16 +410,16 @@ async function smokeTest(bundle, packageIds) {
     await library.installLocalPackages({ ...roots, operationId: `self-update-smoke-${Date.now()}`, packageIds: closure,
       expectedSourceDigests: Object.fromEntries(closure.map((id) => [id, byId.get(id).source_digest])) });
     row("install", true, `${closure.length} packages`);
-    const doctor = octopus(bundle, home, ["doctor"]);
+    const doctor = phobos(bundle, home, ["doctor"]);
     if (!row("doctor", doctor.status === 0, lastLines(doctor))) return rows;
     const log = fs.openSync(path.join(home, "up.log"), "a");
     spawn(runtimeBinary(bundle), ["up"], { env: runtimeEnv(bundle, home), cwd: home, detached: true, stdio: ["ignore", log, log] }).unref();
     fs.closeSync(log);
     const up = await waitForStatus(home, isReady, 60_000);
     if (!row("boot", up.ok, JSON.stringify(up.status))) return rows;
-    const restart = octopus(bundle, home, ["restart"]), after = await control(home, "status");
+    const restart = phobos(bundle, home, ["restart"]), after = await control(home, "status");
     if (!row("restart", restart.status === 0 && isReady(after) && after.started_at_unix_ms !== up.status.started_at_unix_ms, lastLines(restart))) return rows;
-    const down = octopus(bundle, home, ["down"]);
+    const down = phobos(bundle, home, ["down"]);
     const stopped = await waitForStatus(home, (status) => status.outcome === "unreachable", 30_000);
     row("stop", down.status === 0 && stopped.ok, lastLines(down));
   } catch (error) { row("error", false, error.message); } finally {
@@ -443,7 +443,7 @@ async function verifyStaging(layout, home, { smoke = true, allowModifiedSource =
   check("revision", info.revision === head && (allowModifiedSource || info.modifiedSource === false),
     `bundle ${info.revision}${info.modifiedSource ? " built from modified source" : ""}; HEAD ${head}`);
   if (fs.existsSync(path.join(home, "registry"))) {
-    const doctor = octopus(bundle, home, ["doctor"]);
+    const doctor = phobos(bundle, home, ["doctor"]);
     check("doctor_home", doctor.status === 0, lastLines(doctor));
   }
   if (smoke) checks.push(...await smokeTest(bundle, smokePackages));
@@ -534,14 +534,14 @@ async function status(layout, home) {
 
 const USAGE = `Usage: node app/scripts/safe-self-update.cjs <command> [options]
   status                          live runtime, bundle revisions, turns in flight (every run)
-  build [--dry-run]               package into app/build/Octopus.staging.app
+  build [--dry-run]               package into app/build/Phobos.staging.app
   verify [--no-smoke] [--allow-modified-source]
   packages status | packages sync [--dry-run] [--with-chat-client] [--only=a,b]
-  swap [--dry-run]                Octopus.app -> Octopus.prev.app, staging -> Octopus.app
+  swap [--dry-run]                Phobos.app -> Phobos.prev.app, staging -> Phobos.app
   restart [--swap] [--caller-run=<run id>] [--allow-in-flight-run <run id>]... [--dry-run] [--force] [--no-rollback] [--detach --log=<file>]
                                   refuses on untrusted turn evidence, a changing frontier, or a blocking turn
-  rollback [--dry-run]            Octopus.prev.app -> Octopus.app
-Common: --home=<Octopus Home, default $OCTOPUS_HOME or ~/.octopus> --build-root=<dir>`;
+  rollback [--dry-run]            Phobos.prev.app -> Phobos.app
+Common: --home=<Phobos Home, default $PHOBOS_HOME or ~/.phobos> --build-root=<dir>`;
 
 const REPEATABLE_VALUE_OPTIONS = new Set(["allow-in-flight-run"]);
 
@@ -566,7 +566,7 @@ function parseArgs(argv) {
 async function main(argv) {
   const { positional, options } = parseArgs(argv);
   const layout = bundles(options.buildRoot ? path.resolve(options.buildRoot) : undefined);
-  const home = path.resolve(options.home || process.env.OCTOPUS_HOME || path.join(os.homedir(), ".octopus"));
+  const home = path.resolve(options.home || process.env.PHOBOS_HOME || path.join(os.homedir(), ".phobos"));
   const dryRun = options.dryRun === true, [command, sub] = positional;
   if (command === "status") return status(layout, home);
   if (command === "build") return buildStaging(layout, { dryRun });

@@ -9,7 +9,7 @@ const { act } = React;
 const { JSDOM } = require("jsdom");
 const { stylesheetCascade } = require("./support/stylesheet-cascade.cjs");
 const appRoot = path.resolve(__dirname, "..");
-const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "https://octopus.test", pretendToBeVisual: true });
+const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "https://phobos.test", pretendToBeVisual: true });
 for (const key of ["window", "document", "HTMLElement", "Element", "Node", "CustomEvent"]) globalThis[key] = dom.window[key];
 Object.defineProperty(globalThis, "navigator", { configurable: true, value: dom.window.navigator });
 const { createRoot } = require("react-dom/client");
@@ -114,7 +114,7 @@ test("page loaders show only the centered logo until the catalog settles", async
     assert.ok(status.classList.contains(className));
     assert.equal(status.getAttribute("aria-busy"), "true");
     assert.equal(container.textContent, "");
-    assert.equal(status.querySelector(".octopus-loading-logo").style.width, "56px");
+    assert.equal(status.querySelector(".phobos-loading-logo").style.width, "56px");
     assert.ok(container.querySelector("header, input, h1") === null);
   };
   try { expectLogo(fallback.container, "surface-loading-state"); } finally { await fallback.close(); }
@@ -131,7 +131,7 @@ test("page loaders show only the centered logo until the catalog settles", async
     await stage.render({ ...props, scope: "System" });
     expectLogo(stage.container);
     await stage.render({ ...props, snapshot: { ...snapshot, projection: { mode: "error", label: "Read failed", detail: "Unavailable" } } });
-    assert.equal(stage.container.querySelector(".octopus-loading-logo"), null);
+    assert.equal(stage.container.querySelector(".phobos-loading-logo"), null);
     assert.match(stage.container.textContent, /Read failed/);
   } finally { await stage.close(); }
   const incidents = [];
@@ -160,7 +160,7 @@ test("page loaders show only the centered logo until the catalog settles", async
         await act(async () => pending.get("projection.operator.os.drivers").reject(new Error("Catalog unavailable")));
         assert.match(view.container.textContent, /Drivers could not be loaded/);
       }
-      assert.equal(view.container.querySelector(".octopus-loading-logo"), null);
+      assert.equal(view.container.querySelector(".phobos-loading-logo"), null);
       assert.ok(view.container.querySelector("h1"));
     } finally { await view.close(); }
   }
@@ -399,7 +399,7 @@ test("Home sequences reply fade before the call scene and preserves drafts, repl
     "../../toasts": { appToast: { warning: noop, info: () => assert.fail("Routine voice context must not toast") }, useAppErrorToast: error => assert.doesNotMatch(error, /Exact (call|device) diagnostic/) },
     "../chat/OperatorRequestSurface": { OperatorRequestSurface: () => null },
     "../chat/MessageContent": { MessageContent: ({ text }) => React.createElement("span", null, text) },
-    "../../appearance": { useShouldReduceMotion: () => true, useAppearance: () => ({ octopuses: false }) },
+    "../../appearance": { useShouldReduceMotion: () => true, useAppearance: () => ({ phoboses: false }) },
     "../IconGlyphs": { Glyph: ({ name }) => React.createElement("svg", { "data-glyph": name }) },
     "../CadencedShimmerText": { CadencedShimmerText: ({ children, active }) => React.createElement("span", { "data-active": active }, children), ShimmerActivityScope: ({ children }) => children },
     "../chat/ChatComposer": { ChatComposer: composer },
@@ -407,7 +407,7 @@ test("Home sequences reply fade before the call scene and preserves drafts, repl
     "./VoiceOrbScene": { VoiceOrbScene: props => { orbProps = props; return null; } },
     "./voiceWidgetDocuments": { buildVoiceWidgetDocuments: () => [] },
     "../chat/chatProductError": { chatProductError: () => "" },
-    "../OctopusLoadingLogo": { OctopusLoadingState: () => null },
+    "../PhobosLoadingLogo": { PhobosLoadingState: () => null },
   })("src/components/voice/VoiceView.tsx");
   const message = (id, interfaceId, text) => ({ id, runId: "home", interfaceId, direction: "out", role: "assistant", eventKind: "message", terminal: true, createdAtMs: 1000, text, attachments: [] });
   const run = { ...home, chatInterfaceId: "home-client", voiceContext: { runId: "home-voice", providerId: "voice-interface", controlInterfaceId: "voice-control", delegationInterfaceId: "home-delegation" } };
@@ -418,7 +418,7 @@ test("Home sequences reply fade before the call scene and preserves drafts, repl
   const extensionWidget = deliveredWidget("Installed extension", { sourceExtensionId: "approved-extension", sourceRunId: "", sourceInterfaceId: "" });
   const surfaces = [artifactWidget, extensionWidget, deliveredWidget("Other interface", { sourceInterfaceId: "private-task" }), deliveredWidget("Other Home", { sourceRunId: "other-home" })];
   const props = { accessProfile: "live", activity: { entries: [], total: 0 }, builtinWidgetSources: {}, homeRunId: "home", installedWidgetIds: [extensionWidget.document.id], installedWidgetsReady: true, session: session("idle", { start: async context => { startContext = context; calls.push("start"); }, end: async () => calls.push("end") }), surfaces, topology, workerEnvironmentSurfaces: [], widgetsOpen: true, workspace, viewMode: "voice" };
-  const visibilityKey = "octopus.voice.hidden-surfaces.v1.live";
+  const visibilityKey = "phobos.voice.hidden-surfaces.v1.live";
   window.localStorage.removeItem(visibilityKey);
   const view = await mount(VoiceView, { ...props, installedWidgetIds: [], installedWidgetsReady: false });
   try {
@@ -517,7 +517,7 @@ test("Home sequences reply fade before the call scene and preserves drafts, repl
     assert.ok(view.container.querySelector('[data-widget="Installed extension"]'));
     const nextPrompt = { ...message("next-prompt", "home-client", "Continue"), role: "user", direction: "in", createdAtMs: 2000 };
     await view.render({ ...props, workspace: { ...workspace, busy: true, renderedMessages: [...workspace.renderedMessages, nextPrompt] } });
-    assert.equal(body.textContent, "Octopus is working");
+    assert.equal(body.textContent, "Phobos is working");
     assert.equal(body.querySelector(".home-response-stage__identity"), null);
     const streaming = { ...message("stream", "home-client", "A streamed reply"), eventKind: "message_delta", terminal: false };
     await view.render({ ...props, workspace: { ...workspace, busy: true, renderedMessages: [streaming] } });
@@ -532,22 +532,22 @@ test("Home sequences reply fade before the call scene and preserves drafts, repl
     ];
     await view.render({ ...props, workspace: { ...workspace, busy: true, renderedMessages: [prompt, ...unrelated, commentary] } });
     assert.equal(body.querySelector('[aria-label="Current run activity"]').textContent, commentary.text);
-    assert.equal(body.querySelector('.octopus-turn-activity').dataset.state, "working");
-    assert.doesNotMatch(body.textContent, /Octopus is working|Previous turn|Private work|Other Home/);
+    assert.equal(body.querySelector('.phobos-turn-activity').dataset.state, "working");
+    assert.doesNotMatch(body.textContent, /Phobos is working|Previous turn|Private work|Other Home/);
     const tool = { ...commentary, id: "write", eventKind: "file_change", text: "", eventData: { changes: [{ path: "notes.txt", kind: "update" }], status: "completed" } };
     const terminal = { ...commentary, id: "terminal", eventKind: "turn_completed", text: "", terminal: true };
     for (const [status, notice] of [["interrupted", "Turn interrupted before a final reply."], ["completed", "Turn ended without a final reply."]]) {
       await view.render({ ...props, workspace: { ...workspace, busy: status === "interrupted", renderedMessages: [prompt, ...unrelated, commentary, tool, { ...terminal, eventData: { turn: { status } } }] } });
       assert.match(body.textContent, new RegExp(commentary.text));
       assert.match(body.textContent, new RegExp(notice));
-      assert.doesNotMatch(body.textContent, /What would you like to do|Octopus is working|Previous turn|Private work|Other Home/);
+      assert.doesNotMatch(body.textContent, /What would you like to do|Phobos is working|Previous turn|Private work|Other Home/);
       assert.equal(body.closest('.home-response-stage').getAttribute('aria-busy'), "false");
       assert.equal(body.querySelector('[data-active="true"], .home-response-output--live'), null);
       const disclosure = body.querySelector('button[aria-expanded]');
       assert.ok(disclosure);
       if (disclosure.getAttribute('aria-expanded') === "false") await click(disclosure);
       await act(async () => new Promise(resolve => window.requestAnimationFrame(resolve)));
-      assert.equal(body.querySelector('.octopus-agent-activity-body').getAttribute('aria-hidden'), "false");
+      assert.equal(body.querySelector('.phobos-agent-activity-body').getAttribute('aria-hidden'), "false");
       assert.match(body.textContent, /Updated notes.txt/);
     }
     const answered = { ...terminal, eventData: { turn: { status: "completed", items: [{ type: "agentMessage", phase: "final_answer", text: "Done." }] } } };
@@ -585,7 +585,7 @@ test("Home sequences reply fade before the call scene and preserves drafts, repl
     for (const createdAtMs of [0, NaN, Infinity, 9e15]) {
       await view.render({ ...props, workspace: { ...workspace, renderedMessages: [{ ...final, createdAtMs }] } });
       assert.equal(body.querySelector("header"), null);
-      assert.doesNotMatch(body.textContent, /Octopus|Invalid Date/);
+      assert.doesNotMatch(body.textContent, /Phobos|Invalid Date/);
     }
     await view.render({ ...props, workspace: { ...workspace, renderedMessages: [prompt] } });
     await view.render({ ...props, workspace: { ...workspace, renderedMessages: [prompt, final] } });

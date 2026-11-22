@@ -4,7 +4,7 @@
   "name": "Custom OpenAI-compatible",
   "description": "Any server that speaks the OpenAI Chat Completions API.",
   "category": "provider",
-  "developer": "Octopus",
+  "developer": "Phobos",
   "version": "1.0.0",
   "icon": "sparkles",
   "logo": "application-logo.svg",

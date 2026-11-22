@@ -1,0 +1,16 @@
+[package]
+name = "phobos-linux-process-authority"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "phobos-linux-process-authority"
+path = "src/main.rs"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
+serde.workspace = true
+serde_json.workspace = true
+phobos-verifiers = { path = "../../../../../crates/phobos-verifiers" }

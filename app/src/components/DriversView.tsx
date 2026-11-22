@@ -9,11 +9,11 @@ import {
 } from "react";
 import "./icon-glyphs/chat";
 import "./icon-glyphs/worker";
-import type { OctopusApplicationLifecycleProgress, OctopusClientAccessProfile, OctopusProviderInterface, OctopusOsWorkspaceMutationRequest } from "../electron";
+import type { PhobosApplicationLifecycleProgress, PhobosClientAccessProfile, PhobosProviderInterface, PhobosOsWorkspaceMutationRequest } from "../electron";
 import {
   formatProjectionError,
   hasProjectionBridge,
-  mutateOctopusOsWorkspace,
+  mutatePhobosOsWorkspace,
   onApplicationLifecycleProgress,
   readProjection,
   readProviderInterfaces,
@@ -39,7 +39,7 @@ import {
   CatalogSection,
 } from "./catalog";
 import { Glyph, type GlyphName } from "./IconGlyphs";
-import { OctopusLoadingState } from "./OctopusLoadingLogo";
+import { PhobosLoadingState } from "./PhobosLoadingLogo";
 import { PackageInstallReviewDialog } from "./applications/PackageInstallReviewDialog";
 import { SetupDialogShell } from "./SetupDialogShell";
 import { useAppErrorToast } from "../toasts";
@@ -111,7 +111,7 @@ type DriverProject = {
 };
 
 type DriversProjection = {
-  octopus_home?: string;
+  phobos_home?: string;
   status?: string;
   root_ee_id?: string;
   host_root_refs?: Record<string, string>;
@@ -132,7 +132,7 @@ type DriverCatalogView = "browse" | "manage";
 type DriverLifecycleOperation = {
   operationId: string;
   operation: "install" | "remove";
-  phase: OctopusApplicationLifecycleProgress["phase"] | "failed";
+  phase: PhobosApplicationLifecycleProgress["phase"] | "failed";
   percent: number;
   error: string;
   settlesAfterRead: number | null;
@@ -142,7 +142,7 @@ export function DriversView({
   accessProfile,
   searchFocusTick,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   searchFocusTick: number;
 }) {
   const generation = useProjectionStructureGeneration();
@@ -164,7 +164,7 @@ export function DriversView({
   const [home, setHome] = useState("");
   const [installReviewName, setInstallReviewName] = useState("");
   const [addingPreset, setAddingPreset] = useState<{ preset: DriverAgentPreset; scope: AgentPresetScope; home: string; operationId: string } | null>(null);
-  const [presetProviders, setPresetProviders] = useState<OctopusProviderInterface[]>([]);
+  const [presetProviders, setPresetProviders] = useState<PhobosProviderInterface[]>([]);
   const [presetProject, setPresetProject] = useState("");
   const [presetProvider, setPresetProvider] = useState("");
   const [presetEffort, setPresetEffort] = useState("");
@@ -205,7 +205,7 @@ export function DriversView({
       .then((response) => {
         if (cancelled) return;
         setDrivers(arrayRecords(response.drivers));
-        setHome(typeof response.octopus_home === "string" ? response.octopus_home : "");
+        setHome(typeof response.phobos_home === "string" ? response.phobos_home : "");
         setProjects(arrayRecords(response.projects));
         setRootEeId(typeof response.root_ee_id === "string" ? response.root_ee_id : "");
         setHostRootRefs(cleanStringRecord(response.host_root_refs ?? {}));
@@ -442,7 +442,7 @@ export function DriversView({
       });
       return;
     }
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport) {
       setError("Folder selection is unavailable.");
       return;
@@ -509,7 +509,7 @@ export function DriversView({
         }];
       });
       if (changedProjects.length) {
-        await mutateOctopusOsWorkspace({
+        await mutatePhobosOsWorkspace({
           action: "configure_driver",
           driverName: setupDriver.name,
           projects: changedProjects,
@@ -555,13 +555,13 @@ export function DriversView({
     const { scope, preset } = addingPreset;
     setPresetSaving(true);
     try {
-      const request: OctopusOsWorkspaceMutationRequest = {
+      const request: PhobosOsWorkspaceMutationRequest = {
         action: "add_agent_preset", operationId: addingPreset.operationId, home: addingPreset.home,
         workspace: { rootEeId: scope.root_ee_id, homeRunId: scope.home_run_id, homeInterfaceId: scope.home_interface_id, expectedHomeSidecarDigest: scope.home_sidecar_digest, expectedAgentCatalogDigest: scope.agent_catalog_digest },
         projectEeId: presetProject, packId: preset.pack_id, expectedPackManifestDigest: preset.pack_manifest_digest, presetId: preset.id,
         providerInterfaceId: selectedPresetProvider.id, providerModel: selectedPresetModel.model, reasoningEffort: presetEffort,
       };
-      await mutateOctopusOsWorkspace(request);
+      await mutatePhobosOsWorkspace(request);
       setAddingPreset(null);
       setReloadTick((value) => value + 1);
     } catch (failure) { setError(formatProjectionError(failure)); }
@@ -584,7 +584,7 @@ export function DriversView({
       [packageId]: { operationId, operation: "install", phase: "preflight", percent: 0, error: "", settlesAfterRead: null },
     }));
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "install_package",
         packageIds: (driver.install_packages ?? []).map((entry) => entry.id),
         expectedSourceDigests: Object.fromEntries((driver.install_packages ?? []).map((entry) => [entry.id, entry.source_digest])),
@@ -626,7 +626,7 @@ export function DriversView({
       [packageId]: { operationId, operation: "remove", phase: "preflight", percent: 0, error: "", settlesAfterRead: null },
     }));
     try {
-      await mutateOctopusOsWorkspace({
+      await mutatePhobosOsWorkspace({
         action: "remove_driver",
         driverName: driver.name,
         expectedInstalledDigest: driver.installed_digest,
@@ -659,7 +659,7 @@ export function DriversView({
   }
 
   if (!hasProjectionBridge()) return (
-    <OcEmptyState className="h-full" detail="Start Octopus to browse and manage local driver packages." glyph="warning" title="Drivers are unavailable" />
+    <OcEmptyState className="h-full" detail="Start Phobos to browse and manage local driver packages." glyph="warning" title="Drivers are unavailable" />
   );
 
   return (
@@ -801,7 +801,7 @@ function DriverBrowseView({
   surfaceRef,
   visible,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   cardRefs: RefObject<Map<string, HTMLDivElement>>;
   drivers: DriverRecord[];
   error: string;
@@ -823,7 +823,7 @@ function DriverBrowseView({
   surfaceRef: RefObject<HTMLElement | null>;
   visible: DriverRecord[];
 }) {
-  if (!loaded) return <OctopusLoadingState className="surface-content-loading-state" label="Loading drivers" />;
+  if (!loaded) return <PhobosLoadingState className="surface-content-loading-state" label="Loading drivers" />;
   return (
     <section className="flex h-full min-h-0 flex-col text-base select-none" ref={surfaceRef}>
       <header className="surface-titlebar-spacer draggable flex h-toolbar shrink-0 items-center justify-between gap-2 px-panel">
@@ -919,7 +919,7 @@ function DriverManageView({
   scrollRef,
   visible,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   cardRefs: RefObject<Map<string, HTMLDivElement>>;
   drivers: DriverRecord[];
   error: string;
@@ -940,7 +940,7 @@ function DriverManageView({
   scrollRef: RefObject<HTMLDivElement | null>;
   visible: DriverRecord[];
 }) {
-  if (!loaded) return <OctopusLoadingState className="surface-content-loading-state" label="Loading installed drivers" />;
+  if (!loaded) return <PhobosLoadingState className="surface-content-loading-state" label="Loading installed drivers" />;
   return (
     <section className="flex h-full min-h-0 flex-col text-base select-none">
       <header className="surface-titlebar-spacer flex h-toolbar shrink-0 items-center px-panel">
@@ -953,7 +953,7 @@ function DriverManageView({
           <div className="mx-auto w-full max-w-[var(--thread-content-max-width)] px-panel pt-panel">
             <div className="flex min-w-0 flex-col gap-2 px-2">
               <h1 className="heading-xl font-normal text-default">Manage drivers</h1>
-              <div className="text-lg leading-6 text-secondary">Review setup or remove driver packages already installed in Octopus Home</div>
+              <div className="text-lg leading-6 text-secondary">Review setup or remove driver packages already installed in Phobos Home</div>
             </div>
           </div>
           <DriverCatalogSearch id="drivers-manage-search" inputRef={searchRef} onChange={onQueryChange} onKeyDown={onSearchKeyDown} placeholder="Search installed drivers" value={query} />
@@ -1022,7 +1022,7 @@ function DriverCatalogSearch({ id, inputRef, onChange, onKeyDown, placeholder, v
 }
 
 function DriverCard({ accessProfile, driver, highlighted, lifecycle, onFocus, onInstall, onKeyDown, onOpen, onRemove, onSetup, setRef, view }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   driver: DriverRecord;
   highlighted: boolean;
   lifecycle?: DriverLifecycleOperation;
@@ -1168,7 +1168,7 @@ function DriverProjectionIssue({ detail }: { detail: string }) {
 }
 
 function DriverDetail({ accessProfile, backButtonRef, driver, lifecycle, onBack, onInstall, onRemove, onSetup, onAddPreset, projects, returnView, rootEeId }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   backButtonRef: RefObject<HTMLButtonElement | null>;
   driver: DriverRecord;
   lifecycle?: DriverLifecycleOperation;
@@ -1235,9 +1235,9 @@ function DriverDetail({ accessProfile, backButtonRef, driver, lifecycle, onBack,
             ) : null}
             <DriverDetailSection title="Setup">
               <DriverDetailRow label="Package" value={driver.installed
-                ? "Installed in Octopus Home."
+                ? "Installed in Phobos Home."
                 : driver.materialized || driver.partially_materialized
-                  ? "Driver files were found, but Octopus could not verify one complete installation."
+                  ? "Driver files were found, but Phobos could not verify one complete installation."
                   : driver.source_available === true
                     ? "Not installed. Installing adds it to no project until you enable it."
                     : "This build ships no package for it."} />
@@ -1278,7 +1278,7 @@ function DriverDetail({ accessProfile, backButtonRef, driver, lifecycle, onBack,
 }
 
 function DriverRemovalDialog({ accessProfile, driver, lifecycle, onCancel, onConfirm }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   driver: DriverRecord | null;
   lifecycle?: DriverLifecycleOperation;
   onCancel: () => void;
@@ -1495,7 +1495,7 @@ function driverSummary(driver: DriverRecord): string {
   return capabilities || `${driver.tool_ids.length} tool${driver.tool_ids.length === 1 ? "" : "s"}`;
 }
 
-function driverInstallTitle(driver: DriverRecord, accessProfile: OctopusClientAccessProfile): string {
+function driverInstallTitle(driver: DriverRecord, accessProfile: PhobosClientAccessProfile): string {
   if (accessProfile !== "live") return "Install drivers from the Administrator profile.";
   if (driver.install_block_reason) return driver.install_block_reason;
   if (driver.source_available === true) return `Install ${driverName(driver)}`;
@@ -1503,7 +1503,7 @@ function driverInstallTitle(driver: DriverRecord, accessProfile: OctopusClientAc
   return "Local package availability is not reported by this projection.";
 }
 
-function driverRemovalTitle(driver: DriverRecord, accessProfile: OctopusClientAccessProfile): string {
+function driverRemovalTitle(driver: DriverRecord, accessProfile: PhobosClientAccessProfile): string {
   if (accessProfile !== "live") return "Remove drivers from the Administrator profile.";
   if (driver.removal_block_reason) return driver.removal_block_reason;
   if (driver.removal_allowed === true) return `Remove ${driverName(driver)}`;

@@ -1,0 +1,31 @@
+[package]
+name = "phobos-remote-exec-room"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+base64 = "0.22.1"
+blake3.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tokio.workspace = true
+url = "2"
+
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-exec = { package = "phobos-exec-substrate", path = "../../../process_session/packages/phobos-exec-substrate" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-substrate-contract = { path = "../../../process_session/packages/phobos-substrate-contract" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-util-pathuri = { path = "../../../process_session/packages/phobos-util-pathuri" }
+phobos-worker-env = { path = "../../../../../crates/phobos-worker-env" }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.182"
+
+[dev-dependencies]
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+tempfile = "3"

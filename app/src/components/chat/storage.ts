@@ -1,6 +1,6 @@
 import type { ChatSettings } from "./types";
 import { CHAT_SETTINGS_KEY } from "./constants";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { normalizeTaskAccessMode, type TaskAccessMode } from "./taskAccess";
 
 export type PersistedChatDraft = {
@@ -25,17 +25,17 @@ export type PersistedChatDraft = {
   updatedAtMs: number;
 };
 
-const CHAT_DRAFTS_KEY = "octopus.client.chatDrafts.v1";
+const CHAT_DRAFTS_KEY = "phobos.client.chatDrafts.v1";
 
-export function chatSettingsChangedEvent(profile: OctopusClientAccessProfile): string {
-  return `octopus:chat-settings-changed:${profile}`;
+export function chatSettingsChangedEvent(profile: PhobosClientAccessProfile): string {
+  return `phobos:chat-settings-changed:${profile}`;
 }
 
-function chatSettingsKey(profile: OctopusClientAccessProfile): string {
+function chatSettingsKey(profile: PhobosClientAccessProfile): string {
   return profile === "live" ? CHAT_SETTINGS_KEY : `${CHAT_SETTINGS_KEY}.test`;
 }
 
-export function loadChatSettings(profile: OctopusClientAccessProfile): ChatSettings {
+export function loadChatSettings(profile: PhobosClientAccessProfile): ChatSettings {
   try {
     const raw = localStorage.getItem(chatSettingsKey(profile));
     if (!raw) throw new Error("missing settings");
@@ -59,7 +59,7 @@ export function loadChatSettings(profile: OctopusClientAccessProfile): ChatSetti
 
 export function saveChatSettings(
   settings: Partial<ChatSettings>,
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): void {
   const current = loadChatSettings(profile);
   localStorage.setItem(chatSettingsKey(profile), JSON.stringify({
@@ -71,7 +71,7 @@ export function saveChatSettings(
   window.dispatchEvent(new CustomEvent(chatSettingsChangedEvent(profile)));
 }
 
-export function loadChatDrafts(profile: OctopusClientAccessProfile, scope = "main"): PersistedChatDraft[] {
+export function loadChatDrafts(profile: PhobosClientAccessProfile, scope = "main"): PersistedChatDraft[] {
   try {
     const parsed = JSON.parse(chatStateStorage(scope).getItem(profileScopedStateKey(CHAT_DRAFTS_KEY, profile, scope)) || "[]") as unknown;
     if (!Array.isArray(parsed)) return [];
@@ -106,7 +106,7 @@ export function loadChatDrafts(profile: OctopusClientAccessProfile, scope = "mai
   }
 }
 
-export function saveChatDrafts(profile: OctopusClientAccessProfile, drafts: readonly PersistedChatDraft[], scope = "main"): void {
+export function saveChatDrafts(profile: PhobosClientAccessProfile, drafts: readonly PersistedChatDraft[], scope = "main"): void {
   const serializable = drafts
     .filter((draft) => draft.messageId || draft.text.trim() || draft.continuation || draft.agentPresetId)
     .sort((left, right) => right.updatedAtMs - left.updatedAtMs)
@@ -128,11 +128,11 @@ function normalizeContinuation(value: unknown): PersistedChatDraft["continuation
   return { sourceRunId, sourceArtifactId };
 }
 
-function profileKey(base: string, profile: OctopusClientAccessProfile): string {
+function profileKey(base: string, profile: PhobosClientAccessProfile): string {
   return profile === "live" ? base : `${base}.test`;
 }
 
-function profileScopedStateKey(base: string, profile: OctopusClientAccessProfile, scope: string): string {
+function profileScopedStateKey(base: string, profile: PhobosClientAccessProfile, scope: string): string {
   const boundedScope = normalizedStateScope(scope);
   return profileKey(boundedScope === "main" ? base : `${base}.${boundedScope}`, profile);
 }

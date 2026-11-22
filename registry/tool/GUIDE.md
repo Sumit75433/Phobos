@@ -15,7 +15,7 @@ Background: [Tools](../../docs/contracts/TOOL_REGISTRY.md).
   "id": "example.read",
   "interface": "system_example_env",
   "process": {
-    "bin": "target/debug/octopus-example-tool",
+    "bin": "target/debug/phobos-example-tool",
     "args": [],
     "required_files": [],
     "inherit_env": [],
@@ -77,8 +77,8 @@ the sake of one file.
 
 A tool process lives in the same package and code-world as the kind and door
 of its worker environment. Each kind runs its own door life, built on the door
-runtime that `process_session` owns (`octopus-process-session-tool-runtime`,
-imported by the other kinds as `octopus-tool-door-runtime`); it reads the
+runtime that `process_session` owns (`phobos-process-session-tool-runtime`,
+imported by the other kinds as `phobos-tool-door-runtime`); it reads the
 ledger, checks the tool grant and formation, and talks to the package process.
 Only artifacts cross the room's boundary.
 

@@ -68,7 +68,7 @@ class Reclamation(unittest.TestCase):
         manifest = json.loads(Path(path).read_text())
         manifest['label'] = 'other.notice'
         raw = self.b.canonical_json(manifest)
-        digest = self.b.octopus_content_hash(raw)
+        digest = self.b.phobos_content_hash(raw)
         other = str(Path(self.b.PAYLOADS_DIR) / (digest + '.artifact.json'))
         self.b.private_file(other, raw, self.b.IO_LIMITS['max_manifest_bytes'], 'other manifest')
         with self.w.db:
@@ -100,7 +100,7 @@ class Reclamation(unittest.TestCase):
 
     def test_manifest_path_escape_is_rejected(self):
         raw = self.b.canonical_json({'payload_path': str(self.root / 'outside'), 'payload_content_hash': 'a' * 64})
-        digest = self.b.octopus_content_hash(raw)
+        digest = self.b.phobos_content_hash(raw)
         path = Path(self.b.PAYLOADS_DIR) / (digest + '.artifact.json')
         self.b.atomic_bytes(str(path), raw)
         with self.assertRaisesRegex(ValueError, 'escapes'):

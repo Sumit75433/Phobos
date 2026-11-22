@@ -2,14 +2,14 @@ const fs = require("node:fs");
 const fsPromises = require("node:fs/promises");
 const path = require("node:path");
 
-const CLIENT_EXTENSION_ACTION_RESULT = "octopus.client-extension.action.v1";
-const CLIENT_EXTENSION_ACTION_STATUS = "octopus.client-extension.action-status.v1";
+const CLIENT_EXTENSION_ACTION_RESULT = "phobos.client-extension.action.v1";
+const CLIENT_EXTENSION_ACTION_STATUS = "phobos.client-extension.action-status.v1";
 const PROVIDER_CREDENTIAL_REPAIR_EXTENSION = "builtin.provider-credential-repair";
 const PROVIDER_CREDENTIAL_REPAIR_ACTION = "provider.credentials.refresh";
 const PROVIDER_AUTHENTICATION_INCIDENT = "provider.authentication.invalid";
 const PROVIDER_SETUP_INCIDENT = "provider.authentication.setup_required";
 const CODEX_PROVIDER_INTERFACE = "world_provider_codex";
-const MACHINE_CODEX_AUTH_FILE_ENV = "OCTOPUS_MACHINE_CODEX_AUTH_FILE";
+const MACHINE_CODEX_AUTH_FILE_ENV = "PHOBOS_MACHINE_CODEX_AUTH_FILE";
 const MAX_AUTH_BYTES = 2 * 1024 * 1024;
 const MAX_DESCRIPTOR_BYTES = 2 * 1024 * 1024;
 let providerCredentialRepairRunning = false;
@@ -40,7 +40,7 @@ function clientExtensionActionFailure(error) {
       code: error instanceof ClientExtensionActionError ? error.code : "repair_failed",
       message: error instanceof ClientExtensionActionError
         ? error.publicMessage
-        : "Octopus couldn't repair the sign-in. Try again.",
+        : "Phobos couldn't repair the sign-in. Try again.",
       retryable: error instanceof ClientExtensionActionError ? error.retryable : true,
     },
   };
@@ -109,22 +109,22 @@ function verifiedInstalledExtensionIds(options) {
 }
 
 async function inspectProviderCredential(options) {
-  let octopusHome;
+  let phobosHome;
   let codexHome;
   try {
-    octopusHome = requiredAbsolutePath(options?.octopusHome, "Octopus home");
+    phobosHome = requiredAbsolutePath(options?.phobosHome, "Phobos home");
     codexHome = requiredAbsolutePath(options?.codexHome, "Codex home");
   } catch (error) {
     return credentialStatus("unavailable", error, "Provider sign-in status is unavailable.");
   }
 
   try {
-    const target = await resolveProviderAuthTarget(octopusHome, CODEX_PROVIDER_INTERFACE, codexHome);
+    const target = await resolveProviderAuthTarget(phobosHome, CODEX_PROVIDER_INTERFACE, codexHome);
     await readAndValidateCodexAuth(target.path, "machine Codex sign-in");
     return {
       state: "configured",
       code: "provider_credentials_present",
-      message: "Octopus uses the current machine-wide Codex sign-in.",
+      message: "Phobos uses the current machine-wide Codex sign-in.",
     };
   } catch (error) {
     if (!(error instanceof ClientExtensionActionError)) {
@@ -149,9 +149,9 @@ function credentialStatus(state, error, message) {
 }
 
 async function repairProviderCredential(options, incident) {
-  const octopusHome = requiredAbsolutePath(options?.octopusHome, "Octopus home");
+  const phobosHome = requiredAbsolutePath(options?.phobosHome, "Phobos home");
   const codexHome = requiredAbsolutePath(options?.codexHome, "Codex home");
-  const target = await resolveProviderAuthTarget(octopusHome, incident.interfaceId, codexHome);
+  const target = await resolveProviderAuthTarget(phobosHome, incident.interfaceId, codexHome);
   await readAndValidateCodexAuth(target.path, "machine Codex sign-in");
   return {
     actionId: PROVIDER_CREDENTIAL_REPAIR_ACTION,
@@ -164,8 +164,8 @@ async function repairProviderCredential(options, incident) {
   };
 }
 
-async function resolveProviderAuthTarget(octopusHome, interfaceId, codexHome) {
-  const descriptorPath = path.join(octopusHome, "registry", "interface", interfaceId, "interface.json");
+async function resolveProviderAuthTarget(phobosHome, interfaceId, codexHome) {
+  const descriptorPath = path.join(phobosHome, "registry", "interface", interfaceId, "interface.json");
   const descriptorBytes = await readStableRegularFile(descriptorPath, MAX_DESCRIPTOR_BYTES, "provider interface descriptor").catch((error) => {
     if (error?.code === "ENOENT") {
       throw new ClientExtensionActionError(
@@ -183,7 +183,7 @@ async function resolveProviderAuthTarget(octopusHome, interfaceId, codexHome) {
   } catch (error) {
     throw new ClientExtensionActionError(
       "provider_descriptor_invalid",
-      "The provider configuration is invalid, so Octopus left it unchanged.",
+      "The provider configuration is invalid, so Phobos left it unchanged.",
       `provider descriptor '${descriptorPath}' is not valid JSON: ${formatError(error)}`,
       false,
     );
@@ -191,7 +191,7 @@ async function resolveProviderAuthTarget(octopusHome, interfaceId, codexHome) {
   if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor) || descriptor.id !== interfaceId) {
     throw new ClientExtensionActionError(
       "provider_descriptor_invalid",
-      "The provider configuration is invalid, so Octopus left it unchanged.",
+      "The provider configuration is invalid, so Phobos left it unchanged.",
       `provider descriptor '${descriptorPath}' does not declare exact interface '${interfaceId}'`,
       false,
     );
@@ -222,7 +222,7 @@ async function resolveProviderAuthTarget(octopusHome, interfaceId, codexHome) {
   if (!homeStat.isDirectory() || homeStat.isSymbolicLink()) {
     throw new ClientExtensionActionError(
       "provider_auth_store_invalid",
-      "The machine Codex home is unsafe, so Octopus left it unchanged.",
+      "The machine Codex home is unsafe, so Phobos left it unchanged.",
       `machine Codex home '${codexHome}' is not a real directory`,
       false,
     );

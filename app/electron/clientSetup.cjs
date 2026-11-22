@@ -71,7 +71,7 @@ function createClientSetupStore(options) {
       }
       const now = timestamp();
       const operation = parseOperation({
-        schema: "octopus.client_setup_operation",
+        schema: "phobos.client_setup_operation",
         schema_version: 1,
         operation_id: operationId,
         plan_digest: planDigest,
@@ -180,7 +180,7 @@ function createClientSetupStore(options) {
       finalProofs.push(proof);
     }
     const receipt = parseReceipt({
-      schema: "octopus.client_setup_receipt",
+      schema: "phobos.client_setup_receipt",
       schema_version: 1,
       operation_id: operation.operation_id,
       plan_digest: operation.plan_digest,
@@ -344,7 +344,7 @@ function createClientSetupStore(options) {
     const current = await readCurrentSelection();
     if (current?.operation_id === record.operation_id && current.plan_digest === record.plan_digest) return;
     await writeJsonAtomic(currentPath, {
-      schema: "octopus.client_setup_current",
+      schema: "phobos.client_setup_current",
       schema_version: 1,
       operation_id: record.operation_id,
       plan_digest: record.plan_digest,
@@ -424,7 +424,7 @@ function normalizePlan(value, operationId) {
   for (const projectDefault of plan.workspace.project_defaults) projectDefault.project_keys.sort();
   plan.workspace.project_defaults.sort((left, right) => String(left.package_id).localeCompare(String(right.package_id)));
   const candidate = {
-    schema: "octopus.client_setup_operation",
+    schema: "phobos.client_setup_operation",
     schema_version: 1,
     operation_id: operationId,
     plan_digest: "0".repeat(64),

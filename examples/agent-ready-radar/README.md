@@ -4,7 +4,7 @@ A zero-dependency Python 3.12+ CLI for empirical observations of web-agent disco
 artifacts. HTTP 200 is **not** evidence of an agent interface: SPA catch-alls,
 redirects, login pages and JSON error objects are rejected.
 
-This standalone source snapshot is part of the [Octopus examples collection](../README.md).
+This standalone source snapshot is part of the [Phobos examples collection](../README.md).
 Python 3.12+ is the installation target; source-mode contracts are also checked
 with Python 3.9 for the older system interpreter. No third-party Python package
 is needed to run from source or build the wheel/sdist.
@@ -16,7 +16,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install --no-deps .
 .venv/bin/python -m agent_ready_radar scan openai.com https://example.org --workers 4 -o scan.json
 .venv/bin/python -m agent_ready_radar report scan.json -o report.md
-.venv/bin/python -m agent_ready_radar octopus-card scan.json -o card.json
+.venv/bin/python -m agent_ready_radar phobos-card scan.json -o card.json
 ```
 
 From source without installation: `PYTHONPATH=src python3 -m agent_ready_radar ...`.
@@ -38,12 +38,12 @@ Schema `agent_ready_radar.summary` version 1 uses `probe_columns` and
 external decoder is needed: zip a column list with its row. Optional absent
 metadata in future scans is represented by null. `expand_summary` in
 [`summary.py`](src/agent_ready_radar/summary.py) reconstructs body-free scan
-records and checks aggregate counts. Both `report` and `octopus-card` accept
+records and checks aggregate counts. Both `report` and `phobos-card` accept
 the summary directly:
 
 ```sh
 PYTHONPATH=src python3 -m agent_ready_radar report benchmarks/survey-2026-11-17-summary.json
-PYTHONPATH=src python3 -m agent_ready_radar octopus-card benchmarks/survey-2026-11-17-summary.json
+PYTHONPATH=src python3 -m agent_ready_radar phobos-card benchmarks/survey-2026-11-17-summary.json
 ```
 
 To reproduce the **procedure and full raw captures** on demand, use
@@ -61,7 +61,7 @@ New responses, timestamps and counts will differ; rescanning cannot recreate
 the historical bytes. The raw output filename above is gitignored.
 
 This is a **single dated snapshot**, not a continuously refreshing Home feed.
-The card can be published through an authorized Octopus Home presentation route;
+The card can be published through an authorized Phobos Home presentation route;
 writing it to disk does not display it.
 
 ## Measurement contract

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { OctopusWorkerEnvironmentFileEntry } from "../../electron";
+import type { PhobosWorkerEnvironmentFileEntry } from "../../electron";
 import { Glyph } from "../IconGlyphs";
 
 export type ProjectedFileSource = {
@@ -14,7 +14,7 @@ export function ProjectedFilePicker({ onAttach, onClose, source }: {
   source: ProjectedFileSource;
 }) {
   const [currentPath, setCurrentPath] = useState("");
-  const [entries, setEntries] = useState<OctopusWorkerEnvironmentFileEntry[]>([]);
+  const [entries, setEntries] = useState<PhobosWorkerEnvironmentFileEntry[]>([]);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -34,13 +34,13 @@ export function ProjectedFilePicker({ onAttach, onClose, source }: {
 
   useEffect(() => {
     let cancelled = false;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     setLoading(true);
     setError("");
     if (!transport?.listWorkerEnvironmentFiles) {
       setEntries([]);
       setLoading(false);
-      setError("Projected file attachment requires the Octopus desktop interface.");
+      setError("Projected file attachment requires the Phobos desktop interface.");
       return () => { cancelled = true; };
     }
     void transport.listWorkerEnvironmentFiles({
@@ -70,16 +70,16 @@ export function ProjectedFilePicker({ onAttach, onClose, source }: {
     setSelectedIndex((current) => Math.min(current, Math.max(0, filteredEntries.length - 1)));
   }, [filteredEntries.length]);
 
-  const choose = (entry: OctopusWorkerEnvironmentFileEntry) => {
+  const choose = (entry: PhobosWorkerEnvironmentFileEntry) => {
     if (entry.kind === "directory") {
       setCurrentPath(entry.path);
       setQuery("");
       return;
     }
     if (entry.kind !== "file" || attachingPath) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.readWorkerEnvironmentFileAttachment) {
-      setError("Projected file attachment requires the Octopus desktop interface.");
+      setError("Projected file attachment requires the Phobos desktop interface.");
       return;
     }
     setAttachingPath(entry.path);

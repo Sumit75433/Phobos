@@ -30,7 +30,7 @@ function createClientBrowser({ electron, getHome, requireAccess }) {
       owner.dispose(); owner = null;
     }
     if (!owner) {
-      const session = electron.session.fromPartition("octopus-client-browser:" + createHash("sha256").update(home).digest("hex") + ":" + randomUUID());
+      const session = electron.session.fromPartition("phobos-client-browser:" + createHash("sha256").update(home).digest("hex") + ":" + randomUUID());
       session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
       session.setPermissionCheckHandler(() => false);
       owner = { home, token, sender, window, session, pages: new Set() };
@@ -52,7 +52,7 @@ function createClientBrowser({ electron, getHome, requireAccess }) {
     if (!pages.has(page.id) || page.owner.sender.isDestroyed() || page.view.webContents.isDestroyed()) return;
     try { requireAccess(page.owner.token); if (page.owner.home !== getHome()) { close(page); return; } }
     catch { page.view.setVisible(false); return; }
-    page.owner.sender.send("octopus:client-browser-state", state(page));
+    page.owner.sender.send("phobos:client-browser-state", state(page));
   }
   function open(owner, url, navigateImmediately = true) {
     const view = new electron.WebContentsView({ webPreferences: { session: owner.session, sandbox: true,
@@ -75,7 +75,7 @@ function createClientBrowser({ electron, getHome, requireAccess }) {
           requireAccess(owner.token);
           if (owner.home !== getHome() || owner.sender.isDestroyed()) throw new Error("Browser window changed before opening the tab.");
           const child = open(owner, url, false);
-          owner.sender.send("octopus:client-browser-opened", state(child));
+          owner.sender.send("phobos:client-browser-opened", state(child));
           return child.view.webContents;
         } };
       } catch (error) { page.error = error.message; publish(page); }

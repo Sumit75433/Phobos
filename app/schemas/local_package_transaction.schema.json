@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/local_package_transaction.schema.json",
-  "title": "Octopus Local Package Transaction",
+  "$id": "https://phobos.local/schemas/local_package_transaction.schema.json",
+  "title": "Phobos Local Package Transaction",
   "type": "object",
   "required": [
     "schema",
@@ -17,7 +17,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "octopus.local_package_transaction"
+      "const": "phobos.local_package_transaction"
     },
     "schema_version": {
       "const": 3
@@ -51,14 +51,14 @@
       "minItems": 1,
       "maxItems": 128,
       "items": {
-        "$ref": "https://octopus.local/schemas/local_package_receipt.schema.json"
+        "$ref": "https://phobos.local/schemas/local_package_receipt.schema.json"
       }
     },
     "previous_receipts": {
       "type": "array",
       "maxItems": 128,
       "items": {
-        "$ref": "https://octopus.local/schemas/local_package_receipt.schema.json"
+        "$ref": "https://phobos.local/schemas/local_package_receipt.schema.json"
       }
     },
     "moves": {

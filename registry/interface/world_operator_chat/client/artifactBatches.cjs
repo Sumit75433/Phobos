@@ -6,9 +6,9 @@ const { readCompleteLedgerRecords } = require("./chatArtifacts.cjs");
 const { LIVE_STREAM_ARTIFACT_LABEL } = require("./constants.cjs");
 const { arrayValue, artifactLabel, contentHashHex, databaseInteger, decimalSafeInteger, exactOutboundRuntime, isObject, nonNegativeInteger, readJsonIfPresent, requiredString, safeSegment, stringValue } = require("./values.cjs");
 
-async function readExactInterfaceRole(octopusHome, interfaceId) {
+async function readExactInterfaceRole(phobosHome, interfaceId) {
   const descriptor = await readJsonIfPresent(path.join(
-    octopusHome,
+    phobosHome,
     "registry",
     "interface",
     safeSegment(interfaceId, "source interface id"),
@@ -20,15 +20,15 @@ async function readExactInterfaceRole(octopusHome, interfaceId) {
   return requiredString(descriptor.role, `source interface '${interfaceId}' role`).toLowerCase();
 }
 
-async function assertExactOperatorClientInterface(octopusHome, interfaceId) {
+async function assertExactOperatorClientInterface(phobosHome, interfaceId) {
   const interfaceRoot = path.join(
-    octopusHome,
+    phobosHome,
     "registry",
     "interface",
     interfaceId,
   );
   const descriptor = await readJsonIfPresent(path.join(interfaceRoot, "interface.json"));
-  const sidecar = await readJsonIfPresent(path.join(interfaceRoot, "octopus_os.json"));
+  const sidecar = await readJsonIfPresent(path.join(interfaceRoot, "phobos_os.json"));
   if (
     !isObject(descriptor)
     || descriptor.id !== interfaceId
@@ -43,9 +43,9 @@ async function assertExactOperatorClientInterface(octopusHome, interfaceId) {
     || sidecar.interface !== interfaceId
     || sidecar.owner_interface !== interfaceId
     || sidecar.component !== "client"
-    || sidecar.workspace !== "octopus_os"
+    || sidecar.workspace !== "phobos_os"
   ) {
-    throw new Error(`interface '${interfaceId}' has no exact Octopus OS client ownership`);
+    throw new Error(`interface '${interfaceId}' has no exact Phobos OS client ownership`);
   }
 }
 
@@ -94,7 +94,7 @@ async function readSpotlightOperatorRows(input) {
   } catch {
     return null;
   }
-  const indexPath = path.join(input.octopusHome, "ledger", "ledger-index.sqlite");
+  const indexPath = path.join(input.phobosHome, "ledger", "ledger-index.sqlite");
   let database;
   try {
     database = new DatabaseSync(indexPath, { readOnly: true });

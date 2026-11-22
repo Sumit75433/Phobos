@@ -58,7 +58,7 @@ export type ClientExtensionContribution =
   | { kind: "surface"; document: ClientSurfaceDocument };
 
 export type ClientExtensionManifest = {
-  schema: "octopus.client_extension";
+  schema: "phobos.client_extension";
   schema_version: 1;
   id: string;
   version: string;
@@ -230,7 +230,7 @@ export type ClientExtensionActionOutcome = {
 };
 
 export type ClientExtensionActionStatus = {
-  contract: "octopus.client-extension.action-status.v1";
+  contract: "phobos.client-extension.action-status.v1";
   extensionId: string;
   actionId: string;
   interfaceId: string;

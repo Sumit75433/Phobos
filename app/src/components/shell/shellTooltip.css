@@ -3,7 +3,7 @@
   border-radius: calc(var(--radius-3xl-base) * var(--corner-radius-scale));
   padding: 5px 12px;
   border-color: color-mix(in oklab, currentColor 5%, transparent);
-  corner-shape: var(--octopus-corner-shape);
+  corner-shape: var(--phobos-corner-shape);
   box-shadow: 0 8px 18px #0f172a33;
   font-weight: var(--font-ui-weight, 400);
   line-height: 18px;
@@ -26,7 +26,7 @@
   margin-inline-end: -7px;
   border: 0;
   border-radius: var(--radius-lg);
-  corner-shape: var(--octopus-corner-shape);
+  corner-shape: var(--phobos-corner-shape);
   background: color-mix(in oklab, currentColor 25%, transparent);
   color: inherit;
   box-shadow: none;

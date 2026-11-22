@@ -74,7 +74,7 @@ function shutdown(code, signal) {
   if (stopping) return;
   stopping = true;
   if (electron && electron.exitCode == null) {
-    electron.send({ type: "octopus-dev-quit" });
+    electron.send({ type: "phobos-dev-quit" });
     forceTimer = setTimeout(() => {
       if (electron?.exitCode == null) electron.kill(signal || "SIGTERM");
     }, 12_000);

@@ -4,7 +4,7 @@
   "name": "Memory",
   "description": "Remembers your preferences, corrections and proven procedures across Home and tasks, and finds them again when they matter.",
   "category": "plugin",
-  "developer": "Octopus",
+  "developer": "Phobos",
   "version": "1.0.0",
   "icon": "book-open",
   "logo": "application-logo.svg",

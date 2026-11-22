@@ -19,7 +19,7 @@ export class RendererFailureBoundary extends Component<{ children: ReactNode }, 
   componentDidCatch(error: Error, info: ErrorInfo) {
     const componentStack = info.componentStack ?? "";
     this.setState({ componentStack });
-    void window.octopusTransport?.logClientEvent({
+    void window.phobosTransport?.logClientEvent({
       level: "error",
       event: "renderer.boundary_failure",
       message: `${error.stack || error.message}\n${componentStack}`.slice(0, 8_000),
@@ -38,8 +38,8 @@ export class RendererFailureBoundary extends Component<{ children: ReactNode }, 
           <p className="m-0 max-w-full truncate font-mono text-xs leading-4 text-token-description-foreground" title={error.message}>{error.message}</p>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
             <button className={FAILURE_PRIMARY_BUTTON_CLASS} onClick={() => window.location.reload()} type="button">Reload client</button>
-            <button className={FAILURE_GHOST_BUTTON_CLASS} onClick={() => void window.octopusTransport?.copyText(detail)} type="button">Copy details</button>
-            <button className={FAILURE_GHOST_BUTTON_CLASS} onClick={() => void window.octopusTransport?.openClientLogs()} type="button">Open logs</button>
+            <button className={FAILURE_GHOST_BUTTON_CLASS} onClick={() => void window.phobosTransport?.copyText(detail)} type="button">Copy details</button>
+            <button className={FAILURE_GHOST_BUTTON_CLASS} onClick={() => void window.phobosTransport?.openClientLogs()} type="button">Open logs</button>
           </div>
         </div>
       </main>

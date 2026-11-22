@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "interface://world_provider_codex/packages/octopus-provider-codex/life-bin/octopus-provider-opencodex-life",
+      "bin": "interface://world_provider_codex/packages/phobos-provider-codex/life-bin/phobos-provider-opencodex-life",
       "doctor": {
         "args": [
           "--doctor"
@@ -48,7 +48,7 @@
           "/etc"
         ],
         "write_paths": [
-          "/tmp/octopus-provider-cwd"
+          "/tmp/phobos-provider-cwd"
         ],
         "executable_paths": [],
         "executable_root_subpaths": [
@@ -62,7 +62,7 @@
           },
           {
             "root_slot": "registry_interface_root",
-            "relative_path": "world_provider_codex/packages/octopus-provider-codex/opencodex-bridge/bin/octopus-opencodex-bridge"
+            "relative_path": "world_provider_codex/packages/phobos-provider-codex/opencodex-bridge/bin/phobos-opencodex-bridge"
           }
         ],
         "executable_commands": [

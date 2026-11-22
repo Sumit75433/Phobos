@@ -1,7 +1,7 @@
 # Standalone Examples & Empirical Benchmarks
 
 Two MIT-licensed companion packages illustrate narrow, testable pieces of
-agent infrastructure. They run without installing Octopus, signing in to a model,
+agent infrastructure. They run without installing Phobos, signing in to a model,
 or configuring its runtime. They are **not** kernel components, production
 security certifications, or evidence of autonomous self-improvement.
 
@@ -33,8 +33,8 @@ pathname-based spawn; scrub coverage is bounded; hash chains need a trusted
 anchor; recourse minimality holds only within the declared finite repair graph.
 See the package's [threat model](mcp-identity-guard/README.md#audit-and-threat-model).
 
-A separate [local native-room smoke test](mcp-identity-guard/README.md#local-native-octopus-integration-smoke-test)
-also listed and called a qualified Python diagnostics tool through Octopus's
+A separate [local native-room smoke test](mcp-identity-guard/README.md#local-native-phobos-integration-smoke-test)
+also listed and called a qualified Python diagnostics tool through Phobos's
 Seatbelt-enforced MCP stdio room, closed cleanly, and produced a verified
 7-record audit chain. This demonstrates one configured integration, not general
 security or stock-installation support.
@@ -44,7 +44,7 @@ security or stock-installation support.
 A zero-dependency Python 3.12+ CLI and library for bounded HTTP observations of
 `/llms.txt`, `/llms-full.txt`, `/agents.md`, two MCP discovery paths,
 plugin manifests, and explicit robots AI directives. Commands: `scan`, `report`,
-`octopus-card`, plus `summarize` for body-free publication.
+`phobos-card`, plus `summarize` for body-free publication.
 
 Three-line quickstart from the repository root (offline report; Python 3.12+):
 
@@ -90,5 +90,5 @@ cargo clippy --manifest-path examples/mcp-identity-guard/Cargo.toml --locked --a
 ```
 
 The Ubuntu `client` and `rust` jobs in [quality](../.github/workflows/quality.yml)
-run the corresponding package tests. These examples do not change the Octopus
+run the corresponding package tests. These examples do not change the Phobos
 release version, installation, or live runtime.

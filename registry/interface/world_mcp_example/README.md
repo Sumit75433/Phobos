@@ -8,7 +8,7 @@ The folder contains:
 - `interface.json` with the transport config;
 - `life.json` with a package-local MCP life process and a generic tool-door
   process;
-- `packages/octopus-mcp-client` with the executable code;
+- `packages/phobos-mcp-client` with the executable code;
 - `registry/tool/mcp.example.search/tool.json` with a separate process
   declaration for the server tool.
 

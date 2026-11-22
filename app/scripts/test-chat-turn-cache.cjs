@@ -7,7 +7,7 @@ const { blake3 } = require('@noble/hashes/blake3');
 const { createProjectionContext } = require('../electron/projection.cjs');
 
 test('persisted task status is an exact incremental fold and rejects changed evidence', async (t) => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'octopus-turn-cache-'));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'phobos-turn-cache-'));
   t.after(() => fs.rmSync(home, { recursive: true, force: true }));
   const ledger = path.join(home, 'ledger/movements.jsonl'), blobs = path.join(home, 'ledger/blobs');
   fs.mkdirSync(blobs, { recursive: true });
@@ -33,10 +33,10 @@ test('persisted task status is an exact incremental fold and rejects changed evi
   const entry = { runId: 'task', chatInterfaceId: 'chat', activity: rows,
     record: { interface_state: { chat: { provider_runtime_interface: 'provider' } } } };
   const read = async (expectedReads) => {
-    const store = createProjectionContext({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), octopusHome: () => home });
+    const store = createProjectionContext({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), phobosHome: () => home });
     const resolve = store.resolveLedgerArtifactPayload, readSequences = [];
     store.resolveLedgerArtifactPayload = (...args) => { readSequences.push(args[0].seq); return resolve(...args); };
-    const projection = { octopusHome: home, operatorChatTurnStateCache: new Map(), warnings: [] };
+    const projection = { phobosHome: home, operatorChatTurnStateCache: new Map(), warnings: [] };
     try {
       const result = await store.operatorChatTurnState(projection, entry, protocol);
       if (expectedReads) assert.deepEqual([...new Set(readSequences)], expectedReads);
@@ -111,7 +111,7 @@ test('persisted task status is an exact incremental fold and rejects changed evi
 
 test('task previews reuse verified text and invalidate source, identity and projection changes', async (t) => {
   const { cachedOperatorChatArtifactText } = require('../electron/projection/operatorChatCache.cjs');
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'octopus-preview-cache-'));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'phobos-preview-cache-'));
   t.after(() => fs.rmSync(home, { recursive: true, force: true }));
   const blobs = path.join(home, 'ledger/blobs'); fs.mkdirSync(blobs, { recursive: true });
   const blob = (value) => {
@@ -124,7 +124,7 @@ test('task previews reuse verified text and invalidate source, identity and proj
   const protocol = { artifactReadProjection: { schema_version: 1, json_object_labels: ['answer'], excluded_root_fields: ['private'],
     max_source_bytes: 1000, max_projected_bytes: 1000 } };
   const entry = { runId: 'run', chatInterfaceId: 'chat' };
-  const createStore = () => createProjectionContext({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), octopusHome: () => home });
+  const createStore = () => createProjectionContext({ resolveRepoRoot: () => path.resolve(__dirname, '../..'), phobosHome: () => home });
   const read = async (expectedLoads, direction = 'out', existingStore) => {
     const store = existingStore ?? createStore();
     let loads = 0;

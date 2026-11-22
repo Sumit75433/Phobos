@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AdmittedClientSurfaceDocument, ClientSurfaceHostSource } from "../client-surfaces/types";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import { builtinClientExtensions } from "./catalog";
 import {
   applyClientExtensionLifecycle,
@@ -36,7 +36,7 @@ const EMPTY_SNAPSHOT: ClientExtensionStoreSnapshot = {
   errors: [],
 };
 
-export function useClientExtensions(accessProfile: OctopusClientAccessProfile): ClientExtensionRegistryState {
+export function useClientExtensions(accessProfile: PhobosClientAccessProfile): ClientExtensionRegistryState {
   const [snapshot, setSnapshot] = useState<ClientExtensionStoreSnapshot>(EMPTY_SNAPSHOT);
   const snapshotRef = useRef<ClientExtensionStoreSnapshot>(EMPTY_SNAPSHOT);
   const [hydrated, setHydrated] = useState(accessProfile !== "live");
@@ -200,7 +200,7 @@ export function useClientExtensions(accessProfile: OctopusClientAccessProfile): 
 
 export function materializeClientExtensions(
   snapshot: ClientExtensionStoreSnapshot,
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   readError: string,
 ): Omit<ClientExtensionRegistryState, "generation" | "root" | "hydrated" | "loading" | "mutable" | "refresh" | "install" | "dismiss" | "uninstall" | "configure" | "removeCredential" | "checkCredential" | "revealRoot"> {
   const errors = [...snapshot.errors];

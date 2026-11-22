@@ -29,7 +29,7 @@ const compiled = build({
   return module.exports;
 });
 const navCompiled = build({
-  stdin: {contents: `import './src/components/icon-glyphs/shell'; export * from './src/components/navigation/OctopusNav'; export {loadTaskHoverEnvironmentDetails} from './src/components/navigation/TaskHoverCard';`, resolveDir: path.resolve(__dirname, '..'), loader: 'tsx'},
+  stdin: {contents: `import './src/components/icon-glyphs/shell'; export * from './src/components/navigation/PhobosNav'; export {loadTaskHoverEnvironmentDetails} from './src/components/navigation/TaskHoverCard';`, resolveDir: path.resolve(__dirname, '..'), loader: 'tsx'},
   bundle: true, platform: 'node', format: 'cjs', write: false, loader: {'.css': 'empty'}, external: ['react', 'react-dom', 'react/jsx-runtime'],
   define: {'import.meta.env.DEV': 'false'}, logLevel: 'silent',
 }).then(result => {
@@ -40,7 +40,7 @@ const navCompiled = build({
 const surface = (id, kind, root = '', data = {}) => ({id, kind, root, data, label: kind, mode: 'evidence', status: 'ready', viewerUrl: '', protocol: '', readOnly: true});
 const files = root => surface(`files:${root}`, 'files', root, {slot: 'readable_root'});
 const environment = (id, surfaces) => ({id, runId: 'run-a', revision: '', eeId: 'ee-a', kind: 'shell', lifecycle: 'active', status: 'ready', live: true, label: 'Files', detail: '', substrateFamily: '', door: '', root: '/', session: '', transport: 'process_session.direct.v1', cells: [], capabilities: [], tools: [], surfaces});
-const roots = ['/', '/Library/Developer/CommandLineTools', '/opt/homebrew', '/var/octopus/ee_instances'].map(files);
+const roots = ['/', '/Library/Developer/CommandLineTools', '/opt/homebrew', '/var/phobos/ee_instances'].map(files);
 const review = {...surface('review:a', 'changes', '/work/project-a'), mode: 'direct', protocol: 'git.worktree'};
 const worktree = surface('worktree:a', 'worktree_status', '', {worktree_git_root: '/work/project-a', worktree_workspace_root: '/work/project-a/src', branch: 'feature/context'});
 const room = environment('room-a', [...roots, files('/work/project-a/src'), review, worktree, surface('terminal:a', 'terminal', '', {workspace: '/work/project-a/src'}), surface('browser:a', 'browser')]);
@@ -66,13 +66,13 @@ test('workspace model separates permission roots, exact workspace identities and
   assert.equal(projectedChangeStats({changes: [{path: 'a', additions: 2, deletions: 3}, null]}), '+2 −3');
 });
 
-test('actual OctopusNav SSR closure and hover loader retain contextual workspaces and reject mismatched projection identity', async () => {
-  const {OctopusTaskRow, loadTaskHoverEnvironmentDetails} = await navCompiled;
+test('actual PhobosNav SSR closure and hover loader retain contextual workspaces and reject mismatched projection identity', async () => {
+  const {PhobosTaskRow, loadTaskHoverEnvironmentDetails} = await navCompiled;
   const rawRoom = {worker_environment_id: room.id, run_id: 'run-a', ee_id: 'ee-a', root: '/', transport: room.transport, client_surfaces: room.surfaces};
   let payload = {run: {run_id: 'run-a', ee_id: 'ee-a'}, worker_environments: [rawRoom, {...rawRoom, worker_environment_id: 'another-room'}]};
   const calls = [];
-  w.octopusTransport = {projectionRead: async request => {calls.push(request); return payload;}};
-  const markup = renderToStaticMarkup(React.createElement(OctopusTaskRow, {title: 'Contextual task', active: false, onClick() {}, hoverDetails: {runId: 'run-a', eeId: 'ee-a'}}));
+  w.phobosTransport = {projectionRead: async request => {calls.push(request); return payload;}};
+  const markup = renderToStaticMarkup(React.createElement(PhobosTaskRow, {title: 'Contextual task', active: false, onClick() {}, hoverDetails: {runId: 'run-a', eeId: 'ee-a'}}));
   assert.match(markup, /Contextual task/);
   assert.deepEqual(calls, []);
   const details = await loadTaskHoverEnvironmentDetails('run-a', 'ee-a');
@@ -87,12 +87,12 @@ test('actual OctopusNav SSR closure and hover loader retain contextual workspace
   await assert.rejects(loadTaskHoverEnvironmentDetails('run-a', 'ee-a'), /identity does not match/);
   payload = {run: {run_id: 'run-a', ee_id: 'another-ee'}, worker_environments: []};
   await assert.rejects(loadTaskHoverEnvironmentDetails('run-a', 'ee-a'), /identity does not match/);
-  delete w.octopusTransport;
+  delete w.phobosTransport;
 });
 
 test('actual React summary opens exact panes, reveals related activity, keeps sources and withdraws stale context without native reads', {timeout: 10000}, async () => {
   const nativeCalls = [];
-  w.octopusTransport = new Proxy({}, {get(_, key) {nativeCalls.push(key); throw new Error(`Unexpected native access: ${String(key)}`);}});
+  w.phobosTransport = new Proxy({}, {get(_, key) {nativeCalls.push(key); throw new Error(`Unexpected native access: ${String(key)}`);}});
   const {TaskSummaryPanel} = await compiled;
   const root = createRoot(w.document.getElementById('root'));
   const opened = [], revealed = [], sourceLists = [];
@@ -133,8 +133,8 @@ test('actual React summary opens exact panes, reveals related activity, keeps so
     await render({surfaces: [], messages: [], runProjection: {id: 'run-c', workerEnvironment: environment('only-roots', roots), workerEnvironments: []}});
     assert.doesNotMatch(w.document.body.textContent, /No workspace attached|Environment details/);
     assert.doesNotMatch(w.document.body.textContent, /feature\/context|project-b|Task viewer|Related agents|notes.txt/);
-    await click(buttons().find(b => b.title.includes('files:/var/octopus/ee_instances')));
-    assert.deepEqual(opened.pop(), ['only-roots', 'files', 'files:/var/octopus/ee_instances']);
+    await click(buttons().find(b => b.title.includes('files:/var/phobos/ee_instances')));
+    assert.deepEqual(opened.pop(), ['only-roots', 'files', 'files:/var/phobos/ee_instances']);
     await click(buttons().find(b => b.getAttribute('aria-label') === 'Details for Files')); assert.deepEqual(opened.pop(), ['only-roots', 'overview']);
     await render({messages: [], surfaces: [], runProjection: null}); assert.match(w.document.body.textContent, /Environment information unavailable/);
     assert.deepEqual(nativeCalls, []);

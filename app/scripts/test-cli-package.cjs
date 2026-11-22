@@ -6,7 +6,7 @@ const { test } = require("node:test");
 const { createRuntimePackager } = require("./runtime-package.cjs");
 
 test("CLI and desktop share exact owner executable materialization", () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-cli-package-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-cli-package-"));
   const put = (file, value) => {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, typeof value === "string" ? value : `${JSON.stringify(value)}\n`);
@@ -14,8 +14,8 @@ test("CLI and desktop share exact owner executable materialization", () => {
   try {
     const appRoot = path.join(root, "app"), source = path.join(root, "registry"), outputRoot = path.join(root, "output");
     put(path.join(appRoot, "distribution/generated-outputs.json"), { schema_version: 1, paths: ["registry/interface/provider/generated/"] });
-    put(path.join(source, "interface/world_provider_codex/packages/octopus-provider-codex/managed-cli/bootstrap.cjs"), "module.exports = {};\n");
-    put(path.join(source, ".octopus-source.json"), { schema_version: 1, id: "test-baseline" });
+    put(path.join(source, "interface/world_provider_codex/packages/phobos-provider-codex/managed-cli/bootstrap.cjs"), "module.exports = {};\n");
+    put(path.join(source, ".phobos-source.json"), { schema_version: 1, id: "test-baseline" });
     put(path.join(source, "worker_environment_kind/test/worker_environment_kind.json"), {
       worker_environment_kind_id: "test", tool_process_bins: ["target/debug/test-tool"],
     });
@@ -37,7 +37,7 @@ test("CLI and desktop share exact owner executable materialization", () => {
     const builder = createRuntimePackager({ repoRoot: root, appRoot, outputRoot });
     for (const platform of ["linux", "darwin"]) {
       const target = createRuntimePackager({ repoRoot: root, appRoot, outputRoot, platform });
-      const service = "octopus-linux-process-authority";
+      const service = "phobos-linux-process-authority";
       assert.equal(target.collectBundledBinaries(source).includes(service), platform === "linux");
       assert.equal(target.sharedBinaries(new Set()).includes(service), platform === "linux");
     }
@@ -56,7 +56,7 @@ test("CLI and desktop share exact owner executable materialization", () => {
     assert.deepEqual(process.authority.executable_root_subpaths, [{ root_slot: "registry_worker_environment_kind_root", relative_path: "test/packages/bin/test-tool" }]);
     assert.equal(read("interface/test_planner/interface.json").interface_driver_config.private_config.task_planner_executable, "bin/test-planner");
     const shared = builder.sharedBinaries(installationReferences);
-    assert.ok(shared.includes("octopus") && shared.includes("test-planner"));
+    assert.ok(shared.includes("phobos") && shared.includes("test-planner"));
     assert.ok(!shared.includes("test-tool") && !shared.includes("test-life"));
     assert.ok(builder.collectBundledBinaries(source).includes("test-tool"));
     assert.equal(owned.size, 2);

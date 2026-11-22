@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from "react";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import type { ClientSurfaceDescriptor } from "./surfaceTypes";
 
-export type ClientWorkspaceKey = "dashboard" | "octopus-os";
+export type ClientWorkspaceKey = "dashboard" | "phobos-os";
 
 export type ClientChatProject = {
   sourceFolders?: string[];
@@ -39,15 +39,15 @@ export type ClientTaskOrganization = {
   sortMode: ClientTaskSortMode;
 };
 
-export const PINNED_TASKS_STORAGE_KEY = "octopus.shell.pinnedTasks.v2";
-export const TASK_ORDER_STORAGE_KEY = "octopus.shell.taskOrder.v2";
-export const PROJECT_FILTER_STORAGE_KEY = "octopus.shell.selectedProject.v2";
-export const TASK_ORGANIZATION_STORAGE_KEY = "octopus.shell.taskOrganization.v2";
-export const DASHBOARD_PINNED_SURFACES_STORAGE_KEY = "octopus.dashboard.pinnedSurfaces.v1";
-const PROJECTS_STORAGE_KEY = "octopus.shell.projects.v4";
+export const PINNED_TASKS_STORAGE_KEY = "phobos.shell.pinnedTasks.v2";
+export const TASK_ORDER_STORAGE_KEY = "phobos.shell.taskOrder.v2";
+export const PROJECT_FILTER_STORAGE_KEY = "phobos.shell.selectedProject.v2";
+export const TASK_ORGANIZATION_STORAGE_KEY = "phobos.shell.taskOrganization.v2";
+export const DASHBOARD_PINNED_SURFACES_STORAGE_KEY = "phobos.dashboard.pinnedSurfaces.v1";
+const PROJECTS_STORAGE_KEY = "phobos.shell.projects.v4";
 
-const TASK_ORGANIZATION_CHANGED_EVENT = "octopus:task-organization-changed";
-const CHAT_PROJECTS_CHANGED_EVENT = "octopus:chat-projects-changed";
+const TASK_ORGANIZATION_CHANGED_EVENT = "phobos:task-organization-changed";
+const CHAT_PROJECTS_CHANGED_EVENT = "phobos:chat-projects-changed";
 const EMPTY_TASK_ORGANIZATION: ClientTaskOrganization = Object.freeze({
   aliases: Object.freeze({}),
   collapsedSectionIds: Object.freeze([]),
@@ -59,12 +59,12 @@ const EMPTY_TASK_ORGANIZATION: ClientTaskOrganization = Object.freeze({
 });
 
 type TaskOrganizationStore = {
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
   current: ClientTaskOrganization;
   subscribers: Set<() => void>;
 };
 
-const taskOrganizationStores = new Map<OctopusClientAccessProfile, TaskOrganizationStore>();
+const taskOrganizationStores = new Map<PhobosClientAccessProfile, TaskOrganizationStore>();
 let taskOrganizationStorageListenerReady = false;
 
 export const fixedDashboardSurfaceIds = [
@@ -82,13 +82,13 @@ export function isFixedDashboardSurfaceId(surfaceId: string): boolean {
 
 export function profileStorageKey(
   storageKey: string,
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): string {
   return profile === "live" ? storageKey : `${storageKey}.test`;
 }
 
 export function parseClientWorkspaceKey(value: string | null | undefined): ClientWorkspaceKey | null {
-  return value === "dashboard" || value === "octopus-os" ? value : null;
+  return value === "dashboard" || value === "phobos-os" ? value : null;
 }
 
 export function surfaceBelongsToWorkspace(
@@ -100,20 +100,20 @@ export function surfaceBelongsToWorkspace(
 
 export function workspaceForSurface(
   surface: Pick<ClientSurfaceDescriptor, "placements">,
-  fallback: ClientWorkspaceKey = "octopus-os",
+  fallback: ClientWorkspaceKey = "phobos-os",
 ): ClientWorkspaceKey {
-  if (surface.placements.includes("home")) return "octopus-os";
+  if (surface.placements.includes("home")) return "phobos-os";
   if (surface.placements.includes("shell")) return "dashboard";
   return fallback;
 }
 
-function octopusOsSurface(surfaceId: string): string {
+function phobosOsSurface(surfaceId: string): string {
   return ["voice", "chat", "scheduled", "inbox", "applications", "drivers"].includes(surfaceId) ? surfaceId : "";
 }
 
 export function readStoredStringList(
   storageKey: string,
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   fallback: readonly string[] = [],
 ): string[] {
   const raw = window.localStorage.getItem(profileStorageKey(storageKey, profile));
@@ -130,7 +130,7 @@ export function readStoredStringList(
 export function saveStoredStringList(
   storageKey: string,
   values: readonly string[],
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): void {
   window.localStorage.setItem(profileStorageKey(storageKey, profile), JSON.stringify([...new Set(values)]));
 }
@@ -164,17 +164,17 @@ const LAB_SEED_PROJECTS: readonly ClientChatProject[] = Object.freeze([
 
 const LAB_SEED_PINNED_CHAT_IDS: readonly string[] = Object.freeze(["lab_run_2", "lab_run_5"]);
 
-const LAB_SEED_MARKER_STORAGE_KEY = "octopus.shell.labSeeds.v3";
+const LAB_SEED_MARKER_STORAGE_KEY = "phobos.shell.labSeeds.v3";
 
-export function defaultClientChatProjects(profile: OctopusClientAccessProfile): ClientChatProject[] {
+export function defaultClientChatProjects(profile: PhobosClientAccessProfile): ClientChatProject[] {
   return profile === "lab" ? LAB_SEED_PROJECTS.map((project) => ({ ...project, chatRunIds: [...project.chatRunIds] })) : [];
 }
 
-export function defaultPinnedTaskIds(profile: OctopusClientAccessProfile): string[] {
+export function defaultPinnedTaskIds(profile: PhobosClientAccessProfile): string[] {
   return profile === "lab" ? [...LAB_SEED_PINNED_CHAT_IDS] : [];
 }
 
-export function ensureLabSidebarSeeds(profile: OctopusClientAccessProfile): void {
+export function ensureLabSidebarSeeds(profile: PhobosClientAccessProfile): void {
   if (profile !== "lab" || typeof window === "undefined") return;
   const markerKey = profileStorageKey(LAB_SEED_MARKER_STORAGE_KEY, profile);
   if (window.localStorage.getItem(markerKey)) return;
@@ -186,7 +186,7 @@ export function ensureLabSidebarSeeds(profile: OctopusClientAccessProfile): void
   window.localStorage.setItem(markerKey, new Date().toISOString());
 }
 
-export function readClientChatProjects(profile: OctopusClientAccessProfile): ClientChatProject[] {
+export function readClientChatProjects(profile: PhobosClientAccessProfile): ClientChatProject[] {
   const raw = window.localStorage.getItem(profileStorageKey(PROJECTS_STORAGE_KEY, profile));
   if (raw == null) return defaultClientChatProjects(profile);
   try {
@@ -197,17 +197,17 @@ export function readClientChatProjects(profile: OctopusClientAccessProfile): Cli
   }
 }
 
-export function hasStoredClientChatProjects(profile: OctopusClientAccessProfile): boolean {
+export function hasStoredClientChatProjects(profile: PhobosClientAccessProfile): boolean {
   return window.localStorage.getItem(profileStorageKey(PROJECTS_STORAGE_KEY, profile)) != null;
 }
 
-export function readClientProjectFilterEeId(profile: OctopusClientAccessProfile): string {
+export function readClientProjectFilterEeId(profile: PhobosClientAccessProfile): string {
   const raw = window.localStorage.getItem(profileStorageKey(PROJECT_FILTER_STORAGE_KEY, profile));
   if (raw == null) return profile === "lab" ? LAB_SEED_PROJECTS[0].id : "";
   return raw.trim();
 }
 
-export function saveClientProjectFilterEeId(profile: OctopusClientAccessProfile, projectId: string): void {
+export function saveClientProjectFilterEeId(profile: PhobosClientAccessProfile, projectId: string): void {
   window.localStorage.setItem(profileStorageKey(PROJECT_FILTER_STORAGE_KEY, profile), projectId.trim());
 }
 
@@ -264,7 +264,7 @@ export function clientProjectScopeIds(
 
 export function saveClientChatProjects(
   projects: readonly ClientChatProject[],
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): void {
   const stored = projects.map((project) => ({
     id: project.id,
@@ -282,7 +282,7 @@ export function saveClientChatProjects(
 }
 
 export function subscribeClientChatProjects(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   onChange: () => void,
 ): () => void {
   const storageKey = profileStorageKey(PROJECTS_STORAGE_KEY, profile);
@@ -335,7 +335,7 @@ function normalizeClientChatProjects(value: unknown, fallback: ClientChatProject
 }
 
 export function useClientTaskOrganization(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): ClientTaskOrganization {
   const store = taskOrganizationStore(profile);
   return useSyncExternalStore(
@@ -346,7 +346,7 @@ export function useClientTaskOrganization(
 }
 
 export function updateClientTaskOrganization(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   update: (current: ClientTaskOrganization) => ClientTaskOrganization,
 ): ClientTaskOrganization {
   const store = taskOrganizationStore(profile);
@@ -370,7 +370,7 @@ export function clientTaskTitle(
 }
 
 export function renameClientTask(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   runId: string,
   title: string,
 ): ClientTaskOrganization {
@@ -383,7 +383,7 @@ export function renameClientTask(
 }
 
 export function clearClientTaskAlias(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   runId: string,
 ): ClientTaskOrganization {
   return updateClientTaskOrganization(profile, (current) => {
@@ -394,7 +394,7 @@ export function clearClientTaskAlias(
 }
 
 export function restoreClientTaskAliasIfAbsent(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   runId: string,
   title: string,
 ): ClientTaskOrganization {
@@ -406,7 +406,7 @@ export function restoreClientTaskAliasIfAbsent(
 }
 
 export function removeClientTaskPresentation(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   runId: string,
 ): ClientTaskOrganization {
   if (!runId) throw new Error("A projected run is required.");
@@ -426,7 +426,7 @@ export function removeClientTaskPresentation(
 }
 
 export function recordClientTaskOpened(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   runId: string,
 ): ClientTaskOrganization {
   if (!runId) return taskOrganizationStore(profile).current;
@@ -437,7 +437,7 @@ export function recordClientTaskOpened(
 }
 
 export function ensureClientTaskReadBaseline(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): ClientTaskOrganization {
   const store = taskOrganizationStore(profile);
   if (store.current.readBaselineAtMs) return store.current;
@@ -447,7 +447,7 @@ export function ensureClientTaskReadBaseline(
 }
 
 export function recordClientTaskRead(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   runId: string,
   updatedAtMs: number,
 ): ClientTaskOrganization {
@@ -469,7 +469,7 @@ export function clientTaskUnread(
 }
 
 export function recordClientDestination(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   destination: Omit<ClientRecentDestination, "key" | "openedAtMs">,
 ): ClientTaskOrganization {
   const surfaceId = destination.surfaceId.trim();
@@ -496,14 +496,14 @@ export function recordClientDestination(
 }
 
 export function setClientTaskSortMode(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   sortMode: ClientTaskSortMode,
 ): ClientTaskOrganization {
   return updateClientTaskOrganization(profile, (current) => ({ ...current, sortMode }));
 }
 
 export function setClientSidebarSectionCollapsed(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
   sectionId: string,
   collapsed: boolean,
 ): ClientTaskOrganization {
@@ -535,7 +535,7 @@ export function clientOsRootEeId(
   return roots.length === 1 ? roots[0] : "";
 }
 
-function taskOrganizationStore(profile: OctopusClientAccessProfile): TaskOrganizationStore {
+function taskOrganizationStore(profile: PhobosClientAccessProfile): TaskOrganizationStore {
   ensureTaskOrganizationStorageListener();
   const existing = taskOrganizationStores.get(profile);
   if (existing) return existing;
@@ -586,7 +586,7 @@ function ensureTaskOrganizationStorageListener(): void {
 }
 
 function readClientTaskOrganization(
-  profile: OctopusClientAccessProfile,
+  profile: PhobosClientAccessProfile,
 ): ClientTaskOrganization {
   if (typeof window === "undefined") return EMPTY_TASK_ORGANIZATION;
   const raw = window.localStorage.getItem(profileStorageKey(TASK_ORGANIZATION_STORAGE_KEY, profile));
@@ -641,9 +641,9 @@ function normalizeRecentDestinations(value: unknown): ClientRecentDestination[] 
     const row = candidate as Partial<ClientRecentDestination>;
     const rawWorkspaceKey = (candidate as Record<string, unknown>).workspaceKey;
     const workspaceKey = rawWorkspaceKey === "os" ? "dashboard"
-      : rawWorkspaceKey === "agent-1" ? "octopus-os"
+      : rawWorkspaceKey === "agent-1" ? "phobos-os"
         : parseClientWorkspaceKey(typeof rawWorkspaceKey === "string" ? rawWorkspaceKey : undefined)
-          ?? (octopusOsSurface(String(row.surfaceId ?? "")) ? "octopus-os" : "dashboard");
+          ?? (phobosOsSurface(String(row.surfaceId ?? "")) ? "phobos-os" : "dashboard");
     const surfaceId = typeof row.surfaceId === "string" ? row.surfaceId.trim() : "";
     const runId = typeof row.runId === "string" ? row.runId.trim() : "";
     const openedAtMs = typeof row.openedAtMs === "number" && Number.isFinite(row.openedAtMs)

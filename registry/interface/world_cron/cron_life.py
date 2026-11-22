@@ -14,22 +14,22 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 _HASH_MODULE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "octopus_content_hash.py",
+    "phobos_content_hash.py",
 )
 _HASH_MODULE_SPEC = importlib.util.spec_from_file_location(
-    "octopus_world_cron_content_hash",
+    "phobos_world_cron_content_hash",
     _HASH_MODULE_PATH,
 )
 if _HASH_MODULE_SPEC is None or _HASH_MODULE_SPEC.loader is None:
     raise RuntimeError("cron content-hash dependency cannot be loaded")
 _HASH_MODULE = importlib.util.module_from_spec(_HASH_MODULE_SPEC)
 _HASH_MODULE_SPEC.loader.exec_module(_HASH_MODULE)
-octopus_content_hash = _HASH_MODULE.octopus_content_hash
+phobos_content_hash = _HASH_MODULE.phobos_content_hash
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-INTERFACE_DIR = os.path.abspath(os.environ["OCTOPUS_INTERFACE_DIR"])
-VAR_DIR = os.path.abspath(os.environ["OCTOPUS_VAR_DIR"])
-INTERFACE_DESCRIPTOR_JSON = os.environ["OCTOPUS_INTERFACE_DESCRIPTOR_JSON"]
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+INTERFACE_DIR = os.path.abspath(os.environ["PHOBOS_INTERFACE_DIR"])
+VAR_DIR = os.path.abspath(os.environ["PHOBOS_VAR_DIR"])
+INTERFACE_DESCRIPTOR_JSON = os.environ["PHOBOS_INTERFACE_DESCRIPTOR_JSON"]
 
 ACTIVATION_PATH = os.path.join(INTERFACE_DIR, "activation.json")
 PAYLOADS_DIR = os.path.join(VAR_DIR, "payloads")
@@ -54,7 +54,7 @@ class DeliveryRefused(RuntimeError):
 
 def load_host_io_limits():
     try:
-        value = json.loads(os.environ["OCTOPUS_INTERFACE_HOST_IO_LIMITS"])
+        value = json.loads(os.environ["PHOBOS_INTERFACE_HOST_IO_LIMITS"])
     except (KeyError, json.JSONDecodeError) as error:
         raise RuntimeError("cron host IO limits are absent or malformed") from error
     expected = {
@@ -247,18 +247,18 @@ def exact_keys(value, allowed, required, label):
 
 def root_slots():
     try:
-        value = json.loads(os.environ["OCTOPUS_ROOT_SLOTS_JSON"])
+        value = json.loads(os.environ["PHOBOS_ROOT_SLOTS_JSON"])
     except (KeyError, json.JSONDecodeError) as error:
-        raise RuntimeError("OCTOPUS_ROOT_SLOTS_JSON is absent or malformed") from error
+        raise RuntimeError("PHOBOS_ROOT_SLOTS_JSON is absent or malformed") from error
     if not isinstance(value, dict):
-        raise RuntimeError("OCTOPUS_ROOT_SLOTS_JSON must be a JSON object")
+        raise RuntimeError("PHOBOS_ROOT_SLOTS_JSON must be a JSON object")
     for name in (
         "run_records_root",
         "timezone_database_root",
     ):
         path = value.get(name)
         if not isinstance(path, str) or not path or not os.path.isabs(path):
-            raise RuntimeError(f"OCTOPUS_ROOT_SLOTS_JSON has no absolute {name!r}")
+            raise RuntimeError(f"PHOBOS_ROOT_SLOTS_JSON has no absolute {name!r}")
     return value
 
 
@@ -775,7 +775,7 @@ def prepared_manifest_path(label, manifest_hash):
         "cron prepared artifact manifest",
         private=True,
     )
-    if octopus_content_hash(body) != manifest_hash:
+    if phobos_content_hash(body) != manifest_hash:
         raise RuntimeError("cron prepared artifact manifest hash mismatch")
     try:
         manifest = json.loads(body)
@@ -811,7 +811,7 @@ def prepared_manifest_path(label, manifest_hash):
         "cron prepared artifact payload",
         private=True,
     )
-    if octopus_content_hash(payload) != payload_hash:
+    if phobos_content_hash(payload) != payload_hash:
         raise RuntimeError("cron prepared artifact payload hash mismatch")
     return path
 
@@ -889,7 +889,7 @@ def materialize_artifact(label, payload, root=PAYLOADS_DIR):
     if len(payload) > HOST_IO_LIMITS["max_payload_bytes"]:
         raise ValueError("cron artifact payload exceeds max_payload_bytes")
     private_directory(root)
-    payload_hash = octopus_content_hash(payload)
+    payload_hash = phobos_content_hash(payload)
     payload_path = os.path.join(root, f"artifact-{payload_hash}.payload")
     try:
         existing = read_regular_file_bounded(
@@ -910,7 +910,7 @@ def materialize_artifact(label, payload, root=PAYLOADS_DIR):
     manifest_bytes = canonical_json(manifest)
     if len(manifest_bytes) > HOST_IO_LIMITS["max_manifest_bytes"]:
         raise ValueError("cron artifact manifest exceeds max_manifest_bytes")
-    manifest_hash = octopus_content_hash(manifest_bytes)
+    manifest_hash = phobos_content_hash(manifest_bytes)
     manifest_path = os.path.join(root, f"artifact-{manifest_hash}.artifact.json")
     try:
         existing = read_regular_file_bounded(
@@ -931,7 +931,7 @@ def staging_pair(manifest_hash):
         raise ValueError("invalid staging manifest hash")
     path = os.path.join(PAYLOADS_DIR, "artifact-" + manifest_hash + ".artifact.json")
     raw = read_regular_file_bounded(path, HOST_IO_LIMITS["max_manifest_bytes"], "staging manifest", private=True)
-    if octopus_content_hash(raw) != manifest_hash:
+    if phobos_content_hash(raw) != manifest_hash:
         raise ValueError("staging manifest hash mismatch")
     manifest = json.loads(raw)
     digest = manifest.get("payload_content_hash")
@@ -941,7 +941,7 @@ def staging_pair(manifest_hash):
     if manifest.get("payload_path") != payload:
         raise ValueError("staging payload escapes its content-addressed path")
     raw_payload = read_regular_file_bounded(payload, HOST_IO_LIMITS["max_payload_bytes"], "staging payload", private=True)
-    if octopus_content_hash(raw_payload) != digest:
+    if phobos_content_hash(raw_payload) != digest:
         raise ValueError("staging payload hash mismatch")
     return path, payload
 
@@ -991,9 +991,9 @@ def reclaim_completed_artifact(label, manifest_hash, admitted_seq):
 
 
 def _ledger_path():
-    path = os.environ.get("OCTOPUS_MOVEMENTS_JSONL")
+    path = os.environ.get("PHOBOS_MOVEMENTS_JSONL")
     if not isinstance(path, str) or not path or not os.path.isabs(path):
-        raise RuntimeError("cron life requires an absolute OCTOPUS_MOVEMENTS_JSONL")
+        raise RuntimeError("cron life requires an absolute PHOBOS_MOVEMENTS_JSONL")
     return path
 
 
@@ -1065,7 +1065,7 @@ def arrival_identity(label, manifest_hash):
             "artifact_id": artifact_id,
             "label": "cron.arrival.idempotency",
             "bytes": list(
-                bytes.fromhex(octopus_content_hash(artifact_id.encode("utf-8")))
+                bytes.fromhex(phobos_content_hash(artifact_id.encode("utf-8")))
             ),
         }
     ]

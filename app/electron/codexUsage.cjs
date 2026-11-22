@@ -57,7 +57,7 @@ function createCodexUsageReader(options = {}) {
     await persistScanCache(startedAtMs).catch(() => undefined);
     const buckets = aggregateRecords(source.records, input, rates);
     return {
-      schema: "octopus.client_usage",
+      schema: "phobos.client_usage",
       schemaVersion: 1,
       provider: "codex",
       readAt: new Date().toISOString(),
@@ -543,7 +543,7 @@ function createTranscriptParserPool(size) {
 
   const spawnWorker = () => {
     const state = {
-      worker: new Worker(__filename, { workerData: { octopusCodexUsageParser: true } }),
+      worker: new Worker(__filename, { workerData: { phobosCodexUsageParser: true } }),
       task: null,
       closed: false,
     };
@@ -658,7 +658,7 @@ function boundedError(error) {
   return `Codex session directory could not be scanned: ${message.slice(0, 240)}`;
 }
 
-if (!isMainThread && workerData?.octopusCodexUsageParser === true && parentPort) {
+if (!isMainThread && workerData?.phobosCodexUsageParser === true && parentPort) {
   parentPort.on("message", async (task) => {
     if (!isObject(task) || !Number.isSafeInteger(task.id) || typeof task.filePath !== "string" || typeof task.timeZone !== "string") return;
     try {

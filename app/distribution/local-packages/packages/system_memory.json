@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.local_package",
+  "schema": "phobos.local_package",
   "schema_version": 1,
   "id": "system_memory",
   "version": "1.1.0",
@@ -9,7 +9,7 @@
   "display": {
     "name": "Memory",
     "description": "Remembers your preferences, corrections and proven procedures across Home and tasks, and finds them again when they matter.",
-    "developer": "Octopus",
+    "developer": "Phobos",
     "category": "plugin",
     "icon": "book-open"
   },

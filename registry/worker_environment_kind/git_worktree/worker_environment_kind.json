@@ -5,8 +5,8 @@
     "system_coder_env"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-coder-exec-tool",
-    "target/debug/octopus-coder-fs-tool"
+    "target/debug/phobos-coder-exec-tool",
+    "target/debug/phobos-coder-fs-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": [

@@ -1,68 +1,68 @@
 import type {
-  OctopusAdministratorAccessUpdate,
-  OctopusClientAccessDetails,
-  OctopusClientAccessStatus,
-  OctopusClientLabAccess,
-  OctopusTouchIdStatus,
+  PhobosAdministratorAccessUpdate,
+  PhobosClientAccessDetails,
+  PhobosClientAccessStatus,
+  PhobosClientLabAccess,
+  PhobosTouchIdStatus,
 } from "./electron";
 
-const ACCESS_URL = "/__octopus/access";
+const ACCESS_URL = "/__phobos/access";
 
-export async function readClientAccessStatus(): Promise<OctopusClientAccessStatus> {
-  if (window.octopusTransport?.accessStatus) return window.octopusTransport.accessStatus();
+export async function readClientAccessStatus(): Promise<PhobosClientAccessStatus> {
+  if (window.phobosTransport?.accessStatus) return window.phobosTransport.accessStatus();
   return request("status", "GET");
 }
 
-export async function configureClientAccess(password: string): Promise<OctopusClientAccessStatus> {
-  if (window.octopusTransport?.configureAccess) return window.octopusTransport.configureAccess(password);
+export async function configureClientAccess(password: string): Promise<PhobosClientAccessStatus> {
+  if (window.phobosTransport?.configureAccess) return window.phobosTransport.configureAccess(password);
   return request("configure", "POST", { password });
 }
 
-export async function unlockClientAccess(password: string): Promise<OctopusClientAccessStatus> {
-  if (window.octopusTransport?.unlockAccess) return window.octopusTransport.unlockAccess(password);
+export async function unlockClientAccess(password: string): Promise<PhobosClientAccessStatus> {
+  if (window.phobosTransport?.unlockAccess) return window.phobosTransport.unlockAccess(password);
   return request("unlock", "POST", { password });
 }
 
-export async function readTouchIdStatus(): Promise<OctopusTouchIdStatus> {
-  if (window.octopusTransport?.touchIdStatus) return window.octopusTransport.touchIdStatus();
+export async function readTouchIdStatus(): Promise<PhobosTouchIdStatus> {
+  if (window.phobosTransport?.touchIdStatus) return window.phobosTransport.touchIdStatus();
   return { available: false, enrolled: false, prompted: false };
 }
 
-export async function setTouchIdEnabled(enabled: boolean): Promise<OctopusTouchIdStatus> {
-  if (window.octopusTransport?.setTouchIdEnabled) return window.octopusTransport.setTouchIdEnabled(enabled);
-  throw new Error("Touch ID is unavailable outside the Octopus desktop app.");
+export async function setTouchIdEnabled(enabled: boolean): Promise<PhobosTouchIdStatus> {
+  if (window.phobosTransport?.setTouchIdEnabled) return window.phobosTransport.setTouchIdEnabled(enabled);
+  throw new Error("Touch ID is unavailable outside the Phobos desktop app.");
 }
 
-export async function unlockWithTouchId(): Promise<OctopusClientAccessStatus> {
-  if (window.octopusTransport?.unlockWithTouchId) return window.octopusTransport.unlockWithTouchId();
-  throw new Error("Touch ID is unavailable outside the Octopus desktop app.");
+export async function unlockWithTouchId(): Promise<PhobosClientAccessStatus> {
+  if (window.phobosTransport?.unlockWithTouchId) return window.phobosTransport.unlockWithTouchId();
+  throw new Error("Touch ID is unavailable outside the Phobos desktop app.");
 }
 
-export async function lockClientAccess(): Promise<OctopusClientAccessStatus> {
-  if (window.octopusTransport?.lockAccess) return window.octopusTransport.lockAccess();
+export async function lockClientAccess(): Promise<PhobosClientAccessStatus> {
+  if (window.phobosTransport?.lockAccess) return window.phobosTransport.lockAccess();
   return request("lock", "POST", {});
 }
 
-export async function readClientLabAccess(): Promise<OctopusClientLabAccess> {
-  if (window.octopusTransport?.labAccess) return window.octopusTransport.labAccess();
+export async function readClientLabAccess(): Promise<PhobosClientLabAccess> {
+  if (window.phobosTransport?.labAccess) return window.phobosTransport.labAccess();
   return labRequest("lab-status", "GET");
 }
 
-export async function updateClientLabAccess(password: string): Promise<OctopusClientLabAccess> {
-  if (window.octopusTransport?.updateLabAccess) return window.octopusTransport.updateLabAccess(password);
+export async function updateClientLabAccess(password: string): Promise<PhobosClientLabAccess> {
+  if (window.phobosTransport?.updateLabAccess) return window.phobosTransport.updateLabAccess(password);
   return labRequest("lab-update", "POST", { password });
 }
 
-export async function readClientAccessDetails(): Promise<OctopusClientAccessDetails> {
-  if (window.octopusTransport?.accessDetails) return window.octopusTransport.accessDetails();
+export async function readClientAccessDetails(): Promise<PhobosClientAccessDetails> {
+  if (window.phobosTransport?.accessDetails) return window.phobosTransport.accessDetails();
   return detailsRequest("details", "GET");
 }
 
 export async function updateClientAdministratorAccess(
-  request: OctopusAdministratorAccessUpdate,
-): Promise<OctopusClientAccessDetails> {
-  if (window.octopusTransport?.updateAdministratorAccess) {
-    return window.octopusTransport.updateAdministratorAccess(request);
+  request: PhobosAdministratorAccessUpdate,
+): Promise<PhobosClientAccessDetails> {
+  if (window.phobosTransport?.updateAdministratorAccess) {
+    return window.phobosTransport.updateAdministratorAccess(request);
   }
   return detailsRequest("administrator-update", "POST", request);
 }
@@ -71,7 +71,7 @@ async function request(
   operation: "status" | "configure" | "unlock" | "lock",
   method: "GET" | "POST",
   body?: Record<string, unknown>,
-): Promise<OctopusClientAccessStatus> {
+): Promise<PhobosClientAccessStatus> {
   if (!import.meta.env.DEV) throw new Error("Client access host is unavailable");
   const response = await fetch(`${ACCESS_URL}/${operation}`, {
     method,
@@ -82,14 +82,14 @@ async function request(
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(typeof payload?.error === "string" ? payload.error : `Client access failed: HTTP ${response.status}`);
-  return payload as OctopusClientAccessStatus;
+  return payload as PhobosClientAccessStatus;
 }
 
 async function labRequest(
   operation: "lab-status" | "lab-update",
   method: "GET" | "POST",
   body?: Record<string, unknown>,
-): Promise<OctopusClientLabAccess> {
+): Promise<PhobosClientLabAccess> {
   if (!import.meta.env.DEV) throw new Error("Client access host is unavailable");
   const response = await fetch(`${ACCESS_URL}/${operation}`, {
     method,
@@ -100,14 +100,14 @@ async function labRequest(
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(typeof payload?.error === "string" ? payload.error : `Client access failed: HTTP ${response.status}`);
-  return payload as OctopusClientLabAccess;
+  return payload as PhobosClientLabAccess;
 }
 
 async function detailsRequest(
   operation: "details" | "administrator-update",
   method: "GET" | "POST",
-  body?: OctopusAdministratorAccessUpdate,
-): Promise<OctopusClientAccessDetails> {
+  body?: PhobosAdministratorAccessUpdate,
+): Promise<PhobosClientAccessDetails> {
   if (!import.meta.env.DEV) throw new Error("Client access host is unavailable");
   const response = await fetch(`${ACCESS_URL}/${operation}`, {
     method,
@@ -118,5 +118,5 @@ async function detailsRequest(
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(typeof payload?.error === "string" ? payload.error : `Client access failed: HTTP ${response.status}`);
-  return payload as OctopusClientAccessDetails;
+  return payload as PhobosClientAccessDetails;
 }

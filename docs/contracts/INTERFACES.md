@@ -132,7 +132,7 @@ life served in a socket root the host formed for it (`app_server_control_root`
 or `interface_local_ipc_root`). While the life sleeps the runtime holds them and
 accepts their callers. A caller that leaves without sending anything wakes
 nobody. A caller's first byte lifts the life, which receives the listener and
-every caller still connected through `OCTOPUS_INHERITED_SOCKETS` and serves
+every caller still connected through `PHOBOS_INHERITED_SOCKETS` and serves
 them as its own:
 
 ```json

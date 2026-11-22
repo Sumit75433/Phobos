@@ -138,7 +138,7 @@ class RelaySupervisor:
                         break
                     connection.sock.settimeout(45)
                     headers = {"Accept": "text/event-stream", "Cache-Control": "no-cache",
-                               "User-Agent": "Octopus-GitHub-Issues"}
+                               "User-Agent": "Phobos-GitHub-Issues"}
                     if self.last_event_id is not None:
                         headers["Last-Event-ID"] = self.last_event_id
                     connection.request("GET", target.path, headers=headers)

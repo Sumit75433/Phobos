@@ -1,9 +1,9 @@
 {
   "schema_version": 3,
   "id": "world_operator_chat",
-  "name": "Octopus Home",
-  "description": "Creates the exact Home and task interfaces through which you work with Octopus.",
-  "developer": "Octopus",
+  "name": "Phobos Home",
+  "description": "Creates the exact Home and task interfaces through which you work with Phobos.",
+  "developer": "Phobos",
   "version": "1.0.0",
   "category": "connector",
   "icon": "house",

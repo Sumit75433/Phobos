@@ -12,7 +12,7 @@ const { contentHashHex, ledgerArtifactId, ledgerArtifactLabel, stringValue } = r
 
 function ledgerProjection(store) {
   function resolveDurableRoot() {
-    return path.join(store.octopusHome(), "ledger");
+    return path.join(store.phobosHome(), "ledger");
   }
 
   const ledgerCursors = new Map();

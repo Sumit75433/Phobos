@@ -27,9 +27,9 @@ function fixture(count = 2) {
 }
 
 test('client observation keeps exact arbitrary inventory rows, hidden state and bounded whole-row omissions', async t => {
-  const previousTransport = window.octopusTransport;
-  window.octopusTransport = { projectionRead: async () => ({ generation: 1, root: 'artifact://ledger', documents: [], errors: [] }) };
-  t.after(() => { window.octopusTransport = previousTransport; });
+  const previousTransport = window.phobosTransport;
+  window.phobosTransport = { projectionRead: async () => ({ generation: 1, root: 'artifact://ledger', documents: [], errors: [] }) };
+  t.after(() => { window.phobosTransport = previousTransport; });
   window.localStorage.clear(); const options = fixture();
   let snapshot = clientObservationContext(options), data = JSON.parse(snapshot[0].text);
   assert.deepEqual(data.widgets, readHomeWidgetInventory(options));
@@ -97,7 +97,7 @@ test('text context carries current client IDs and a prepared envelope replays it
   assert.doesNotThrow(() => messages.operatorClientContext([{ name: 'home_state', text: 'x'.repeat(12288) }, { name: 'client_observation', text: 'x'.repeat(4096) }]));
   assert.throws(() => messages.operatorClientContext([...snapshot, { name: 'extra', text: 'x'.repeat(16384) }]), /exceeds/);
   assert.throws(() => messages.operatorClientContext([{ ...snapshot[0], grant: true }]), /field set/);
-  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'octopus-observation-'));
+  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'phobos-observation-'));
   t.after(() => fs.rm(artifactRoot, { recursive: true, force: true }));
   await fs.mkdir(path.join(artifactRoot, 'payloads'));
   const bytes = Buffer.from(JSON.stringify({ text: 'Show it', message_id: 'same_input', attachments: [], client_context: context }));

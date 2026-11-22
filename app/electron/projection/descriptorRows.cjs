@@ -5,7 +5,7 @@ const path = require("node:path");
 const { readJsonFile, readOptionalRegularJsonDocument } = require("./jsonFiles.cjs");
 const { readApplicationLogoAsset, readInterfacePrivateConfigurationProjection } = require("./privateConfiguration.cjs");
 const { normalizeDescriptorRow } = require("./registryRows.cjs");
-const { parseApplicationManifest, parseClientWorkerTemplate, parseOctopusOsSidecar } = require("./sidecars.cjs");
+const { parseApplicationManifest, parseClientWorkerTemplate, parsePhobosOsSidecar } = require("./sidecars.cjs");
 const { mapConcurrentOrdered, stringValue } = require("./values.cjs");
 
 function descriptorRowsProjection(store) {
@@ -34,20 +34,20 @@ function descriptorRowsProjection(store) {
         }
         let row = normalizeDescriptorRow(registryRoot, registry, entry.name, descriptorPath, descriptor);
         if (registry.kind === "interface") {
-          const octopusOsPath = path.join(root, entry.name, "octopus_os.json");
+          const phobosOsPath = path.join(root, entry.name, "phobos_os.json");
           try {
-            const octopusOs = await readOptionalRegularJsonDocument(
-              octopusOsPath,
-              `Octopus OS sidecar ${entry.name}`,
+            const phobosOs = await readOptionalRegularJsonDocument(
+              phobosOsPath,
+              `Phobos OS sidecar ${entry.name}`,
             );
-            if (octopusOs) {
-              row.octopus_os_sidecar = {
-                ...parseOctopusOsSidecar(octopusOs.document, entry.name, octopusOsPath),
-                source_digest: octopusOs.digest,
+            if (phobosOs) {
+              row.phobos_os_sidecar = {
+                ...parsePhobosOsSidecar(phobosOs.document, entry.name, phobosOsPath),
+                source_digest: phobosOs.digest,
               };
             }
           } catch (error) {
-            row.octopus_os_sidecar = null;
+            row.phobos_os_sidecar = null;
             warnings.push(String(error?.message ?? error));
           }
           const applicationPath = path.join(root, entry.name, "application.json");
@@ -89,7 +89,7 @@ function descriptorRowsProjection(store) {
               descriptor,
               interfaceId: entry.name,
               interfaceRegistryDirectory: path.join(root, entry.name),
-              interfacePrivateDirectory: path.join(store.octopusHome(), "interfaces", entry.name),
+              interfacePrivateDirectory: path.join(store.phobosHome(), "interfaces", entry.name),
               launchEnvironment,
             });
           } catch (error) {

@@ -65,7 +65,7 @@ function holder() {
 
 let root, barrier, counter = 0;
 before(async () => {
-  root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-retirement-lifetime-"));
+  root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-retirement-lifetime-"));
   const binary = path.join(root, "holder");
   await fs.writeFile(binary, `#!${process.execPath}\n(${holder.toString()})();\n`, { mode: 0o700 });
   barrier = createTaskRetirementBarrier(binary);

@@ -1,4 +1,4 @@
-# Extending Octopus
+# Extending Phobos
 
 The cookbook for adding capabilities without editing the runtime.
 
@@ -22,7 +22,7 @@ Installed owners may carry authorized local edits to descriptors, role artifacts
 and code. Health checks validate identities, structure, declared imports and
 probes, not byte equality with a distribution.
 
-Octopus is a research preview. An incompatible persisted format needs a fresh
+Phobos is a research preview. An incompatible persisted format needs a fresh
 Home through normal setup: there are no migrations, automatic package adoption
 or startup repairs of old state. Keep sign-in credentials when resetting a
 disposable Home; never transplant old runs, checkpoints or ledgers.
@@ -148,7 +148,7 @@ closed with both sizes.
 ### Providers served through OpenCodex
 
 Most providers are one entry in the Codex provider's OpenCodex bridge,
-`registry/interface/world_provider_codex/packages/octopus-provider-codex/opencodex-bridge/providers.json`.
+`registry/interface/world_provider_codex/packages/phobos-provider-codex/opencodex-bridge/providers.json`.
 `scripts/sync-providers.ts` writes each provider folder and local package from
 the Codex provider template and the pinned OpenCodex registry, so every provider
 moves to a new OpenCodex release together; `--check` fails when a folder drifts
@@ -190,7 +190,7 @@ CLI descriptor declares zero: its request deadline ends the turn, without
 replaying the CLI through native stream retries. The CLI and bridge share the
 declared `transport.request_timeout_ms`; expiry returns the deadline in the error.
 The bridge serves no hosted web search:
-runs search through Octopus's own `web.search` and `web.extract`.
+runs search through Phobos's own `web.search` and `web.extract`.
 
 Google's adapter accepts `private_config.opencodex.options.google_safety_settings`
 as the native array of `category` and `threshold` pairs, sent as `safetySettings`
@@ -235,7 +235,7 @@ starts a fresh ACP session with the supplied transcript. If a restart interrupts
 a pending MCP call, ACP cannot reconnect that call. The provider restores the
 admitted transcript with its call ID and result in a fresh ACP session. The
 same recovery lets the bridge release an idle connection after its configured
-transport timeout while Octopus continues waiting for the tool. A retry
+transport timeout while Phobos continues waiting for the tool. A retry
 of a recorded request returns its recorded response and call ID.
 Replayed assistant content is ordered typed JSON, including historical calls
 and their exact arguments, rather than prose that resembles a new tool call.
@@ -283,7 +283,7 @@ successful amendments return the checked readback hash, counts and stage
 receipts. The readback validates the full record without returning its private
 interface state.
 
-Explicitly selected Octopus `web.search` and `web.extract` remain visible on
+Explicitly selected Phobos `web.search` and `web.extract` remain visible on
 Codex and ChatGPT as well as the bridge providers. Codex's hosted search is
 independent of those granted tools. The web driver defaults to the configured `custom` endpoint. Select
 `keenable` in a tool call to use the bundled keyless endpoint.

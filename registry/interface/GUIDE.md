@@ -83,7 +83,7 @@ environment variable, and `life.json` selects it explicitly by JSON pointer.
 
 The process starts fail-closed with a cleared environment and physical
 authority. It always receives only its own interface folder, its own writable
-`OCTOPUS_VAR_DIR`, a private stdin/stdout intake, and the handles it lists. The
+`PHOBOS_VAR_DIR`, a private stdin/stdout intake, and the handles it lists. The
 ledger, the blob cache, and the Spotlight index are available only as explicit
 read handles. Root slots, environment paths, network, local IPC, package files,
 and executables are declared as data; the sandbox denies anything undeclared.

@@ -19,7 +19,7 @@ const POLL_SECONDS = 20;
 const PROBE_BUDGET_MS = 25_000;
 const ANSWER_RESERVE_MS = 5_000;
 const MAX_HEAD_BYTES = 65536;
-const CONFIRMATION = "Octopus is connected. Messages you send here reach the tasks you connect to Telegram.";
+const CONFIRMATION = "Phobos is connected. Messages you send here reach the tasks you connect to Telegram.";
 const CONFIG_PATH = path.join(__dirname, "..", "config.json");
 const MANAGE = { label: "Manage in BotFather", url: "https://t.me/BotFather" };
 
@@ -99,7 +99,7 @@ async function stored(ctx, name) {
   const saved = ctx.values?.[name];
   const ambient = await ctx.launchEnvironment(name);
   if (typeof saved === "string" && typeof ambient === "string" && saved !== ambient) {
-    throw new Problem(`${name} is set in this Mac's environment and saved in Octopus with a different value, so the Telegram interface cannot start. Remove it from the environment or connect with the same value.`);
+    throw new Problem(`${name} is set in this Mac's environment and saved in Phobos with a different value, so the Telegram interface cannot start. Remove it from the environment or connect with the same value.`);
   }
   const value = typeof ambient === "string" ? ambient : typeof saved === "string" ? saved : "";
   return value.trim();
@@ -500,20 +500,20 @@ function response(buffer, ended, limit) {
 function unreachable(route, failures) {
   const where = route.official ? "Telegram" : `the Bot API server at ${route.base.authority}`;
   const untrusted = failures.find((error) => /CERT|SELF_SIGNED|UNABLE_TO_|ALTNAME|HOSTNAME/i.test(String(error?.code ?? "")));
-  if (untrusted) return `The certificate of ${route.base.host} is not trusted (${untrusted.code}), so Octopus did not send the bot token.`;
+  if (untrusted) return `The certificate of ${route.base.host} is not trusted (${untrusted.code}), so Phobos did not send the bot token.`;
   if (failures.length && failures.every((error) => error instanceof Timeout)) {
     return `${where} did not answer in time${route.proxy ? ` through the proxy in ${route.proxyEnv}` : ""}. Check the internet connection and try again.`;
   }
   return route.proxy
-    ? `Octopus could not reach ${where} through the proxy in ${route.proxyEnv}. Check the proxy and try again.`
-    : `Octopus could not reach ${where}. Check the internet connection, or set a proxy in ${route.proxyEnv}, and try again.`;
+    ? `Phobos could not reach ${where} through the proxy in ${route.proxyEnv}. Check the proxy and try again.`
+    : `Phobos could not reach ${where}. Check the internet connection, or set a proxy in ${route.proxyEnv}, and try again.`;
 }
 
 async function exchange(route, method, payload, timeoutMs, signal) {
   const head = [
     `POST ${route.base.prefix}/bot${route.token}/${method} HTTP/1.1`,
     `Host: ${route.base.authority}`,
-    "User-Agent: octopus-world-telegram/1",
+    "User-Agent: phobos-world-telegram/1",
     "Accept: application/json",
     "Content-Type: application/json",
     `Content-Length: ${payload.length}`,
@@ -612,7 +612,7 @@ async function takeOverWebhook(ctx, path) {
   const info = await call(ctx, path, "getWebhookInfo");
   if (typeof info?.url === "string" && info.url) {
     await call(ctx, path, "deleteWebhook", { drop_pending_updates: false });
-    ctx.progress({ message: "This bot was sending its messages to a webhook. Octopus switched it to receive them directly." });
+    ctx.progress({ message: "This bot was sending its messages to a webhook. Phobos switched it to receive them directly." });
   }
 }
 
@@ -724,7 +724,7 @@ async function connect(ctx) {
     const access = await allowed(ctx, names, config, users);
     const pairing = !reachable(access);
     if (pairing && usersInherited) {
-      throw new Problem(`${names.users} is set in this Mac's environment without a user ID, so Octopus cannot save the Telegram account you pair. Remove it from the environment or put your Telegram user ID in it.`);
+      throw new Problem(`${names.users} is set in this Mac's environment without a user ID, so Phobos cannot save the Telegram account you pair. Remove it from the environment or put your Telegram user ID in it.`);
     }
     const path = await route(ctx, config, token);
     ctx.progress({ message: "Checking the bot token with Telegram…" });
@@ -764,18 +764,18 @@ async function disconnect(ctx) {
   return guarded(async () => {
     const names = environmentNames(ctx.descriptor);
     await ctx.saveValues({ [names.token]: null, [names.users]: null, [names.home]: null });
-    const removed = "Telegram is disconnected: Octopus removed the bot token and allowed users from this Mac.";
+    const removed = "Telegram is disconnected: Phobos removed the bot token and allowed users from this Mac.";
     const remains = "The bot still exists; revoke its token or delete it in BotFather.";
     if (typeof (await ctx.launchEnvironment(names.token)) !== "string") return { state: "not_connected", manage: MANAGE, message: `${removed} ${remains}` };
     const listed = `${names.token} is set in this Mac's environment`;
     const state = await probe(ctx);
-    if (state.state === "error") return { ...state, message: `Octopus removed the saved Telegram settings, but ${listed} and checking it failed: ${state.message}` };
+    if (state.state === "error") return { ...state, message: `Phobos removed the saved Telegram settings, but ${listed} and checking it failed: ${state.message}` };
     if (state.state === "not_connected") {
       return { ...state, manage: MANAGE, message: `${removed} ${listed}, but no Telegram account reaches tasks through it. ${remains}` };
     }
     return {
       ...state,
-      message: `Octopus removed the saved Telegram settings, but ${listed}, so the Telegram interface keeps using that bot. Remove it there to disconnect.`,
+      message: `Phobos removed the saved Telegram settings, but ${listed}, so the Telegram interface keeps using that bot. Remove it there to disconnect.`,
     };
   });
 }

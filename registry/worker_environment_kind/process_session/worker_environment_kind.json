@@ -5,7 +5,7 @@
     "system_exec_env"
   ],
   "tool_process_bins": [
-    "target/debug/octopus-process-room-tool"
+    "target/debug/phobos-process-room-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": [

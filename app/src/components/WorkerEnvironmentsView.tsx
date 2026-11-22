@@ -3,7 +3,7 @@ import "./icon-glyphs/worker";
 import { motion } from "motion/react";
 import type { ChatRun } from "../chatRuns";
 import type { RunProjection, SelectionRef, TopologySnapshot, WorkerEnvironmentProjection } from "../data/topology";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import type { AdmittedClientSurfaceDocument } from "../client-surfaces/types";
 import { OcButton, OcEmptyState, OcIconButton, OcSearchField, OcSelect, OcStatus, cx, type OcTone } from "../design-system/components";
 import { useProjectionStructureGeneration } from "../projectionLive";
@@ -22,7 +22,7 @@ import {
 import { useFixedVirtualRange } from "./useFixedVirtualRange";
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   chatRuns: readonly ChatRun[];
   snapshot: TopologySnapshot;
   searchFocusTick: number;
@@ -59,7 +59,7 @@ type RoomRow = {
 };
 
 type ProjectPresentationProjection = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   error: string;
   names: Map<string, string>;
   status: "loading" | "ready" | "degraded";
@@ -69,7 +69,7 @@ const ROOM_TABS: Array<{ value: RoomTab; label: string; note: string }> = [
   { value: "all", label: "All", note: "" },
   { value: "tasks", label: "Tasks", note: "Rooms your tasks opened to do their work." },
   { value: "home", label: "Home", note: "Rooms opened for Home." },
-  { value: "system", label: "System", note: "Rooms Octopus opens for its own upkeep rather than for a task. They come and go on their own and need nothing from you." },
+  { value: "system", label: "System", note: "Rooms Phobos opens for its own upkeep rather than for a task. They come and go on their own and need nothing from you." },
 ];
 
 const ROOM_STATE_OPTIONS = [
@@ -190,7 +190,7 @@ export function WorkerEnvironmentsView({ accessProfile, chatRuns, snapshot, sear
               />
             </div>
             <p className="m-0 mt-2 max-w-3xl px-2 text-base leading-6 text-token-text-secondary">
-              Rooms where work touches the world: a browser, a code checkout, a terminal, a desktop. Octopus opens one when a task's tools need it.
+              Rooms where work touches the world: a browser, a code checkout, a terminal, a desktop. Phobos opens one when a task's tools need it.
               Open a room to watch it live, review its changes, or browse its files.
             </p>
           </div>
@@ -241,17 +241,17 @@ export function WorkerEnvironmentsView({ accessProfile, chatRuns, snapshot, sear
             title={snapshot.projection.label}
           />
         ) : null}
-        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-panel pt-1 pb-panel electron:min-w-[calc(320px*var(--octopus-window-zoom))]">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-panel pt-1 pb-panel electron:min-w-[calc(320px*var(--phobos-window-zoom))]">
           {rows.length === 0 ? (
             <RoomEmptyState
               detail={projectionLive
-                ? "When a task needs a browser, a code checkout, a terminal or a desktop, Octopus opens a room for it and it appears here."
+                ? "When a task needs a browser, a code checkout, a terminal or a desktop, Phobos opens a room for it and it appears here."
                 : snapshot.projection.detail}
               title={projectionLive ? "No rooms yet" : snapshot.projection.label}
             />
           ) : visibleRows.length === 0 ? (
             <RoomEmptyState
-              detail={filtered ? "Try another search, state, kind or project." : tab === "tasks" ? "None of your tasks has opened a room." : tab === "home" ? "Home has no rooms." : "Octopus has no upkeep rooms."}
+              detail={filtered ? "Try another search, state, kind or project." : tab === "tasks" ? "None of your tasks has opened a room." : tab === "home" ? "Home has no rooms." : "Phobos has no upkeep rooms."}
               title={filtered ? "No matching rooms" : "Nothing here"}
             />
           ) : (

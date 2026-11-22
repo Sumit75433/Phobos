@@ -39,9 +39,9 @@ async function main() {
   const bundleRoot = await requirePlainDirectory(requiredAbsoluteOption(options, "bundle"), "publication bundle");
   const publicationFile = path.join(bundleRoot, "publication.json");
   const { value: publication } = await readJsonRegular(publicationFile, "publication manifest", 8 * 1024 * 1024);
-  if (publication.schema === "octopus.package_publication") {
+  if (publication.schema === "phobos.package_publication") {
     await verifyRegistryPackage(bundleRoot, publication);
-  } else if (publication.schema === "octopus.client_extension_publication") {
+  } else if (publication.schema === "phobos.client_extension_publication") {
     await verifyClientExtension(bundleRoot, publication);
   } else {
     throw new Error(`publication schema is unsupported: ${publication.schema}`);

@@ -14,7 +14,7 @@ import {
   type WorkerEnvironmentPanelKind,
 } from "./surfaceRegistry";
 
-export const OPEN_WORKER_ENVIRONMENT_PANE_EVENT = "octopus:open-worker-environment-pane";
+export const OPEN_WORKER_ENVIRONMENT_PANE_EVENT = "phobos:open-worker-environment-pane";
 
 export type WorkerEnvironmentPaneTarget = {
   schemaVersion: 1;

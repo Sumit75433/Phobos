@@ -13,7 +13,7 @@ const COMPONENTS = Object.freeze({
 
 function hostTarget(platform = process.platform, architecture = process.arch) {
   const found = SUPPORTED_TARGETS.find((triple) => TARGETS[triple].platform === platform && TARGETS[triple].architecture === architecture);
-  if (!found) throw new Error(`The Octopus CLI distribution is not built on ${platform}-${architecture}; supported targets: ${SUPPORTED_TARGETS.join(", ")}`);
+  if (!found) throw new Error(`The Phobos CLI distribution is not built on ${platform}-${architecture}; supported targets: ${SUPPORTED_TARGETS.join(", ")}`);
   return found;
 }
 

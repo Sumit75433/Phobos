@@ -421,11 +421,11 @@ function buildScene(
   const boundWorldInterfaceNames = dedupe(environments.flatMap((env) => env.worldInterfaces));
   const boundWorldInterfaces = new Set(boundWorldInterfaceNames);
   const registrations = registeredWorldInterfaces.map((iface) => {
-    const sidecar = descriptorObject(iface.descriptor, "octopus_os_sidecar");
+    const sidecar = descriptorObject(iface.descriptor, "phobos_os_sidecar");
     const ownerInterface = descriptorString(sidecar, "owner_interface");
     return {
       id: iface.id,
-      routeSetId: descriptorString(sidecar, "workspace") === "octopus_os" && ownerInterface
+      routeSetId: descriptorString(sidecar, "workspace") === "phobos_os" && ownerInterface
         ? ownerInterface
         : iface.id,
     };

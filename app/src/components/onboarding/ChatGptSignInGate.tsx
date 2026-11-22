@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useChatgptAccount } from "../../account/useChatgptAccount";
-import { OctopusLoadingState } from "../OctopusLoadingLogo";
+import { PhobosLoadingState } from "../PhobosLoadingLogo";
 import openaiLogo from "../../assets/openai-logo.svg?raw";
 import "../account/account.css";
 
@@ -37,13 +37,13 @@ export function ChatGptSignInGate() {
     }
   }
   if (state.loading && !state.account) return <main className="welcome">
-    <OctopusLoadingState className="app-loading-state" label="Checking your ChatGPT account" />
+    <PhobosLoadingState className="app-loading-state" label="Checking your ChatGPT account" />
   </main>;
 
   const error = state.error || state.signInStatusError || copyError;
   return <main className="chatgpt-signin" data-state={state.action} aria-labelledby="chatgpt-signin-title">
     <header className="welcome-top chatgpt-signin-brand">
-      <div className="welcome-brand"><img className="welcome-brand-mark" src="./octopus-logo.png" alt="" /><span className="welcome-brand-name">Octopus&nbsp;OS</span></div>
+      <div className="welcome-brand"><img className="welcome-brand-mark" src="./phobos-logo.png" alt="" /><span className="welcome-brand-name">Phobos&nbsp;OS</span></div>
     </header>
     <section className="chatgpt-signin-panel">
       <div className="chatgpt-signin-heading">

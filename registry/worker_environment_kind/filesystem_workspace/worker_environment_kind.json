@@ -3,8 +3,8 @@
   "substrate_family": "process_exec",
   "door_driver_refs": ["system_workspace_env"],
   "tool_process_bins": [
-    "target/debug/octopus-workspace-exec-tool",
-    "target/debug/octopus-workspace-fs-tool"
+    "target/debug/phobos-workspace-exec-tool",
+    "target/debug/phobos-workspace-fs-tool"
   ],
   "worker_consent": "explicit_ceiling",
   "supported_executor_kinds": ["exec"],

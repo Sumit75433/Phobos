@@ -1,6 +1,6 @@
 # Environments
 
-"Environment" means two different things in Octopus. They are not
+"Environment" means two different things in Phobos. They are not
 interchangeable and they do not nest under a third concept.
 
 | | Execution environment (EE) | Worker environment |
@@ -184,7 +184,7 @@ The Linux backend enforces process authority through an AppArmor profile before 
 The platform service owns only profile loading, child attachment and profile
 release; it runs no tool command and changes no command's Unix credentials.
 Its peer pidfd and temporary ptrace hold bind attachment to the preparing
-process or its actual child without a recycled PID. A process already confined by Octopus can prepare another profile
+process or its actual child without a recycled PID. A process already confined by Phobos can prepare another profile
 only with declared sandbox-delegation authority. AppArmor labels that stack
 that enforced profile with `unconfined` retain the same lease check. A stack
 containing another profile is refused. Another user namespace cannot

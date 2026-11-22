@@ -1,15 +1,15 @@
 import { settingsTargetProps } from "./settingsCatalog";
 import { useClientPreferences, useSetClientPreferences, type WorkerEnvironmentDefaultPanel } from "../../clientPreferences";
 import { OcCard, OcGroup, OcSelect, OcSettingsRow, OcStatus, OcSwitch } from "../../design-system/components";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { SettingsHeading } from "./SettingsHeading";
 import { GestureManager } from "./GestureManager";
 
-export function GesturesSection({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
+export function GesturesSection({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
   return (
     <section {...settingsTargetProps("gestures.controls")} className="settings-section">
       <SettingsHeading
-        description="Move through Octopus with your hands. Video is processed on this device and never leaves it."
+        description="Move through Phobos with your hands. Video is processed on this device and never leaves it."
         title="Gestures"
       />
       <GestureManager accessProfile={accessProfile} />

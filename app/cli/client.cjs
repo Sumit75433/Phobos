@@ -3,7 +3,7 @@ const path = require("node:path");
 const { randomUUID, createHash } = require("node:crypto");
 const { promisify } = require("node:util");
 const { execFile } = require("node:child_process");
-const { createProjectionStore, mutateOctopusOsWorkspace } = require("../electron/projection.cjs");
+const { createProjectionStore, mutatePhobosOsWorkspace } = require("../electron/projection.cjs");
 const { projectionReadRequest } = require("../electron/projectionReadContract.cjs");
 const { createClientProviderMetadata, validateProviderModelSelection } = require("../electron/clientProviderMetadata.cjs");
 const { createOperatorChatClientLoader, assertOperatorChatArtifactBatch } = require("../electron/operatorChatClientContract.cjs");
@@ -28,7 +28,7 @@ function createClient(environment, dependencies = {}) {
     sourceRegistry: () => env.sourceRegistry,
     localPackageRegistry: () => env.packageRoots.sourceRegistryRoot,
     localPackageLibrary: () => env.packageRoots.libraryRoot,
-    octopusHome: () => env.home,
+    phobosHome: () => env.home,
     projectEePolicies: async () => {
       const { stdout } = await execute(env.runtimeBinary, ["project-ee-policies"], {
         env: { ...process.env, ...env.launchEnv },
@@ -64,10 +64,10 @@ function createClient(environment, dependencies = {}) {
     : readPayload(input);
   const submitOptions = {
     clientArtifactsRoot: artifactsRoot,
-    octopusHome: () => env.home,
+    phobosHome: () => env.home,
     installationRoot: () => env.installationRoot,
     registryRoot: () => registryRoot,
-    handInArtifact: (input) => handInArtifact({ ...input, octopusHome: env.home }),
+    handInArtifact: (input) => handInArtifact({ ...input, phobosHome: env.home }),
     readArtifactPayload: readPayload,
   };
 
@@ -86,7 +86,7 @@ function createClient(environment, dependencies = {}) {
   async function requireReady() {
     const runtime = await environment.status();
     if (!(runtime.ready || runtime.runtimeReady)) {
-      throw Object.assign(new Error("Octopus is not running. Start it with 'octopus up' or open the interactive client."), { code: "runtime_stopped" });
+      throw Object.assign(new Error("Phobos is not running. Start it with 'phobos up' or open the interactive client."), { code: "runtime_stopped" });
     }
   }
 
@@ -296,7 +296,7 @@ function createClient(environment, dependencies = {}) {
       if (options.signal?.aborted || closed) return;
       if (Date.now() - lastProbe > 5_000) { await requireReady(); lastProbe = Date.now(); }
       const batch = assertOperatorChatArtifactBatch(await chat.readOperatorChatArtifacts({
-        octopusHome: () => env.home, readArtifactPayload: readActivityPayload,
+        phobosHome: () => env.home, readArtifactPayload: readActivityPayload,
       }, { runId: current.id, interfaceId: current.chatInterfaceId, afterSeq, cursor, waitMs: 500, limit: 256 }));
       cursor = batch.cursor;
       if (options.signal?.aborted || closed) return;
@@ -407,7 +407,7 @@ function createClient(environment, dependencies = {}) {
     const [scope, { raw }] = await Promise.all([read("projection.operator.os.scope"), contextData()]);
     const chat = await loader.load();
     const { taskLifecycle, retirementBarrier } = await chat.loadOperatorTaskLifecycle(submitOptions);
-    const result = await mutateOctopusOsWorkspace(registryRoot, env.home, scope, request, {
+    const result = await mutatePhobosOsWorkspace(registryRoot, env.home, scope, request, {
       chatContexts: raw,
       taskLifecycle,
       commitClientAuthoring: (plan) => commitProjectionClientAuthoring(env.home, registryRoot, plan,
@@ -419,7 +419,7 @@ function createClient(environment, dependencies = {}) {
       },
       releaseTaskWorkerEnvironments: (input) => chat.releaseOperatorTaskWorkerEnvironments(submitOptions, input),
       mutateWorkspaceProject: (scope, request) => chat.withOperatorWorkspaceTopologyLock(env.home, () => mutateWorkspaceProject({
-        octopusHomeRoot: env.home, registryRoot, scope, request, publication: env.packageRoots.publication, retirementBarrier,
+        phobosHomeRoot: env.home, registryRoot, scope, request, publication: env.packageRoots.publication, retirementBarrier,
         planOperatorSurface: ({ eeInstancesRoot, request }) => chat.planOperatorChatSurface({
           ...submitOptions, eeInstancesRoot: () => eeInstancesRoot,
         }, request),
@@ -570,7 +570,7 @@ function createClient(environment, dependencies = {}) {
 }
 
 function workspaceIdentity(scope, agents = false) {
-  if (scope.status !== "ready") throw new Error("Complete Octopus setup before changing Projects or Agents.");
+  if (scope.status !== "ready") throw new Error("Complete Phobos setup before changing Projects or Agents.");
   return {
     rootEeId: scope.root_ee_id, homeRunId: scope.home_run_id,
     homeInterfaceId: scope.home_interface_id, expectedHomeSidecarDigest: scope.home_sidecar_digest,
@@ -597,8 +597,8 @@ function select(rows, value, label, nameKey = "name") {
 function assertAdmission(verdict) {
   if (verdict?.admitted && Number.isSafeInteger(verdict.admitted.seq)) return;
   throw Object.assign(new Error(verdict?.refused
-    ? `Octopus refused the input: ${verdict.refused.reason}.`
-    : "Octopus returned no verifiable admission receipt."), { code: "delivery_refused" });
+    ? `Phobos refused the input: ${verdict.refused.reason}.`
+    : "Phobos returned no verifiable admission receipt."), { code: "delivery_refused" });
 }
 
 module.exports = { createClient, select, assertAdmission };

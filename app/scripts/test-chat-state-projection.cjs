@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const { test } = require('node:test');
 const { build } = require('esbuild');
-const { parseOctopusOsAuthoringProfile } = require('../electron/projection/authoringProfiles.cjs');
+const { parsePhobosOsAuthoringProfile } = require('../electron/projection/authoringProfiles.cjs');
 
 const helpers = build({ stdin: { contents: 'export {latestContextUsage} from "./contextUsage"; export {withRunOperationTargets} from "./runOperationTargets";',
   resolveDir: path.resolve(__dirname, '../src/components/chat'), loader: 'ts' }, bundle: true, write: false, format: 'cjs', platform: 'node' })
@@ -13,8 +13,8 @@ test('client retains native publication selection provenance when projecting a c
   const evidence = { pin: { source: reference('library'), entry_id: 'widget', revision: 'a'.repeat(64) },
     entry: { id: 'widget', schema_version: 1 }, snapshot: reference('snapshot'), context_sources: [reference('guide')] };
   const profile = { ee_id: 'project', worker_choice_interface: 'worker', door_host_slots: {}, publication_evidence: [evidence] };
-  assert.deepEqual(parseOctopusOsAuthoringProfile(profile, 'worker', 'task').publication_evidence, [evidence]);
-  assert.throws(() => parseOctopusOsAuthoringProfile({ ...profile, publication_evidence: [{ ...evidence, pin: { ...evidence.pin, entry_id: 'another' } }] }, 'worker', 'task'), /Invalid publication/);
+  assert.deepEqual(parsePhobosOsAuthoringProfile(profile, 'worker', 'task').publication_evidence, [evidence]);
+  assert.throws(() => parsePhobosOsAuthoringProfile({ ...profile, publication_evidence: [{ ...evidence, pin: { ...evidence.pin, entry_id: 'another' } }] }, 'worker', 'task'), /Invalid publication/);
 });
 
 test('recipient names and links resolve exact declared interfaces, including waits', async () => {

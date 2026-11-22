@@ -17,17 +17,17 @@ const {
   removeLocalPackages,
 } = require("../electron/localPackages.cjs");
 const { runClientDoctor } = require("../electron/clientDoctor.cjs");
-const { createProjectionStore, mutateOctopusOsWorkspace } = require("../electron/projection.cjs");
+const { createProjectionStore, mutatePhobosOsWorkspace } = require("../electron/projection.cjs");
 
 function rootsFor(root) {
-  const octopusHomeRoot = path.join(root, "octopus-home");
+  const phobosHomeRoot = path.join(root, "phobos-home");
   return {
     publication: nativePublication(),
     sourceRegistryRoot: path.join(root, "source-registry"),
-    activeRegistryRoot: path.join(octopusHomeRoot, "registry"),
+    activeRegistryRoot: path.join(phobosHomeRoot, "registry"),
     libraryRoot: path.join(root, "local-library"),
-    stateRoot: path.join(octopusHomeRoot, "client", "package-state"),
-    octopusHomeRoot,
+    stateRoot: path.join(phobosHomeRoot, "client", "package-state"),
+    phobosHomeRoot,
   };
 }
 
@@ -50,7 +50,7 @@ async function createFixture(root) {
     payload: { text: "test context" },
   });
   await writeJson(path.join(roots.libraryRoot, "packages", "application.test_provider.json"), {
-    schema: "octopus.local_package",
+    schema: "phobos.local_package",
     schema_version: 1,
     id: "application.test_provider",
     version: "1.0.0",
@@ -60,7 +60,7 @@ async function createFixture(root) {
     display: {
       name: "Test Provider",
       description: "A multi-owner provider package used by the lifecycle contract test.",
-      developer: "Octopus",
+      developer: "Phobos",
       category: "provider",
     },
     members: [
@@ -69,7 +69,7 @@ async function createFixture(root) {
     ],
   });
   await writeJson(path.join(roots.libraryRoot, "packs", "test-pack.json"), {
-    schema: "octopus.local_application_pack",
+    schema: "phobos.local_application_pack",
     schema_version: 1,
     id: "test-pack",
     version: "1.0.0",
@@ -204,7 +204,7 @@ async function crashChild(mode, root) {
 }
 
 async function consentRecipeFixture() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-consent-package-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-consent-package-")));
   try {
     const roots = await createFixture(root);
     const packFile = path.join(roots.libraryRoot, "packs", "test-pack.json");
@@ -228,7 +228,7 @@ async function consentRecipeFixture() {
 }
 
 async function cloneIsolationFixture() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-clone-install-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-clone-install-")));
   const nativeFiles = require("../electron/nativeFiles.cjs"), original = nativeFiles.cloneFile;
   const syncFs = require("node:fs"), crypto = require("node:crypto");
   try {
@@ -298,7 +298,7 @@ print(json.dumps(rows))
 }
 
 async function run() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-local-packages-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-local-packages-")));
   try {
     const roots = await createFixture(root);
     await fs.mkdir(roots.activeRegistryRoot, { recursive: true });
@@ -402,8 +402,8 @@ async function run() {
       ceiling: { interfaces: [], tools: [], wek: [], mark_outcomes: [], hard_blocked_tools: [] },
       role_artifacts: ["artifact-unowned-context", "artifact-local-context"],
     });
-    const runsRoot = path.join(roots.octopusHomeRoot, "state", "runs");
-    await writeJson(path.join(roots.octopusHomeRoot, "host.json"), {
+    const runsRoot = path.join(roots.phobosHomeRoot, "state", "runs");
+    await writeJson(path.join(roots.phobosHomeRoot, "host.json"), {
       host_manifest_version: 1,
       root_refs: { run_records_root: runsRoot },
     });
@@ -416,8 +416,8 @@ async function run() {
       checkpoints: [{ id: "cp_missing_context", artifact_bindings: [{ id: "artifact-missing-context" }] }],
       active_checkpoints: ["cp_missing_context"],
     });
-    await fs.mkdir(path.join(roots.octopusHomeRoot, "ledger"), { recursive: true });
-    await fs.writeFile(path.join(roots.octopusHomeRoot, "ledger", "movements.jsonl"), `${JSON.stringify({
+    await fs.mkdir(path.join(roots.phobosHomeRoot, "ledger"), { recursive: true });
+    await fs.writeFile(path.join(roots.phobosHomeRoot, "ledger", "movements.jsonl"), `${JSON.stringify({
       from: { Interface: "world_test" },
       to: { Interface: "world_operator_chat_test" },
       invocation_metadata: { runtime: { run: "run_observed" } },
@@ -474,7 +474,7 @@ async function run() {
       sourceRegistry: () => roots.sourceRegistryRoot,
       localPackageRegistry: () => roots.sourceRegistryRoot,
       localPackageLibrary: () => roots.libraryRoot,
-      octopusHome: () => roots.octopusHomeRoot,
+      phobosHome: () => roots.phobosHomeRoot,
       projectEePolicies: async () => ({ environments: [], issues: [] }),
     });
     try {
@@ -500,7 +500,7 @@ async function run() {
       sourceRegistry: () => roots.sourceRegistryRoot,
       localPackageRegistry: () => roots.sourceRegistryRoot,
       localPackageLibrary: () => roots.libraryRoot,
-      octopusHome: () => roots.octopusHomeRoot,
+      phobosHome: () => roots.phobosHomeRoot,
       projectEePolicies: async () => ({ environments: [], issues: [] }),
     };
     const localPackagesRead = { contract_version: 1, method: "projection.operator.os.local_packages" };
@@ -555,7 +555,7 @@ async function run() {
     assert.match(packageRecord(catalog)?.error ?? "", /without a valid install receipt/);
     const missingReceiptExpectation = repairExpectation(packageRecord(catalog));
     await assert.rejects(
-      mutateOctopusOsWorkspace(roots.activeRegistryRoot, roots.octopusHomeRoot, {}, {
+      mutatePhobosOsWorkspace(roots.activeRegistryRoot, roots.phobosHomeRoot, {}, {
         action: "repair_package",
         operationId: "receipt_repair_rejected_001",
         packageIds: ["application.test_provider"],
@@ -721,9 +721,9 @@ async function run() {
     assert.equal(repeatedRepair.changed, false);
     const installedDigest = currentInstallation.installed_digest;
     const dependentManifest = {
-      schema: "octopus.local_package", schema_version: 1, id: "application.dependent", version: "1.0.0",
+      schema: "phobos.local_package", schema_version: 1, id: "application.dependent", version: "1.0.0",
       product_kind: "application", product_id: "world_dependent", release_status: "optional",
-      display: { name: "Dependent", description: "Declared dependency removal fixture.", developer: "Octopus", category: "connector" },
+      display: { name: "Dependent", description: "Declared dependency removal fixture.", developer: "Phobos", category: "connector" },
       required_packages: ["application.test_provider"],
       members: [{ registry_kind: "interface", owner: "world_dependent", primary: true }],
     };
@@ -769,12 +769,12 @@ async function run() {
       expectedSourceDigests: { "application.test_provider": packageRecord(catalog).source_digest },
     };
     await assert.rejects(
-      mutateOctopusOsWorkspace(roots.activeRegistryRoot, roots.octopusHomeRoot, {}, installRequest, inventoryHooks),
+      mutatePhobosOsWorkspace(roots.activeRegistryRoot, roots.phobosHomeRoot, {}, installRequest, inventoryHooks),
       /native publication boundary/,
     );
     assert.deepEqual(await transactionEntries(roots), [], "a refused install writes no transaction");
     assert.equal(packageRecord(await readLocalPackageCatalog(roots))?.installed, false);
-    const inventoryInstall = await mutateOctopusOsWorkspace(roots.activeRegistryRoot, roots.octopusHomeRoot, {}, installRequest,
+    const inventoryInstall = await mutatePhobosOsWorkspace(roots.activeRegistryRoot, roots.phobosHomeRoot, {}, installRequest,
       { ...inventoryHooks, localPackagePublication: roots.publication });
     assert.equal(inventoryInstall.changed, true);
     assert.equal(inventoryInstall.action, "install_package");
@@ -782,7 +782,7 @@ async function run() {
     assert.equal(packageRecord(catalog)?.installed, true);
     assert.equal(packageRecord(catalog)?.receipt_state, "valid");
     assert.deepEqual(await transactionEntries(roots), []);
-    const inventoryRemove = await mutateOctopusOsWorkspace(roots.activeRegistryRoot, roots.octopusHomeRoot, {}, {
+    const inventoryRemove = await mutatePhobosOsWorkspace(roots.activeRegistryRoot, roots.phobosHomeRoot, {}, {
       action: "remove_package",
       operationId: "inventory_remove_001",
       packageIds: ["application.test_provider"],
@@ -798,7 +798,7 @@ async function run() {
 }
 
 async function editableInstalledOwnerFixture() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-editable-owner-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-editable-owner-")));
   try {
     const roots = await createFixture(root), id = "application.test_provider";
     const original = packageRecord(await readLocalPackageCatalog(roots));
@@ -815,7 +815,7 @@ async function editableInstalledOwnerFixture() {
     await writeJson(path.join(roots.activeRegistryRoot, "artifact/artifact-topology/artifact.json"), {
       id: "artifact-topology", schema_version: 1, routes: [],
     });
-    await writeJson(path.join(roots.octopusHomeRoot, "state/runs/run_topology.json"), {
+    await writeJson(path.join(roots.phobosHomeRoot, "state/runs/run_topology.json"), {
       id: "run_topology", status: "idle", active_checkpoints: ["cp_topology"],
       checkpoints: [{ id: "cp_topology", artifact_bindings: [{ id: "artifact-topology" }] }],
     });
@@ -839,7 +839,7 @@ async function editableInstalledOwnerFixture() {
 }
 
 async function applicationHostFixture() {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "octopus-application-host-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "phobos-application-host-")));
   try {
     const roots = rootsFor(root);
     const hostPolicy = path.join(roots.activeRegistryRoot, "interface/system_worker_host/policy.json");
@@ -854,7 +854,7 @@ async function applicationHostFixture() {
     });
     await writeJson(path.join(roots.sourceRegistryRoot, "interface/world_mail/application.json"), {
       schema_version: 3, id: "world_mail", name: "Mail", description: "Mail fixture.", category: "plugin",
-      developer: "Octopus", version: "1.0.0", logo: "logo.svg", interfaces: ["world_mail"],
+      developer: "Phobos", version: "1.0.0", logo: "logo.svg", interfaces: ["world_mail"],
       task_capabilities: { tools: [
         { tool: "artifact.send", interface: "system_room", worker_environment_kind: "system_room" },
         { tool: "mail.search", interface: "world_mail_index", worker_environment_kind: "mail_room" },
@@ -862,8 +862,8 @@ async function applicationHostFixture() {
     });
     await fs.writeFile(path.join(roots.sourceRegistryRoot, "interface/world_mail/logo.svg"), "<svg/>");
     await writeJson(path.join(roots.libraryRoot, "packages", "host.json"), {
-      schema: "octopus.local_package", schema_version: 1, id: "host", version: "1.0.0", product_kind: "driver", product_id: "host",
-      release_status: "optional", display: { name: "Host", description: "Hosts applications.", developer: "Octopus", category: "driver" },
+      schema: "phobos.local_package", schema_version: 1, id: "host", version: "1.0.0", product_kind: "driver", product_id: "host",
+      release_status: "optional", display: { name: "Host", description: "Hosts applications.", developer: "Phobos", category: "driver" },
       members: [{ registry_kind: "interface", owner: "system_worker_host", primary: true, application_host: true,
         configuration: [{ path: "policy.json", fields: ["/ceiling/interfaces", "/ceiling/tools", "/ceiling/wek"]
           .map((pointer) => ({ pointer, schema: { type: "array", items: { type: "string" } } })) }] }],

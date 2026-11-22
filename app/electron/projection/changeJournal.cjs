@@ -20,9 +20,9 @@ function requiredJournalFiring(value) {
   return value;
 }
 
-async function readChangeJournalDocument(octopusHome, runId, firing) {
+async function readChangeJournalDocument(phobosHome, runId, firing) {
   requiredSafeRegistryId(runId, "change journal run");
-  const directory = path.join(octopusHome, "state", "change-journals", runId, requiredJournalFiring(firing));
+  const directory = path.join(phobosHome, "state", "change-journals", runId, requiredJournalFiring(firing));
   const file = path.join(directory, "journal.json");
   const stat = await fs.lstat(file).catch((error) => error?.code === "ENOENT" ? null : Promise.reject(error));
   if (!stat) return null;
@@ -35,15 +35,15 @@ async function readChangeJournalDocument(octopusHome, runId, firing) {
   return { document, digest, directory };
 }
 
-async function changeJournalPlan(octopusHome, registryRoot, runId, firing) {
-  const journal = await readChangeJournalDocument(octopusHome, runId, firing);
+async function changeJournalPlan(phobosHome, registryRoot, runId, firing) {
+  const journal = await readChangeJournalDocument(phobosHome, runId, firing);
   if (!journal) return null;
   const { document, digest, directory } = journal;
   const restorableRoots = [
     ...["interface", "tool", "artifact", "ee_template"].map((kind) => path.join(registryRoot, kind)),
-    path.join(octopusHome, "state", "runs"),
-    path.join(octopusHome, "state", "ee_instances"),
-    path.join(octopusHome, "interfaces"),
+    path.join(phobosHome, "state", "runs"),
+    path.join(phobosHome, "state", "ee_instances"),
+    path.join(phobosHome, "interfaces"),
   ];
   const entries = [];
   const writes = [];
@@ -95,11 +95,11 @@ async function changeJournalPlan(octopusHome, registryRoot, runId, firing) {
   };
 }
 
-async function undoChangeJournal(registryRoot, octopusHomeRoot, request, commitClientAuthoring) {
+async function undoChangeJournal(registryRoot, phobosHomeRoot, request, commitClientAuthoring) {
   if (typeof commitClientAuthoring !== "function") throw new Error("client authoring transaction is unavailable");
   const runId = requiredSafeRegistryId(request?.runId, "runId");
   const firing = requiredJournalFiring(request?.firing);
-  const plan = await changeJournalPlan(octopusHomeRoot, registryRoot, runId, firing);
+  const plan = await changeJournalPlan(phobosHomeRoot, registryRoot, runId, firing);
   if (!plan) throw new Error(`run ${runId} kept no change journal for firing ${firing}`);
   if (plan.digest !== requiredDigest(request?.expectedJournalDigest, "expectedJournalDigest")) throw new Error("the change journal changed before undo");
   if (!plan.undoable) {

@@ -1,7 +1,7 @@
 {
   "processes": [
     {
-      "bin": "target/debug/octopus-browser-session-tool-door-life",
+      "bin": "target/debug/phobos-browser-session-tool-door-life",
       "io_limits": {
         "max_control_frame_bytes": 1048576,
         "max_stderr_bytes": 262144,
@@ -22,8 +22,8 @@
         "read_paths": [],
         "write_paths": [],
         "executable_paths": [
-          "target/debug/octopus-browser-session-tool",
-          "target/debug/octopus-browser-wait-completion-tool"
+          "target/debug/phobos-browser-session-tool",
+          "target/debug/phobos-browser-wait-completion-tool"
         ],
         "executable_commands": [],
         "read_env_paths": [],

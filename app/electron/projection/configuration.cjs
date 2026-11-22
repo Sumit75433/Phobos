@@ -31,9 +31,9 @@ function configurationProjection(store) {
         if (packageOwnerScope !== scope) packageOwners = null;
         build = { scope, generation: packageCatalogGeneration, promise: readLocalPackageCatalog({
           sourceRegistryRoot: store.resolveLocalPackageRegistry(),
-          activeRegistryRoot: path.join(store.octopusHome(), "registry"),
+          activeRegistryRoot: path.join(store.phobosHome(), "registry"),
           libraryRoot: store.resolveLocalPackageLibrary(),
-          stateRoot: path.join(store.octopusHome(), "client", "package-state"),
+          stateRoot: path.join(store.phobosHome(), "client", "package-state"),
           publication: store.localPackagePublication(),
         }) };
         packageCatalogBuild = build;
@@ -65,7 +65,7 @@ function configurationProjection(store) {
     if (segments[0] !== "registry") return false;
     if (segments.length < 3 || !packageOwners
       || packageOwnerScope !== store.fileProjectionScope(store.resolveRepoRoot())
-      || path.resolve(store.resolveLocalPackageRegistry()) === path.join(store.octopusHome(), "registry")) return true;
+      || path.resolve(store.resolveLocalPackageRegistry()) === path.join(store.phobosHome(), "registry")) return true;
     return packageOwners.has(`${segments[1]}/${segments[2]}`);
   }
 
@@ -96,7 +96,7 @@ function configurationProjection(store) {
     const generation = configurationProjectionGeneration;
     const scope = store.fileProjectionScope(repoRoot);
     const warnings = store.projectionWatchWarnings();
-    const homeRoot = store.octopusHome();
+    const homeRoot = store.phobosHome();
     const durableRoot = store.resolveDurableRoot();
     const registryRoot = path.join(homeRoot, "registry");
     const stateRoot = path.join(homeRoot, "state");
@@ -169,7 +169,7 @@ function configurationProjection(store) {
     const operatorChatProtocol = await readOperatorChatProtocol(registryRoot);
     const configuration = {
       repoRoot,
-      octopusHome: homeRoot,
+      phobosHome: homeRoot,
       registryRoot,
       sourceRegistryRoot,
       localPackageRegistryRoot,
@@ -262,14 +262,14 @@ function configurationProjection(store) {
     const runRecordProjection = await readRunRecords(configuration.runRecordsRoot, warnings);
     let workspaceSetup;
     try {
-      workspaceSetup = await (store.options.inspectWorkspaceSetupState ?? inspectWorkspaceSetupState)({ octopusHomeRoot: configuration.octopusHome, registryRoot: configuration.registryRoot });
+      workspaceSetup = await (store.options.inspectWorkspaceSetupState ?? inspectWorkspaceSetupState)({ phobosHomeRoot: configuration.phobosHome, registryRoot: configuration.registryRoot });
       warnings.push(...arrayValue(workspaceSetup.errors));
     } catch (error) {
       const message = String(error?.message ?? error);
       workspaceSetup = { status: "degraded", receipt: null, errors: [message] };
       warnings.push(message);
     }
-    const workerEnvironments = await store.readWorkerEnvironmentRecords(configuration.octopusHome, warnings, configuration.descriptorIndexes.worker_environment_kind);
+    const workerEnvironments = await store.readWorkerEnvironmentRecords(configuration.phobosHome, warnings, configuration.descriptorIndexes.worker_environment_kind);
     const cachedLedger = store.ledgerProjectionSnapshot?.durableRoot === configuration.durableRoot
       ? store.ledgerProjectionSnapshot
       : null;

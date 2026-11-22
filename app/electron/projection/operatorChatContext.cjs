@@ -1,7 +1,7 @@
 module.exports = { applicationWithinWorkerCeiling, operatorChatContextProjection };
 
 const { payloadArtifactBindings } = require("../contentAddressedArtifact.cjs");
-const { descriptorRows, eeInstanceRows, octopusOsInterfaceSidecars } = require("./registryRows.cjs");
+const { descriptorRows, eeInstanceRows, phobosOsInterfaceSidecars } = require("./registryRows.cjs");
 const { arrayValue, numberValue, objectOrEmpty, stringValue } = require("./values.cjs");
 
 function applicationWithinWorkerCeiling(application, ceiling) {
@@ -62,7 +62,7 @@ function operatorChatContextProjection(store) {
       stringValue(row?.ee_id),
       row,
     ]).filter(([eeId]) => eeId));
-    const privateInterfaceIds = new Set(octopusOsInterfaceSidecars(projection).keys());
+    const privateInterfaceIds = new Set(phobosOsInterfaceSidecars(projection).keys());
     const providerIds = descriptorRows(projection, "interface")
       .filter((row) => (
         !privateInterfaceIds.has(stringValue(row.id ?? row.rule_id))
@@ -260,10 +260,10 @@ function operatorChatContextProjection(store) {
         .filter((worker) => worker?.authoring_profile)
         .sort((left, right) => left.authoring_profile_index - right.authoring_profile_index || left.id.localeCompare(right.id));
       const defaultTaskAccessMode = stringValue(
-        objectOrEmpty(objectOrEmpty(environment.config).octopus_os).task_access_default,
+        objectOrEmpty(objectOrEmpty(environment.config).phobos_os).task_access_default,
       ) || "full_access";
       if (!["project_access", "full_access"].includes(defaultTaskAccessMode)) {
-        throw new Error(`EE '${stringValue(environment.ee_id)}' has an invalid Octopus OS task access default`);
+        throw new Error(`EE '${stringValue(environment.ee_id)}' has an invalid Phobos OS task access default`);
       }
       return [{
         ee_id: stringValue(environment.ee_id),
@@ -276,7 +276,7 @@ function operatorChatContextProjection(store) {
         default_task_access_mode: defaultTaskAccessMode,
         host_root_refs: objectOrEmpty(projection.hostRootRefs),
         full_access_root: stringValue(projection.fullAccessRoot),
-        source_folders: arrayValue(environment.config?.octopus_os?.source_folders),
+        source_folders: arrayValue(environment.config?.phobos_os?.source_folders),
         formed_envelope: effectivePolicy,
         workers: availableWorkers,
       }];

@@ -5,7 +5,7 @@ import { SupportWindow } from "./SupportWindow";
 import "../components/icon-glyphs/shell";
 import "../foundation.css";
 import "../owned-utilities.css";
-import "../octopus-owned-components.css";
+import "../phobos-owned-components.css";
 import "../styles.css";
 import "../theme.css";
 

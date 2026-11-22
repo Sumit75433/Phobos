@@ -9,7 +9,7 @@ import type {
   ClientExtensionMutation,
   ClientExtensionStoreSnapshot,
 } from "./extensions/types";
-import type { OctopusClientProjectionReadRequest } from "./generated/projectionReadContract";
+import type { PhobosClientProjectionReadRequest } from "./generated/projectionReadContract";
 import type {
   ClientWindowBootstrap,
   ClientWindowOpenOutcome,
@@ -28,80 +28,80 @@ import type {
   ClientPaneTransferRequest,
 } from "./shell/clientWindowModel";
 
-export type OctopusClientContextMenuItem = { type: "separator" } | {
+export type PhobosClientContextMenuItem = { type: "separator" } | {
   id: string;
   label: string;
   type?: "normal" | "checkbox" | "radio";
   enabled?: boolean;
   checked?: boolean;
   accelerator?: string;
-  submenu?: OctopusClientContextMenuItem[];
+  submenu?: PhobosClientContextMenuItem[];
 };
-export type OctopusClientContextMenuRequest = {
+export type PhobosClientContextMenuRequest = {
   requestId: string;
-  items: OctopusClientContextMenuItem[];
+  items: PhobosClientContextMenuItem[];
   position?: { x: number; y: number };
 };
-export type OctopusClientContextMenuResult = { requestId: string; id: string | null };
+export type PhobosClientContextMenuResult = { requestId: string; id: string | null };
 
 export {};
 
-export type OctopusClientWindowCloseGuard = { windowId: string; generation: number };
-export type OctopusClientWindowCloseRequest = OctopusClientWindowCloseGuard & { requestId: string; reason: "close" | "quit" | "logout" };
-export type OctopusClientWindowCloseCancelled = OctopusClientWindowCloseGuard & { requestId: string; reason: "cancelled" | "invalidated" };
-export type OctopusClientWindowCloseResolution = OctopusClientWindowCloseGuard & { requestId: string; allowClose: boolean };
+export type PhobosClientWindowCloseGuard = { windowId: string; generation: number };
+export type PhobosClientWindowCloseRequest = PhobosClientWindowCloseGuard & { requestId: string; reason: "close" | "quit" | "logout" };
+export type PhobosClientWindowCloseCancelled = PhobosClientWindowCloseGuard & { requestId: string; reason: "cancelled" | "invalidated" };
+export type PhobosClientWindowCloseResolution = PhobosClientWindowCloseGuard & { requestId: string; allowClose: boolean };
 
 declare global {
   interface Window {
-    octopusTransport?: {
-      showClientContextMenu(request: OctopusClientContextMenuRequest): Promise<OctopusClientContextMenuResult>;
+    phobosTransport?: {
+      showClientContextMenu(request: PhobosClientContextMenuRequest): Promise<PhobosClientContextMenuResult>;
       cancelClientContextMenu(request: { requestId: string }): Promise<{ cancelled: boolean }>;
       windowZoomFactor(): number;
-      appInfo(): Promise<OctopusAppInfo>;
+      appInfo(): Promise<PhobosAppInfo>;
       openProblemReport(): Promise<void>;
-      runClientDoctor(): Promise<OctopusClientDoctorReport>;
+      runClientDoctor(): Promise<PhobosClientDoctorReport>;
       copyText(value: string): Promise<{ copied: true }>;
-      logClientEvent(request: OctopusClientLogRequest): Promise<{ written: true }>;
+      logClientEvent(request: PhobosClientLogRequest): Promise<{ written: true }>;
       openClientLogs(): Promise<{ path: string }>;
-      selectClientDirectory(request?: OctopusClientPathSelectionRequest): Promise<OctopusClientDirectorySelection>;
-      selectClientAttachments(request: OctopusClientAttachmentSelectionRequest): Promise<OctopusClientAttachmentSelection>;
-      stageDroppedAttachments(files: readonly File[]): Promise<OctopusClientAttachmentSelection & { fileIndices: number[] }>;
-      discardClientAttachmentStages(handles: readonly OctopusClientAttachmentStageHandle[]): Promise<void>;
+      selectClientDirectory(request?: PhobosClientPathSelectionRequest): Promise<PhobosClientDirectorySelection>;
+      selectClientAttachments(request: PhobosClientAttachmentSelectionRequest): Promise<PhobosClientAttachmentSelection>;
+      stageDroppedAttachments(files: readonly File[]): Promise<PhobosClientAttachmentSelection & { fileIndices: number[] }>;
+      discardClientAttachmentStages(handles: readonly PhobosClientAttachmentStageHandle[]): Promise<void>;
       readClientAttachmentPreview(request: { id: string; contentHash: string }): Promise<{ base64: string; mimeType: string; contentHash: string; size: number }>;
-      beginClientAttachmentStage(request: OctopusClientAttachmentStageBeginRequest): Promise<OctopusClientAttachmentStageHandle>;
-      appendClientAttachmentStage(request: OctopusClientAttachmentStageAppendRequest): Promise<OctopusClientAttachmentStageProgress>;
-      finalizeClientAttachmentStage(request: OctopusClientAttachmentStageFinalizeRequest): Promise<OctopusClientAttachmentStageHandle>;
-      abortClientAttachmentStage(request: OctopusClientAttachmentStageAbortRequest): Promise<OctopusClientAttachmentStageAbortOutcome>;
-      saveClientFile(request: OctopusClientFileRequest): Promise<OctopusClientFileSaveOutcome>;
-      downloadClientFileCopy(request: OctopusClientFileRequest): Promise<OctopusClientFileSaveOutcome>;
-      openClientFile(request: OctopusClientFileOpenRequest): Promise<OctopusClientFileOpenOutcome>;
-      listClientFileOpenTargets(request: OctopusClientFileRequest): Promise<OctopusClientFileOpenTargets>;
-      openClientFileWithApplication(request: OctopusClientFileOpenWithRequest): Promise<OctopusClientFileOpenOutcome>;
-      startClientFileDrag(request: OctopusClientFileRequest): void;
-      accessStatus(): Promise<OctopusClientAccessStatus>;
-      configureAccess(password: string): Promise<OctopusClientAccessStatus>;
-      unlockAccess(password: string): Promise<OctopusClientAccessStatus>;
-      touchIdStatus(): Promise<OctopusTouchIdStatus>;
-      setTouchIdEnabled(enabled: boolean): Promise<OctopusTouchIdStatus>;
-      unlockWithTouchId(): Promise<OctopusClientAccessStatus>;
-      lockAccess(): Promise<OctopusClientAccessStatus>;
-      labAccess(): Promise<OctopusClientLabAccess>;
-      updateLabAccess(password: string): Promise<OctopusClientLabAccess>;
-      accessDetails(): Promise<OctopusClientAccessDetails>;
-      updateAdministratorAccess(request: OctopusAdministratorAccessUpdate): Promise<OctopusClientAccessDetails>;
-      requestMicrophoneAccess(): Promise<OctopusMicrophoneAccess>;
-      requestCameraAccess(): Promise<OctopusCameraAccess>;
-      cameraAccessStatus(): Promise<OctopusCameraAccess>;
-      saveGestureTrace(text: string): Promise<OctopusGestureTraceSaved>;
+      beginClientAttachmentStage(request: PhobosClientAttachmentStageBeginRequest): Promise<PhobosClientAttachmentStageHandle>;
+      appendClientAttachmentStage(request: PhobosClientAttachmentStageAppendRequest): Promise<PhobosClientAttachmentStageProgress>;
+      finalizeClientAttachmentStage(request: PhobosClientAttachmentStageFinalizeRequest): Promise<PhobosClientAttachmentStageHandle>;
+      abortClientAttachmentStage(request: PhobosClientAttachmentStageAbortRequest): Promise<PhobosClientAttachmentStageAbortOutcome>;
+      saveClientFile(request: PhobosClientFileRequest): Promise<PhobosClientFileSaveOutcome>;
+      downloadClientFileCopy(request: PhobosClientFileRequest): Promise<PhobosClientFileSaveOutcome>;
+      openClientFile(request: PhobosClientFileOpenRequest): Promise<PhobosClientFileOpenOutcome>;
+      listClientFileOpenTargets(request: PhobosClientFileRequest): Promise<PhobosClientFileOpenTargets>;
+      openClientFileWithApplication(request: PhobosClientFileOpenWithRequest): Promise<PhobosClientFileOpenOutcome>;
+      startClientFileDrag(request: PhobosClientFileRequest): void;
+      accessStatus(): Promise<PhobosClientAccessStatus>;
+      configureAccess(password: string): Promise<PhobosClientAccessStatus>;
+      unlockAccess(password: string): Promise<PhobosClientAccessStatus>;
+      touchIdStatus(): Promise<PhobosTouchIdStatus>;
+      setTouchIdEnabled(enabled: boolean): Promise<PhobosTouchIdStatus>;
+      unlockWithTouchId(): Promise<PhobosClientAccessStatus>;
+      lockAccess(): Promise<PhobosClientAccessStatus>;
+      labAccess(): Promise<PhobosClientLabAccess>;
+      updateLabAccess(password: string): Promise<PhobosClientLabAccess>;
+      accessDetails(): Promise<PhobosClientAccessDetails>;
+      updateAdministratorAccess(request: PhobosAdministratorAccessUpdate): Promise<PhobosClientAccessDetails>;
+      requestMicrophoneAccess(): Promise<PhobosMicrophoneAccess>;
+      requestCameraAccess(): Promise<PhobosCameraAccess>;
+      cameraAccessStatus(): Promise<PhobosCameraAccess>;
+      saveGestureTrace(text: string): Promise<PhobosGestureTraceSaved>;
       revealGestureTrace(path: string): Promise<{ revealed: boolean; path: string }>;
       clientWindowBootstrap(): ClientWindowBootstrap | null;
       openClientWindow(request?: ClientWindowOpenRequest): Promise<ClientWindowOpenOutcome>;
       clientWindowReady(request: ClientWindowReadyRequest): Promise<ClientWindowOpenOutcome>;
-      registerClientWindowCloseGuard(): Promise<OctopusClientWindowCloseGuard>;
-      unregisterClientWindowCloseGuard(request: OctopusClientWindowCloseGuard): Promise<void>;
-      onClientWindowCloseRequested(listener: (request: OctopusClientWindowCloseRequest) => void): () => void;
-      resolveClientWindowClose(request: OctopusClientWindowCloseResolution): Promise<{ accepted: boolean }>;
-      onClientWindowCloseCancelled(listener: (request: OctopusClientWindowCloseCancelled) => void): () => void;
+      registerClientWindowCloseGuard(): Promise<PhobosClientWindowCloseGuard>;
+      unregisterClientWindowCloseGuard(request: PhobosClientWindowCloseGuard): Promise<void>;
+      onClientWindowCloseRequested(listener: (request: PhobosClientWindowCloseRequest) => void): () => void;
+      resolveClientWindowClose(request: PhobosClientWindowCloseResolution): Promise<{ accepted: boolean }>;
+      onClientWindowCloseCancelled(listener: (request: PhobosClientWindowCloseCancelled) => void): () => void;
       beginClientPaneTransfer(request: ClientPaneTransferBeginRequest): ClientPaneDragPayload;
       beginClientPaneDrag(request: ClientPaneDragBeginRequest): Promise<{ phase: "prepared" | "cancelled" }>;
       moveClientPaneDrag(request: ClientPaneTransferRequest): Promise<{ phase: ClientPaneDragState["phase"]; destinationWindowId: string | null }>;
@@ -126,190 +126,190 @@ declare global {
       pendingClientPaneDestinationTransfers(): Promise<(ClientPaneTransferCompleted & { committed: boolean })[]>;
       resumeClientPaneTransfer(request: ClientPaneTransferRequest): Promise<ClientPaneTransferCompleted>;
       finalizeClientPaneTransfer(request: ClientPaneTransferRequest): Promise<{ finalized: true; transferId: string }>;
-      windowState(): Promise<OctopusWindowState>;
-      setHistoryNavigationState(state: OctopusHistoryNavigationState): void;
-      setWindowAppearance(appearance: OctopusWindowAppearance): void;
+      windowState(): Promise<PhobosWindowState>;
+      setHistoryNavigationState(state: PhobosHistoryNavigationState): void;
+      setWindowAppearance(appearance: PhobosWindowAppearance): void;
       setPowerSaveBlocker(enabled: boolean): Promise<{ enabled: boolean }>;
-      setGlobalDictationShortcut(request: OctopusGlobalDictationShortcutRequest): Promise<OctopusGlobalDictationShortcutState>;
+      setGlobalDictationShortcut(request: PhobosGlobalDictationShortcutRequest): Promise<PhobosGlobalDictationShortcutState>;
       setNativeCommandShortcuts(shortcuts: Record<string, readonly string[]>): Promise<{ configured: number }>;
       openQuickTaskWindow(): Promise<{ opened: true }>;
       closeQuickTaskWindow(): Promise<{ closed: true }>;
       openRunInMain(runId: string): Promise<{ opened: true; runId: string }>;
-      openWorkerEnvironmentWindow(request: OctopusWorkerEnvironmentWindowTarget): Promise<OctopusWorkerEnvironmentWindowOutcome>;
-      openWorkerEnvironmentInMain(request: OctopusWorkerEnvironmentWindowTarget): Promise<OctopusWorkerEnvironmentWindowOutcome>;
+      openWorkerEnvironmentWindow(request: PhobosWorkerEnvironmentWindowTarget): Promise<PhobosWorkerEnvironmentWindowOutcome>;
+      openWorkerEnvironmentInMain(request: PhobosWorkerEnvironmentWindowTarget): Promise<PhobosWorkerEnvironmentWindowOutcome>;
       setWorkerEnvironmentWindowPinned(enabled: boolean): Promise<{ pinned: boolean }>;
       openTaskMonitorWindow(runId: string): Promise<{ opened: true; runId: string }>;
       setTaskMonitorWindowPinned(enabled: boolean): Promise<{ pinned: boolean }>;
-      loginItemSettings(request?: { enabled: boolean }): Promise<OctopusLoginItemSettings>;
+      loginItemSettings(request?: { enabled: boolean }): Promise<PhobosLoginItemSettings>;
       windowControl(action: "close" | "minimize" | "zoom"): void;
       relaunchClient(): Promise<{ relaunching: true }>;
-      defaults(): Promise<OctopusTransportDefaults>;
-      providerInterfaces(): Promise<OctopusProviderInterfacesResponse>;
-      bootStatus(): Promise<OctopusRuntimeHostState>;
-      chatgptAccount(): Promise<OctopusChatgptAccount>;
-      chatgptRateLimits(): Promise<OctopusChatgptUsage>;
-      chatgptAccountSessions(): Promise<OctopusChatgptAccountSessions>;
-      chatgptSwitchWorkspace(request: { sessionId: string; accountId: string }): Promise<OctopusChatgptWorkspaceSwitch>;
-      chatgptLogout(): Promise<OctopusChatgptAccount>;
+      defaults(): Promise<PhobosTransportDefaults>;
+      providerInterfaces(): Promise<PhobosProviderInterfacesResponse>;
+      bootStatus(): Promise<PhobosRuntimeHostState>;
+      chatgptAccount(): Promise<PhobosChatgptAccount>;
+      chatgptRateLimits(): Promise<PhobosChatgptUsage>;
+      chatgptAccountSessions(): Promise<PhobosChatgptAccountSessions>;
+      chatgptSwitchWorkspace(request: { sessionId: string; accountId: string }): Promise<PhobosChatgptWorkspaceSwitch>;
+      chatgptLogout(): Promise<PhobosChatgptAccount>;
       onChatgptAccountChanged(listener: () => void): () => void;
       chatgptSignInStart(): Promise<{ loginId: string; authUrl: string }>;
       chatgptSignInStatus(loginId: string): Promise<{ state: "pending" | "completed" | "failed"; error: string }>;
       chatgptSignInCancel(loginId: string): Promise<{ cancelled: boolean }>;
-      openLaunchTerminal(request: OctopusTerminalResizeRequest): Promise<OctopusTerminalSnapshot>;
-      writeLaunchTerminal(sessionId: string, data: string): Promise<OctopusTerminalSnapshot>;
-      resizeLaunchTerminal(sessionId: string, request: OctopusTerminalResizeRequest): Promise<OctopusTerminalSnapshot>;
-      openTerminal(request: OctopusTerminalOpenRequest): Promise<OctopusTerminalSnapshot>;
-      writeTerminal(terminalId: string, sessionId: string, data: string): Promise<OctopusTerminalSnapshot>;
-      resizeTerminal(terminalId: string, sessionId: string, request: OctopusTerminalResizeRequest): Promise<OctopusTerminalSnapshot>;
+      openLaunchTerminal(request: PhobosTerminalResizeRequest): Promise<PhobosTerminalSnapshot>;
+      writeLaunchTerminal(sessionId: string, data: string): Promise<PhobosTerminalSnapshot>;
+      resizeLaunchTerminal(sessionId: string, request: PhobosTerminalResizeRequest): Promise<PhobosTerminalSnapshot>;
+      openTerminal(request: PhobosTerminalOpenRequest): Promise<PhobosTerminalSnapshot>;
+      writeTerminal(terminalId: string, sessionId: string, data: string): Promise<PhobosTerminalSnapshot>;
+      resizeTerminal(terminalId: string, sessionId: string, request: PhobosTerminalResizeRequest): Promise<PhobosTerminalSnapshot>;
       closeTerminal(terminalId: string): Promise<{ closed: boolean }>;
-      runtimeStatus(request?: OctopusRuntimeStatusRequest): Promise<OctopusRuntimeStatus>;
-      validateRuntimeEndpoint(request: OctopusRuntimeEndpointValidationRequest): Promise<OctopusRuntimeEndpointValidation>;
-      projectionRead(request: OctopusProjectionReadRequest): Promise<unknown>;
-      workspaceSetupState(): Promise<OctopusWorkspaceSetupState>;
+      runtimeStatus(request?: PhobosRuntimeStatusRequest): Promise<PhobosRuntimeStatus>;
+      validateRuntimeEndpoint(request: PhobosRuntimeEndpointValidationRequest): Promise<PhobosRuntimeEndpointValidation>;
+      projectionRead(request: PhobosProjectionReadRequest): Promise<unknown>;
+      workspaceSetupState(): Promise<PhobosWorkspaceSetupState>;
       saveSetupFile(request: { text: string; suggestedName: string }): Promise<{ saved: false } | { saved: true; name: string }>;
       openSetupFile(): Promise<{ opened: false } | { opened: true; name: string; text: string }>;
-      clientSetupRead(request: { operationId: string }): Promise<OctopusClientSetupState | null>;
-      clientSetupReadCurrent(): Promise<OctopusClientSetupState | null>;
-      clientSetupBegin(request: OctopusClientSetupBeginRequest): Promise<OctopusClientSetupState>;
-      clientSetupResume(request: { operationId: string; stopBefore?: "provider" }): Promise<OctopusClientSetupState>;
-      mutateScheduledInterface(request: OctopusScheduledMutationRequest): Promise<OctopusScheduledMutationOutcome>;
-      mutateApplicationPrivateConfiguration(request: OctopusApplicationPrivateConfigurationMutation): Promise<OctopusApplicationPrivateConfigurationOutcome>;
-      applicationConnectionProbe(request: { applicationId: string }): Promise<OctopusApplicationConnectionProbe>;
-      applicationConnectionConnect(request: OctopusApplicationConnectionRequest): Promise<OctopusApplicationConnectionState>;
+      clientSetupRead(request: { operationId: string }): Promise<PhobosClientSetupState | null>;
+      clientSetupReadCurrent(): Promise<PhobosClientSetupState | null>;
+      clientSetupBegin(request: PhobosClientSetupBeginRequest): Promise<PhobosClientSetupState>;
+      clientSetupResume(request: { operationId: string; stopBefore?: "provider" }): Promise<PhobosClientSetupState>;
+      mutateScheduledInterface(request: PhobosScheduledMutationRequest): Promise<PhobosScheduledMutationOutcome>;
+      mutateApplicationPrivateConfiguration(request: PhobosApplicationPrivateConfigurationMutation): Promise<PhobosApplicationPrivateConfigurationOutcome>;
+      applicationConnectionProbe(request: { applicationId: string }): Promise<PhobosApplicationConnectionProbe>;
+      applicationConnectionConnect(request: PhobosApplicationConnectionRequest): Promise<PhobosApplicationConnectionState>;
       applicationConnectionCancel(request: { operationId: string }): Promise<{ cancelled: boolean }>;
-      applicationConnectionDisconnect(request: { applicationId: string; interfaceId: string }): Promise<OctopusApplicationConnectionState>;
-      mutateOctopusOsWorkspace(request: OctopusOsWorkspaceMutationRequest): Promise<OctopusOsWorkspaceMutationOutcome>;
+      applicationConnectionDisconnect(request: { applicationId: string; interfaceId: string }): Promise<PhobosApplicationConnectionState>;
+      mutatePhobosOsWorkspace(request: PhobosOsWorkspaceMutationRequest): Promise<PhobosOsWorkspaceMutationOutcome>;
       clientBrowser(request: ClientBrowserRequest): Promise<ClientBrowserState | null>;
       onClientBrowserState(listener: (state: ClientBrowserState) => void): () => void;
       onClientBrowserOpened(listener: (state: ClientBrowserState) => void): () => void;
-      openCdpViewer(request: OctopusCdpViewerOpenRequest): Promise<OctopusCdpViewerState>;
-      prepareNativeBrowserViewer(request: OctopusNativeBrowserViewerPrepareRequest): Promise<OctopusNativeBrowserViewerPrepared>;
-      acknowledgeNativeBrowserViewer(request: OctopusNativeBrowserViewerSyncRequest): Promise<OctopusNativeBrowserViewerState>;
-      syncNativeBrowserViewer(request: OctopusNativeBrowserViewerSyncRequest): Promise<OctopusNativeBrowserViewerState>;
-      nativeBrowserCursorArrived(request: OctopusNativeBrowserViewerIdentity & { moveSequence: number; metricsRevision: number }): Promise<{ accepted: boolean }>;
-      nativeBrowserViewerAction(request: OctopusNativeBrowserViewerActionRequest): Promise<OctopusNativeBrowserViewerState>;
-      nativeBrowserDownloads(request: OctopusBrowserDownloadRequest): Promise<OctopusBrowserDownloadSnapshot>;
-      closeNativeBrowserViewer(request: OctopusNativeBrowserViewerIdentity): Promise<void>;
+      openCdpViewer(request: PhobosCdpViewerOpenRequest): Promise<PhobosCdpViewerState>;
+      prepareNativeBrowserViewer(request: PhobosNativeBrowserViewerPrepareRequest): Promise<PhobosNativeBrowserViewerPrepared>;
+      acknowledgeNativeBrowserViewer(request: PhobosNativeBrowserViewerSyncRequest): Promise<PhobosNativeBrowserViewerState>;
+      syncNativeBrowserViewer(request: PhobosNativeBrowserViewerSyncRequest): Promise<PhobosNativeBrowserViewerState>;
+      nativeBrowserCursorArrived(request: PhobosNativeBrowserViewerIdentity & { moveSequence: number; metricsRevision: number }): Promise<{ accepted: boolean }>;
+      nativeBrowserViewerAction(request: PhobosNativeBrowserViewerActionRequest): Promise<PhobosNativeBrowserViewerState>;
+      nativeBrowserDownloads(request: PhobosBrowserDownloadRequest): Promise<PhobosBrowserDownloadSnapshot>;
+      closeNativeBrowserViewer(request: PhobosNativeBrowserViewerIdentity): Promise<void>;
       closeNativeBrowserPage(request: { home: string; workerEnvironmentId: string; surfaceId: string }): Promise<void>;
-      browserSavedPermissions(request: { operation: "list" } | { operation: "remove"; home: string; hostGeneration: string; id: string }): Promise<OctopusSavedBrowserPermissions>;
-      desktopSavedApplicationPermissions(request: OctopusSavedApplicationPermissionRequest): Promise<OctopusSavedApplicationPermissions>;
+      browserSavedPermissions(request: { operation: "list" } | { operation: "remove"; home: string; hostGeneration: string; id: string }): Promise<PhobosSavedBrowserPermissions>;
+      desktopSavedApplicationPermissions(request: PhobosSavedApplicationPermissionRequest): Promise<PhobosSavedApplicationPermissions>;
       desktopComputerUseSettings(request: { operation: "status" } | { operation: "set_enabled"; enabled: boolean }): Promise<{ enabled: boolean; ready: boolean; permissions: Array<{ kind: "screen_capture" | "accessibility"; status: string }> }>;
       desktopComputerUseSettings(request: { operation: "setup" }): Promise<{ opened: true }>;
       openDesktopPermissions(request: import("./components/worker-environment/desktopSurfaceModel").DesktopPermissionRequest): Promise<{ opened: true }>;
       desktopSurfaceRequest(request: import("./components/worker-environment/desktopSurfaceModel").DesktopSurfaceRequest): Promise<import("./components/worker-environment/desktopSurfaceModel").DesktopSurfaceResponse>;
       desktopApplicationView(request: import("./components/worker-environment/desktopSurfaceModel").DesktopApplicationViewRequest): Promise<{ attached: boolean }>;
-      cdpViewerAction(request: OctopusCdpViewerActionRequest): Promise<OctopusCdpViewerState | OctopusCdpViewerActionAccepted>;
-      closeCdpViewer(request: OctopusCdpViewerCloseRequest): Promise<OctopusCdpViewerCloseOutcome>;
-      openProcessViewer(request: OctopusProcessViewerOpenRequest): Promise<OctopusProcessViewerSnapshot>;
-      processViewerAction(request: OctopusProcessViewerActionRequest): Promise<OctopusProcessViewerActionOutcome>;
-      closeProcessViewer(request: OctopusProcessViewerCloseRequest): Promise<{ sessionId: string; closed: true }>;
-      listWorkerEnvironmentFiles(request: OctopusWorkerEnvironmentFilesRequest): Promise<OctopusWorkerEnvironmentDirectory>;
-      readWorkerEnvironmentFile(request: OctopusWorkerEnvironmentFilesRequest): Promise<OctopusWorkerEnvironmentFile>;
-      readWorkerEnvironmentFilePreview(request: OctopusWorkerEnvironmentFilesRequest): Promise<OctopusWorkerEnvironmentFilePreview>;
-      readWorkerEnvironmentFileAttachment(request: OctopusWorkerEnvironmentFilesRequest): Promise<OctopusWorkerEnvironmentFileAttachment>;
-      writeWorkerEnvironmentFile(request: OctopusWorkerEnvironmentFileWriteRequest): Promise<OctopusWorkerEnvironmentFileWriteOutcome>;
-      performWorkerEnvironmentFileSystemAction(request: OctopusWorkerEnvironmentFileSystemActionRequest): Promise<OctopusWorkerEnvironmentFileSystemActionOutcome>;
-      osFileRoots(): Promise<OctopusOsFileRoots>;
-      listOsFiles(request: OctopusOsFilesRequest): Promise<OctopusOsDirectory>;
-      readOsFile(request: OctopusOsFilesRequest): Promise<OctopusOsFile>;
-      writeOsFile(request: OctopusOsFileWriteRequest): Promise<OctopusOsFileWriteOutcome>;
-      performOsFileSystemAction(request: OctopusOsFileSystemActionRequest): Promise<OctopusOsFileSystemActionOutcome>;
-      inspectWorkerEnvironmentGit(request: OctopusWorkerEnvironmentGitRequest): Promise<OctopusWorkerEnvironmentGitSnapshot>;
-      performWorkerEnvironmentOperatorAction(request: OctopusWorkerEnvironmentOperatorActionRequest): Promise<OctopusWorkerEnvironmentOperatorActionOutcome>;
-      clientSurfaceDocuments(): Promise<OctopusClientSurfaceDocumentSnapshot>;
+      cdpViewerAction(request: PhobosCdpViewerActionRequest): Promise<PhobosCdpViewerState | PhobosCdpViewerActionAccepted>;
+      closeCdpViewer(request: PhobosCdpViewerCloseRequest): Promise<PhobosCdpViewerCloseOutcome>;
+      openProcessViewer(request: PhobosProcessViewerOpenRequest): Promise<PhobosProcessViewerSnapshot>;
+      processViewerAction(request: PhobosProcessViewerActionRequest): Promise<PhobosProcessViewerActionOutcome>;
+      closeProcessViewer(request: PhobosProcessViewerCloseRequest): Promise<{ sessionId: string; closed: true }>;
+      listWorkerEnvironmentFiles(request: PhobosWorkerEnvironmentFilesRequest): Promise<PhobosWorkerEnvironmentDirectory>;
+      readWorkerEnvironmentFile(request: PhobosWorkerEnvironmentFilesRequest): Promise<PhobosWorkerEnvironmentFile>;
+      readWorkerEnvironmentFilePreview(request: PhobosWorkerEnvironmentFilesRequest): Promise<PhobosWorkerEnvironmentFilePreview>;
+      readWorkerEnvironmentFileAttachment(request: PhobosWorkerEnvironmentFilesRequest): Promise<PhobosWorkerEnvironmentFileAttachment>;
+      writeWorkerEnvironmentFile(request: PhobosWorkerEnvironmentFileWriteRequest): Promise<PhobosWorkerEnvironmentFileWriteOutcome>;
+      performWorkerEnvironmentFileSystemAction(request: PhobosWorkerEnvironmentFileSystemActionRequest): Promise<PhobosWorkerEnvironmentFileSystemActionOutcome>;
+      osFileRoots(): Promise<PhobosOsFileRoots>;
+      listOsFiles(request: PhobosOsFilesRequest): Promise<PhobosOsDirectory>;
+      readOsFile(request: PhobosOsFilesRequest): Promise<PhobosOsFile>;
+      writeOsFile(request: PhobosOsFileWriteRequest): Promise<PhobosOsFileWriteOutcome>;
+      performOsFileSystemAction(request: PhobosOsFileSystemActionRequest): Promise<PhobosOsFileSystemActionOutcome>;
+      inspectWorkerEnvironmentGit(request: PhobosWorkerEnvironmentGitRequest): Promise<PhobosWorkerEnvironmentGitSnapshot>;
+      performWorkerEnvironmentOperatorAction(request: PhobosWorkerEnvironmentOperatorActionRequest): Promise<PhobosWorkerEnvironmentOperatorActionOutcome>;
+      clientSurfaceDocuments(): Promise<PhobosClientSurfaceDocumentSnapshot>;
       clientExtensions(): Promise<ClientExtensionStoreSnapshot>;
       mutateClientExtension(request: ClientExtensionMutation): Promise<ClientExtensionStoreSnapshot>;
       setClientExtensionCredential(request: ClientExtensionCredentialUpdate): Promise<ClientExtensionStoreSnapshot>;
       checkClientExtensionCredential(request: { id: string; sourceId: string }): Promise<ClientExtensionCredentialCheck>;
       applyClientExtensionLifecycle(request: ClientExtensionLifecycleRequest): Promise<ClientExtensionLifecycleOutcome>;
       revealClientExtensions(): Promise<{ opened: true; path: string }>;
-      readClientExtensionFilesystemSource(request: OctopusClientExtensionFilesystemReadRequest): Promise<OctopusClientExtensionFilesystemSource>;
+      readClientExtensionFilesystemSource(request: PhobosClientExtensionFilesystemReadRequest): Promise<PhobosClientExtensionFilesystemSource>;
       runClientExtensionAction(request: ClientExtensionActionRequest): Promise<ClientExtensionActionOutcome>;
-      readCodexUsage(request: OctopusCodexUsageReadRequest): Promise<OctopusCodexUsageSnapshot>;
-      refreshProviderModels(request: OctopusProviderModelsRefreshRequest): Promise<OctopusProviderModelsRefreshResponse>;
+      readCodexUsage(request: PhobosCodexUsageReadRequest): Promise<PhobosCodexUsageSnapshot>;
+      refreshProviderModels(request: PhobosProviderModelsRefreshRequest): Promise<PhobosProviderModelsRefreshResponse>;
       requestComposerPrediction(request: { runId: string }): Promise<{ id: string; text: string | null; runId: string } | null>;
       requestTaskTitle(request: { runId: string }): Promise<{ title: string; runId: string } | null>;
-      submitChatTurn(request: OctopusChatTurnRequest): Promise<OctopusChatTurnResponse>;
-      readOperatorChatArtifacts(request: OctopusOperatorChatArtifactsRequest): Promise<OctopusOperatorChatArtifactsResponse>;
-      submitOperatorTurnControl(request: OctopusOperatorTurnControlRequest): Promise<OctopusOperatorTurnControlResponse>;
-      submitChatSteer(request: OctopusChatSteerRequest): Promise<OctopusChatSteerResponse>;
-      updateChatPins(request: OctopusChatPinsRequest): Promise<OctopusChatPinsResponse>;
-      transcribeDictation(request: OctopusDictationRequest): Promise<OctopusDictationResponse>;
-      startDictationStream(request: { attemptId: string; sampleRateHz: number }): Promise<OctopusDictationLocalResult<null>>;
+      submitChatTurn(request: PhobosChatTurnRequest): Promise<PhobosChatTurnResponse>;
+      readOperatorChatArtifacts(request: PhobosOperatorChatArtifactsRequest): Promise<PhobosOperatorChatArtifactsResponse>;
+      submitOperatorTurnControl(request: PhobosOperatorTurnControlRequest): Promise<PhobosOperatorTurnControlResponse>;
+      submitChatSteer(request: PhobosChatSteerRequest): Promise<PhobosChatSteerResponse>;
+      updateChatPins(request: PhobosChatPinsRequest): Promise<PhobosChatPinsResponse>;
+      transcribeDictation(request: PhobosDictationRequest): Promise<PhobosDictationResponse>;
+      startDictationStream(request: { attemptId: string; sampleRateHz: number }): Promise<PhobosDictationLocalResult<null>>;
       appendDictationAudio(attemptId: string, bytes: ArrayBuffer): void;
-      finishDictationStream(attemptId: string): Promise<OctopusDictationResponse>;
-      onDictationStreamEvent(listener: (event: OctopusDictationStreamEvent) => void): () => void;
+      finishDictationStream(attemptId: string): Promise<PhobosDictationResponse>;
+      onDictationStreamEvent(listener: (event: PhobosDictationStreamEvent) => void): () => void;
       cancelDictation(attemptId: string): Promise<void>;
-      readDictationRecordings(): Promise<OctopusDictationLocalResult<OctopusDictationRecordingState>>;
-      configureDictationRecordings(enabled: boolean): Promise<OctopusDictationLocalResult<OctopusDictationRecordingState>>;
-      saveDictationRecording(request: OctopusDictationRequest): Promise<OctopusDictationLocalResult<OctopusDictationRecording | null>>;
-      readDictationRecording(id: string): Promise<OctopusDictationLocalResult<{ entry: OctopusDictationRecording; bytes: Uint8Array }>>;
-      updateDictationRecording(request: { id: string; text: string; status: "transcribed" | "failed" }): Promise<OctopusDictationLocalResult<OctopusDictationRecording>>;
-      deleteDictationRecording(id: string | null): Promise<OctopusDictationLocalResult<null>>;
-      submitInterfaceArtifact(request: OctopusInterfaceArtifactRequest): Promise<OctopusInterfaceArtifactResponse>;
-      beginInterfaceArtifactStream(request: OctopusArtifactStreamBeginRequest): Promise<OctopusArtifactStreamHandle>;
-      appendInterfaceArtifactStream(request: OctopusArtifactStreamAppendRequest): Promise<OctopusArtifactStreamProgress>;
-      finalizeInterfaceArtifactStream(request: OctopusArtifactStreamFinalizeRequest): Promise<OctopusArtifactStreamOutcome>;
-      abortInterfaceArtifactStream(request: OctopusArtifactStreamAbortRequest): Promise<OctopusArtifactStreamAbortOutcome>;
-      onProjectionChanged(listener: (change: OctopusProjectionChange) => void): () => void;
-      onRuntimeHostState(listener: (state: OctopusRuntimeHostState) => void): () => void;
-      onTerminalData(listener: (event: OctopusTerminalData) => void): () => void;
-      onTerminalExit(listener: (event: OctopusTerminalExit) => void): () => void;
-      onCdpViewerEvent(listener: (event: OctopusCdpViewerEvent) => void): () => void;
-      onNativeBrowserViewerEvent(listener: (event: OctopusNativeBrowserViewerEvent) => void): () => void;
-      onProcessViewerEvent(listener: (event: OctopusProcessViewerEvent) => void): () => void;
-      onWindowStateChanged(listener: (state: OctopusWindowState) => void): () => void;
+      readDictationRecordings(): Promise<PhobosDictationLocalResult<PhobosDictationRecordingState>>;
+      configureDictationRecordings(enabled: boolean): Promise<PhobosDictationLocalResult<PhobosDictationRecordingState>>;
+      saveDictationRecording(request: PhobosDictationRequest): Promise<PhobosDictationLocalResult<PhobosDictationRecording | null>>;
+      readDictationRecording(id: string): Promise<PhobosDictationLocalResult<{ entry: PhobosDictationRecording; bytes: Uint8Array }>>;
+      updateDictationRecording(request: { id: string; text: string; status: "transcribed" | "failed" }): Promise<PhobosDictationLocalResult<PhobosDictationRecording>>;
+      deleteDictationRecording(id: string | null): Promise<PhobosDictationLocalResult<null>>;
+      submitInterfaceArtifact(request: PhobosInterfaceArtifactRequest): Promise<PhobosInterfaceArtifactResponse>;
+      beginInterfaceArtifactStream(request: PhobosArtifactStreamBeginRequest): Promise<PhobosArtifactStreamHandle>;
+      appendInterfaceArtifactStream(request: PhobosArtifactStreamAppendRequest): Promise<PhobosArtifactStreamProgress>;
+      finalizeInterfaceArtifactStream(request: PhobosArtifactStreamFinalizeRequest): Promise<PhobosArtifactStreamOutcome>;
+      abortInterfaceArtifactStream(request: PhobosArtifactStreamAbortRequest): Promise<PhobosArtifactStreamAbortOutcome>;
+      onProjectionChanged(listener: (change: PhobosProjectionChange) => void): () => void;
+      onRuntimeHostState(listener: (state: PhobosRuntimeHostState) => void): () => void;
+      onTerminalData(listener: (event: PhobosTerminalData) => void): () => void;
+      onTerminalExit(listener: (event: PhobosTerminalExit) => void): () => void;
+      onCdpViewerEvent(listener: (event: PhobosCdpViewerEvent) => void): () => void;
+      onNativeBrowserViewerEvent(listener: (event: PhobosNativeBrowserViewerEvent) => void): () => void;
+      onProcessViewerEvent(listener: (event: PhobosProcessViewerEvent) => void): () => void;
+      onWindowStateChanged(listener: (state: PhobosWindowState) => void): () => void;
       onNavigateBack(listener: () => void): () => void;
       onNavigateForward(listener: () => void): () => void;
       onGlobalDictationRequested(listener: () => void): () => void;
       onNativeClientCommand(listener: (command: string) => void): () => void;
-      onClientAccessLocked(listener: (status: OctopusClientAccessStatus) => void): () => void;
+      onClientAccessLocked(listener: (status: PhobosClientAccessStatus) => void): () => void;
       onClientPaneTransferCompleted(listener: (completion: ClientPaneTransferCompleted) => void): () => void;
       onOpenRunRequested(listener: (runId: string) => void): () => void;
-      onOpenWorkerEnvironmentRequested(listener: (target: OctopusWorkerEnvironmentWindowTarget) => void): () => void;
-      onWorkerEnvironmentWindowTarget(listener: (target: OctopusWorkerEnvironmentWindowTarget) => void): () => void;
-      onClientSurfaceDocumentsChanged(listener: (change: OctopusClientSurfaceDocumentChange) => void): () => void;
-      onClientExtensionsChanged(listener: (change: OctopusClientExtensionChange) => void): () => void;
-      onApplicationLifecycleProgress(listener: (progress: OctopusApplicationLifecycleProgress) => void): () => void;
-      onApplicationConnectionProgress(listener: (progress: OctopusApplicationConnectionProgress) => void): () => void;
-      onWorkspaceSetupProgress(listener: (progress: OctopusWorkspaceSetupProgress) => void): () => void;
-      onClientSetupProgress(listener: (progress: OctopusClientSetupProgress) => void): () => void;
+      onOpenWorkerEnvironmentRequested(listener: (target: PhobosWorkerEnvironmentWindowTarget) => void): () => void;
+      onWorkerEnvironmentWindowTarget(listener: (target: PhobosWorkerEnvironmentWindowTarget) => void): () => void;
+      onClientSurfaceDocumentsChanged(listener: (change: PhobosClientSurfaceDocumentChange) => void): () => void;
+      onClientExtensionsChanged(listener: (change: PhobosClientExtensionChange) => void): () => void;
+      onApplicationLifecycleProgress(listener: (progress: PhobosApplicationLifecycleProgress) => void): () => void;
+      onApplicationConnectionProgress(listener: (progress: PhobosApplicationConnectionProgress) => void): () => void;
+      onWorkspaceSetupProgress(listener: (progress: PhobosWorkspaceSetupProgress) => void): () => void;
+      onClientSetupProgress(listener: (progress: PhobosClientSetupProgress) => void): () => void;
     };
   }
 }
 
-export type OctopusProjectionChange = {
+export type PhobosProjectionChange = {
   generation: number;
   kind: "ledger" | "runs" | "files" | "structure";
 };
 
-export type OctopusClientAttachmentSelectionRequest = {
+export type PhobosClientAttachmentSelectionRequest = {
   mode: "directory" | "files" | "files_and_folders";
 };
 
-export type OctopusClientDirectorySelection = {
+export type PhobosClientDirectorySelection = {
   canceled: boolean;
   path: string;
   paths: string[];
 };
 
-export type OctopusClientPathSelectionRequest = {
+export type PhobosClientPathSelectionRequest = {
   mode: "file" | "directory";
   allowMultiple?: boolean;
   title?: string;
   buttonLabel?: string;
 };
 
-export type OctopusClientExtensionChange = {
+export type PhobosClientExtensionChange = {
   generation: number;
 };
 
-export type OctopusClientExtensionFilesystemReadRequest = {
+export type PhobosClientExtensionFilesystemReadRequest = {
   path: string;
   read: "text" | "json" | "directory";
 };
 
-export type OctopusClientExtensionDirectoryEntry = {
+export type PhobosClientExtensionDirectoryEntry = {
   kind: "file" | "directory";
   name: string;
   path: string;
@@ -317,13 +317,13 @@ export type OctopusClientExtensionDirectoryEntry = {
   modifiedAt: string;
 };
 
-export type OctopusClientExtensionFilesystemSource =
+export type PhobosClientExtensionFilesystemSource =
   | {
       kind: "directory";
       path: string;
       name: string;
       modifiedAt: string;
-      entries: OctopusClientExtensionDirectoryEntry[];
+      entries: PhobosClientExtensionDirectoryEntry[];
       truncated: boolean;
       files: number;
       directories: number;
@@ -347,14 +347,14 @@ export type OctopusClientExtensionFilesystemSource =
       value: unknown;
     };
 
-export type OctopusCodexUsageWindowDays = 7 | 30 | 90;
+export type PhobosCodexUsageWindowDays = 7 | 30 | 90;
 
-export type OctopusCodexUsageReadRequest = {
-  windowDays: OctopusCodexUsageWindowDays;
+export type PhobosCodexUsageReadRequest = {
+  windowDays: PhobosCodexUsageWindowDays;
   timeZone: string;
 };
 
-export type OctopusCodexUsageBucket = {
+export type PhobosCodexUsageBucket = {
   day: string;
   model: string;
   uncachedInputTokens: number;
@@ -370,15 +370,15 @@ export type OctopusCodexUsageBucket = {
   sessions: number;
 };
 
-export type OctopusCodexUsageSnapshot = {
-  schema: "octopus.client_usage";
+export type PhobosCodexUsageSnapshot = {
+  schema: "phobos.client_usage";
   schemaVersion: 1;
   provider: "codex";
   readAt: string;
   timeZone: string;
   sinceDay: string;
   untilDay: string;
-  buckets: OctopusCodexUsageBucket[];
+  buckets: PhobosCodexUsageBucket[];
   source: {
     kind: "codex_session_transcripts";
     resolvedHomePath: string;
@@ -403,12 +403,12 @@ export type OctopusCodexUsageSnapshot = {
   scanDurationMs: number;
 };
 
-export type OctopusClientAttachmentSelection = {
+export type PhobosClientAttachmentSelection = {
   canceled: boolean;
-  attachments: OctopusClientAttachmentStageHandle[];
+  attachments: PhobosClientAttachmentStageHandle[];
 };
 
-export type OctopusClientAttachmentStageBeginRequest = {
+export type PhobosClientAttachmentStageBeginRequest = {
   name: string;
   label: string;
   type: string;
@@ -416,72 +416,72 @@ export type OctopusClientAttachmentStageBeginRequest = {
   lastModified: number;
 };
 
-export type OctopusClientAttachmentStageHandle = OctopusClientAttachmentStageBeginRequest & {
+export type PhobosClientAttachmentStageHandle = PhobosClientAttachmentStageBeginRequest & {
   id: string;
   contentHash?: string;
 };
 
-export type OctopusClientAttachmentStageAppendRequest = {
+export type PhobosClientAttachmentStageAppendRequest = {
   id: string;
   bytes: ArrayBuffer;
 };
 
-export type OctopusClientAttachmentStageProgress = {
+export type PhobosClientAttachmentStageProgress = {
   id: string;
   bytes: number;
 };
 
-export type OctopusClientAttachmentStageFinalizeRequest = {
+export type PhobosClientAttachmentStageFinalizeRequest = {
   id: string;
 };
 
-export type OctopusClientAttachmentStageAbortRequest = {
+export type PhobosClientAttachmentStageAbortRequest = {
   id: string;
 };
 
-export type OctopusClientAttachmentStageAbortOutcome = {
+export type PhobosClientAttachmentStageAbortOutcome = {
   id: string;
   aborted: true;
 };
 
-export type OctopusClientFileRequest = {
+export type PhobosClientFileRequest = {
   bytes: ArrayBuffer | Uint8Array;
   filename: string;
 };
 
-export type OctopusClientFileOpenRequest = OctopusClientFileRequest & {
+export type PhobosClientFileOpenRequest = PhobosClientFileRequest & {
   action: "open" | "reveal";
 };
 
-export type OctopusClientFileOpenWithRequest = OctopusClientFileRequest & {
+export type PhobosClientFileOpenWithRequest = PhobosClientFileRequest & {
   applicationId: string;
 };
 
-export type OctopusClientFileOpenTarget = {
+export type PhobosClientFileOpenTarget = {
   icon: string | null;
   id: string;
   label: string;
 };
 
-export type OctopusClientFileOpenTargets = {
-  applications: OctopusClientFileOpenTarget[];
+export type PhobosClientFileOpenTargets = {
+  applications: PhobosClientFileOpenTarget[];
   downloadsFolderIcon: string | null;
   fileManagerIcon: string | null;
   preferredApplicationId: string | null;
 };
 
-export type OctopusClientFileSaveOutcome = {
+export type PhobosClientFileSaveOutcome = {
   saved: boolean;
   path?: string;
   filename?: string;
 };
 
-export type OctopusClientFileOpenOutcome = {
+export type PhobosClientFileOpenOutcome = {
   opened: true;
   path: string;
 };
 
-export type OctopusWorkerEnvironmentPanelKind =
+export type PhobosWorkerEnvironmentPanelKind =
   | "browser"
   | "connection"
   | "container"
@@ -494,10 +494,10 @@ export type OctopusWorkerEnvironmentPanelKind =
   | "custom"
   | "overview";
 
-export type OctopusWorkerEnvironmentWindowTarget = {
+export type PhobosWorkerEnvironmentWindowTarget = {
   runId: string;
   workerEnvironmentId: string;
-  panelKind: OctopusWorkerEnvironmentPanelKind;
+  panelKind: PhobosWorkerEnvironmentPanelKind;
   surfaceId?: string;
   filePath?: string;
   clientSurface?: {
@@ -507,60 +507,60 @@ export type OctopusWorkerEnvironmentWindowTarget = {
   };
 };
 
-export type OctopusWorkerEnvironmentWindowOutcome = OctopusWorkerEnvironmentWindowTarget & {
+export type PhobosWorkerEnvironmentWindowOutcome = PhobosWorkerEnvironmentWindowTarget & {
   opened: true;
 };
 
-export type OctopusClientLogRequest = {
+export type PhobosClientLogRequest = {
   level: "info" | "warning" | "error";
   event: string;
   message: string;
 };
 
-export type OctopusGlobalDictationShortcutRequest = {
+export type PhobosGlobalDictationShortcutRequest = {
   enabled: boolean;
   shortcut: string;
 };
 
-export type OctopusGlobalDictationShortcutState = {
+export type PhobosGlobalDictationShortcutState = {
   enabled: boolean;
   shortcut: string;
   registered: boolean;
 };
 
-export type OctopusLoginItemSettings = {
+export type PhobosLoginItemSettings = {
   supported: boolean;
   enabled: boolean;
 };
 
-export type OctopusCdpViewerOpenRequest = {
+export type PhobosCdpViewerOpenRequest = {
   attachmentId: string;
   visible: boolean;
   workerEnvironmentId: string;
   surfaceId: string;
 };
 
-export type OctopusNativeBrowserViewerIdentity = {
+export type PhobosNativeBrowserViewerIdentity = {
   attachmentId: string;
   hostGeneration: string;
   mountGeneration: number;
 };
 
-export type OctopusNativeBrowserViewerPrepareRequest = {
+export type PhobosNativeBrowserViewerPrepareRequest = {
   attachmentId: string;
   workerEnvironmentId: string;
   surfaceId: string;
   frameToken: string;
 };
 
-export type OctopusNativeBrowserViewerPrepared = {
+export type PhobosNativeBrowserViewerPrepared = {
   adoptionToken: string | null;
   hostGeneration: string;
   mountGeneration: number;
-  state: OctopusNativeBrowserViewerState;
+  state: PhobosNativeBrowserViewerState;
 };
 
-export type OctopusNativeBrowserViewerSyncRequest = OctopusNativeBrowserViewerIdentity & {
+export type PhobosNativeBrowserViewerSyncRequest = PhobosNativeBrowserViewerIdentity & {
   viewportSequence: number;
   metricsRevision: number;
   stageBounds: { x: number; y: number; width: number; height: number };
@@ -570,27 +570,27 @@ export type OctopusNativeBrowserViewerSyncRequest = OctopusNativeBrowserViewerId
   visible: boolean;
 };
 
-export type OctopusNativeBrowserViewerActionRequest = OctopusNativeBrowserViewerIdentity & (
+export type PhobosNativeBrowserViewerActionRequest = PhobosNativeBrowserViewerIdentity & (
   | { action: "reload" | "back" | "forward" | "stop" | "focus" }
   | { action: "navigate"; params: { url: string } }
   | { action: "zoom"; params: { zoomFactor: number } }
   | { action: "find"; params: { query: string; backwards: boolean; matchCase: boolean } }
 );
 
-export type OctopusSavedBrowserPermissions = {
+export type PhobosSavedBrowserPermissions = {
   home: string;
   hostGeneration: string;
   removed?: boolean;
   entries: Array<{ id: string; decision: "accept" | "decline"; subject:
     { type: "upload"; origin: string } | { type: "history"; source: { id: string; content: number[] }; source_payload_digest: string } }>;
 };
-export type OctopusSavedApplicationPermissionRequest = { operation: "list" } | { operation: "remove"; sourceId: string; bundleId: string };
-export type OctopusSavedApplicationPermissions = {
+export type PhobosSavedApplicationPermissionRequest = { operation: "list" } | { operation: "remove"; sourceId: string; bundleId: string };
+export type PhobosSavedApplicationPermissions = {
   sourceId: string; removed: boolean;
   applications: Array<{ bundle_id: string; display_name: string }>;
 };
 
-export type OctopusBrowserDownloadRequest = {
+export type PhobosBrowserDownloadRequest = {
   workerEnvironmentId: string;
   surfaceId: string;
   hostGeneration: string;
@@ -599,7 +599,7 @@ export type OctopusBrowserDownloadRequest = {
   id?: string;
   query?: { text: string; offset: number };
 };
-export type OctopusBrowserDownload = {
+export type PhobosBrowserDownload = {
   id: string;
   targetId: string;
   filename: string;
@@ -618,23 +618,23 @@ export type OctopusBrowserDownload = {
   artifactError?: string | null;
   sequence: number;
 };
-export type OctopusBrowserDownloadHistory = { text: string; offset: number; hasMore: boolean; downloads: OctopusBrowserDownload[] };
-export type OctopusBrowserDownloadSnapshot = {
-  history?: OctopusBrowserDownloadHistory;
+export type PhobosBrowserDownloadHistory = { text: string; offset: number; hasMore: boolean; downloads: PhobosBrowserDownload[] };
+export type PhobosBrowserDownloadSnapshot = {
+  history?: PhobosBrowserDownloadHistory;
   preferences: { directory: string | null; promptForLocation: boolean };
   sequence: number;
-  downloads: OctopusBrowserDownload[];
+  downloads: PhobosBrowserDownload[];
   unacknowledgedIds: string[];
   error: string | null;
 };
 
-export type OctopusNativeBrowserViewerState = OctopusNativeBrowserViewerIdentity & {
+export type PhobosNativeBrowserViewerState = PhobosNativeBrowserViewerIdentity & {
   surfaceId: string;
   protocol: "browser.native.v1";
   presentationProtocol: "electron.ownedGuest.v1" | "electron.webContentsView.v1";
   engine: {
     mode: "standard" | "owned";
-    presentationProtocol: OctopusNativeBrowserViewerState["presentationProtocol"];
+    presentationProtocol: PhobosNativeBrowserViewerState["presentationProtocol"];
     capabilities: {
       nativeView: boolean;
       ownedGuestEmbedding: boolean;
@@ -674,13 +674,13 @@ export type OctopusNativeBrowserViewerState = OctopusNativeBrowserViewerIdentity
   findActiveOrdinal?: number;
 };
 
-export type OctopusNativeBrowserViewerEvent = OctopusNativeBrowserViewerIdentity & (
-  | { type: "state"; state: OctopusNativeBrowserViewerState }
+export type PhobosNativeBrowserViewerEvent = PhobosNativeBrowserViewerIdentity & (
+  | { type: "state"; state: PhobosNativeBrowserViewerState }
   | { type: "command"; command: "focus-address" | "find" }
   | { type: "closed" | "error"; error: { code: string; message: string } }
 );
 
-export type OctopusCdpViewerState = {
+export type PhobosCdpViewerState = {
   runId: string;
   targetId: string;
   visible: boolean;
@@ -700,7 +700,7 @@ export type OctopusCdpViewerState = {
   zoom: number;
 };
 
-export type OctopusCdpViewerMouseAction = {
+export type PhobosCdpViewerMouseAction = {
   sessionId: string;
   action: "mouse";
   eventType: "mousePressed" | "mouseReleased" | "mouseMoved" | "mouseWheel";
@@ -714,7 +714,7 @@ export type OctopusCdpViewerMouseAction = {
   modifiers?: number;
 };
 
-export type OctopusCdpViewerKeyAction = {
+export type PhobosCdpViewerKeyAction = {
   sessionId: string;
   action: "key";
   eventType: "keyDown" | "keyUp" | "rawKeyDown" | "char";
@@ -728,7 +728,7 @@ export type OctopusCdpViewerKeyAction = {
   autoRepeat?: boolean;
 };
 
-export type OctopusCdpViewerActionRequest =
+export type PhobosCdpViewerActionRequest =
   | { sessionId: string; action: "setVisible"; visible: boolean }
   | { sessionId: string; action: "claimControl" | "releaseControl" | "stop" }
   | { sessionId: string; action: "navigate"; url: string }
@@ -736,25 +736,25 @@ export type OctopusCdpViewerActionRequest =
   | { sessionId: string; action: "find"; query: string; backwards?: boolean; matchCase?: boolean }
   | { sessionId: string; action: "zoom"; factor: number }
   | { sessionId: string; action: "back" | "forward" | "refreshState" }
-  | OctopusCdpViewerMouseAction
-  | OctopusCdpViewerKeyAction;
+  | PhobosCdpViewerMouseAction
+  | PhobosCdpViewerKeyAction;
 
-export type OctopusCdpViewerActionAccepted = {
+export type PhobosCdpViewerActionAccepted = {
   sessionId: string;
   accepted: true;
   found?: boolean;
 };
 
-export type OctopusCdpViewerCloseRequest = {
+export type PhobosCdpViewerCloseRequest = {
   sessionId: string;
 };
 
-export type OctopusCdpViewerCloseOutcome = {
+export type PhobosCdpViewerCloseOutcome = {
   sessionId: string;
   closed: true;
 };
 
-export type OctopusCdpViewerFrameMetadata = {
+export type PhobosCdpViewerFrameMetadata = {
   deviceWidth: number;
   deviceHeight: number;
   pageScaleFactor: number;
@@ -764,17 +764,17 @@ export type OctopusCdpViewerFrameMetadata = {
   timestamp: number;
 };
 
-export type OctopusCdpViewerEvent =
-  | { sessionId: string; type: "state"; state: OctopusCdpViewerState }
+export type PhobosCdpViewerEvent =
+  | { sessionId: string; type: "state"; state: PhobosCdpViewerState }
   | { sessionId: string; type: "error"; error: string }
-  | { sessionId: string; type: "frame"; data: string; mimeType: "image/jpeg"; metadata: OctopusCdpViewerFrameMetadata };
+  | { sessionId: string; type: "frame"; data: string; mimeType: "image/jpeg"; metadata: PhobosCdpViewerFrameMetadata };
 
-export type OctopusProcessViewerOpenRequest = {
+export type PhobosProcessViewerOpenRequest = {
   workerEnvironmentId: string;
   surfaceId: string;
 };
 
-export type OctopusProcessViewerState = {
+export type PhobosProcessViewerState = {
   workerEnvironmentId: string;
   generation: number;
   processId: string;
@@ -788,41 +788,41 @@ export type OctopusProcessViewerState = {
   launchLabel: string;
 };
 
-export type OctopusProcessViewerSnapshot = {
+export type PhobosProcessViewerSnapshot = {
   sessionId: string;
-  state: OctopusProcessViewerState;
+  state: PhobosProcessViewerState;
 };
 
-export type OctopusProcessViewerActionRequest =
+export type PhobosProcessViewerActionRequest =
   | { sessionId: string; action: "write"; data: string }
   | { sessionId: string; action: "resize"; cols: number; rows: number }
   | { sessionId: string; action: "interrupt" | "terminate" | "restart" | "start_new_shell" };
 
-export type OctopusProcessViewerActionOutcome = {
-  state: OctopusProcessViewerState;
+export type PhobosProcessViewerActionOutcome = {
+  state: PhobosProcessViewerState;
 };
 
-export type OctopusProcessViewerCloseRequest = {
+export type PhobosProcessViewerCloseRequest = {
   sessionId: string;
 };
 
-export type OctopusProcessViewerEvent = {
+export type PhobosProcessViewerEvent = {
   sessionId: string;
   event:
     | { type: "output"; data: string; seq: number }
     | { type: "history_truncated"; retainedFromSeq: number | null }
     | { type: "reset" }
-    | { type: "state"; state: OctopusProcessViewerState }
+    | { type: "state"; state: PhobosProcessViewerState }
     | { type: "failure"; message: string };
 };
 
-export type OctopusWorkerEnvironmentFilesRequest = {
+export type PhobosWorkerEnvironmentFilesRequest = {
   workerEnvironmentId: string;
   surfaceId: string;
   path: string;
 };
 
-export type OctopusWorkerEnvironmentFileEntry = {
+export type PhobosWorkerEnvironmentFileEntry = {
   name: string;
   path: string;
   kind: "directory" | "file" | "symlink" | "other";
@@ -830,14 +830,14 @@ export type OctopusWorkerEnvironmentFileEntry = {
   modifiedAt: string;
 };
 
-export type OctopusWorkerEnvironmentDirectory = {
+export type PhobosWorkerEnvironmentDirectory = {
   workerEnvironmentId: string;
   surfaceId: string;
   path: string;
-  entries: OctopusWorkerEnvironmentFileEntry[];
+  entries: PhobosWorkerEnvironmentFileEntry[];
 };
 
-export type OctopusWorkerEnvironmentFile = {
+export type PhobosWorkerEnvironmentFile = {
   workerEnvironmentId: string;
   surfaceId: string;
   path: string;
@@ -850,18 +850,18 @@ export type OctopusWorkerEnvironmentFile = {
   digest: string;
 };
 
-export type OctopusWorkerEnvironmentFileWriteRequest = OctopusWorkerEnvironmentFilesRequest & {
+export type PhobosWorkerEnvironmentFileWriteRequest = PhobosWorkerEnvironmentFilesRequest & {
   text: string;
   expectedDigest: string;
   expectedModifiedAt: string;
   expectedSize: number;
 };
 
-export type OctopusWorkerEnvironmentFileWriteOutcome = OctopusWorkerEnvironmentFile & {
-  outsideOctopusEvidence: true;
+export type PhobosWorkerEnvironmentFileWriteOutcome = PhobosWorkerEnvironmentFile & {
+  outsidePhobosEvidence: true;
 };
 
-export type OctopusWorkerEnvironmentFilePreview = {
+export type PhobosWorkerEnvironmentFilePreview = {
   workerEnvironmentId: string;
   surfaceId: string;
   path: string;
@@ -872,7 +872,7 @@ export type OctopusWorkerEnvironmentFilePreview = {
   bytes: ArrayBuffer;
 };
 
-export type OctopusWorkerEnvironmentFileAttachment = {
+export type PhobosWorkerEnvironmentFileAttachment = {
   workerEnvironmentId: string;
   surfaceId: string;
   path: string;
@@ -883,37 +883,37 @@ export type OctopusWorkerEnvironmentFileAttachment = {
   bytes: ArrayBuffer;
 };
 
-export type OctopusWorkerEnvironmentFileSystemAction = "resolve" | "reveal" | "open";
+export type PhobosWorkerEnvironmentFileSystemAction = "resolve" | "reveal" | "open";
 
-export type OctopusWorkerEnvironmentFileSystemActionRequest = OctopusWorkerEnvironmentFilesRequest & {
-  action: OctopusWorkerEnvironmentFileSystemAction;
+export type PhobosWorkerEnvironmentFileSystemActionRequest = PhobosWorkerEnvironmentFilesRequest & {
+  action: PhobosWorkerEnvironmentFileSystemAction;
 };
 
-export type OctopusWorkerEnvironmentFileSystemActionOutcome = {
+export type PhobosWorkerEnvironmentFileSystemActionOutcome = {
   workerEnvironmentId: string;
   surfaceId: string;
   path: string;
   absolutePath: string;
   kind: "directory" | "file";
-  action: OctopusWorkerEnvironmentFileSystemAction;
+  action: PhobosWorkerEnvironmentFileSystemAction;
 };
 
-export type OctopusOsFileRoot = {
+export type PhobosOsFileRoot = {
   id: string;
   label: string;
   path: string;
 };
 
-export type OctopusOsFileRoots = {
-  roots: OctopusOsFileRoot[];
+export type PhobosOsFileRoots = {
+  roots: PhobosOsFileRoot[];
 };
 
-export type OctopusOsFilesRequest = {
+export type PhobosOsFilesRequest = {
   rootId: string;
   path?: string;
 };
 
-export type OctopusOsFileEntry = {
+export type PhobosOsFileEntry = {
   name: string;
   path: string;
   kind: "directory" | "file" | "symlink" | "other";
@@ -921,13 +921,13 @@ export type OctopusOsFileEntry = {
   modifiedAt: string;
 };
 
-export type OctopusOsDirectory = {
+export type PhobosOsDirectory = {
   rootId: string;
   path: string;
-  entries: OctopusOsFileEntry[];
+  entries: PhobosOsFileEntry[];
 };
 
-export type OctopusOsFile = {
+export type PhobosOsFile = {
   rootId: string;
   path: string;
   name: string;
@@ -939,40 +939,40 @@ export type OctopusOsFile = {
   digest: string;
 };
 
-export type OctopusOsFileWriteRequest = OctopusOsFilesRequest & {
+export type PhobosOsFileWriteRequest = PhobosOsFilesRequest & {
   text: string;
   expectedDigest: string;
   expectedModifiedAt: string;
   expectedSize: number;
 };
 
-export type OctopusOsFileWriteOutcome = OctopusOsFile & {
-  outsideOctopusEvidence: true;
+export type PhobosOsFileWriteOutcome = PhobosOsFile & {
+  outsidePhobosEvidence: true;
 };
 
-export type OctopusOsFileSystemAction = "resolve" | "reveal" | "open";
+export type PhobosOsFileSystemAction = "resolve" | "reveal" | "open";
 
-export type OctopusOsFileSystemActionRequest = OctopusOsFilesRequest & {
-  action: OctopusOsFileSystemAction;
+export type PhobosOsFileSystemActionRequest = PhobosOsFilesRequest & {
+  action: PhobosOsFileSystemAction;
 };
 
-export type OctopusOsFileSystemActionOutcome = {
+export type PhobosOsFileSystemActionOutcome = {
   rootId: string;
   path: string;
   absolutePath: string;
   kind: "directory" | "file";
-  action: OctopusOsFileSystemAction;
+  action: PhobosOsFileSystemAction;
 };
 
-export type OctopusWorkerEnvironmentOperatorAction = "apply" | "revert" | "stage" | "unstage";
+export type PhobosWorkerEnvironmentOperatorAction = "apply" | "revert" | "stage" | "unstage";
 
-export type OctopusWorkerEnvironmentGitRequest = {
+export type PhobosWorkerEnvironmentGitRequest = {
   workerEnvironmentId: string;
   surfaceId: string;
   runId: string;
 };
 
-export type OctopusWorkerEnvironmentGitSnapshot = {
+export type PhobosWorkerEnvironmentGitSnapshot = {
   workerEnvironmentId: string;
   surfaceId: string;
   runId: string;
@@ -980,15 +980,15 @@ export type OctopusWorkerEnvironmentGitSnapshot = {
   revision: string;
   branch: string;
   base: string;
-  branchDiffs: Array<OctopusWorkerEnvironmentGitDiff>;
+  branchDiffs: Array<PhobosWorkerEnvironmentGitDiff>;
   branchError: string;
   omittedPaths: Array<{ path: string; reason: "nested-worktree" }>;
   stagedFiles: string[];
   unstagedFiles: string[];
-  diffs: Array<OctopusWorkerEnvironmentGitDiff>;
+  diffs: Array<PhobosWorkerEnvironmentGitDiff>;
 };
 
-export type OctopusWorkerEnvironmentGitDiff = {
+export type PhobosWorkerEnvironmentGitDiff = {
   path: string;
   previous_path: string;
   before: string;
@@ -1001,26 +1001,26 @@ export type OctopusWorkerEnvironmentGitDiff = {
   status: "added" | "deleted" | "modified" | "renamed";
 };
 
-export type OctopusWorkerEnvironmentOperatorActionRequest = {
+export type PhobosWorkerEnvironmentOperatorActionRequest = {
   workerEnvironmentId: string;
   surfaceId: string;
   runId: string;
   projectionRevision: string;
-  action: OctopusWorkerEnvironmentOperatorAction;
+  action: PhobosWorkerEnvironmentOperatorAction;
   paths: string[];
 };
 
-export type OctopusWorkerEnvironmentOperatorActionOutcome = {
+export type PhobosWorkerEnvironmentOperatorActionOutcome = {
   workerEnvironmentId: string;
   runId: string;
   surfaceId: string;
   projectionRevision: string;
-  action: OctopusWorkerEnvironmentOperatorAction;
+  action: PhobosWorkerEnvironmentOperatorAction;
   paths: string[];
-  outsideOctopusEvidence: true;
+  outsidePhobosEvidence: true;
 };
 
-export type OctopusClientSurfaceDocumentSource = {
+export type PhobosClientSurfaceDocumentSource = {
   path: string;
   digest: string;
   bytes: number;
@@ -1028,18 +1028,18 @@ export type OctopusClientSurfaceDocumentSource = {
   text: string;
 };
 
-export type OctopusClientSurfaceDocumentSnapshot = {
+export type PhobosClientSurfaceDocumentSnapshot = {
   generation: number;
   root: string;
-  documents: OctopusClientSurfaceDocumentSource[];
+  documents: PhobosClientSurfaceDocumentSource[];
   errors: string[];
 };
 
-export type OctopusClientSurfaceDocumentChange = {
+export type PhobosClientSurfaceDocumentChange = {
   generation: number;
 };
 
-export type OctopusInterfaceArtifactRequest = {
+export type PhobosInterfaceArtifactRequest = {
   interfaceId: string;
   runId?: string;
   label: string;
@@ -1047,7 +1047,7 @@ export type OctopusInterfaceArtifactRequest = {
   timeoutMs?: number;
 };
 
-export type OctopusDictationRequest = {
+export type PhobosDictationRequest = {
   attemptId: string;
   bytes: ArrayBuffer;
   durationMs: number;
@@ -1057,19 +1057,19 @@ export type OctopusDictationRequest = {
   timeoutMs?: number;
 };
 
-export type OctopusDictationResponse = OctopusDictationLocalResult<{
+export type PhobosDictationResponse = PhobosDictationLocalResult<{
   provider: "codex";
   text: string;
   model: string;
 }>;
 
-export type OctopusDictationStreamEvent = { attemptId: string } & (
+export type PhobosDictationStreamEvent = { attemptId: string } & (
   { type: "transcript"; text: string } | { type: "stop-requested" } | { type: "error"; error: { code: string; message: string } }
 );
 
-export type OctopusDictationLocalResult<T> = { ok: true; value: T } | { ok: false; error: { code: string; message: string } };
+export type PhobosDictationLocalResult<T> = { ok: true; value: T } | { ok: false; error: { code: string; message: string } };
 
-export type OctopusDictationRecording = {
+export type PhobosDictationRecording = {
   version: 1;
   id: string;
   createdAtMs: number;
@@ -1079,14 +1079,14 @@ export type OctopusDictationRecording = {
   text: string;
 };
 
-export type OctopusDictationRecordingState = {
+export type PhobosDictationRecordingState = {
   version: 1;
   enabled: boolean;
-  recordings: OctopusDictationRecording[];
+  recordings: PhobosDictationRecording[];
   maxRecordings: number;
 };
 
-export type OctopusInterfaceArtifactResponse = {
+export type PhobosInterfaceArtifactResponse = {
   interfaceId: string;
   runId?: string;
   label: string;
@@ -1094,7 +1094,7 @@ export type OctopusInterfaceArtifactResponse = {
   verdict: unknown;
 };
 
-export type OctopusArtifactStreamBeginRequest = {
+export type PhobosArtifactStreamBeginRequest = {
   interfaceId: string;
   runId?: string;
   label: string;
@@ -1103,7 +1103,7 @@ export type OctopusArtifactStreamBeginRequest = {
   payload?: Record<string, unknown>;
 };
 
-export type OctopusArtifactStreamHandle = {
+export type PhobosArtifactStreamHandle = {
   streamId: string;
   interfaceId: string;
   runId?: string;
@@ -1111,37 +1111,37 @@ export type OctopusArtifactStreamHandle = {
   mediaType: string;
 };
 
-export type OctopusArtifactStreamAppendRequest = {
+export type PhobosArtifactStreamAppendRequest = {
   streamId: string;
   bytes: Uint8Array;
 };
 
-export type OctopusArtifactStreamProgress = {
+export type PhobosArtifactStreamProgress = {
   streamId: string;
   bytes: number;
 };
 
-export type OctopusArtifactStreamFinalizeRequest = {
+export type PhobosArtifactStreamFinalizeRequest = {
   streamId: string;
   timeoutMs?: number;
 };
 
-export type OctopusArtifactStreamOutcome = OctopusInterfaceArtifactResponse & {
+export type PhobosArtifactStreamOutcome = PhobosInterfaceArtifactResponse & {
   mediaType: string;
   mediaContentHash: string;
   mediaBytes: number;
 };
 
-export type OctopusArtifactStreamAbortRequest = {
+export type PhobosArtifactStreamAbortRequest = {
   streamId: string;
 };
 
-export type OctopusArtifactStreamAbortOutcome = {
+export type PhobosArtifactStreamAbortOutcome = {
   streamId: string;
   aborted: true;
 };
 
-export type OctopusWindowState = {
+export type PhobosWindowState = {
   customWindowControls: boolean;
   nativeControlInset: number;
   fullScreen: boolean;
@@ -1150,25 +1150,25 @@ export type OctopusWindowState = {
   resizing: boolean;
 };
 
-export type OctopusHistoryNavigationState = {
+export type PhobosHistoryNavigationState = {
   canNavigateBack: boolean;
   canNavigateForward: boolean;
 };
 
-export type OctopusWindowAppearance = {
+export type PhobosWindowAppearance = {
   theme: "light" | "dark";
   preference: "system" | "light" | "dark";
   translucent: boolean;
 };
 
-export type OctopusAppInfo = {
+export type PhobosAppInfo = {
   name: string;
   version: string;
   platform: NodeJS.Platform;
   isPackaged: boolean;
 };
 
-export type OctopusClientDoctorFinding = {
+export type PhobosClientDoctorFinding = {
   code: string;
   subject: string;
   reason: string;
@@ -1176,37 +1176,37 @@ export type OctopusClientDoctorFinding = {
   evidence: Record<string, unknown>;
 };
 
-export type OctopusClientDoctorReport = {
+export type PhobosClientDoctorReport = {
   schema_version: 2;
   checks: number;
   passed: number;
-  findings: OctopusClientDoctorFinding[];
+  findings: PhobosClientDoctorFinding[];
   errors: string[];
 };
 
-export type OctopusClientAccessProfile = "live" | "lab";
+export type PhobosClientAccessProfile = "live" | "lab";
 
-export type OctopusClientAccessStatus = {
+export type PhobosClientAccessStatus = {
   configured: boolean;
   labAvailable: boolean;
   authenticated: boolean;
-  profile: OctopusClientAccessProfile | null;
+  profile: PhobosClientAccessProfile | null;
   expiresAt: string | null;
 };
 
-export type OctopusTouchIdStatus = {
+export type PhobosTouchIdStatus = {
   available: boolean;
   enrolled: boolean;
   prompted: boolean;
 };
 
-export type OctopusClientLabAccess = {
+export type PhobosClientLabAccess = {
   source: "default" | "environment" | "administrator";
   minimumLength: number;
 };
 
-export type OctopusClientAccessDetails = {
-  profile: OctopusClientAccessProfile;
+export type PhobosClientAccessDetails = {
+  profile: PhobosClientAccessProfile;
   minimumLength: number;
   administrator: {
     configured: boolean;
@@ -1220,41 +1220,41 @@ export type OctopusClientAccessDetails = {
   };
 };
 
-export type OctopusAdministratorAccessUpdate = {
+export type PhobosAdministratorAccessUpdate = {
   currentPassword: string;
   password: string;
 };
 
-export type OctopusMicrophoneAccess = {
+export type PhobosMicrophoneAccess = {
   granted: boolean;
   status: string;
 };
 
-export type OctopusCameraAccess = {
+export type PhobosCameraAccess = {
   granted: boolean;
   status: string;
 };
 
-export type OctopusGestureTraceSaved = {
+export type PhobosGestureTraceSaved = {
   path: string;
   filename: string;
   bytes: number;
 };
 
-export type OctopusTransportDefaults = {
+export type PhobosTransportDefaults = {
   endpoint: string;
   repoRoot?: string | null;
-  octopusHome?: string | null;
+  phobosHome?: string | null;
   registryRoot?: string | null;
   stateRoot?: string | null;
   ledgerPath?: string | null;
 };
 
-export type OctopusRuntimeStatusRequest = {
+export type PhobosRuntimeStatusRequest = {
   endpoint?: string;
 };
 
-export type OctopusRuntimeStatus = {
+export type PhobosRuntimeStatus = {
   up: boolean;
   endpoint: string;
   error?: string;
@@ -1267,7 +1267,7 @@ export type OctopusRuntimeStatus = {
   hostError?: string | null;
 };
 
-export type OctopusHomeStorageHealth = {
+export type PhobosHomeStorageHealth = {
   status: "writable" | "blocked" | "unavailable";
   availableBytes: number | null;
   minimumBytes: number;
@@ -1275,9 +1275,9 @@ export type OctopusHomeStorageHealth = {
   message: string | null;
 };
 
-export type OctopusInterfaceFailure = { interfaceId: string; message: string };
+export type PhobosInterfaceFailure = { interfaceId: string; message: string };
 
-export type OctopusRuntimeHostState = {
+export type PhobosRuntimeHostState = {
   phase: string;
   ready: boolean;
   ownership: "none" | "external";
@@ -1291,24 +1291,24 @@ export type OctopusRuntimeHostState = {
   launchEnv: Record<string, string>;
   endpoint: string;
   error: string | null;
-  storageHealth: OctopusHomeStorageHealth | null;
-  interfaceFailures: OctopusInterfaceFailure[];
+  storageHealth: PhobosHomeStorageHealth | null;
+  interfaceFailures: PhobosInterfaceFailure[];
   updatedAtMs: number;
 };
 
-export type OctopusTerminalResizeRequest = {
+export type PhobosTerminalResizeRequest = {
   cols?: number;
   rows?: number;
 };
 
-export type OctopusTerminalOpenRequest = OctopusTerminalResizeRequest & {
+export type PhobosTerminalOpenRequest = PhobosTerminalResizeRequest & {
   terminalId: string;
   cwd?: string;
   env?: Record<string, string>;
   preparedCommand?: string;
 };
 
-export type OctopusTerminalSnapshot = {
+export type PhobosTerminalSnapshot = {
   terminalId: string;
   sessionId: string;
   command: string;
@@ -1321,13 +1321,13 @@ export type OctopusTerminalSnapshot = {
   error: string | null;
 };
 
-export type OctopusTerminalData = {
+export type PhobosTerminalData = {
   terminalId: string;
   sessionId: string;
   data: string;
 };
 
-export type OctopusTerminalExit = {
+export type PhobosTerminalExit = {
   terminalId: string;
   sessionId: string;
   exitCode: number | null;
@@ -1335,57 +1335,57 @@ export type OctopusTerminalExit = {
   error: string | null;
 };
 
-export type OctopusRuntimeEndpointValidationRequest = {
+export type PhobosRuntimeEndpointValidationRequest = {
   endpoint: string;
 };
 
-export type OctopusRuntimeEndpointValidation = {
+export type PhobosRuntimeEndpointValidation = {
   valid: boolean;
   endpoint: string;
   error?: string;
 };
 
-export type OctopusChatgptAccount = {
+export type PhobosChatgptAccount = {
   signedIn: boolean;
   authType: "chatgpt" | "apiKey" | "amazonBedrock" | "gcp" | null;
   email: string | null;
   planType: string | null;
   workspaceName: string | null;
   credentialHome: string;
-  octopusHome: string | null;
+  phobosHome: string | null;
 };
 
-export type OctopusChatgptWorkspace = {
+export type PhobosChatgptWorkspace = {
   accountId: string;
   name: string | null;
   kind: "personal" | "workspace" | null;
 };
 
-export type OctopusChatgptAccountSession = {
+export type PhobosChatgptAccountSession = {
   sessionId: string;
   email: string | null;
   displayName: string | null;
   active: boolean;
   selectedWorkspaceId: string | null;
-  workspaces: OctopusChatgptWorkspace[];
+  workspaces: PhobosChatgptWorkspace[];
 };
 
-export type OctopusChatgptAccountSessions = {
+export type PhobosChatgptAccountSessions = {
   activeSessionId: string | null;
-  sessions: OctopusChatgptAccountSession[];
+  sessions: PhobosChatgptAccountSession[];
   credentialHome: string;
-  octopusHome: string | null;
+  phobosHome: string | null;
 };
 
-export type OctopusChatgptWorkspaceSwitch =
-  | { state: "switched"; account: OctopusChatgptAccount; sessions: OctopusChatgptAccountSessions }
+export type PhobosChatgptWorkspaceSwitch =
+  | { state: "switched"; account: PhobosChatgptAccount; sessions: PhobosChatgptAccountSessions }
   | { state: "browser"; loginId: string; authUrl: string };
 
-export type OctopusChatgptLimit = {
+export type PhobosChatgptLimit = {
   limitId: string | null;
   limitName: string | null;
-  primary: OctopusProviderRateLimitWindow | null;
-  secondary: OctopusProviderRateLimitWindow | null;
+  primary: PhobosProviderRateLimitWindow | null;
+  secondary: PhobosProviderRateLimitWindow | null;
   credits: { hasCredits: boolean; unlimited: boolean; balance: string | null } | null;
   individualLimit: { limit: string; used: string; remainingPercent: number; resetsAt: number } | null;
   planType: string | null;
@@ -1393,13 +1393,13 @@ export type OctopusChatgptLimit = {
   spendControlReached: boolean | null;
 };
 
-export type OctopusChatgptUsage = {
-  rateLimits: OctopusChatgptLimit;
-  rateLimitsByLimitId: Record<string, OctopusChatgptLimit> | null;
+export type PhobosChatgptUsage = {
+  rateLimits: PhobosChatgptLimit;
+  rateLimitsByLimitId: Record<string, PhobosChatgptLimit> | null;
   observedAtMs: number;
 };
 
-export type OctopusProviderInterface = {
+export type PhobosProviderInterface = {
   id: string;
   label: string;
   descriptorPath: string;
@@ -1409,13 +1409,13 @@ export type OctopusProviderInterface = {
   reasoningEffort?: string;
   serviceTier?: string;
   supportedReasoningEfforts: string[];
-  models: OctopusProviderModel[];
+  models: PhobosProviderModel[];
   modelCatalogError?: string;
   preferred?: boolean;
-  rateLimits?: OctopusProviderRateLimits;
+  rateLimits?: PhobosProviderRateLimits;
 };
 
-export type OctopusProviderModel = {
+export type PhobosProviderModel = {
   model: string;
   displayName: string;
   description: string;
@@ -1423,40 +1423,40 @@ export type OctopusProviderModel = {
   supportedReasoningEfforts: string[];
   showInPicker: boolean;
   isDefault: boolean;
-  serviceTiers?: OctopusModelServiceTier[];
+  serviceTiers?: PhobosModelServiceTier[];
   defaultServiceTier?: string | null;
 };
 
-export type OctopusModelServiceTier = {
+export type PhobosModelServiceTier = {
   id: string;
   name: string;
   description: string;
 };
 
-export type OctopusProviderModelsRefreshRequest = {
+export type PhobosProviderModelsRefreshRequest = {
   providerInterfaceId: string;
 };
 
-export type OctopusProviderModelsRefreshResponse = {
+export type PhobosProviderModelsRefreshResponse = {
   providerInterfaceId: string;
-  models: OctopusProviderModel[];
+  models: PhobosProviderModel[];
   observedAtUnixMs: number;
 };
 
-export type OctopusProviderRateLimitWindow = {
+export type PhobosProviderRateLimitWindow = {
   usedPercent: number;
   windowDurationMins: number | null;
   resetsAt: number | null;
 };
 
-export type OctopusProviderRateLimits = {
+export type PhobosProviderRateLimits = {
   observedAtMs: number;
   movementSeq: number;
   runId: string;
   limitId: string;
   limitName: string;
-  primary: OctopusProviderRateLimitWindow | null;
-  secondary: OctopusProviderRateLimitWindow | null;
+  primary: PhobosProviderRateLimitWindow | null;
+  secondary: PhobosProviderRateLimitWindow | null;
   credits: {
     hasCredits: boolean;
     unlimited: boolean;
@@ -1472,16 +1472,16 @@ export type OctopusProviderRateLimits = {
   reachedType: string;
 };
 
-export type OctopusProviderInterfacesResponse = {
+export type PhobosProviderInterfacesResponse = {
   repoRoot?: string | null;
   registryRoot?: string | null;
-  providers: OctopusProviderInterface[];
+  providers: PhobosProviderInterface[];
   error?: string;
 };
 
-export type OctopusProjectionReadRequest = OctopusClientProjectionReadRequest;
+export type PhobosProjectionReadRequest = PhobosClientProjectionReadRequest;
 
-export type OctopusRuntimeTopologyProjection = {
+export type PhobosRuntimeTopologyProjection = {
   generation: number;
   snapshotRaw: unknown;
   eeRaw: unknown;
@@ -1496,7 +1496,7 @@ export type OctopusRuntimeTopologyProjection = {
   runDetailsRaw: Record<string, { detail: unknown; trace: unknown }>;
 };
 
-export type OctopusScheduledDraft = {
+export type PhobosScheduledDraft = {
   type: "interval" | "cron" | "once" | "inactivity";
   inactivity?: {
     seconds: number;
@@ -1516,19 +1516,19 @@ export type OctopusScheduledDraft = {
   instructions: string;
 };
 
-export type OctopusScheduledMutationRequest =
+export type PhobosScheduledMutationRequest =
   | {
       action: "create";
       sourceInterfaceId: string;
       sourceActivationDigest: string;
       interfaceId: string;
-      draft: OctopusScheduledDraft;
+      draft: PhobosScheduledDraft;
     }
   | {
       action: "update";
       interfaceId: string;
       expectedDigest: string;
-      draft: OctopusScheduledDraft;
+      draft: PhobosScheduledDraft;
     }
   | {
       action: "set_enabled";
@@ -1548,8 +1548,8 @@ export type OctopusScheduledMutationRequest =
       expectedJournalDigest: string;
     };
 
-export type OctopusScheduledMutationOutcome = {
-  action: OctopusScheduledMutationRequest["action"];
+export type PhobosScheduledMutationOutcome = {
+  action: PhobosScheduledMutationRequest["action"];
   interfaceId?: string;
   runId?: string;
   activationDigest?: string;
@@ -1557,7 +1557,7 @@ export type OctopusScheduledMutationOutcome = {
   restored?: string[];
 };
 
-export type OctopusApplicationPrivateConfigurationMutation = {
+export type PhobosApplicationPrivateConfigurationMutation = {
   applicationId: string;
   interfaceId: string;
   expectedDigest: string | null;
@@ -1565,26 +1565,26 @@ export type OctopusApplicationPrivateConfigurationMutation = {
   clears: string[];
 };
 
-export type OctopusApplicationConnectionState = {
+export type PhobosApplicationConnectionState = {
   state: "connected" | "not_connected" | "expired" | "error";
   account?: { label: string; detail?: string };
   manage?: { label: string; url: string };
   message?: string;
 };
 
-export type OctopusApplicationConnectionProbe = {
+export type PhobosApplicationConnectionProbe = {
   applicationId: string;
-  interfaces: Array<{ interfaceId: string; state: OctopusApplicationConnectionState }>;
+  interfaces: Array<{ interfaceId: string; state: PhobosApplicationConnectionState }>;
 };
 
-export type OctopusApplicationConnectionRequest = {
+export type PhobosApplicationConnectionRequest = {
   operationId: string;
   applicationId: string;
   interfaceId: string;
   input: Record<string, string>;
 };
 
-export type OctopusApplicationConnectionProgress = {
+export type PhobosApplicationConnectionProgress = {
   operationId: string;
   applicationId: string;
   interfaceId: string;
@@ -1593,14 +1593,14 @@ export type OctopusApplicationConnectionProgress = {
   code?: string;
 };
 
-export type OctopusApplicationPrivateConfigurationOutcome = {
+export type PhobosApplicationPrivateConfigurationOutcome = {
   interfaceId: string;
   documentStatus: "absent" | "valid";
   documentDigest: string | null;
   configuredFields: number;
 };
 
-export type OctopusOsWorkspaceMutationRequest =
+export type PhobosOsWorkspaceMutationRequest =
   | {
       action: "initialize_workspace";
       agentPresets?: import("./onboarding/workspaceSetup").WorkspaceAgentPresetChoice[];
@@ -1839,8 +1839,8 @@ export type OctopusOsWorkspaceMutationRequest =
       expectedDigest: string;
     };
 
-export type OctopusOsWorkspaceMutationOutcome = {
-  action: OctopusOsWorkspaceMutationRequest["action"];
+export type PhobosOsWorkspaceMutationOutcome = {
+  action: PhobosOsWorkspaceMutationRequest["action"];
   eeId?: string;
   parentEeId?: string;
   templateName?: string;
@@ -1879,7 +1879,7 @@ export type OctopusOsWorkspaceMutationOutcome = {
   }>;
 };
 
-export type OctopusApplicationLifecycleProgress = {
+export type PhobosApplicationLifecycleProgress = {
   operationId: string;
   applicationId: string;
   packageId: string;
@@ -1888,14 +1888,14 @@ export type OctopusApplicationLifecycleProgress = {
   percent: number;
 };
 
-export type OctopusWorkspaceSetupProgress = {
+export type PhobosWorkspaceSetupProgress = {
   operationId: string;
   phase: "planning" | "staging" | "applying" | "publishing" | "complete";
   percent: number;
   label: string;
 };
 
-export type OctopusWorkspaceSetupState = {
+export type PhobosWorkspaceSetupState = {
   status: "not_configured" | "configured" | "degraded";
   receipt: {
     operationId: string;
@@ -1909,7 +1909,7 @@ export type OctopusWorkspaceSetupState = {
   errors: string[];
 };
 
-export type OctopusClientSetupPlan = {
+export type PhobosClientSetupPlan = {
   pack: {
     id: string;
     manifest_digest: string;
@@ -1932,7 +1932,7 @@ export type OctopusClientSetupPlan = {
   };
   workspace: {
     request_digest: string;
-    request: Extract<OctopusOsWorkspaceMutationRequest, { action: "initialize_workspace" }>;
+    request: Extract<PhobosOsWorkspaceMutationRequest, { action: "initialize_workspace" }>;
     project_defaults: Array<{
       package_id: string;
       product_kind: "application" | "driver";
@@ -1943,16 +1943,16 @@ export type OctopusClientSetupPlan = {
   };
 };
 
-export type OctopusClientSetupBeginRequest = {
+export type PhobosClientSetupBeginRequest = {
   operationId: string;
-  plan: OctopusClientSetupPlan;
+  plan: PhobosClientSetupPlan;
 };
 
-export type OctopusClientSetupState = {
+export type PhobosClientSetupState = {
   status: "in_progress" | "complete";
   operationId: string;
   planDigest: string;
-  plan: OctopusClientSetupPlan;
+  plan: PhobosClientSetupPlan;
   steps: Array<{
     step: "packages" | "extensions" | "provider" | "workspace";
     state: "pending" | "complete";
@@ -1968,16 +1968,16 @@ export type OctopusClientSetupState = {
   receiptDigest: string;
 };
 
-export type OctopusClientSetupProgress = {
+export type PhobosClientSetupProgress = {
   operationId: string;
   step: "packages" | "extensions" | "provider" | "workspace";
   phase: "verifying" | "applying" | "complete" | "sealed";
   percent: number;
 };
 
-export type OctopusClientContext = readonly Readonly<{ name: string; text: string }>[];
+export type PhobosClientContext = readonly Readonly<{ name: string; text: string }>[];
 
-export type OctopusChatTurnRequest = {
+export type PhobosChatTurnRequest = {
   replacesMessage?: { id: string; content: string };
   endpoint?: string;
   timeoutMs?: number;
@@ -2032,7 +2032,7 @@ export type OctopusChatTurnRequest = {
     workerEnvironmentKind: string;
   }>;
   clientSurfaceRole: "home" | "task";
-  clientContext?: OctopusClientContext;
+  clientContext?: PhobosClientContext;
   continuation?: {
     sourceRunId: string;
     sourceArtifactId: string;
@@ -2045,11 +2045,11 @@ export type OctopusChatTurnRequest = {
     type: string;
     size: number;
     lastModified: number;
-    stage: OctopusClientAttachmentStageHandle;
+    stage: PhobosClientAttachmentStageHandle;
   }>;
 };
 
-export type OctopusChatSteerRequest = {
+export type PhobosChatSteerRequest = {
   runId: string;
   messageId?: string;
   recoverPreparedMessage?: boolean;
@@ -2058,14 +2058,14 @@ export type OctopusChatSteerRequest = {
   eeId?: string;
   workerInterfaceId?: string;
   clientSurfaceRole: "home" | "task";
-  clientContext?: OctopusClientContext;
+  clientContext?: PhobosClientContext;
   endpoint?: string;
   text: string;
   timeoutMs?: number;
-  attachments: OctopusChatTurnRequest["attachments"];
+  attachments: PhobosChatTurnRequest["attachments"];
 };
 
-export type OctopusChatPinsRequest = {
+export type PhobosChatPinsRequest = {
   runId: string;
   artifactId: string;
   pinned: boolean;
@@ -2078,7 +2078,7 @@ export type OctopusChatPinsRequest = {
   };
 };
 
-export type OctopusChatPinsResponse = {
+export type PhobosChatPinsResponse = {
   runId: string;
   pinnedArtifactIds: string[];
   pinnedContextItems: Array<{
@@ -2100,11 +2100,11 @@ export type OctopusChatPinsResponse = {
   }>;
 };
 
-export type OctopusDeliveryVerdict =
+export type PhobosDeliveryVerdict =
   | { admitted: { seq: number } }
   | { refused: { reason: string; detail: unknown } };
 
-export type OctopusChatTurnResponse = {
+export type PhobosChatTurnResponse = {
   runId: string;
   chatInterfaceId: string;
   modelInterfaceId: string;
@@ -2124,18 +2124,18 @@ export type OctopusChatTurnResponse = {
     changed: boolean;
   }>;
   messageRecovered: boolean;
-  messageVerdict: OctopusDeliveryVerdict;
-  outboundCursor: OctopusOperatorChatCursor;
+  messageVerdict: PhobosDeliveryVerdict;
+  outboundCursor: PhobosOperatorChatCursor;
 };
 
-export type OctopusOperatorChatCursor = {
+export type PhobosOperatorChatCursor = {
   offset: number;
   seq: number | null;
-  stream?: OctopusOperatorTurnStreamCursor;
-  streams?: Record<string, OctopusOperatorTurnStreamCursor>;
+  stream?: PhobosOperatorTurnStreamCursor;
+  streams?: Record<string, PhobosOperatorTurnStreamCursor>;
 };
 
-export type OctopusOperatorTurnStreamCursor = {
+export type PhobosOperatorTurnStreamCursor = {
   stream_id: string;
   offset: number;
   seq: number;
@@ -2144,16 +2144,16 @@ export type OctopusOperatorTurnStreamCursor = {
   sealed?: true;
 };
 
-export type OctopusOperatorChatArtifactsRequest = {
+export type PhobosOperatorChatArtifactsRequest = {
   interfaceId: string;
   runId: string;
   afterSeq: number;
-  cursor?: OctopusOperatorChatCursor;
+  cursor?: PhobosOperatorChatCursor;
   waitMs?: number;
   limit?: number;
 };
 
-export type OctopusOperatorChatArtifactBase = {
+export type PhobosOperatorChatArtifactBase = {
   source: "movement" | "stream";
   recorded_at_unix_ms: number;
   run_id: string;
@@ -2169,7 +2169,7 @@ export type OctopusOperatorChatArtifactBase = {
   will_retry: boolean;
 };
 
-export type OctopusOperatorChatMovementArtifact = OctopusOperatorChatArtifactBase & {
+export type PhobosOperatorChatMovementArtifact = PhobosOperatorChatArtifactBase & {
   source: "movement";
   movement_seq: number;
   checkpoint_id: string;
@@ -2177,7 +2177,7 @@ export type OctopusOperatorChatMovementArtifact = OctopusOperatorChatArtifactBas
   content_hash: string;
 };
 
-export type OctopusOperatorChatStreamArtifact = OctopusOperatorChatArtifactBase & {
+export type PhobosOperatorChatStreamArtifact = PhobosOperatorChatArtifactBase & {
   source: "stream";
   stream_id: string;
   stream_seq: number;
@@ -2186,11 +2186,11 @@ export type OctopusOperatorChatStreamArtifact = OctopusOperatorChatArtifactBase 
   source_movement_seq: number;
 };
 
-export type OctopusOperatorChatArtifact =
-  | OctopusOperatorChatMovementArtifact
-  | OctopusOperatorChatStreamArtifact;
+export type PhobosOperatorChatArtifact =
+  | PhobosOperatorChatMovementArtifact
+  | PhobosOperatorChatStreamArtifact;
 
-export type OctopusOperatorTurnControlRequest = {
+export type PhobosOperatorTurnControlRequest = {
   interfaceId: string;
   runId: string;
   controlId: string;
@@ -2198,14 +2198,14 @@ export type OctopusOperatorTurnControlRequest = {
   timeoutMs?: number;
 };
 
-export type OctopusOperatorTurnControlResponse = {
+export type PhobosOperatorTurnControlResponse = {
   interfaceId: string;
   runId: string;
   label: "operator.turn.control";
   controlId: string;
   action: "interrupt" | "resume" | "stop";
   payloadPath: string;
-  verdict: OctopusDeliveryVerdict;
+  verdict: PhobosDeliveryVerdict;
 } | {
   deliveryError: {
     stage: "not-sent" | "refused" | "admitted" | "outcome-unknown";
@@ -2213,12 +2213,12 @@ export type OctopusOperatorTurnControlResponse = {
   };
 };
 
-export type OctopusOperatorChatArtifactsResponse = {
-  artifacts: OctopusOperatorChatArtifact[];
-  cursor: OctopusOperatorChatCursor;
+export type PhobosOperatorChatArtifactsResponse = {
+  artifacts: PhobosOperatorChatArtifact[];
+  cursor: PhobosOperatorChatCursor;
 };
 
-export type OctopusChatSteerResponse = {
+export type PhobosChatSteerResponse = {
   interfaceId: string;
   runId: string;
   label: string;
@@ -2226,5 +2226,5 @@ export type OctopusChatSteerResponse = {
   attachmentCount: number;
   contentHash: string;
   messageRecovered: boolean;
-  verdict: OctopusDeliveryVerdict;
+  verdict: PhobosDeliveryVerdict;
 };

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type Keyboard
 import { createPortal } from "react-dom";
 import { OcButton, OcMenuItem, OcMenuSurface, OcStatus } from "../design-system/components";
 import { useFloatingMenu } from "../design-system/useFloatingMenu";
-import type { OctopusClientAccessProfile, OctopusOsFile, OctopusOsFileEntry } from "../electron";
+import type { PhobosClientAccessProfile, PhobosOsFile, PhobosOsFileEntry } from "../electron";
 import { useProjectionStructureGeneration } from "../projectionLive";
 import { readProjection } from "../projectionClient";
 import { useAppErrorToast } from "../toasts";
@@ -20,7 +20,7 @@ type RegistryFrame = {
 
 type RegistryFileMenu = {
   path: string;
-  rootId: "octopus-home";
+  rootId: "phobos-home";
   x: number;
   y: number;
 };
@@ -76,16 +76,16 @@ type InterfaceCatalogIssue = {
 
 type RegistryDescriptorTarget = {
   path: string;
-  rootId: "octopus-home";
+  rootId: "phobos-home";
   interfaceItem?: InterfaceCatalogItem;
 };
 
-const REGISTRY_ROOT_ID = "octopus-home";
+const REGISTRY_ROOT_ID = "phobos-home";
 const REGISTRY_ROOT = "registry";
 const DEFAULT_REGISTRY_SECTION = "registry/artifact";
 
 export function RegistryView({ accessProfile, onOpenFiles, query }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   onOpenFiles: (target: FilesOpenTarget) => void;
   query: string;
 }) {
@@ -100,7 +100,7 @@ export function RegistryView({ accessProfile, onOpenFiles, query }: {
 
   useFloatingMenu(Boolean(fileMenu), fileMenuRef, () => setFileMenu(null), fileMenu ? { left: fileMenu.x, top: fileMenu.y } : null);
 
-  if (!window.octopusTransport?.listOsFiles) {
+  if (!window.phobosTransport?.listOsFiles) {
     return <RuntimeEmpty title="Files bridge unavailable" detail="Registry is the admitted registry/ directory tree." />;
   }
 
@@ -201,8 +201,8 @@ export function RegistryView({ accessProfile, onOpenFiles, query }: {
 }
 
 function RegistryJsonColumn({ onOpenFiles, target }: { onOpenFiles: (target: FilesOpenTarget) => void; target: RegistryDescriptorTarget }) {
-  const transport = window.octopusTransport;
-  const [file, setFile] = useState<OctopusOsFile | null>(null);
+  const transport = window.phobosTransport;
+  const [file, setFile] = useState<PhobosOsFile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showRaw, setShowRaw] = useState(false);
@@ -295,7 +295,7 @@ function RegistryJsonColumn({ onOpenFiles, target }: { onOpenFiles: (target: Fil
 }
 
 function RegistryInterfaceColumn({ accessProfile, activePath, onContextMenu, onSelect, query }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   activePath?: string;
   onContextMenu: (item: InterfaceCatalogItem, x: number, y: number) => void;
   onSelect: (item: InterfaceCatalogItem) => void;
@@ -323,7 +323,7 @@ function RegistryInterfaceColumn({ accessProfile, activePath, onContextMenu, onS
       }
       const incomplete = [
         bindings.status === "rejected" ? `Bindings: ${projectionFailureMessage(bindings.reason)}` : "",
-        scope.status === "rejected" ? `Octopus OS scope: ${projectionFailureMessage(scope.reason)}` : "",
+        scope.status === "rejected" ? `Phobos OS scope: ${projectionFailureMessage(scope.reason)}` : "",
       ].filter(Boolean);
       setItems(buildInterfaceCatalog(
         interfaces.value,
@@ -499,7 +499,7 @@ function InterfaceDescriptorOverview({ item, onOpenFiles }: { item: InterfaceCat
         <InterfaceFactRow label="Source" value={interfaceSourceNames(record).join(", ") || "Not declared"} />
         {item.applications.length ? <InterfaceFactRow label="Applications" value={item.applications.map((application) => `${application.name} · ${registryDisplayName(application.category)}`).join(", ")} /> : null}
         <InterfaceFactRow label="Available in" value={item.availabilityProjected
-          ? item.availableIn.length ? item.availableIn.join(", ") : "No Octopus OS project policy currently admits this exact id"
+          ? item.availableIn.length ? item.availableIn.join(", ") : "No Phobos OS project policy currently admits this exact id"
           : "Project availability projection unavailable"} />
         <InterfaceFactRow label="Artifact hand-in" value={handIn.detail} />
         <InterfaceFactRow label="Bindings" value={item.bindingsProjected
@@ -541,12 +541,12 @@ function RegistryDirectoryColumn({ activePath, frame, index, onFileContextMenu, 
   activePath?: string;
   frame: RegistryFrame;
   index: number;
-  onFileContextMenu: (entry: OctopusOsFileEntry, x: number, y: number) => void;
-  onSelect: (entry: OctopusOsFileEntry) => void;
+  onFileContextMenu: (entry: PhobosOsFileEntry, x: number, y: number) => void;
+  onSelect: (entry: PhobosOsFileEntry) => void;
   query: string;
 }) {
-  const transport = window.octopusTransport;
-  const [entries, setEntries] = useState<OctopusOsFileEntry[]>([]);
+  const transport = window.phobosTransport;
+  const [entries, setEntries] = useState<PhobosOsFileEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [localFilter, setLocalFilter] = useState("");
@@ -907,11 +907,11 @@ function compactIdentity(value: string): string {
   return value.length <= 18 ? value : `${value.slice(0, 11)}…${value.slice(-5)}`;
 }
 
-function registryEntryRank(entry: OctopusOsFileEntry): number {
+function registryEntryRank(entry: PhobosOsFileEntry): number {
   return entry.kind === "directory" ? 0 : entry.kind === "file" ? 1 : 2;
 }
 
-function registryDescriptorPath(sectionPath: string, entry: OctopusOsFileEntry): string {
+function registryDescriptorPath(sectionPath: string, entry: PhobosOsFileEntry): string {
   if (entry.kind === "file") return entry.path;
   const descriptorKind = sectionPath.split("/").at(-1) ?? "";
   return `${entry.path}/${descriptorKind}.json`;
@@ -923,7 +923,7 @@ function registryDisplayName(value: string): string {
   return words ? `${words[0].toUpperCase()}${words.slice(1)}` : value;
 }
 
-function registryEntryMeta(entry: OctopusOsFileEntry): string {
+function registryEntryMeta(entry: PhobosOsFileEntry): string {
   if (entry.kind === "directory") return "Folder";
   if (entry.kind !== "file") return entry.kind;
   const extension = entry.name.includes(".") ? entry.name.split(".").at(-1)?.toUpperCase() : "File";
@@ -933,17 +933,17 @@ function registryEntryMeta(entry: OctopusOsFileEntry): string {
 function registrySectionDescription(sectionName: string): string {
   if (sectionName === "ee_template") return "Execution environment templates";
   if (sectionName === "worker_environment_kind") return "Worker environment drivers";
-  if (sectionName === "interface") return "Ways Octopus receives, sends, thinks, and acts";
+  if (sectionName === "interface") return "Ways Phobos receives, sends, thinks, and acts";
   return `${registryDisplayName(sectionName)} packages`;
 }
 
-function registryFileMeta(file: OctopusOsFile | null): string {
+function registryFileMeta(file: PhobosOsFile | null): string {
   if (!file) return "unavailable";
   const extension = file.name.includes(".") ? file.name.split(".").at(-1)?.toUpperCase() : "File";
   return [file.kind === "text" ? extension : "Binary", formatBytes(file.size)].filter(Boolean).join(" · ");
 }
 
-function formatRegistryFile(file: OctopusOsFile | null): string {
+function formatRegistryFile(file: PhobosOsFile | null): string {
   if (!file || file.kind !== "text") return "";
   try {
     return JSON.stringify(JSON.parse(file.text), null, 2);

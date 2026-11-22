@@ -1,12 +1,12 @@
 import { lazy, Suspense, useState } from "react";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { SecondaryPaneTabState } from "./operatorShellState";
 import { SurfaceLoadingState, SurfaceRenderBoundary } from "./SurfaceBoundary";
 
 const TerminalTab = lazy(() => import("../terminal/TerminalTab").then((module) => ({ default: module.TerminalTab })));
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   active: boolean;
   activeTabId: string;
   tabs: SecondaryPaneTabState[];

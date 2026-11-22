@@ -1,4 +1,4 @@
-# Octopus App Design System
+# Phobos App Design System
 
 This folder is the first-party UI contract for the Electron/operator app.
 
@@ -70,5 +70,5 @@ Functional signals (live error states in controls and toasts, link
 affordances in rendered markdown) keep the system tokens — the color code
 governs decoration, not legibility.
 
-The app shell is an Octopus projection surface, not a runtime primitive. Keep
+The app shell is a Phobos projection surface, not a runtime primitive. Keep
 runtime vocabulary in the architecture docs; keep visual UI contracts here.

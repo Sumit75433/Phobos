@@ -5,7 +5,7 @@ import {
 } from "../../clientPreferences";
 import type { AdmittedClientSurfaceDocument, ClientSurfaceDocument } from "../../client-surfaces/types";
 import { OcButton, OcCard, OcGroup, OcSettingsRow, OcStatus, OcSwitch } from "../../design-system/components";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { copyText } from "../../runtimeFormat";
 import { clientNavigationDestinations } from "../../shell/navigation";
 import type { ClientSurfaceDescriptor } from "../../shell/surfaceTypes";
@@ -21,7 +21,7 @@ export function SurfacesSection({
   surfaceErrors,
   surfaces,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   documentRoot: string;
   documents: AdmittedClientSurfaceDocument[];
   surfaceErrors: string[];
@@ -230,7 +230,7 @@ function surfaceTargetLabel(document: ClientSurfaceDocument): string {
 
 function testWidgetTemplate(): ClientSurfaceDocument {
   return {
-    schema: "octopus.client_surface",
+    schema: "phobos.client_surface",
     schema_version: 1,
     release_channel: "lab",
     id: "voice.example",

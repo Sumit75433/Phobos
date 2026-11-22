@@ -1,4 +1,4 @@
-module.exports = { applicationDirectoryDigest, applicationHasAnyAuthoredBinding, applicationIsConnectedToAuthoredRun, applicationTaskCapabilityReferences, assertApplicationPackageUnreferenced, installOctopusOsApplicationPackage, optionalApplicationPackageSource, projectCapabilityChanges, readConnectedApplicationIdsByRun, removeOctopusOsApplicationPackage, reportApplicationProgress, stageApplicationPackage, taskBaseAuthoringProfile, taskCheckpointCarriesProviderContext, taskProviderContextArtifactIds };
+module.exports = { applicationDirectoryDigest, applicationHasAnyAuthoredBinding, applicationIsConnectedToAuthoredRun, applicationTaskCapabilityReferences, assertApplicationPackageUnreferenced, installPhobosOsApplicationPackage, optionalApplicationPackageSource, projectCapabilityChanges, readConnectedApplicationIdsByRun, removePhobosOsApplicationPackage, reportApplicationProgress, stageApplicationPackage, taskBaseAuthoringProfile, taskCheckpointCarriesProviderContext, taskProviderContextArtifactIds };
 
 const fs = require("node:fs/promises");
 const crypto = require("node:crypto");
@@ -41,9 +41,9 @@ async function readConnectedApplicationIdsByRun(projection, scope) {
   return connected;
 }
 
-async function installOctopusOsApplicationPackage(
+async function installPhobosOsApplicationPackage(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   sourceRegistryRootValue,
   request,
   onProgress,
@@ -54,7 +54,7 @@ async function installOctopusOsApplicationPackage(
   reportApplicationProgress(onProgress, operationId, applicationId, "install", "preflight", 0);
   const activeInterfaceRoot = await fs.realpath(path.join(registryRoot, "interface"));
   const sourceRegistryRoot = requiredAbsolutePath(sourceRegistryRootValue, "application source registry");
-  const archiveRegistryRoot = path.join(octopusHomeRoot, "client", "application-packages");
+  const archiveRegistryRoot = path.join(phobosHomeRoot, "client", "application-packages");
   const bundled = await optionalApplicationPackageSource(sourceRegistryRoot, applicationId, "bundled");
   const archived = await optionalApplicationPackageSource(archiveRegistryRoot, applicationId, "archived");
   if (bundled && archived) {
@@ -80,7 +80,7 @@ async function installOctopusOsApplicationPackage(
   if (existing.length) {
     throw new Error(`application '${applicationId}' cannot install over existing interface folders: ${existing.join(", ")}`);
   }
-  const transactionParent = path.join(octopusHomeRoot, ".client-application-transactions");
+  const transactionParent = path.join(phobosHomeRoot, ".client-application-transactions");
   const transactionRoot = path.join(transactionParent, operationId);
   await fs.mkdir(transactionParent, { recursive: true, mode: 0o700 });
   await fs.mkdir(transactionRoot, { mode: 0o700 });
@@ -191,9 +191,9 @@ async function installOctopusOsApplicationPackage(
   };
 }
 
-async function removeOctopusOsApplicationPackage(
+async function removePhobosOsApplicationPackage(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   sourceRegistryRootValue,
   _scope,
   request,
@@ -213,7 +213,7 @@ async function removeOctopusOsApplicationPackage(
   }
   const sourceRegistryRoot = requiredAbsolutePath(sourceRegistryRootValue, "application source registry");
   if (await optionalApplicationPackageSource(sourceRegistryRoot, applicationId, "bundled")) {
-    throw new Error(`application '${applicationId}' is supplied by the Octopus installation and cannot be removed independently`);
+    throw new Error(`application '${applicationId}' is supplied by the Phobos installation and cannot be removed independently`);
   }
   const exactInterfaces = new Set(active.manifest.interfaces);
   const excludedDirectories = new Set(active.manifest.interfaces.map((interfaceId) => (
@@ -221,12 +221,12 @@ async function removeOctopusOsApplicationPackage(
   )));
   await assertApplicationPackageUnreferenced(
     await fs.realpath(registryRoot),
-    octopusHomeRoot,
+    phobosHomeRoot,
     excludedDirectories,
     exactInterfaces,
     applicationId,
   );
-  const archiveRegistryRoot = path.join(octopusHomeRoot, "client", "application-packages");
+  const archiveRegistryRoot = path.join(phobosHomeRoot, "client", "application-packages");
   const archiveInterfaceRoot = path.join(archiveRegistryRoot, "interface");
   await fs.mkdir(archiveInterfaceRoot, { recursive: true, mode: 0o700 });
   for (const interfaceId of active.manifest.interfaces) {
@@ -235,7 +235,7 @@ async function removeOctopusOsApplicationPackage(
       throw new Error(`application '${applicationId}' already has an archived '${interfaceId}' package folder`);
     }
   }
-  const transactionParent = path.join(octopusHomeRoot, ".client-application-transactions");
+  const transactionParent = path.join(phobosHomeRoot, ".client-application-transactions");
   const transactionRoot = path.join(transactionParent, operationId);
   await fs.mkdir(transactionParent, { recursive: true, mode: 0o700 });
   await fs.mkdir(transactionRoot, { mode: 0o700 });
@@ -362,7 +362,7 @@ async function stageApplicationPackage(source, stagedInterfaceRoot, onCopy) {
 
 async function assertApplicationPackageUnreferenced(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   excludedDirectories,
   exactInterfaces,
   applicationId,
@@ -376,7 +376,7 @@ async function assertApplicationPackageUnreferenced(
     }
   }
   for (const relativeRoot of [path.join("state", "runs"), path.join("state", "ee_instances")]) {
-    const root = path.join(octopusHomeRoot, relativeRoot);
+    const root = path.join(phobosHomeRoot, relativeRoot);
     let entries;
     try {
       entries = await fs.readdir(root, { withFileTypes: true });

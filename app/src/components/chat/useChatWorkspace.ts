@@ -24,17 +24,17 @@ import {
 import { reportClientExtensionIncident } from "../../extensions/incidents";
 import { appToast } from "../../toasts";
 import type {
-  OctopusClientAccessProfile,
-  OctopusClientContext,
-  OctopusOperatorChatArtifact,
-  OctopusOperatorChatMovementArtifact,
+  PhobosClientAccessProfile,
+  PhobosClientContext,
+  PhobosOperatorChatArtifact,
+  PhobosOperatorChatMovementArtifact,
 } from "../../electron";
 import { DEFAULT_RUNTIME_ENDPOINT } from "../../gateway";
 import {
   canSubmitOperatorSteer,
   canSubmitOperatorTurn,
   hasProjectionBridge,
-  mutateOctopusOsWorkspace,
+  mutatePhobosOsWorkspace,
   submitInterfaceArtifact,
   submitOperatorSteer,
   submitOperatorTurn,
@@ -120,8 +120,8 @@ import {
 } from "./taskAccess";
 
 function movementArtifact(
-  artifact: OctopusOperatorChatArtifact,
-): artifact is OctopusOperatorChatMovementArtifact {
+  artifact: PhobosOperatorChatArtifact,
+): artifact is PhobosOperatorChatMovementArtifact {
   return artifact.source === "movement";
 }
 
@@ -168,13 +168,13 @@ type TurnControlTarget = {
 type PendingTurnControls = Record<string, { action: "resume" | "stop"; controlId: string; afterMovementSeq: number; requestPending?: boolean }>;
 
 export function useChatWorkspace(
-  accessProfile: OctopusClientAccessProfile,
+  accessProfile: PhobosClientAccessProfile,
   enabled = true,
   runtimeReady = true,
   storageScope = "main",
   clientSurfaceRole: "home" | "task" = "task",
   runtimeHome = "",
-  clientContext: OctopusClientContext = [],
+  clientContext: PhobosClientContext = [],
 ) {
   const { storageHealth, interfaceFailures } = useRuntimeHomeHealth(runtimeHome, accessProfile === "live");
   const storageBlockReason = storageHealth && storageHealth.status !== "writable" ? storageHealth.message || "Home storage is unavailable. Sending is paused; your draft is retained." : "";
@@ -390,7 +390,7 @@ export function useChatWorkspace(
 
   const reconcileRunReceipt = useCallback((
     runId: string,
-    artifacts: OctopusOperatorChatArtifact[],
+    artifacts: PhobosOperatorChatArtifact[],
   ) => {
     const floor = Math.max(
       runReceiptSequenceRef.current.get(runId) ?? -1,
@@ -401,7 +401,7 @@ export function useChatWorkspace(
     runReceiptSequenceRef.current.set(runId, Math.max(...fresh.map((artifact) => artifact.movement_seq)));
     setRuns((current) => current.map((run) => run.runId === runId ? reconcileChatRunReceipts(run, fresh) : run));
     const latest = fresh.filter((artifact) => isChatReplyTerminal(artifact.event_kind, artifact.event_data, artifact.terminal))
-      .reduce<OctopusOperatorChatMovementArtifact | null>((current, artifact) => !current || artifact.movement_seq > current.movement_seq ? artifact : current, null);
+      .reduce<PhobosOperatorChatMovementArtifact | null>((current, artifact) => !current || artifact.movement_seq > current.movement_seq ? artifact : current, null);
     if (!latest) return false;
     if (isChatReplyTerminal(latest.event_kind, latest.event_data, latest.terminal)) {
       setPendingTurnControls((current) => {
@@ -665,7 +665,7 @@ export function useChatWorkspace(
   useEffect(() => {
     if (!enabled || accessProfile !== "live") return;
     let cancelled = false;
-    window.octopusTransport?.defaults()
+    window.phobosTransport?.defaults()
       .then((defaults) => {
         if (cancelled) return;
         if (!endpoint || endpoint === DEFAULT_RUNTIME_ENDPOINT) {
@@ -905,7 +905,7 @@ export function useChatWorkspace(
     setAgentPresetId,
   ]);
   const newTaskAuthoringError = !activeRunId && runsLoaded && !newTaskDefaults
-    ? "New task authoring requires exactly one writable Home projected in the Octopus OS root EE."
+    ? "New task authoring requires exactly one writable Home projected in the Phobos OS root EE."
     : "";
   const resolvedProviderInterfaceId = activeRunId
     ? activeRun?.providerInterfaceId ?? ""
@@ -1888,7 +1888,7 @@ export function useChatWorkspace(
       return;
     }
     setApplicationMutationPending(applicationId);
-    void mutateOctopusOsWorkspace({
+    void mutatePhobosOsWorkspace({
       action: "configure_task_application",
       runId: run.runId,
       applicationId,
@@ -2327,7 +2327,7 @@ export function useChatWorkspace(
               if (!incoming.length) return;
               liveMessages = mergeChatRunMessages(liveMessages, incoming);
               mergeLiveRunMessages(submitted.runId, incoming);
-              const terminalArtifact = artifacts.filter(movementArtifact).reduce<OctopusOperatorChatMovementArtifact | null>((latest, artifact) => (
+              const terminalArtifact = artifacts.filter(movementArtifact).reduce<PhobosOperatorChatMovementArtifact | null>((latest, artifact) => (
                 isChatReplyTerminal(artifact.event_kind, artifact.event_data, artifact.terminal) && (!latest || artifact.movement_seq > latest.movement_seq)
                   ? artifact
                   : latest
@@ -3158,7 +3158,7 @@ export function useChatWorkspace(
     steerableMessageId,
     endpoint,
     eeId,
-    error: error || providerUsageError || (turnStoppedByRuntime ? "The Octopus runtime is not running, so this task stopped." : ""),
+    error: error || providerUsageError || (turnStoppedByRuntime ? "The Phobos runtime is not running, so this task stopped." : ""),
     executionContextError,
     fullAccessUnavailableReason,
     executionContexts,

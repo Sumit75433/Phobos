@@ -61,7 +61,7 @@ function createChatgptSignIn(options) {
     }
     fs.accessSync(binary, fs.constants.X_OK);
     fs.mkdirSync(codexHome, { recursive: true, mode: 0o700 });
-    const env = { ...process.env, CODEX_HOME: codexHome, CODEX_INTERNAL_ORIGINATOR_OVERRIDE: "octopus_desktop" };
+    const env = { ...process.env, CODEX_HOME: codexHome, CODEX_INTERNAL_ORIGINATOR_OVERRIDE: "phobos_desktop" };
     const child = spawn(binary, ["app-server"], {
       cwd: codexHome,
       env,
@@ -149,7 +149,7 @@ function createChatgptSignIn(options) {
       child.stdin.write(`${JSON.stringify({ id, method, ...(params === undefined ? {} : { params }) })}\n`);
     });
     server.ready = server.request("initialize", {
-      clientInfo: { name: "octopus_desktop", title: "Octopus", version: options.version() },
+      clientInfo: { name: "phobos_desktop", title: "Phobos", version: options.version() },
       capabilities: { experimentalApi: true },
     }).then(() => {
       child.stdin.write(`${JSON.stringify({ method: "initialized" })}\n`);
@@ -199,7 +199,7 @@ function createChatgptSignIn(options) {
       email: native?.type === "chatgpt" ? native.email ?? null : null,
       planType: native?.type === "chatgpt" ? native.planType ?? null : null,
       workspaceName: native?.type === "chatgpt" ? native.workspaceName ?? null : null,
-      credentialHome: server.codexHome, octopusHome: options.octopusHome?.() ?? null,
+      credentialHome: server.codexHome, phobosHome: options.phobosHome?.() ?? null,
     };
     if (sequence > (server.accountSnapshot?.sequence ?? 0)
       && generation === authGeneration && authStamp === nativeAuthStamp(server.codexHome)) {
@@ -383,7 +383,7 @@ function createChatgptSignIn(options) {
       : active.length !== 1 || active[0].sessionId !== response.activeSessionId) {
       throw new Error("ChatGPT returned an invalid account list.");
     }
-    return { activeSessionId: response.activeSessionId, sessions, credentialHome: server.codexHome, octopusHome: options.octopusHome?.() ?? null };
+    return { activeSessionId: response.activeSessionId, sessions, credentialHome: server.codexHome, phobosHome: options.phobosHome?.() ?? null };
   }
 
   async function sessions() {

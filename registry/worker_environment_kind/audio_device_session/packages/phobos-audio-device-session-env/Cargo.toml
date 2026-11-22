@@ -1,0 +1,25 @@
+[package]
+name = "phobos-audio-device-session-env"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+cpal = "0.16.0"
+fs2 = "0.4"
+rodio = { version = "0.21.1", default-features = false, features = ["playback", "wav", "mp3", "flac", "vorbis", "mp4"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-tool-door-runtime = { package = "phobos-process-session-tool-runtime", path = "../../../process_session/packages/phobos-process-session-tool-runtime" }
+phobos-tool-handlers = { path = "../../../../../crates/phobos-tool-handlers" }
+phobos-tool-registry = { path = "../../../../../crates/phobos-tool-registry" }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

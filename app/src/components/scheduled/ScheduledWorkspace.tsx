@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
-import type { OctopusScheduledMutationRequest } from "../../electron";
+import type { PhobosScheduledMutationRequest } from "../../electron";
 import { canMutateScheduledInterfaces, mutateScheduledInterface } from "../../projectionClient";
 import { appToast } from "../../toasts";
 import { describeSchedule, draftFromScheduledInterface, mutationDraft } from "./scheduleModel";
@@ -25,7 +25,7 @@ function useScheduledWorkspaceState(active: boolean, onCreateTask: (text: string
   const createUnavailableReason = !canMutateScheduledInterfaces() ? "Open a connected desktop client to create a trigger." : "";
   const timeSuggestionUnavailableReason = createUnavailableReason;
 
-  async function mutate(request: OctopusScheduledMutationRequest, failureTitle: string, after: () => void) {
+  async function mutate(request: PhobosScheduledMutationRequest, failureTitle: string, after: () => void) {
     setPending(true);
     setEditorError("");
     try {
@@ -63,7 +63,7 @@ function useScheduledWorkspaceState(active: boolean, onCreateTask: (text: string
 
   function save(draft: ScheduledEditorDraft, source: ScheduledInterfaceProjection) {
     if (!editor || pending || !canEdit) return;
-    const request: OctopusScheduledMutationRequest = editor.mode.kind === "create"
+    const request: PhobosScheduledMutationRequest = editor.mode.kind === "create"
       ? { action: "create", sourceInterfaceId: source.interfaceId, sourceActivationDigest: source.activationDigest, interfaceId: draft.interfaceId, draft: mutationDraft(draft) }
       : { action: "update", interfaceId: editor.mode.task.interfaceId, expectedDigest: editor.mode.task.activationDigest, draft: mutationDraft(draft) };
     void mutate(request, editor.mode.kind === "create" ? "Could not create trigger" : "Could not update trigger", () => { setSelectedId(draft.interfaceId); setEditor(null); });

@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import type { GestureInteraction, NavigationDirection } from "./airHandEngine";
 import { emitVoiceSpatialInteraction } from "./client-surfaces/voiceSpatialControl";
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 import { subscribeGestureState } from "./gestureRecognition";
 import { subscribeGestureInteractions } from "./gestureShortcuts";
 import { IDLE_AIM, nearestSpatialCandidate, rankSpatialCandidates, readingOrder, trackAim, type AimOptions, type AimState, type SpatialRect } from "./gestureSpatialNavigation";
@@ -99,7 +99,7 @@ export function useGestureFocusView(): GestureFocusView {
   return useSyncExternalStore(subscribeView, () => view, () => view);
 }
 
-export function useGestureFocus(accessProfile: OctopusClientAccessProfile, enabled: boolean, spatialControl: boolean): void {
+export function useGestureFocus(accessProfile: PhobosClientAccessProfile, enabled: boolean, spatialControl: boolean): void {
   useEffect(() => {
     if (!enabled) return;
     const controller = new GestureFocusController(accessProfile !== "live", spatialControl);

@@ -87,4 +87,4 @@ class SummaryContracts(unittest.TestCase):
             run("summarize", raw, "-o", compact)
             self.assertEqual(compact.read_bytes(), (ROOT / "benchmarks/survey-2026-11-17-summary.json").read_bytes())
             self.assertEqual(run("report", compact), report(expand_summary(self.data)))
-            self.assertEqual(json.loads(run("octopus-card", compact)), card(expand_summary(self.data)))
+            self.assertEqual(json.loads(run("phobos-card", compact)), card(expand_summary(self.data)))

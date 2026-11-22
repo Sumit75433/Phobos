@@ -1,7 +1,7 @@
 {
   "interface": "system_context",
   "process": {
-    "bin": "target/debug/octopus-artifact-bound-tool",
+    "bin": "target/debug/phobos-artifact-bound-tool",
     "authority": {
       "read_root_slots": [
         "registry_artifact_root"

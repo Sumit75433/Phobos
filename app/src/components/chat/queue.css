@@ -14,7 +14,7 @@
   transition: margin-bottom .3s cubic-bezier(.19, 1, .22, 1), top .3s cubic-bezier(.19, 1, .22, 1);
 }
 @supports (corner-shape: superellipse(1.5)) {
-  .composer-queue-surface { corner-shape: var(--octopus-corner-shape); }
+  .composer-queue-surface { corner-shape: var(--phobos-corner-shape); }
 }
 .composer-queue-surface[data-composer-rail-item="exiting"] { top: var(--spacing); margin-bottom: 0; }
 .composer-queue-content { min-height: 0; min-width: 0; }
@@ -38,7 +38,7 @@
   justify-content: space-between;
   gap: 8px;
   padding: 2px 10px;
-  font-size: var(--octopus-chat-font-size);
+  font-size: var(--phobos-chat-font-size);
 }
 .composer-queue-row[data-muted] { opacity: .6; }
 .composer-queue-body {
@@ -104,7 +104,7 @@
   color: var(--color-text-secondary);
   line-height: 20px;
 }
-.composer-queue-message .octopus-markdown-root {
+.composer-queue-message .phobos-markdown-root {
   --markdown-line-height: 20px;
   font-size: inherit;
   line-height: 20px;
@@ -182,5 +182,5 @@
 }
 .composer-primary-action:focus-visible { outline-color: var(--color-background-composer-primary); }
 @supports (corner-shape: superellipse(1.5)) {
-  .composer-queue-surface { corner-shape: var(--octopus-corner-shape); }
+  .composer-queue-surface { corner-shape: var(--phobos-corner-shape); }
 }

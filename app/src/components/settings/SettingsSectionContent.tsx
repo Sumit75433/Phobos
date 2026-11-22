@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { AdmittedClientSurfaceDocument, ClientSurfaceAdmissionVerdict } from "../../client-surfaces/types";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { ClientExtensionRegistryState } from "../../extensions/types";
 import type { ClientSurfaceDescriptor } from "../../shell/surfaceTypes";
 import { AppearanceSection } from "./AppearanceSection";
@@ -26,7 +26,7 @@ import { settingsTargetProps } from "./settingsCatalog";
 export type SettingsSectionContext = {
   dictationRecordingId?: string;
   onShowAllRecordings?: () => void;
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   documentRoot: string;
   documentVerdicts: ClientSurfaceAdmissionVerdict[];
   documents: AdmittedClientSurfaceDocument[];

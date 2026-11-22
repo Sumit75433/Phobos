@@ -9,12 +9,12 @@ const { nativeTrafficLightPosition, nativeControlInset } = require("./windowChro
 const { resolveClientLaunchSelection, saveClientLaunchSelection } = require("./clientLaunchSelection.cjs");
 const { writeJsonFileAtomicallySync } = require("./atomicJsonFile.cjs");
 
-const clientLaunchSelectionPath = path.join(app.getPath("appData"), "Octopus", "launch.json");
+const clientLaunchSelectionPath = path.join(app.getPath("appData"), "Phobos", "launch.json");
 const clientLaunchSelection = resolveClientLaunchSelection({ selectionPath: clientLaunchSelectionPath, userRoot: os.homedir(), env: process.env });
-process.env.OCTOPUS_HOME = clientLaunchSelection.home;
+process.env.PHOBOS_HOME = clientLaunchSelection.home;
 if (clientLaunchSelection.codexHome) process.env.CODEX_HOME = clientLaunchSelection.codexHome;
 const clientEnvironment = loadClientEnvironment();
-const clientProfileRoot = path.join(resolveOctopusHome(), "client");
+const clientProfileRoot = path.join(resolvePhobosHome(), "client");
 fs.mkdirSync(clientProfileRoot, { recursive: true, mode: 0o700 });
 app.setPath("userData", clientProfileRoot);
 const clientLogsRoot = path.join(clientProfileRoot, "logs");
@@ -29,7 +29,7 @@ const {
 } = require("./clientDataSource.cjs");
 const {
   mutateApplicationPrivateConfiguration,
-  mutateOctopusOsWorkspace,
+  mutatePhobosOsWorkspace,
   mutateScheduledInterface,
   setupTriggerEntries,
   setupTriggerProof,
@@ -177,10 +177,10 @@ const clientWindows = createClientWindowRegistry({
   onTransferEnd({ completion, destinationWebContentsId, finalized, sourceWebContentsId }) {
     const destination = clientWindows.entryForWebContents(destinationWebContentsId);
     if (finalized && destination) presentPaneDestination(destination.win);
-    if (!finalized && destination && !destination.win.webContents.isDestroyed()) destination.win.webContents.send("octopus:client-pane-transfer-cancelled", completion);
+    if (!finalized && destination && !destination.win.webContents.isDestroyed()) destination.win.webContents.send("phobos:client-pane-transfer-cancelled", completion);
     const source = clientWindows.entryForWebContents(sourceWebContentsId);
     if (source && !source.win.webContents.isDestroyed()) {
-      source.win.webContents.send(finalized ? "octopus:client-pane-transfer-finalized" : "octopus:client-pane-transfer-cancelled", completion);
+      source.win.webContents.send(finalized ? "phobos:client-pane-transfer-finalized" : "phobos:client-pane-transfer-cancelled", completion);
     }
   },
 });
@@ -213,11 +213,11 @@ const paneWindowDrag = createPaneWindowDragHost({
     if (!entry.win.isDestroyed()) entry.win.destroy();
   },
   notifyDestination(ownerId, accepted) {
-    clientWindows.entryForWebContents(ownerId)?.win.webContents.send("octopus:client-pane-transfer-accepted", accepted);
+    clientWindows.entryForWebContents(ownerId)?.win.webContents.send("phobos:client-pane-transfer-accepted", accepted);
   },
   notifySource(ownerId, state) {
     const entry = clientWindows.entryForWebContents(ownerId);
-    if (entry && !entry.win.webContents.isDestroyed()) entry.win.webContents.send("octopus:client-pane-drag-state", state);
+    if (entry && !entry.win.webContents.isDestroyed()) entry.win.webContents.send("phobos:client-pane-drag-state", state);
   },
   reportError(error) { console.error("Pane preview failed:", error.message); },
 });
@@ -284,7 +284,7 @@ function clientApplicationInfo() {
 function getClientSupportHost() {
   if (!clientSupportHost) clientSupportHost = createClientSupportHost({
     app, BrowserWindow, ipcMain, dialog, clipboard, shell,
-    home: resolveOctopusHome, application: clientApplicationInfo,
+    home: resolvePhobosHome, application: clientApplicationInfo,
     accessStatus: (token) => getClientAccessController().status(token),
     runtime: () => runtimeHost?.snapshot() ?? null,
     progress: () => latestSetupProgress,
@@ -306,7 +306,7 @@ const WORKER_ENVIRONMENT_PANEL_KINDS = new Set([
 ]);
 
 function clientLogPath() {
-  return path.join(app.getPath("logs"), "octopus-client.jsonl");
+  return path.join(app.getPath("logs"), "phobos-client.jsonl");
 }
 
 async function appendClientLog(level, event, detail = {}) {
@@ -330,8 +330,8 @@ function getClientAccessController() {
   if (!clientAccessController) {
     clientAccessController = createClientAccessController({
       administratorSecret: clientEnvironment.administratorSecret,
-      credentialPath: stringValue(process.env.OCTOPUS_CLIENT_ACCESS_PATH)
-        || path.join(resolveOctopusHome(), "client-access.json"),
+      credentialPath: stringValue(process.env.PHOBOS_CLIENT_ACCESS_PATH)
+        || path.join(resolvePhobosHome(), "client-access.json"),
       labSecret: clientEnvironment.labSecret,
     });
   }
@@ -339,7 +339,7 @@ function getClientAccessController() {
 }
 
 function loadClientEnvironment() {
-  const file = path.join(resolveOctopusHome(), ".env");
+  const file = path.join(resolvePhobosHome(), ".env");
   let stat;
   try {
     stat = fs.lstatSync(file);
@@ -354,10 +354,10 @@ function loadClientEnvironment() {
     }
     process.loadEnvFile(file);
   }
-  const administratorSecret = String(process.env.OCTOPUS_CLIENT_ADMIN_SECRET ?? "");
-  const labSecret = String(process.env.OCTOPUS_CLIENT_LAB_SECRET ?? "");
-  delete process.env.OCTOPUS_CLIENT_ADMIN_SECRET;
-  delete process.env.OCTOPUS_CLIENT_LAB_SECRET;
+  const administratorSecret = String(process.env.PHOBOS_CLIENT_ADMIN_SECRET ?? "");
+  const labSecret = String(process.env.PHOBOS_CLIENT_LAB_SECRET ?? "");
+  delete process.env.PHOBOS_CLIENT_ADMIN_SECRET;
+  delete process.env.PHOBOS_CLIENT_LAB_SECRET;
   return { administratorSecret, labSecret };
 }
 
@@ -518,9 +518,9 @@ function getProjectionStore(profile) {
       sourceRegistry: resolveSourceRegistry,
       localPackageRegistry: resolveLocalPackageRegistry,
       localPackageLibrary: resolveLocalPackageLibrary,
-      octopusHome: resolveOctopusHome,
+      phobosHome: resolvePhobosHome,
       beforeRead: profile === "live" ? prepareLiveProjectionRead : undefined,
-      localPackagePublication: profile === "live" ? () => workspaceStorage(resolveOctopusHome()) : undefined,
+      localPackagePublication: profile === "live" ? () => workspaceStorage(resolvePhobosHome()) : undefined,
       inspectWorkspaceSetupState: profile === "live" ? inspectWorkspaceSetupState : undefined,
       nativeBrowserTargetsForProjection: profile === "live" ? nativeBrowserTargetsForProjection : undefined,
       nativeBrowserDownloadsForProjection: profile === "live" ? nativeBrowserDownloadsForProjection : undefined,
@@ -530,7 +530,7 @@ function getProjectionStore(profile) {
       onChange: (generation, kind) => {
         for (const win of BrowserWindow.getAllWindows()) {
           if (!win.isDestroyed()) {
-            win.webContents.send("octopus:projection-changed", {
+            win.webContents.send("phobos:projection-changed", {
               generation,
               kind: ["ledger", "runs", "files"].includes(kind) ? kind : "structure",
             });
@@ -552,38 +552,38 @@ async function prepareLiveProjectionRead() {
   await initializeRuntimeHost();
 }
 
-async function taskRetirementBarrier(octopusHome) {
-  if (resolveOctopusHome() !== octopusHome) throw new Error("Home changed during task retirement");
+async function taskRetirementBarrier(phobosHome) {
+  if (resolvePhobosHome() !== phobosHome) throw new Error("Home changed during task retirement");
   const client = await getOperatorChatClientLoader().load();
   return (await client.loadOperatorTaskLifecycle({
-    registryRoot: () => path.join(octopusHome, "registry"), installationRoot: resolveInstallationRoot,
+    registryRoot: () => path.join(phobosHome, "registry"), installationRoot: resolveInstallationRoot,
   })).retirementBarrier;
 }
 
 function readWorkspaceSetupState(options) {
-  const octopusHome = options.octopusHomeRoot;
+  const phobosHome = options.phobosHomeRoot;
   return readWorkspaceSetupStateTransaction({ ...options,
-    publication: workspaceStorage(octopusHome), retirementBarrier: {
-    verifyBefore: (context) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.verifyBefore(context)),
-    withHeldProof: (context, operation) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.withHeldProof(context, operation)),
+    publication: workspaceStorage(phobosHome), retirementBarrier: {
+    verifyBefore: (context) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.verifyBefore(context)),
+    withHeldProof: (context, operation) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.withHeldProof(context, operation)),
   } });
 }
 
-function commitProjectionClientAuthoring(octopusHome, registryRoot, request) {
-  return commitProjectionClientAuthoringTransaction(octopusHome, registryRoot, request, {
-    publication: workspaceStorage(octopusHome),
+function commitProjectionClientAuthoring(phobosHome, registryRoot, request) {
+  return commitProjectionClientAuthoringTransaction(phobosHome, registryRoot, request, {
+    publication: workspaceStorage(phobosHome),
     retirementBarrier: {
-      verifyBefore: (context) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.verifyBefore(context)),
-      withHeldProof: (context, operation) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.withHeldProof(context, operation)),
+      verifyBefore: (context) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.verifyBefore(context)),
+      withHeldProof: (context, operation) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.withHeldProof(context, operation)),
     },
   });
 }
 
-function workspaceStorage(octopusHome) {
+function workspaceStorage(phobosHome) {
   const publisher = require("./packageStorage.cjs").createPackageStoragePublisher(resolveLocalPackageRegistry(), resolveInstallationRoot());
   return Object.freeze(Object.fromEntries(["publishFiles", "snapshotDirectory", "publishDirectoryMoves", "reclaimDirectory"].map(method =>
     [method, async (...args) => {
-      if (resolveOctopusHome() !== octopusHome) throw new Error("Home changed during workspace publication");
+      if (resolvePhobosHome() !== phobosHome) throw new Error("Home changed during workspace publication");
       return publisher[method](...args);
     }])));
 }
@@ -596,17 +596,17 @@ function getCdpViewerManager() {
 }
 
 function requireNativeBrowserHost() {
-  if (nativeBrowserHome && nativeBrowserHome !== resolveOctopusHome()) throw new Error("The native browser host belongs to another Octopus Home. Restart the client.");
+  if (nativeBrowserHome && nativeBrowserHome !== resolvePhobosHome()) throw new Error("The native browser host belongs to another Phobos Home. Restart the client.");
   if (!nativeBrowserHost) throw nativeBrowserStartupError ?? new Error("The native browser host is not available. Complete browser package setup and restart the client.");
   return nativeBrowserHost;
 }
 
 function requireNativeBrowserHome(home) {
-  if (typeof home !== "string" || home !== nativeBrowserHome || home !== resolveOctopusHome()) throw new Error("Native browser page belongs to another Octopus Home.");
+  if (typeof home !== "string" || home !== nativeBrowserHome || home !== resolvePhobosHome()) throw new Error("Native browser page belongs to another Phobos Home.");
 }
 
 function nativeBrowserTargetsForProjection(projection) {
-  if (projection?.octopusHome !== nativeBrowserHome || projection.octopusHome !== resolveOctopusHome()) throw new Error("Native browser observation belongs to another Octopus Home.");
+  if (projection?.phobosHome !== nativeBrowserHome || projection.phobosHome !== resolvePhobosHome()) throw new Error("Native browser observation belongs to another Phobos Home.");
   return requireNativeBrowserHost().listTargetsForProjection({
     protocol: "browser.native.v1",
     worker_environment_id: projection.worker_environment_id,
@@ -618,7 +618,7 @@ function nativeBrowserTargetsForProjection(projection) {
 }
 
 async function nativeBrowserDownloadsForProjection(projection) {
-  if (projection?.octopusHome !== nativeBrowserHome || projection.octopusHome !== resolveOctopusHome()) throw new Error("Native browser history belongs to another Octopus Home.");
+  if (projection?.phobosHome !== nativeBrowserHome || projection.phobosHome !== resolvePhobosHome()) throw new Error("Native browser history belongs to another Phobos Home.");
   const host = requireNativeBrowserHost();
   const history = await host.listDownloadHistoryForProjection({ worker_environment_id: projection.worker_environment_id, formation_pin: projection.formation_pin });
   return { ...history, engine: host.getEngineInfo() };
@@ -627,7 +627,7 @@ async function nativeBrowserDownloadsForProjection(projection) {
 function getNativeBrowserSurface() {
   if (!nativeBrowserSurface) nativeBrowserSurface = createNativeBrowserSurfaceAdapter({
     getHost: requireNativeBrowserHost,
-    getHome: resolveOctopusHome,
+    getHome: resolvePhobosHome,
     requireHome: requireNativeBrowserHome,
     resolveSurface: resolveProjectedWorkerEnvironmentSurface,
     resolveEnvironments: async () => {
@@ -661,10 +661,10 @@ function requireNativeBrowserPackageOwner(installation) {
 }
 
 async function startNativeBrowserEngine() {
-  if (nativeBrowserHome && nativeBrowserHome !== resolveOctopusHome()) throw new Error("Restart the client before changing the native browser Home.");
+  if (nativeBrowserHome && nativeBrowserHome !== resolvePhobosHome()) throw new Error("Restart the client before changing the native browser Home.");
   if (nativeBrowserHost) return;
   if (nativeBrowserStartup) return nativeBrowserStartup;
-  nativeBrowserHome = resolveOctopusHome();
+  nativeBrowserHome = resolvePhobosHome();
   const roots = clientSetupPackageRoots();
   guardNativeBrowserPackage();
   nativeBrowserStartup = (async () => {
@@ -687,12 +687,12 @@ async function startNativeBrowserEngine() {
       const hasOverride = overrides && Object.prototype.hasOwnProperty.call(overrides, "browser_native_host_root");
       const hostRoot = hasOverride ? overrides.browser_native_host_root?.path : machine.root_refs?.browser_native_host_root;
       if (typeof hostRoot !== "string" || !path.isAbsolute(hostRoot) || path.resolve(hostRoot) !== hostRoot) throw new Error("Browser setup requires an explicit canonical absolute browser_native_host_root in host.json or the browser door's host_slots.");
-      const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "browser_session", "packages", "octopus-browser-session-env", "native", "electron-host.cjs");
+      const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "browser_session", "packages", "phobos-browser-session-env", "native", "electron-host.cjs");
       if (await fs.promises.realpath(modulePath) !== modulePath) throw new Error("The installed native browser module path must not contain symbolic links.");
       const { verifyBrowserEngine } = require(path.join(path.dirname(modulePath), "engine-mode.cjs"));
       const browserEngine = verifyBrowserEngine({ resourcesRoot: process.resourcesPath, executablePath: process.execPath,
         isPackaged: app.isPackaged, architecture: process.arch, nodeVersion: process.versions.node, electronVersion: process.versions.electron });
-      if (nativeBrowserHome !== resolveOctopusHome()) throw new Error("Browser Home changed during packaged engine verification.");
+      if (nativeBrowserHome !== resolvePhobosHome()) throw new Error("Browser Home changed during packaged engine verification.");
       const { createBrowserEngineHost } = require(modulePath);
       if (typeof createBrowserEngineHost !== "function") throw new Error("The installed browser kind has no native engine host export.");
       nativeBrowserModuleLoaded = true;
@@ -716,7 +716,7 @@ async function planBrowserNativeHost(request) {
   guardNativeBrowserPackage();
   return withLocalPackageInstallation({ ...roots, packageId: "driver.browser_session" }, async (installation) => {
     requireNativeBrowserPackageOwner(installation);
-    const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "browser_session", "packages", "octopus-browser-session-env", "native", "setup-host.cjs");
+    const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "browser_session", "packages", "phobos-browser-session-env", "native", "setup-host.cjs");
     if (await fs.promises.realpath(modulePath) !== modulePath) throw new Error("The installed browser setup module path must not contain symbolic links.");
     const helper = require(modulePath);
     if (typeof helper.planBrowserNativeHost !== "function") throw new Error("The installed browser kind has no native host setup planner.");
@@ -729,22 +729,22 @@ let desktopPreferencesSetupGuard = null;
 let desktopPreferencesSetupLoaded = false;
 async function planDesktopApplicationPreferences(request) {
   await initializeRuntimeHost();
-  const roots = clientSetupPackageRoots(), home = resolveOctopusHome();
-  if (request.octopusHomeRoot !== home) throw new Error("Computer Use setup belongs to another Home.");
+  const roots = clientSetupPackageRoots(), home = resolvePhobosHome();
+  if (request.phobosHomeRoot !== home) throw new Error("Computer Use setup belongs to another Home.");
   if (!desktopPreferencesSetupGuard) desktopPreferencesSetupGuard = registerLocalPackageMutationGuard({ stateRoot: roots.stateRoot,
     guard: (ids) => { if (desktopPreferencesSetupLoaded && ids.includes("driver.desktop_session")) throw new Error("Restart the client before changing the loaded Computer Use setup package."); } });
   return withLocalPackageInstallation({ ...roots, packageId: "driver.desktop_session" }, async (installation) => {
     const owner = installation.member_states?.find((member) => member.registry_kind === "worker_environment_kind" && member.owner === "desktop_session");
     if (!installation.available || !installation.installed || installation.receipt_state !== "valid" || !/^[a-f0-9]{64}$/.test(installation.receipt_digest)
       || !owner?.materialized) throw new Error("Computer Use setup requires its current installed package and valid receipt.");
-    const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "desktop_session", "packages", "octopus-system-gui-env", "native", "setup-preferences.cjs");
+    const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "desktop_session", "packages", "phobos-system-gui-env", "native", "setup-preferences.cjs");
     if (await fs.promises.realpath(modulePath) !== modulePath) throw new Error("The installed Computer Use setup module must not contain symbolic links.");
     const helper = require(modulePath);
     desktopPreferencesSetupLoaded = true;
     if (typeof helper.planDesktopApplicationPreferences !== "function") throw new Error("The installed Computer Use package has no preference setup planner.");
-    if (resolveOctopusHome() !== home) throw new Error("Home changed during Computer Use setup verification.");
+    if (resolvePhobosHome() !== home) throw new Error("Home changed during Computer Use setup verification.");
     const plan = await helper.planDesktopApplicationPreferences(request);
-    if (resolveOctopusHome() !== home) { await plan.rollback(); throw new Error("Home changed during Computer Use preference setup."); }
+    if (resolvePhobosHome() !== home) { await plan.rollback(); throw new Error("Home changed during Computer Use preference setup."); }
     return plan;
   });
 }
@@ -778,7 +778,7 @@ function getDesktopSurfaceHost(sender) {
           return operation("system_gui");
         });
       },
-      homePath: resolveOctopusHome,
+      homePath: resolvePhobosHome,
       environment: () => process.env,
     });
   }
@@ -800,7 +800,7 @@ function getNativeDesktopPermissions() {
   if (!nativeDesktopPermissions) nativeDesktopPermissions = createDesktopPermissionHost({
     prepareSource: (input, owner) => input.setup === true ? getNativeDesktopSettings().source(owner) : getDesktopSurfaceHost().preparePermissionSource(input),
     automationSources: (input, helper) => getNativeDesktopPresentations().permissionSources(input, helper),
-    getNativeHost: () => getNativeClientPresentations().get(), homePath: resolveOctopusHome,
+    getNativeHost: () => getNativeClientPresentations().get(), homePath: resolvePhobosHome,
   });
   return nativeDesktopPermissions;
 }
@@ -808,19 +808,19 @@ function getNativeDesktopSettings() {
   if (!desktopPreferencesSetupGuard) desktopPreferencesSetupGuard = registerLocalPackageMutationGuard({ stateRoot: clientSetupPackageRoots().stateRoot,
     guard: ids => { if (desktopPreferencesSetupLoaded && ids.includes("driver.desktop_session")) throw new Error("Restart the client before changing the loaded Computer Use Settings package."); } });
   if (!nativeDesktopSettings) nativeDesktopSettings = createNativeDesktopSettingsHost({
-    homePath: resolveOctopusHome,
+    homePath: resolvePhobosHome,
     prepareHelper: async () => {
       await initializeRuntimeHost();
-      const home = resolveOctopusHome(), roots = clientSetupPackageRoots();
+      const home = resolvePhobosHome(), roots = clientSetupPackageRoots();
       const read = operation => withLocalPackageInstallation({ ...roots, packageId: "driver.desktop_session" }, async installation => {
         const member = installation.member_states?.find(value => value.registry_kind === "worker_environment_kind" && value.owner === "desktop_session");
         const descriptor = installation.member_states?.find(value => value.registry_kind === "interface" && value.owner === "system_gui");
-        if (resolveOctopusHome() !== home || !installation.available || !installation.installed || installation.receipt_state !== "valid"
+        if (resolvePhobosHome() !== home || !installation.available || !installation.installed || installation.receipt_state !== "valid"
           || !/^[a-f0-9]{64}$/.test(installation.receipt_digest) || !member?.materialized || !descriptor?.materialized) throw new Error("Computer Use setup requires its current verified installed driver.");
         return operation(installation.receipt_digest, member.installed_digest);
       });
       const preferences = await getDesktopSurfaceHost().defaultPreferenceStore(() => {
-        if (home !== resolveOctopusHome()) throw new Error("Computer Use Settings Home changed.");
+        if (home !== resolvePhobosHome()) throw new Error("Computer Use Settings Home changed.");
       });
       if (typeof preferences.identity !== "string" || !preferences.identity || typeof preferences.generation !== "string" || !preferences.generation) throw new Error("Computer Use preference store has no captured identity.");
       return read(async (receipt, digest) => {
@@ -834,14 +834,14 @@ function getNativeDesktopSettings() {
         const program = path.join(roots.activeRegistryRoot, "worker_environment_kind", relative);
         const stat = await fs.promises.lstat(program);
         if (!stat.isFile() || stat.isSymbolicLink() || stat.size < 1 || stat.size > 64 * 1024 * 1024 || !(stat.mode & 0o111) || await fs.promises.realpath(program) !== program) throw new Error("Computer Use setup helper is not the installed executable.");
-        const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "desktop_session", "packages", "octopus-system-gui-env", "native", "setup-preferences.cjs");
+        const modulePath = path.join(roots.activeRegistryRoot, "worker_environment_kind", "desktop_session", "packages", "phobos-system-gui-env", "native", "setup-preferences.cjs");
         if (await fs.promises.realpath(modulePath) !== modulePath) throw new Error("Computer Use preference module must be canonical.");
         const lifePath = path.join(roots.activeRegistryRoot, "interface", "system_gui", "life.json");
         const lifeStat = await fs.promises.lstat(lifePath);
         if (!lifeStat.isFile() || lifeStat.isSymbolicLink() || lifeStat.size > 1024 * 1024 || await fs.promises.realpath(lifePath) !== lifePath) throw new Error("Computer Use Settings has no canonical installed lifecycle.");
         const lifeBytes = await fs.promises.readFile(lifePath), life = JSON.parse(lifeBytes.toString("utf8"));
         if (lifeBytes.length > 1024 * 1024 || !Array.isArray(life.processes)) throw new Error("Computer Use Settings lifecycle is malformed.");
-        const hosts = life.processes.filter(value => typeof value.bin === "string" && path.basename(value.bin) === "octopus-desktop-host");
+        const hosts = life.processes.filter(value => typeof value.bin === "string" && path.basename(value.bin) === "phobos-desktop-host");
         const host = hosts.length === 1 ? hosts[0] : null;
         const hostPath = host?.bin?.startsWith("owner://") ? host.bin.slice("owner://".length) : null;
         if (!hostPath || hostPath.split("/").some(value => !value || value === "." || value === "..") || !Array.isArray(host.args) || host.args.length
@@ -885,7 +885,7 @@ function getNativeClientPresentations() {
   if (!nativeClientPresentations) nativeClientPresentations = createClientPresentationHost({
     artifactOptions: () => ({ resourcesRoot: process.resourcesPath, appRoot: app.getAppPath(), isPackaged: app.isPackaged,
       architecture: process.arch, nodeVersion: process.versions.node, electronVersion: process.versions.electron }),
-    homePath: resolveOctopusHome, requireAccess: requireNativeDesktopAccess, syncHosts: syncNativeDesktopHosts,
+    homePath: resolvePhobosHome, requireAccess: requireNativeDesktopAccess, syncHosts: syncNativeDesktopHosts,
     onEvent: event => {
       nativeDesktopPresentations?.onEvent(event);
       void nativeDesktopPermissions?.onEvent(event).catch(error => appendClientLog("error", "client.native_permissions.failed", { message: error.message }));
@@ -915,14 +915,14 @@ function syncNativeDesktopHosts(host) {
 }
 function getNativeDesktopPresentations() {
   if (!nativeDesktopPresentations) nativeDesktopPresentations = createDesktopPresentationHost({
-    getNativeHost: () => getNativeClientPresentations().get(), homePath: resolveOctopusHome, requireAccess: requireNativeDesktopAccess,
+    getNativeHost: () => getNativeClientPresentations().get(), homePath: resolvePhobosHome, requireAccess: requireNativeDesktopAccess,
     prepareSource: input => getDesktopSurfaceHost().preparePresentationSource(input), syncHosts: syncNativeDesktopHosts,
     onChange: () => projectionStores.get("live")?.invalidate(),
   });
   return nativeDesktopPresentations;
 }
 async function readNativeBrowserToolDescriptor(id) {
-  const home = resolveOctopusHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
+  const home = resolvePhobosHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
   if (typeof id !== "string" || !id || id.trim() !== id || id === "." || id === ".." || /[\x00-\x1f/\\]/.test(id)) throw new Error("Invalid exact browser tool descriptor identity.");
   const filename = path.join(home, "registry", "tool", id, "tool.json");
   if (await fs.promises.realpath(filename) !== filename) throw new Error("Browser tool descriptor must not contain symbolic links.");
@@ -941,7 +941,7 @@ async function readNativeBrowserToolDescriptor(id) {
   } finally { await handle.close(); }
 }
 async function currentNativeBrowserFormedRoom(expected) {
-  const home = resolveOctopusHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
+  const home = resolvePhobosHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
   const result = await getProjectionStore("live").read(projectionReadRequest("projection.worker_environments.list", { all_scopes: true, include_archived: false }));
   requireNativeBrowserHome(home); requireNativeDesktopAccess();
   const room = result.worker_environments?.find(value => value.worker_environment_id === expected.worker_environment_id);
@@ -949,8 +949,8 @@ async function currentNativeBrowserFormedRoom(expected) {
   return room;
 }
 async function currentNativeBrowserPreviewTarget(record) {
-  requireNativeDesktopAccess(); requireNativeBrowserHome(resolveOctopusHome());
-  const home = resolveOctopusHome();
+  requireNativeDesktopAccess(); requireNativeBrowserHome(resolvePhobosHome());
+  const home = resolvePhobosHome();
   const surface = await resolveProjectedWorkerEnvironmentSurface(record.input.workerEnvironmentId, record.input.surfaceId);
   requireNativeDesktopAccess(); requireNativeBrowserHome(home);
   if (surface.environmentKind !== "browser_session" || surface.protocol !== "browser.native.v1" || surface.mode !== "direct"
@@ -965,14 +965,14 @@ async function currentNativeBrowserPreviewTarget(record) {
 }
 function getNativeBrowserPresentations() {
   if (!nativeBrowserPresentations) nativeBrowserPresentations = createBrowserPresentationHost({
-    homePath: resolveOctopusHome, requireAccess: requireNativeDesktopAccess,
+    homePath: resolvePhobosHome, requireAccess: requireNativeDesktopAccess,
     getNativeHost: () => getNativeClientPresentations().get(), currentTarget: currentNativeBrowserPreviewTarget,
     readToolDescriptor: readNativeBrowserToolDescriptor, currentRoom: owner => currentNativeBrowserFormedRoom(owner.room),
     readActivity: (run, after) => getProjectionStore("live").read(projectionReadRequest("projection.operator.run.activity", {
       run_id: run, after_seq: after, from_end: false, limit: 1000,
     })),
     readArtifact: async row => {
-      const home = resolveOctopusHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
+      const home = resolvePhobosHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
       const artifact = await readContentAddressedArtifactPayload({ blobsRoot: path.join(home, "ledger", "blobs"),
         artifactId: row.artifact_id, manifestHash: row.content_hash, label: row.label, maxPayloadBytes: 96 * 1024 * 1024 });
       requireNativeBrowserHome(home); requireNativeDesktopAccess(); return artifact;
@@ -990,17 +990,17 @@ function getNativeBrowserPresentations() {
 }
 function getNativeBrowserDownloadHistory() {
   if (!nativeBrowserDownloadHistory) nativeBrowserDownloadHistory = createBrowserDownloadHistory({
-    homePath: resolveOctopusHome, requireAccess: requireNativeDesktopAccess,
+    homePath: resolvePhobosHome, requireAccess: requireNativeDesktopAccess,
     readToolDescriptor: readNativeBrowserToolDescriptor,
     readActivity: (run, after) => getProjectionStore("live").read(projectionReadRequest("projection.operator.run.activity", { run_id: run, after_seq: after, from_end: false, limit: 1000 })),
     readArtifact: async row => {
-      const home = resolveOctopusHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
+      const home = resolvePhobosHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
       const artifact = await readContentAddressedArtifactPayload({ blobsRoot: path.join(home, "ledger", "blobs"), artifactId: row.artifact_id,
         manifestHash: row.content_hash, label: row.label, maxPayloadBytes: 96 * 1024 * 1024 });
       requireNativeBrowserHome(home); requireNativeDesktopAccess(); return artifact;
     },
     currentRoom: async (owner, projection) => {
-      const home = resolveOctopusHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
+      const home = resolvePhobosHome(); requireNativeBrowserHome(home); requireNativeDesktopAccess();
       const surface = await resolveProjectedWorkerEnvironmentSurface(owner.room.worker_environment_id, owner.surface.id);
       requireNativeBrowserHome(home); requireNativeDesktopAccess();
       if (surface.environmentKind !== "browser_session" || surface.mode !== "direct" || surface.protocol !== "browser.native.downloads.v1"
@@ -1021,9 +1021,9 @@ function scheduleNativeDesktopPresentations() {
     nativeDesktopRefreshRunning = true;
     void (async () => {
       if (!nativeDesktopAccessEntries().length) { nativeBrowserPresentations?.revokeAll(); nativeBrowserDownloadHistory?.revokeAll(); nativeDesktopPresentations?.revokeAll(); return; }
-      const home = resolveOctopusHome(), store = getProjectionStore("live");
+      const home = resolvePhobosHome(), store = getProjectionStore("live");
       const result = await store.read(projectionReadRequest("projection.worker_environments.list", { all_scopes: true, include_archived: false }));
-      if (home !== resolveOctopusHome()) throw new Error("Native desktop Home changed during source projection.");
+      if (home !== resolvePhobosHome()) throw new Error("Native desktop Home changed during source projection.");
       const candidates = [], browserRooms = [], historyRooms = [], runIds = new Set();
       for (const room of result.worker_environments ?? []) {
         if (room.worker_environment_kind === "browser_session" && nativeBrowserHost && home === nativeBrowserHome) {
@@ -1056,7 +1056,7 @@ function scheduleNativeDesktopPresentations() {
       if (!candidates.length && !nativeDesktopPresentations && !browserRooms.length && !historyRooms.length && !nativeBrowserPresentations && !nativeBrowserDownloadHistory) return;
       const status = await store.read(projectionReadRequest("projection.operator.chats.status", { run_ids: [...runIds] }));
       requireNativeDesktopAccess();
-      if (home !== resolveOctopusHome()) throw new Error("Native desktop Home changed before source admission.");
+      if (home !== resolvePhobosHome()) throw new Error("Native desktop Home changed before source admission.");
       const currentBrowserRooms = [];
       for (const owner of browserRooms) {
         const { room, surface } = owner;
@@ -1074,7 +1074,7 @@ function scheduleNativeDesktopPresentations() {
         }
       }
       requireNativeDesktopAccess();
-      if (home !== resolveOctopusHome()) throw new Error("Native presentation Home changed during room revalidation.");
+      if (home !== resolvePhobosHome()) throw new Error("Native presentation Home changed during room revalidation.");
       if (historyRooms.length || nativeBrowserDownloadHistory) {
         try { await getNativeBrowserDownloadHistory().reconcile(historyRooms, status.chats); }
         catch (error) { void appendClientLog("error", "browser.download_history.unavailable", { message: error.message }); }
@@ -1089,7 +1089,7 @@ function scheduleNativeDesktopPresentations() {
       }
       nativeClientPresentations?.sync(status.chats);
     })().catch(error => {
-      if (!nativeDesktopAccessEntries().length || nativeClientPresentations?.home() && nativeClientPresentations.home() !== resolveOctopusHome()) { nativeBrowserPresentations?.revokeAll(); nativeBrowserDownloadHistory?.revokeAll(); nativeDesktopPresentations?.revokeAll(); }
+      if (!nativeDesktopAccessEntries().length || nativeClientPresentations?.home() && nativeClientPresentations.home() !== resolvePhobosHome()) { nativeBrowserPresentations?.revokeAll(); nativeBrowserDownloadHistory?.revokeAll(); nativeDesktopPresentations?.revokeAll(); }
       void appendClientLog("error", "desktop.native_presentation.unavailable", { message: error.message });
     }).finally(() => {
       nativeDesktopRefreshRunning = false;
@@ -1131,7 +1131,7 @@ function getOsFileStore() {
       resolveRoots: () => {
         const source = resolveRepoRoot();
         return [
-          { id: "octopus-home", label: "Octopus Home", root: resolveOctopusHome() },
+          { id: "phobos-home", label: "Phobos Home", root: resolvePhobosHome() },
           ...(source ? [{ id: "source", label: "Source", root: source }] : []),
         ];
       },
@@ -1193,7 +1193,7 @@ function getClientSurfaceDocumentStore() {
       onChange: (generation) => {
         for (const win of BrowserWindow.getAllWindows()) {
           if (!win.isDestroyed()) {
-            win.webContents.send("octopus:client-surface-documents-changed", { generation });
+            win.webContents.send("phobos:client-surface-documents-changed", { generation });
           }
         }
       },
@@ -1215,7 +1215,7 @@ function getClientExtensionStore() {
 function notifyClientExtensionsChanged(generation) {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) {
-      win.webContents.send("octopus:client-extensions-changed", { generation });
+      win.webContents.send("phobos:client-extensions-changed", { generation });
     }
   }
 }
@@ -1224,7 +1224,7 @@ async function clientExtensionSnapshot() {
   const snapshot = await getClientExtensionStore().snapshot();
   const installedExtensionIds = verifiedInstalledExtensionIds(snapshot);
   const actionStatuses = await readClientExtensionActionStatuses({
-    octopusHome: resolveOctopusHome(),
+    phobosHome: resolvePhobosHome(),
     codexHome: resolveOperatorCodexHome(),
     installedExtensionIds,
   });
@@ -1286,19 +1286,19 @@ function createClientSetupOwners() {
     provider: getClientProviderMetadata().setupOwner,
     workspace: {
       probe: async (plan, context) => {
-        const octopusHome = resolveOctopusHome();
+        const phobosHome = resolvePhobosHome();
         const { withOperatorWorkspaceTopologyLock } = await loadOperatorChatClient();
         return withOperatorWorkspaceTopologyLock(
-          octopusHome,
+          phobosHome,
           () => clientSetupWorkspaceProof(plan, context.operationId),
         );
       },
       apply: async (plan, context) => {
-        const octopusHome = resolveOctopusHome();
-        const registryRoot = path.join(octopusHome, "registry");
+        const phobosHome = resolvePhobosHome();
+        const registryRoot = path.join(phobosHome, "registry");
         const { withOperatorWorkspaceTopologyLock } = await loadOperatorChatClient();
-        await withOperatorWorkspaceTopologyLock(octopusHome, async () => {
-          const state = await readWorkspaceSetupState({ octopusHomeRoot: octopusHome, registryRoot });
+        await withOperatorWorkspaceTopologyLock(phobosHome, async () => {
+          const state = await readWorkspaceSetupState({ phobosHomeRoot: phobosHome, registryRoot });
           if (state.status === "configured") {
             if (
               state.receipt?.operation_id !== context.operationId
@@ -1306,12 +1306,12 @@ function createClientSetupOwners() {
             ) throw new Error("Another workspace setup receipt already owns the configured Home.");
           } else if (state.status === "not_configured") {
             await initializeWorkspace({
-              octopusHomeRoot: octopusHome,
+              phobosHomeRoot: phobosHome,
               registryRoot,
-              publication: workspaceStorage(octopusHome),
+              publication: workspaceStorage(phobosHome),
               retirementBarrier: {
-                verifyBefore: (context) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.verifyBefore(context)),
-                withHeldProof: (context, operation) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.withHeldProof(context, operation)),
+                verifyBefore: (context) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.verifyBefore(context)),
+                withHeldProof: (context, operation) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.withHeldProof(context, operation)),
               },
               request: plan.workspace.request,
               planOperatorSurface: planWorkspaceHomeSurface,
@@ -1334,14 +1334,14 @@ function createClientSetupOwners() {
 }
 
 function clientSetupPackageRoots() {
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   const sourceRegistryRoot = resolveLocalPackageRegistry();
   return {
     sourceRegistryRoot,
     publication: require("./packageStorage.cjs").createPackageStoragePublisher(sourceRegistryRoot, resolveInstallationRoot()),
-    activeRegistryRoot: path.join(octopusHome, "registry"),
+    activeRegistryRoot: path.join(phobosHome, "registry"),
     libraryRoot: resolveLocalPackageLibrary(),
-    stateRoot: path.join(octopusHome, "client", "package-state"),
+    stateRoot: path.join(phobosHome, "client", "package-state"),
   };
 }
 
@@ -1522,7 +1522,7 @@ async function clientSetupExtensionProof(plan) {
 
 function getClientProviderMetadata() {
   return createClientProviderMetadata({
-    registryRoot: () => path.join(resolveOctopusHome(), "registry"),
+    registryRoot: () => path.join(resolvePhobosHome(), "registry"),
     sourceRegistryRoot: resolveLocalPackageRegistry,
     accountClient: getChatgptSignIn,
     reference: clientSetupReference,
@@ -1531,8 +1531,8 @@ function getClientProviderMetadata() {
 
 async function clientSetupWorkspaceProof(plan, operationId) {
   const state = await readWorkspaceSetupState({
-    octopusHomeRoot: resolveOctopusHome(),
-    registryRoot: path.join(resolveOctopusHome(), "registry"),
+    phobosHomeRoot: resolvePhobosHome(),
+    registryRoot: path.join(resolvePhobosHome(), "registry"),
   });
   if (
     state.status !== "configured"
@@ -1541,7 +1541,7 @@ async function clientSetupWorkspaceProof(plan, operationId) {
   ) return null;
   const defaultReferences = await clientSetupProjectDefaultProof(plan, state.receipt);
   if (!defaultReferences) return null;
-  const triggers = await setupTriggerProof(path.join(resolveOctopusHome(), "registry"), resolveOctopusHome(), await clientSetupTriggerEntries(plan));
+  const triggers = await setupTriggerProof(path.join(resolvePhobosHome(), "registry"), resolvePhobosHome(), await clientSetupTriggerEntries(plan));
   if (!triggers) return null;
   return [
     clientSetupReference("workspace_receipt", operationId, state.receipt),
@@ -1556,9 +1556,9 @@ async function clientSetupTriggerEntries(plan) {
 }
 
 async function applyClientSetupTriggers(plan, operationId) {
-  const octopusHome = resolveOctopusHome();
-  const registryRoot = path.join(octopusHome, "registry");
-  const state = await readWorkspaceSetupState({ octopusHomeRoot: octopusHome, registryRoot });
+  const phobosHome = resolvePhobosHome();
+  const registryRoot = path.join(phobosHome, "registry");
+  const state = await readWorkspaceSetupState({ phobosHomeRoot: phobosHome, registryRoot });
   if (
     state.status !== "configured"
     || state.receipt?.operation_id !== operationId
@@ -1566,25 +1566,25 @@ async function applyClientSetupTriggers(plan, operationId) {
   ) throw new Error("Workspace receipt is not ready for its triggers.");
   const entries = await clientSetupTriggerEntries(plan);
   const home = plan.workspace.request?.home;
-  await armSetupTriggers(registryRoot, octopusHome, entries, {
-    commitClientAuthoring: (authoringRequest) => commitProjectionClientAuthoring(octopusHome, registryRoot, authoringRequest),
+  await armSetupTriggers(registryRoot, phobosHome, entries, {
+    commitClientAuthoring: (authoringRequest) => commitProjectionClientAuthoring(phobosHome, registryRoot, authoringRequest),
     planTriggerTask: setupTriggerTaskPlanner(planWorkspaceHomeSurface, {
-      eeInstancesRoot: path.join(octopusHome, "state", "ee_instances"),
+      eeInstancesRoot: path.join(phobosHome, "state", "ee_instances"),
       rootEeId: state.receipt.root_ee_id,
       home,
     }),
   });
   getProjectionStore("live").invalidate();
-  if (!await setupTriggerProof(registryRoot, octopusHome, entries)) {
+  if (!await setupTriggerProof(registryRoot, phobosHome, entries)) {
     throw new Error("Workspace triggers were armed without canonical read-back proof.");
   }
 }
 
 async function applyClientSetupProjectDefaults(plan, operationId) {
-  const octopusHome = resolveOctopusHome();
-  const registryRoot = path.join(octopusHome, "registry");
+  const phobosHome = resolvePhobosHome();
+  const registryRoot = path.join(phobosHome, "registry");
   const state = await readWorkspaceSetupState({
-    octopusHomeRoot: octopusHome,
+    phobosHomeRoot: phobosHome,
     registryRoot,
   });
   if (
@@ -1617,14 +1617,14 @@ async function applyClientSetupProjectDefaults(plan, operationId) {
             expectedDigest: target.recordDigest,
           })),
         };
-    await mutateOctopusOsWorkspace(
+    await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHome,
+      phobosHome,
       context.scope,
       request,
       {
         commitClientAuthoring: (authoringRequest) => commitProjectionClientAuthoring(
-          octopusHome,
+          phobosHome,
           registryRoot,
           authoringRequest,
         ),
@@ -1748,11 +1748,11 @@ function stableClientSetupJson(value) {
 }
 
 async function planWorkspaceHomeSurface({ eeInstancesRoot, request }) {
-  const octopusHome = resolveOctopusHome();
-  const registryRoot = path.join(octopusHome, "registry");
+  const phobosHome = resolvePhobosHome();
+  const registryRoot = path.join(phobosHome, "registry");
   const { planOperatorChatSurface } = await loadOperatorChatClient();
   return planOperatorChatSurface({
-    octopusHome: () => octopusHome,
+    phobosHome: () => phobosHome,
     installationRoot: resolveInstallationRoot,
     registryRoot: () => registryRoot,
     eeInstancesRoot: () => eeInstancesRoot,
@@ -1760,10 +1760,10 @@ async function planWorkspaceHomeSurface({ eeInstancesRoot, request }) {
 }
 
 async function withWorkspaceAgentPreset(choice, eeInstancesRoot, operation) {
-  const home = resolveOctopusHome();
+  const home = resolvePhobosHome();
   if (choice.home !== home) throw new Error("Agent preset belongs to another Home");
   const verifyHome = () => {
-    if (resolveOctopusHome() !== home) throw new Error("Home changed during Agent preset authoring");
+    if (resolvePhobosHome() !== home) throw new Error("Home changed during Agent preset authoring");
   };
   const { planOperatorChatSurface } = await loadOperatorChatClient();
   verifyHome();
@@ -1774,7 +1774,7 @@ async function withWorkspaceAgentPreset(choice, eeInstancesRoot, operation) {
     const token = createHash("sha256").update(`${choice.operationId}\0${choice.projectEeId}\0${choice.presetId}`).digest("hex").slice(0, 32);
     if (typeof choice.reasoningEffort !== "string" || choice.reasoningEffort.length > 80) throw new Error("Agent reasoning effort is invalid");
     const preflight = await planOperatorChatSurface({
-      octopusHome: () => home,
+      phobosHome: () => home,
       installationRoot: resolveInstallationRoot,
       registryRoot: () => registryRoot,
       eeInstancesRoot: () => eeInstancesRoot,
@@ -1806,7 +1806,7 @@ async function withWorkspaceAgentPreset(choice, eeInstancesRoot, operation) {
 }
 
 async function planWorkspaceAgentPreset({ choice, projectEeId, operationId, eeInstancesRoot }) {
-  return withWorkspaceAgentPreset({ ...choice, home: resolveOctopusHome(), projectEeId, operationId }, eeInstancesRoot, async (preset) => ({
+  return withWorkspaceAgentPreset({ ...choice, home: resolvePhobosHome(), projectEeId, operationId }, eeInstancesRoot, async (preset) => ({
     ...planClientAgentTemplate({
       operationId, projectEeId, sourceInterface: preset.sourceInterface, sourcePolicy: preset.sourcePolicy,
       sourceProfile: preset.profile, settings: preset.settings, name: preset.recipe.name, icon: preset.recipe.icon,
@@ -1826,11 +1826,11 @@ function getCodexUsageReader() {
 
 function getClientArtifactStreamStore() {
   if (!clientArtifactStreamStore) {
-    const octopusHome = resolveOctopusHome();
+    const phobosHome = resolvePhobosHome();
     clientArtifactStreamStore = createClientArtifactStreamStore({
-      clientArtifactsRoot: (interfaceId) => path.join(octopusHome, "interface-hand-in", interfaceId, "client"),
+      clientArtifactsRoot: (interfaceId) => path.join(phobosHome, "interface-hand-in", interfaceId, "client"),
       projectionStore: () => getProjectionStore("live"),
-      handInArtifact: (input) => handInArtifact({ ...input, octopusHome }),
+      handInArtifact: (input) => handInArtifact({ ...input, phobosHome }),
       authorizeSubmission: authorizeClientInterfaceArtifactSubmission,
     });
   }
@@ -1859,7 +1859,7 @@ const nativeChromeWindows = new WeakSet();
 const customChromeWindows = new WeakSet();
 const historyNavigationStates = new WeakMap();
 
-app.setName("Octopus");
+app.setName("Phobos");
 if (isDev) {
   app.commandLine.appendSwitch("remote-debugging-port", "9223");
 }
@@ -1929,7 +1929,7 @@ function createWindow(inheritedAccessToken = "", options = {}) {
   const openRequest = options.initialTarget === undefined
     ? {}
     : validateClientWindowOpenRequest({ initialTarget: options.initialTarget });
-  if (primary && clientWindows.primaryEntry()) throw new Error("The primary Octopus client window already exists.");
+  if (primary && clientWindows.primaryEntry()) throw new Error("The primary Phobos client window already exists.");
   const iconPath = appIconPath();
   const isMac = process.platform === "darwin";
   const windowState = primary ? loadWindowState() : peerClientWindowState();
@@ -1942,7 +1942,7 @@ function createWindow(inheritedAccessToken = "", options = {}) {
       : {}),
     minWidth: MIN_WINDOW_BOUNDS.width,
     minHeight: MIN_WINDOW_BOUNDS.height,
-    title: "Octopus",
+    title: "Phobos",
     ...(iconPath ? { icon: iconPath } : {}),
     backgroundColor: isMac ? "#00000000" : "#181818",
     show: false,
@@ -1962,7 +1962,7 @@ function createWindow(inheritedAccessToken = "", options = {}) {
       webviewTag: true,
       spellcheck: true,
       v8CacheOptions: "bypassHeatCheckAndEagerCompile",
-      ...(accessClaim ? { additionalArguments: [`--octopus-access-claim=${accessClaim}`] } : {}),
+      ...(accessClaim ? { additionalArguments: [`--phobos-access-claim=${accessClaim}`] } : {}),
     },
   });
   win.webContents.on("will-attach-webview", (event, _preferences, _params, details) => {
@@ -2026,9 +2026,9 @@ function createWindow(inheritedAccessToken = "", options = {}) {
     win.on("swipe", (_event, direction) => {
       const history = historyNavigationStates.get(win);
       if (direction === "left" && history?.canNavigateBack) {
-        win.webContents.send("octopus:navigate-back");
+        win.webContents.send("phobos:navigate-back");
       } else if (direction === "right" && history?.canNavigateForward) {
-        win.webContents.send("octopus:navigate-forward");
+        win.webContents.send("phobos:navigate-forward");
       }
     });
   }
@@ -2137,7 +2137,7 @@ function createQuickTaskWindow(accessToken) {
     height: 430,
     minWidth: 520,
     minHeight: 320,
-    title: "Quick task — Octopus",
+    title: "Quick task — Phobos",
     backgroundColor: isMac ? (nativeTheme.shouldUseDarkColors ? "#171717" : "#f7f7f7") : "#181818",
     show: false,
     titleBarStyle: isMac ? "hidden" : "hidden",
@@ -2150,7 +2150,7 @@ function createQuickTaskWindow(accessToken) {
       sandbox: true,
       spellcheck: true,
       v8CacheOptions: "bypassHeatCheckAndEagerCompile",
-      additionalArguments: [`--octopus-access-claim=${accessClaim}`],
+      additionalArguments: [`--phobos-access-claim=${accessClaim}`],
     },
   });
   bindAccessInheritanceClaim(accessClaim, win);
@@ -2201,7 +2201,7 @@ function createWorkerEnvironmentWindow(accessToken, target) {
     height: 760,
     minWidth: 620,
     minHeight: 440,
-    title: "Worker Environment — Octopus",
+    title: "Worker Environment — Phobos",
     backgroundColor: isMac ? (nativeTheme.shouldUseDarkColors ? "#171717" : "#f7f7f7") : "#181818",
     show: false,
     titleBarStyle: "hidden",
@@ -2213,7 +2213,7 @@ function createWorkerEnvironmentWindow(accessToken, target) {
       sandbox: true,
       spellcheck: true,
       v8CacheOptions: "bypassHeatCheckAndEagerCompile",
-      additionalArguments: [`--octopus-access-claim=${accessClaim}`],
+      additionalArguments: [`--phobos-access-claim=${accessClaim}`],
     },
   });
   bindAccessInheritanceClaim(accessClaim, win);
@@ -2271,7 +2271,7 @@ function createTaskMonitorWindow(accessToken, runId) {
     height: 620,
     minWidth: 380,
     minHeight: 420,
-    title: "Task Monitor — Octopus",
+    title: "Task Monitor — Phobos",
     backgroundColor: isMac ? (nativeTheme.shouldUseDarkColors ? "#171717" : "#f7f7f7") : "#181818",
     show: false,
     titleBarStyle: "hidden",
@@ -2284,7 +2284,7 @@ function createTaskMonitorWindow(accessToken, runId) {
       sandbox: true,
       spellcheck: true,
       v8CacheOptions: "bypassHeatCheckAndEagerCompile",
-      additionalArguments: [`--octopus-access-claim=${accessClaim}`],
+      additionalArguments: [`--phobos-access-claim=${accessClaim}`],
     },
   });
   bindAccessInheritanceClaim(accessClaim, win);
@@ -2316,7 +2316,7 @@ function createTaskMonitorWindow(accessToken, runId) {
 
 function publishWorkerEnvironmentWindowTarget(win, target) {
   if (!win || win.isDestroyed() || win.webContents.isDestroyed()) return;
-  win.webContents.send("octopus:worker-environment-window-target", target);
+  win.webContents.send("phobos:worker-environment-window-target", target);
 }
 
 function loadRendererWindow(win, query = {}) {
@@ -2546,7 +2546,7 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
   app.quit();
 } else {
-  saveClientLaunchSelection(clientLaunchSelectionPath, { home: resolveOctopusHome(), codexHome: resolveOperatorCodexHome() });
+  saveClientLaunchSelection(clientLaunchSelectionPath, { home: resolvePhobosHome(), codexHome: resolveOperatorCodexHome() });
   app.on("second-instance", () => {
     void app.whenReady().then(() => {
       ensureRuntimeHost();
@@ -2597,7 +2597,7 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 }
 
 process.on("message", (message) => {
-  if (message?.type === "octopus-dev-quit") app.quit();
+  if (message?.type === "phobos-dev-quit") app.quit();
 });
 
 app.on("before-quit", (event) => {
@@ -2630,7 +2630,7 @@ function startClientQuitCleanup() {
       : Promise.resolve(true);
     try {
       const [stopped] = await Promise.all([stopObservation, terminalHost?.terminate()]);
-      if (!stopped) throw new Error("Octopus runtime did not stop after its launch terminal received Ctrl-C and closed");
+      if (!stopped) throw new Error("Phobos runtime did not stop after its launch terminal received Ctrl-C and closed");
     } finally {
       runtimeHost?.close();
       terminalHost?.closeAll();
@@ -2718,7 +2718,7 @@ function clientShortcutToElectronAccelerator(value) {
 function ensureRuntimeHost() {
   if (runtimeHost) return runtimeHost;
   const host = createRuntimeHost({
-    home: resolveOctopusHome,
+    home: resolvePhobosHome,
     sourceRegistry: resolveSourceRegistry,
     runtimeBinary: resolveRuntimeBinary,
     repoRoot: resolveRepoRoot,
@@ -2734,7 +2734,7 @@ function ensureRuntimeHost() {
     const projectionChanged = projectionReady && !runtimeProjectionHasBeenReady;
     if (projectionReady) runtimeProjectionHasBeenReady = true;
     if (projectionChanged) projectionStores.get("live")?.invalidate(false);
-    publishRuntimeEvent("octopus:runtime-host-state", state);
+    publishRuntimeEvent("phobos:runtime-host-state", state);
   });
   host.observe();
   return host;
@@ -2745,13 +2745,13 @@ async function initializeRuntimeHost() {
   if (runtimeInitializationComplete) return host;
   if (!runtimeInitializationPromise) {
     runtimeInitializationPromise = (async () => {
-      const octopusHome = resolveOctopusHome();
+      const phobosHome = resolvePhobosHome();
       const packageRoots = clientSetupPackageRoots();
       const assertStopped = async () => {
-          if (resolveOctopusHome() !== octopusHome) throw new Error("Home changed during workspace recovery.");
+          if (resolvePhobosHome() !== phobosHome) throw new Error("Home changed during workspace recovery.");
           const state = await host.probe();
           if (state.phase !== "unmanaged" || state.ready || state.ownership !== "none" || state.pid !== null || state.error) {
-            throw new Error("Close the running Octopus runtime before recovering its interrupted workspace transactions.");
+            throw new Error("Close the running Phobos runtime before recovering its interrupted workspace transactions.");
           }
         };
       const releaseGuard = registerLocalPackageMutationGuard({ stateRoot: packageRoots.stateRoot, guard: assertStopped });
@@ -2761,12 +2761,12 @@ async function initializeRuntimeHost() {
           await assertStopped();
           await recoverLocalPackageTransactions(packageRoots);
           await assertStopped();
-          const registryRoot = path.join(octopusHome, "registry");
-          await recoverWorkspaceTransactions({ octopusHomeRoot: octopusHome, registryRoot,
-            publication: workspaceStorage(octopusHome),
+          const registryRoot = path.join(phobosHome, "registry");
+          await recoverWorkspaceTransactions({ phobosHomeRoot: phobosHome, registryRoot,
+            publication: workspaceStorage(phobosHome),
             retirementBarrier: {
-              verifyBefore: (context) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.verifyBefore(context)),
-              withHeldProof: (context, operation) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.withHeldProof(context, operation)),
+              verifyBefore: (context) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.verifyBefore(context)),
+              withHeldProof: (context, operation) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.withHeldProof(context, operation)),
             },
           });
         }
@@ -2792,10 +2792,10 @@ function getTerminalHost() {
   if (!terminalHost) {
     terminalHost = createTerminalHost();
     terminalHost.on("data", (payload) => {
-      publishTerminalEvent("octopus:terminal-data", payload);
+      publishTerminalEvent("phobos:terminal-data", payload);
     });
     terminalHost.on("exit", (payload) => {
-      publishTerminalEvent("octopus:terminal-exit", payload);
+      publishTerminalEvent("phobos:terminal-exit", payload);
     });
   }
   return terminalHost;
@@ -2830,7 +2830,7 @@ function terminalOwner(event, token) {
 function requireRuntimeStateAccess(event, token) {
   if (typeof token !== "string" || !token) {
     if (!primaryWindow || primaryWindow.isDestroyed() || primaryWindow.webContents.id !== event.sender.id) {
-      throw new Error("Pre-password runtime state belongs to the primary Octopus window");
+      throw new Error("Pre-password runtime state belongs to the primary Phobos window");
     }
     return { mode: "bootstrap", profile: null };
   }
@@ -2842,7 +2842,7 @@ function launchTerminalOwner(event, token) {
   const access = requireRuntimeStateAccess(event, token);
   const entry = clientWindows.entryForWebContents(event.sender.id);
   if (!entry || (access.mode === "bootstrap" && !entry.primary)) {
-    throw new Error("The Octopus boot terminal requires a full client window with the current access authority");
+    throw new Error("The Phobos boot terminal requires a full client window with the current access authority");
   }
   return { scope: "launch", senderId: event.sender.id, token: "" };
 }
@@ -2878,7 +2878,7 @@ function subscribeRuntimeEvents(event, token) {
   const lab = labRuntimeHostState(token);
   if (lab) {
     runtimeEventSubscriptions.delete(event.sender.id);
-    event.sender.send("octopus:runtime-host-state", lab);
+    event.sender.send("phobos:runtime-host-state", lab);
     return { subscribed: true };
   }
   requireRuntimeStateAccess(event, token);
@@ -2886,7 +2886,7 @@ function subscribeRuntimeEvents(event, token) {
   event.sender.once("destroyed", () => {
     runtimeEventSubscriptions.delete(event.sender.id);
   });
-  if (runtimeHost) event.sender.send("octopus:runtime-host-state", runtimeHost.snapshot());
+  if (runtimeHost) event.sender.send("phobos:runtime-host-state", runtimeHost.snapshot());
   return { subscribed: true };
 }
 
@@ -2912,37 +2912,37 @@ function trackTerminalSender(sender) {
   });
 }
 
-ipcMain.handle("octopus:transport-defaults", async (_event, token) => {
+ipcMain.handle("phobos:transport-defaults", async (_event, token) => {
   const { profile } = getClientAccessController().requireSession(token);
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   return profile === "lab"
-    ? { endpoint: getProjectionStore("lab").runtimeHostState().endpoint, repoRoot: null, octopusHome: null, registryRoot: null, stateRoot: null, ledgerPath: null }
+    ? { endpoint: getProjectionStore("lab").runtimeHostState().endpoint, repoRoot: null, phobosHome: null, registryRoot: null, stateRoot: null, ledgerPath: null }
     : {
       endpoint: defaultRuntimeEndpoint(),
       repoRoot: resolveRepoRoot(),
-      octopusHome,
-      registryRoot: path.join(octopusHome, "registry"),
-      stateRoot: path.join(octopusHome, "state"),
-      ledgerPath: path.join(octopusHome, "ledger", "movements.jsonl"),
+      phobosHome,
+      registryRoot: path.join(phobosHome, "registry"),
+      stateRoot: path.join(phobosHome, "state"),
+      ledgerPath: path.join(phobosHome, "ledger", "movements.jsonl"),
     };
 });
 
-ipcMain.handle("octopus:app-info", async () => clientApplicationInfo());
+ipcMain.handle("phobos:app-info", async () => clientApplicationInfo());
 
-ipcMain.handle("octopus:support-open", async (event, token) => {
-  if (!clientWindows.entryForWebContents(event.sender.id) || event.senderFrame !== event.sender.mainFrame) throw new Error("Problem reports must be opened from the Octopus client.");
+ipcMain.handle("phobos:support-open", async (event, token) => {
+  if (!clientWindows.entryForWebContents(event.sender.id) || event.senderFrame !== event.sender.mainFrame) throw new Error("Problem reports must be opened from the Phobos client.");
   getClientAccessController().requireSession(token);
   getClientSupportHost().open(token);
 });
 
-ipcMain.handle("octopus:client-doctor", async (_event, token) => {
+ipcMain.handle("phobos:client-doctor", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   return runClientDoctor({ roots: clientSetupPackageRoots() });
 });
 
-ipcMain.handle("octopus:boot-status", runtimeBootStatusHandler);
+ipcMain.handle("phobos:boot-status", runtimeBootStatusHandler);
 
-ipcMain.handle("octopus:client-relaunch", async (_event, token) => {
+ipcMain.handle("phobos:client-relaunch", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   if (quitCleanupStarted) throw new Error("The client is already closing.");
   relaunchRequested = true;
@@ -2950,33 +2950,33 @@ ipcMain.handle("octopus:client-relaunch", async (_event, token) => {
   return { relaunching: true };
 });
 
-ipcMain.handle("octopus:runtime-events-subscribe", subscribeRuntimeEvents);
+ipcMain.handle("phobos:runtime-events-subscribe", subscribeRuntimeEvents);
 
-ipcMain.handle("octopus:runtime-events-unsubscribe", unsubscribeRuntimeEvents);
+ipcMain.handle("phobos:runtime-events-unsubscribe", unsubscribeRuntimeEvents);
 
-ipcMain.handle("octopus:terminal-open", async (event, token, request) => {
+ipcMain.handle("phobos:terminal-open", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   trackTerminalSender(event.sender);
   const launch = { ...request, cwd: request?.cwd || resolveRepoRoot() || os.homedir() };
   return getTerminalHost().open(terminalOwner(event, token), launch);
 });
 
-ipcMain.handle("octopus:terminal-write", async (event, token, terminalId, sessionId, data) => {
+ipcMain.handle("phobos:terminal-write", async (event, token, terminalId, sessionId, data) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getTerminalHost().write(terminalOwner(event, token), terminalId, sessionId, data);
 });
 
-ipcMain.handle("octopus:terminal-resize", async (event, token, terminalId, sessionId, request) => {
+ipcMain.handle("phobos:terminal-resize", async (event, token, terminalId, sessionId, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getTerminalHost().resize(terminalOwner(event, token), terminalId, sessionId, request);
 });
 
-ipcMain.handle("octopus:terminal-close", async (event, token, terminalId) => {
+ipcMain.handle("phobos:terminal-close", async (event, token, terminalId) => {
   getClientAccessController().requireSession(token, ["live"]);
   return { closed: getTerminalHost().close(terminalOwner(event, token), terminalId) };
 });
 
-ipcMain.handle("octopus:launch-terminal-open", async (event, token, request) => {
+ipcMain.handle("phobos:launch-terminal-open", async (event, token, request) => {
   const owner = launchTerminalOwner(event, token);
   trackTerminalSender(event.sender);
   const existing = terminalHost?.openExisting(owner, {
@@ -2987,7 +2987,7 @@ ipcMain.handle("octopus:launch-terminal-open", async (event, token, request) => 
   if (existing) return existing;
   const host = await initializeRuntimeHost();
   const state = await host.probe();
-  if (state.ready) throw new Error("Octopus runtime is already ready for this Home");
+  if (state.ready) throw new Error("Phobos runtime is already ready for this Home");
   return getTerminalHost().open(owner, {
     terminalId: "launch",
     cwd: state.launchCwd,
@@ -2998,11 +2998,11 @@ ipcMain.handle("octopus:launch-terminal-open", async (event, token, request) => 
   });
 });
 
-ipcMain.handle("octopus:launch-terminal-write", async (event, token, sessionId, data) => (
+ipcMain.handle("phobos:launch-terminal-write", async (event, token, sessionId, data) => (
   getTerminalHost().write(launchTerminalOwner(event, token), "launch", sessionId, data)
 ));
 
-ipcMain.handle("octopus:launch-terminal-resize", async (event, token, sessionId, request) => (
+ipcMain.handle("phobos:launch-terminal-resize", async (event, token, sessionId, request) => (
   getTerminalHost().resize(launchTerminalOwner(event, token), "launch", sessionId, request)
 ));
 
@@ -3012,12 +3012,12 @@ function getChatgptSignIn() {
     chatgptSignIn = createChatgptSignIn({
       codexBinary: () => path.join(resolveInstallationRoot(), "bin", "codex"),
       codexHome: resolveOperatorCodexHome,
-      octopusHome: resolveOctopusHome,
+      phobosHome: resolvePhobosHome,
       version: () => app.getVersion(),
       openExternal: (url) => shell.openExternal(url),
       onAccountChanged: () => {
         for (const win of BrowserWindow.getAllWindows()) {
-          if (!win.isDestroyed()) win.webContents.send("octopus:chatgpt-account-changed");
+          if (!win.isDestroyed()) win.webContents.send("phobos:chatgpt-account-changed");
         }
       },
     });
@@ -3025,54 +3025,54 @@ function getChatgptSignIn() {
   return chatgptSignIn;
 }
 
-ipcMain.handle("octopus:chatgpt-account", async (event, token) => {
+ipcMain.handle("phobos:chatgpt-account", async (event, token) => {
   requireRuntimeStateAccess(event, token);
   return getChatgptSignIn().account();
 });
 
-ipcMain.handle("octopus:chatgpt-rate-limits", async (event, token) => {
+ipcMain.handle("phobos:chatgpt-rate-limits", async (event, token) => {
   requireRuntimeStateAccess(event, token);
   return getChatgptSignIn().rateLimits();
 });
 
-ipcMain.handle("octopus:chatgpt-account-sessions", async (event, token) => {
+ipcMain.handle("phobos:chatgpt-account-sessions", async (event, token) => {
   requireRuntimeStateAccess(event, token);
   return getChatgptSignIn().sessions();
 });
 
-ipcMain.handle("octopus:chatgpt-switch-workspace", async (_event, token, request) => {
+ipcMain.handle("phobos:chatgpt-switch-workspace", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getChatgptSignIn().switchWorkspace(request);
 });
 
-ipcMain.handle("octopus:chatgpt-logout", async (_event, token) => {
+ipcMain.handle("phobos:chatgpt-logout", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getChatgptSignIn().logout();
 });
 
-ipcMain.handle("octopus:chatgpt-sign-in-start", async (event, token) => {
+ipcMain.handle("phobos:chatgpt-sign-in-start", async (event, token) => {
   requireRuntimeStateAccess(event, token);
   return getChatgptSignIn().start();
 });
 
-ipcMain.handle("octopus:chatgpt-sign-in-status", async (event, token, loginId) => {
+ipcMain.handle("phobos:chatgpt-sign-in-status", async (event, token, loginId) => {
   requireRuntimeStateAccess(event, token);
   return getChatgptSignIn().status(loginId);
 });
 
-ipcMain.handle("octopus:chatgpt-sign-in-cancel", async (event, token, loginId) => {
+ipcMain.handle("phobos:chatgpt-sign-in-cancel", async (event, token, loginId) => {
   requireRuntimeStateAccess(event, token);
   return getChatgptSignIn().cancel(loginId);
 });
 
-ipcMain.handle("octopus:clipboard-write", async (_event, token, value) => {
+ipcMain.handle("phobos:clipboard-write", async (_event, token, value) => {
   getClientAccessController().requireSession(token);
   if (typeof value !== "string") throw new Error("clipboard value must be a string");
   await clipboard.writeText(value);
   return { copied: true };
 });
 
-ipcMain.handle("octopus:client-log", async (_event, token, request) => {
+ipcMain.handle("phobos:client-log", async (_event, token, request) => {
   const { profile } = getClientAccessController().requireSession(token);
   const level = ["info", "warning", "error"].includes(request?.level) ? request.level : "info";
   const event = String(request?.event || "renderer.event").slice(0, 160);
@@ -3081,7 +3081,7 @@ ipcMain.handle("octopus:client-log", async (_event, token, request) => {
   return { written: true };
 });
 
-ipcMain.handle("octopus:open-client-logs", async (_event, token) => {
+ipcMain.handle("phobos:open-client-logs", async (_event, token) => {
   const { profile } = getClientAccessController().requireSession(token);
   const logPath = await appendClientLog("info", "diagnostics.logs_opened", { profile });
   const result = await shell.openPath(path.dirname(logPath));
@@ -3089,7 +3089,7 @@ ipcMain.handle("octopus:open-client-logs", async (_event, token) => {
   return { path: logPath };
 });
 
-ipcMain.handle("octopus:client-attachments-select", async (event, token, request) => {
+ipcMain.handle("phobos:client-attachments-select", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) throw new Error("Attachment selection requires an active window.");
@@ -3103,7 +3103,7 @@ ipcMain.handle("octopus:client-attachments-select", async (event, token, request
   });
 });
 
-ipcMain.handle("octopus:stage-dropped-attachments", async (event, token, paths) => {
+ipcMain.handle("phobos:stage-dropped-attachments", async (event, token, paths) => {
   getClientAccessController().requireSession(token);
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) throw new Error("Attachment drop requires an active window.");
@@ -3115,7 +3115,7 @@ ipcMain.handle("octopus:stage-dropped-attachments", async (event, token, paths) 
   });
 });
 
-ipcMain.handle("octopus:client-attachment-preview", async (event, token, request) => {
+ipcMain.handle("phobos:client-attachment-preview", async (event, token, request) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   const current = () => {
     getClientAccessController().requireSession(token);
@@ -3128,7 +3128,7 @@ ipcMain.handle("octopus:client-attachment-preview", async (event, token, request
   return preview;
 });
 
-ipcMain.handle("octopus:attachment-stages-discard", async (_event, token, handles) => {
+ipcMain.handle("phobos:attachment-stages-discard", async (_event, token, handles) => {
   getClientAccessController().requireSession(token);
   if (!Array.isArray(handles) || handles.length > 12) throw new Error("Invalid attachment cleanup request.");
   const store = getClientAttachmentStagingStore();
@@ -3137,27 +3137,27 @@ ipcMain.handle("octopus:attachment-stages-discard", async (_event, token, handle
   if (errors.length) throw new AggregateError(errors, "Some attachment stages could not be discarded.");
 });
 
-ipcMain.handle("octopus:attachment-stage-begin", async (_event, token, request) => {
+ipcMain.handle("phobos:attachment-stage-begin", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return getClientAttachmentStagingStore().begin(token, request);
 });
 
-ipcMain.handle("octopus:attachment-stage-append", async (_event, token, request) => {
+ipcMain.handle("phobos:attachment-stage-append", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return getClientAttachmentStagingStore().append(token, { ...request, bytes: bufferFromIpcBytes(request?.bytes) });
 });
 
-ipcMain.handle("octopus:attachment-stage-finalize", async (_event, token, request) => {
+ipcMain.handle("phobos:attachment-stage-finalize", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return getClientAttachmentStagingStore().finalize(token, request);
 });
 
-ipcMain.handle("octopus:attachment-stage-abort", async (_event, token, request) => {
+ipcMain.handle("phobos:attachment-stage-abort", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return getClientAttachmentStagingStore().abort(token, request);
 });
 
-ipcMain.handle("octopus:client-directory-select", async (event, token, request) => {
+ipcMain.handle("phobos:client-directory-select", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) throw new Error("Folder selection requires an active window.");
@@ -3176,7 +3176,7 @@ ipcMain.handle("octopus:client-directory-select", async (event, token, request) 
     : { canceled: false, path: selected, paths: result.filePaths };
 });
 
-ipcMain.handle("octopus:client-file-save", async (event, token, request) => {
+ipcMain.handle("phobos:client-file-save", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   const browserWindow = BrowserWindow.fromWebContents(event.sender);
   if (!browserWindow || browserWindow.isDestroyed()) throw new Error("Saving requires an active window.");
@@ -3188,7 +3188,7 @@ ipcMain.handle("octopus:client-file-save", async (event, token, request) => {
   });
 });
 
-ipcMain.handle("octopus:client-file-download-copy", async (_event, token, request) => {
+ipcMain.handle("phobos:client-file-download-copy", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return downloadClientFileCopy({
     bytes: bufferFromIpcBytes(request?.bytes),
@@ -3197,39 +3197,39 @@ ipcMain.handle("octopus:client-file-download-copy", async (_event, token, reques
   });
 });
 
-ipcMain.handle("octopus:client-file-open", async (_event, token, request) => {
+ipcMain.handle("phobos:client-file-open", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return openClientFile({
     action: request?.action,
     bytes: bufferFromIpcBytes(request?.bytes),
     filename: request?.filename,
-    root: path.join(app.getPath("temp"), "Octopus", "Artifacts"),
+    root: path.join(app.getPath("temp"), "Phobos", "Artifacts"),
     shell,
   });
 });
 
-ipcMain.handle("octopus:client-file-open-targets", async (_event, token, request) => {
+ipcMain.handle("phobos:client-file-open-targets", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return listClientFileOpenTargets({
     app,
     bytes: bufferFromIpcBytes(request?.bytes),
     downloadsRoot: app.getPath("downloads"),
     filename: request?.filename,
-    root: path.join(app.getPath("temp"), "Octopus", "Artifacts"),
+    root: path.join(app.getPath("temp"), "Phobos", "Artifacts"),
   });
 });
 
-ipcMain.handle("octopus:client-file-open-with", async (_event, token, request) => {
+ipcMain.handle("phobos:client-file-open-with", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   return openClientFileWithApplication({
     applicationId: request?.applicationId,
     bytes: bufferFromIpcBytes(request?.bytes),
     filename: request?.filename,
-    root: path.join(app.getPath("temp"), "Octopus", "Artifacts"),
+    root: path.join(app.getPath("temp"), "Phobos", "Artifacts"),
   });
 });
 
-ipcMain.on("octopus:client-file-start-drag", (event, token, request) => {
+ipcMain.on("phobos:client-file-start-drag", (event, token, request) => {
   let profile = "unknown";
   try {
     ({ profile } = getClientAccessController().requireSession(token));
@@ -3240,7 +3240,7 @@ ipcMain.on("octopus:client-file-start-drag", (event, token, request) => {
   void materializeClientFile({
     bytes: bufferFromIpcBytes(request?.bytes),
     filename: request?.filename,
-    root: path.join(app.getPath("temp"), "Octopus", "Artifacts"),
+    root: path.join(app.getPath("temp"), "Phobos", "Artifacts"),
   }).then(async (target) => {
     if (event.sender.isDestroyed()) return;
     const icon = await app.getFileIcon(target, { size: "small" });
@@ -3250,11 +3250,11 @@ ipcMain.on("octopus:client-file-start-drag", (event, token, request) => {
   });
 });
 
-ipcMain.on("octopus:client-window-bootstrap", (event) => {
+ipcMain.on("phobos:client-window-bootstrap", (event) => {
   event.returnValue = clientWindows.bootstrapForWebContents(event.sender.id);
 });
 
-ipcMain.on("octopus:client-pane-transfer-begin", (event, token, request) => {
+ipcMain.on("phobos:client-pane-transfer-begin", (event, token, request) => {
   try {
     getClientAccessController().requireSession(token);
     clientWindows.setAccessToken(event.sender.id, token);
@@ -3267,7 +3267,7 @@ ipcMain.on("octopus:client-pane-transfer-begin", (event, token, request) => {
   }
 });
 
-ipcMain.on("octopus:access-inherit", (event, claimValue) => {
+ipcMain.on("phobos:access-inherit", (event, claimValue) => {
   const claim = typeof claimValue === "string" ? claimValue : "";
   const inherited = accessInheritanceClaims.get(claim);
   event.returnValue = inherited?.webContentsId === event.sender.id ? inherited.token : "";
@@ -3286,24 +3286,24 @@ function requireClientLockWindow(event, token) {
   return entry;
 }
 
-ipcMain.handle("octopus:access-status", async (event, token) => {
+ipcMain.handle("phobos:access-status", async (event, token) => {
   const status = getClientAccessController().status(token);
   if (status.authenticated) bindClientWindowAccessToken(event, token);
   return status;
 });
-ipcMain.handle("octopus:access-configure", async (event, password) => {
+ipcMain.handle("phobos:access-configure", async (event, password) => {
   const result = getClientAccessController().configure(password);
   clearTouchIdEnrollment();
   bindClientWindowAccessToken(event, result.token);
   return result;
 });
-ipcMain.handle("octopus:access-unlock", async (event, password) => {
+ipcMain.handle("phobos:access-unlock", async (event, password) => {
   const result = getClientAccessController().unlock(password);
   bindClientWindowAccessToken(event, result.token);
   return result;
 });
-ipcMain.handle("octopus:touch-id-status", async () => touchIdStatus());
-ipcMain.handle("octopus:touch-id-set-enabled", async (_event, token, enabled) => {
+ipcMain.handle("phobos:touch-id-status", async () => touchIdStatus());
+ipcMain.handle("phobos:touch-id-set-enabled", async (_event, token, enabled) => {
   getClientAccessController().requireSession(token, ["live"]);
   if (typeof enabled !== "boolean") throw new Error("Touch ID preference requires an explicit enabled state.");
   writeTouchIdPreference();
@@ -3311,27 +3311,27 @@ ipcMain.handle("octopus:touch-id-set-enabled", async (_event, token, enabled) =>
     clearTouchIdEnrollment();
     return touchIdStatus();
   }
-  await promptTouchId("Enable Touch ID to unlock Octopus");
+  await promptTouchId("Enable Touch ID to unlock Phobos");
   await writeTouchIdEnrollment();
   return touchIdStatus();
 });
-ipcMain.handle("octopus:touch-id-unlock", async (event) => {
+ipcMain.handle("phobos:touch-id-unlock", async (event) => {
   const enrollment = readTouchIdEnrollmentRecord();
   const fingerprint = getClientAccessController().credentialFingerprint();
   if (!enrollment || !fingerprint || enrollment.credentialFingerprint !== fingerprint) {
     throw new Error("Touch ID is not enabled for the current Administrator password.");
   }
-  await promptTouchId("Unlock Octopus");
+  await promptTouchId("Unlock Phobos");
   requireUnchangedTouchIdEnrollment(enrollment);
   await verifyTouchIdEnrollment(enrollment);
   const result = getClientAccessController().unlockWithTouchId();
   bindClientWindowAccessToken(event, result.token);
   return result;
 });
-ipcMain.handle("octopus:client-window-open", async (event, token, requestValue) => {
+ipcMain.handle("phobos:client-window-open", async (event, token, requestValue) => {
   getClientAccessController().requireSession(token);
   if (!clientWindows.entryForWebContents(event.sender.id)) {
-    throw new Error("Only an authenticated full Octopus client window can open a peer window.");
+    throw new Error("Only an authenticated full Phobos client window can open a peer window.");
   }
   clientWindows.setAccessToken(event.sender.id, token);
   const request = validateClientWindowOpenRequest(requestValue);
@@ -3351,7 +3351,7 @@ ipcMain.handle("octopus:client-window-open", async (event, token, requestValue) 
     throw error;
   }
 });
-ipcMain.handle("octopus:client-window-ready", async (event, token, request) => {
+ipcMain.handle("phobos:client-window-ready", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   const entry = clientWindows.entryForWebContents(event.sender.id);
   if (!entry || entry.primary || entry.accessToken !== token) {
@@ -3364,25 +3364,25 @@ function currentClientWindowCloseSender(event) {
   return entry && entry.win.webContents === event.sender && event.senderFrame === event.sender.mainFrame
     ? event.sender : null;
 }
-ipcMain.handle("octopus:client-window-close-register", (event, token) => {
+ipcMain.handle("phobos:client-window-close-register", (event, token) => {
   const sender = currentClientWindowCloseSender(event);
   if (!sender) throw new Error("Window close guard requires the current main client frame.");
   return clientWindowClose.register(sender, token);
 });
-ipcMain.handle("octopus:client-window-close-unregister", (event, token, request) => {
+ipcMain.handle("phobos:client-window-close-unregister", (event, token, request) => {
   const sender = currentClientWindowCloseSender(event);
   if (sender) clientWindowClose.unregister(sender, token, request);
 });
-ipcMain.handle("octopus:client-window-close-resolve", (event, token, request) => {
+ipcMain.handle("phobos:client-window-close-resolve", (event, token, request) => {
   const sender = currentClientWindowCloseSender(event);
   return sender ? clientWindowClose.resolve(sender, token, request) : { accepted: false };
 });
-ipcMain.handle("octopus:client-pane-transfer-accept", async (event, token, request) => {
+ipcMain.handle("phobos:client-pane-transfer-accept", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   return clientWindows.acceptPaneTransfer(event.sender.id, request);
 });
-ipcMain.handle("octopus:client-pane-transfer-commit", async (event, token, request) => {
+ipcMain.handle("phobos:client-pane-transfer-commit", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   const result = clientWindows.commitPaneTransfer(event.sender.id, request);
@@ -3396,13 +3396,13 @@ ipcMain.handle("octopus:client-pane-transfer-commit", async (event, token, reque
     return result.outcome;
   }
   try {
-    source.win.webContents.send("octopus:client-pane-transfer-completed", result.completion);
+    source.win.webContents.send("phobos:client-pane-transfer-completed", result.completion);
   } catch (error) {
     clientWindows.abortCommittedPaneTransfer(event.sender.id, request, error);
   }
   return result.outcome;
 });
-ipcMain.on("octopus:client-pane-transfer-acknowledge", (event, token, request) => {
+ipcMain.on("phobos:client-pane-transfer-acknowledge", (event, token, request) => {
   try {
     getClientAccessController().requireSession(token);
     clientWindows.setAccessToken(event.sender.id, token);
@@ -3414,33 +3414,33 @@ ipcMain.on("octopus:client-pane-transfer-acknowledge", (event, token, request) =
     };
   }
 });
-ipcMain.handle("octopus:client-pane-transfer-pending", async (event, token) => {
+ipcMain.handle("phobos:client-pane-transfer-pending", async (event, token) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   return clientWindows.pendingPaneTransferCompletions(event.sender.id);
 });
-ipcMain.handle("octopus:client-pane-transfer-destination-pending", async (event, token) => {
+ipcMain.handle("phobos:client-pane-transfer-destination-pending", async (event, token) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   return clientWindows.pendingDestinationPaneTransfers(event.sender.id);
 });
-ipcMain.handle("octopus:client-pane-transfer-resume", async (event, token, request) => {
+ipcMain.handle("phobos:client-pane-transfer-resume", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   return clientWindows.resumePaneTransfer(event.sender.id, request);
 });
-ipcMain.handle("octopus:client-pane-transfer-finalize", async (event, token, request) => {
+ipcMain.handle("phobos:client-pane-transfer-finalize", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   return clientWindows.finalizePaneTransfer(event.sender.id, request);
 });
-ipcMain.handle("octopus:client-pane-transfer-reject", (event, token, request) => {
+ipcMain.handle("phobos:client-pane-transfer-reject", (event, token, request) => {
   getClientAccessController().requireSession(token);
   const entry = clientWindows.entryForWebContents(event.sender.id);
   if (!entry || entry.accessToken !== token) throw new Error("Destination rejection requires its authenticated owner.");
   return clientWindows.rejectDestinationPaneTransfer(event.sender.id, request);
 });
-ipcMain.handle("octopus:client-pane-transfer-cancel", async (event, token, request) => {
+ipcMain.handle("phobos:client-pane-transfer-cancel", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   clientWindows.setAccessToken(event.sender.id, token);
   return clientWindows.cancelPaneTransfer(event.sender.id, request);
@@ -3449,26 +3449,26 @@ for (const [channel, method] of [
   ["begin", "begin"], ["move", "move"], ["finish", "finish"],
   ["cancel", "cancel"], ["reattach", "reattach"], ["detach", "detach"], ["drop-zone", "registerDropZone"], ["anchor", "anchor"],
 ]) {
-  ipcMain.handle(`octopus:client-pane-drag-${channel}`, (event, token, request) => {
+  ipcMain.handle(`phobos:client-pane-drag-${channel}`, (event, token, request) => {
     getClientAccessController().requireSession(token);
     const entry = clientWindows.entryForWebContents(event.sender.id);
     if (!entry || entry.accessToken !== token) throw new Error("Pane window drag requires its authenticated client owner.");
     return paneWindowDrag[method](event.sender.id, request);
   });
 }
-ipcMain.handle("octopus:client-pane-source-finalizations", (event, token) => {
+ipcMain.handle("phobos:client-pane-source-finalizations", (event, token) => {
   getClientAccessController().requireSession(token);
   const entry = clientWindows.entryForWebContents(event.sender.id);
   if (!entry || entry.accessToken !== token) throw new Error("Source finalizations require their authenticated owner.");
   return clientWindows.pendingSourceFinalizations(event.sender.id);
 });
-ipcMain.handle("octopus:client-pane-source-finalization-ack", (event, token, request) => {
+ipcMain.handle("phobos:client-pane-source-finalization-ack", (event, token, request) => {
   getClientAccessController().requireSession(token);
   const entry = clientWindows.entryForWebContents(event.sender.id);
   if (!entry || entry.accessToken !== token) throw new Error("Source finalization requires its authenticated window.");
   return clientWindows.acknowledgeSourceFinalization(event.sender.id, request);
 });
-ipcMain.handle("octopus:access-lock", async (event, token) => {
+ipcMain.handle("phobos:access-lock", async (event, token) => {
   requireClientLockWindow(event, token);
   const sender = currentClientWindowCloseSender(event);
   if (!sender) throw new Error("Logout requires the current main client frame.");
@@ -3485,7 +3485,7 @@ ipcMain.handle("octopus:access-lock", async (event, token) => {
       const retained = targets.find((entry) => entry.primary) ?? targets.find((entry) => entry.win.webContents === sender);
       for (const [id, subscription] of runtimeEventSubscriptions) if (subscription.token === token) runtimeEventSubscriptions.delete(id);
       clientWindows.clearAccessToken(token);
-      for (const entry of targets) sendClientWindowEvent(entry.win, "octopus:client-access-locked", result);
+      for (const entry of targets) sendClientWindowEvent(entry.win, "phobos:client-access-locked", result);
       if (globalDictationAccessToken === token) clearGlobalDictationShortcut();
       cdpViewerManager?.closeOwner(token);
       await nativeBrowserSurface?.closeOwner(token);
@@ -3509,42 +3509,42 @@ ipcMain.handle("octopus:access-lock", async (event, token) => {
   });
   return settlement.accepted ? settlement.value : getClientAccessController().status(token);
 });
-ipcMain.handle("octopus:quick-task-open", async (_event, token) => {
+ipcMain.handle("phobos:quick-task-open", async (_event, token) => {
   getClientAccessController().requireSession(token);
   createQuickTaskWindow(token);
   return { opened: true };
 });
-ipcMain.handle("octopus:quick-task-close", async (event, token) => {
+ipcMain.handle("phobos:quick-task-close", async (event, token) => {
   getClientAccessController().requireSession(token);
   const win = BrowserWindow.fromWebContents(event.sender);
   if (win && win === quickTaskWindow && !win.isDestroyed()) win.close();
   return { closed: true };
 });
-ipcMain.handle("octopus:quick-task-open-main", async (event, token, runIdValue) => {
+ipcMain.handle("phobos:quick-task-open-main", async (event, token, runIdValue) => {
   getClientAccessController().requireSession(token);
   const runId = stringValue(runIdValue);
   if (!runId || runId.length > 512 || /[\u0000-\u001f]/.test(runId)) throw new Error("A bounded run id is required");
   const source = BrowserWindow.fromWebContents(event.sender);
   const win = revealClientWindow(ensureClientWindowForAccess(token, source));
-  sendClientWindowEvent(win, "octopus:open-run-requested", runId);
+  sendClientWindowEvent(win, "phobos:open-run-requested", runId);
   if (source && source === quickTaskWindow && !source.isDestroyed()) source.close();
   return { opened: true, runId };
 });
-ipcMain.handle("octopus:worker-environment-window-open", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-window-open", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   const target = workerEnvironmentWindowTarget(request);
   createWorkerEnvironmentWindow(token, target);
   return { opened: true, ...target };
 });
-ipcMain.handle("octopus:worker-environment-window-open-main", async (event, token, request) => {
+ipcMain.handle("phobos:worker-environment-window-open-main", async (event, token, request) => {
   getClientAccessController().requireSession(token);
   const target = workerEnvironmentWindowTarget(request);
   const source = BrowserWindow.fromWebContents(event.sender);
   const win = revealClientWindow(ensureClientWindowForAccess(token, source));
-  sendClientWindowEvent(win, "octopus:open-worker-environment-requested", target);
+  sendClientWindowEvent(win, "phobos:open-worker-environment-requested", target);
   return { opened: true, ...target };
 });
-ipcMain.handle("octopus:worker-environment-window-pinned", async (event, token, enabled) => {
+ipcMain.handle("phobos:worker-environment-window-pinned", async (event, token, enabled) => {
   getClientAccessController().requireSession(token);
   const win = BrowserWindow.fromWebContents(event.sender);
   const detached = [...workerEnvironmentWindows.values()].some((entry) => entry.win === win);
@@ -3553,14 +3553,14 @@ ipcMain.handle("octopus:worker-environment-window-pinned", async (event, token, 
   win.setAlwaysOnTop(pinned, "floating");
   return { pinned };
 });
-ipcMain.handle("octopus:task-monitor-window-open", async (_event, token, runIdValue) => {
+ipcMain.handle("phobos:task-monitor-window-open", async (_event, token, runIdValue) => {
   getClientAccessController().requireSession(token);
   const runId = stringValue(runIdValue);
   if (!runId || runId.length > 512 || /[\u0000-\u001f]/.test(runId)) throw new Error("A bounded run id is required.");
   createTaskMonitorWindow(token, runId);
   return { opened: true, runId };
 });
-ipcMain.handle("octopus:task-monitor-window-pinned", async (event, token, enabled) => {
+ipcMain.handle("phobos:task-monitor-window-pinned", async (event, token, enabled) => {
   getClientAccessController().requireSession(token);
   const win = BrowserWindow.fromWebContents(event.sender);
   const monitor = [...taskMonitorWindows.values()].some((entry) => entry.win === win);
@@ -3569,7 +3569,7 @@ ipcMain.handle("octopus:task-monitor-window-pinned", async (event, token, enable
   win.setAlwaysOnTop(pinned, "floating");
   return { pinned };
 });
-ipcMain.handle("octopus:global-dictation-shortcut", async (_event, token, request) => {
+ipcMain.handle("phobos:global-dictation-shortcut", async (_event, token, request) => {
   getClientAccessController().requireSession(token);
   clearGlobalDictationShortcut();
   if (request?.enabled !== true) return { enabled: false, shortcut: "", registered: false };
@@ -3578,7 +3578,7 @@ ipcMain.handle("octopus:global-dictation-shortcut", async (_event, token, reques
   const registered = globalShortcut.register(shortcut, () => {
     try {
       const win = revealClientWindow(ensureClientWindowForAccess(token));
-      sendClientWindowEvent(win, "octopus:global-dictation-requested");
+      sendClientWindowEvent(win, "phobos:global-dictation-requested");
     } catch (error) {
       clearGlobalDictationShortcut();
       void appendClientLog("warning", "dictation.shortcut_rejected", {
@@ -3591,7 +3591,7 @@ ipcMain.handle("octopus:global-dictation-shortcut", async (_event, token, reques
   globalDictationAccessToken = token;
   return { enabled: true, shortcut, registered: true };
 });
-ipcMain.handle("octopus:native-command-shortcuts", async (_event, token, shortcuts) => {
+ipcMain.handle("phobos:native-command-shortcuts", async (_event, token, shortcuts) => {
   getClientAccessController().requireSession(token);
   const allowed = new Set([
     "new_chat",
@@ -3625,26 +3625,26 @@ ipcMain.handle("octopus:native-command-shortcuts", async (_event, token, shortcu
   setApplicationMenu();
   return { configured: Object.keys(nativeCommandShortcuts).length };
 });
-ipcMain.handle("octopus:login-item-settings", async (_event, token, request) => {
+ipcMain.handle("phobos:login-item-settings", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   const supported = app.isPackaged;
   if (request && Object.prototype.hasOwnProperty.call(request, "enabled")) {
-    if (!supported) throw new Error("Open at login is available only in a packaged Octopus application.");
+    if (!supported) throw new Error("Open at login is available only in a packaged Phobos application.");
     app.setLoginItemSettings({ openAtLogin: request.enabled === true });
   }
   const settings = app.getLoginItemSettings();
   return { supported, enabled: supported && settings.openAtLogin === true };
 });
-ipcMain.handle("octopus:lab-access-read", async (_event, token) => getClientAccessController().labAccess(token));
-ipcMain.handle("octopus:lab-access-update", async (_event, token, password) => getClientAccessController().updateLabAccess(token, password));
-ipcMain.handle("octopus:access-details", async (_event, token) => getClientAccessController().accessDetails(token));
-ipcMain.handle("octopus:administrator-access-update", async (_event, token, request) => {
+ipcMain.handle("phobos:lab-access-read", async (_event, token) => getClientAccessController().labAccess(token));
+ipcMain.handle("phobos:lab-access-update", async (_event, token, password) => getClientAccessController().updateLabAccess(token, password));
+ipcMain.handle("phobos:access-details", async (_event, token) => getClientAccessController().accessDetails(token));
+ipcMain.handle("phobos:administrator-access-update", async (_event, token, request) => {
   const result = getClientAccessController().updateAdministratorAccess(token, request?.currentPassword, request?.password);
   clearTouchIdEnrollment();
   return result;
 });
 
-ipcMain.handle("octopus:request-microphone-access", async (_event, token) => {
+ipcMain.handle("phobos:request-microphone-access", async (_event, token) => {
   getClientAccessController().requireSession(token);
   if (process.platform !== "darwin") {
     return { granted: true, status: "browser-managed" };
@@ -3661,24 +3661,24 @@ ipcMain.handle("octopus:request-microphone-access", async (_event, token) => {
   };
 });
 
-ipcMain.handle("octopus:camera-access-status", async (_event, token) => {
+ipcMain.handle("phobos:camera-access-status", async (_event, token) => {
   getClientAccessController().requireSession(token);
   if (process.platform !== "darwin") return { granted: true, status: "browser-managed" };
   const status = systemPreferences.getMediaAccessStatus("camera");
   return { granted: status === "granted", status };
 });
 
-ipcMain.handle("octopus:gesture-trace-save", async (_event, token, text) => {
+ipcMain.handle("phobos:gesture-trace-save", async (_event, token, text) => {
   getClientAccessController().requireSession(token, ["live"]);
   return saveGestureTrace({ root: clientProfileRoot, text });
 });
 
-ipcMain.handle("octopus:gesture-trace-reveal", async (_event, token, target) => {
+ipcMain.handle("phobos:gesture-trace-reveal", async (_event, token, target) => {
   getClientAccessController().requireSession(token, ["live"]);
   return revealGestureTrace({ root: clientProfileRoot, target, shell });
 });
 
-ipcMain.handle("octopus:request-camera-access", async (_event, token) => {
+ipcMain.handle("phobos:request-camera-access", async (_event, token) => {
   getClientAccessController().requireSession(token);
   if (process.platform !== "darwin") {
     return { granted: true, status: "browser-managed" };
@@ -3695,15 +3695,15 @@ ipcMain.handle("octopus:request-camera-access", async (_event, token) => {
   };
 });
 
-ipcMain.handle("octopus:client-context-menu", (event, request) => clientContextMenu.show(event, request));
-ipcMain.handle("octopus:client-context-menu-cancel", (event, request) => clientContextMenu.cancel(event, request));
+ipcMain.handle("phobos:client-context-menu", (event, request) => clientContextMenu.show(event, request));
+ipcMain.handle("phobos:client-context-menu-cancel", (event, request) => clientContextMenu.cancel(event, request));
 
-ipcMain.handle("octopus:window-state", async (event) => {
+ipcMain.handle("phobos:window-state", async (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   return windowStateSnapshot(win);
 });
 
-ipcMain.handle("octopus:power-save-blocker", async (event, token, enabled) => {
+ipcMain.handle("phobos:power-save-blocker", async (event, token, enabled) => {
   getClientAccessController().requireSession(token);
   const key = event.sender.id;
   const current = powerSaveBlockers.get(key);
@@ -3723,7 +3723,7 @@ ipcMain.handle("octopus:power-save-blocker", async (event, token, enabled) => {
   return { enabled: false };
 });
 
-ipcMain.on("octopus:history-navigation-state", (event, state) => {
+ipcMain.on("phobos:history-navigation-state", (event, state) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) return;
   historyNavigationStates.set(win, {
@@ -3732,7 +3732,7 @@ ipcMain.on("octopus:history-navigation-state", (event, state) => {
   });
 });
 
-ipcMain.on("octopus:window-control", (event, action) => {
+ipcMain.on("phobos:window-control", (event, action) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) return;
   if (action === "close") win.close();
@@ -3740,7 +3740,7 @@ ipcMain.on("octopus:window-control", (event, action) => {
   else if (action === "zoom") win.setFullScreen(!win.isFullScreen());
 });
 
-ipcMain.on("octopus:window-appearance", (event, appearance) => {
+ipcMain.on("phobos:window-appearance", (event, appearance) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) return;
   windowAppearances.set(win, {
@@ -3755,14 +3755,14 @@ ipcMain.on("octopus:window-appearance", (event, appearance) => {
   applyWindowBackdrop(win, true);
 });
 
-ipcMain.handle("octopus:validate-runtime-endpoint", async (_event, token, request) => {
+ipcMain.handle("phobos:validate-runtime-endpoint", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   const endpoint = stringValue(request?.endpoint);
   try {
     return {
       valid: true,
-      endpoint: validateArtifactEndpoint(endpoint, octopusHome, OPERATOR_CHAT_INTERFACE),
+      endpoint: validateArtifactEndpoint(endpoint, phobosHome, OPERATOR_CHAT_INTERFACE),
     };
   } catch (error) {
     return {
@@ -3773,18 +3773,18 @@ ipcMain.handle("octopus:validate-runtime-endpoint", async (_event, token, reques
   }
 });
 
-ipcMain.handle("octopus:provider-interfaces", async (_event, token) => {
+ipcMain.handle("phobos:provider-interfaces", async (_event, token) => {
   const { profile } = getClientAccessController().requireSession(token);
   if (profile === "live") await initializeRuntimeHost();
   const repoRoot = profile === "live" ? resolveRepoRoot() : "";
-  const registryRoot = profile === "live" ? path.join(resolveOctopusHome(), "registry") : "";
+  const registryRoot = profile === "live" ? path.join(resolvePhobosHome(), "registry") : "";
   try {
     const providers = (await getProjectionStore(profile).read(projectionReadRequest(
       "projection.operator.providers.list",
     ))).providers;
     const catalog = profile === "live" ? await getClientProviderMetadata().catalog(providers) : providers;
     getClientAccessController().requireSession(token, [profile]);
-    if (profile === "live" && registryRoot !== path.join(resolveOctopusHome(), "registry")) {
+    if (profile === "live" && registryRoot !== path.join(resolvePhobosHome(), "registry")) {
       throw new Error("Provider catalogue belongs to another Home.");
     }
     return {
@@ -3802,7 +3802,7 @@ ipcMain.handle("octopus:provider-interfaces", async (_event, token) => {
   }
 });
 
-ipcMain.handle("octopus:projection-read", async (_event, token, request) => {
+ipcMain.handle("phobos:projection-read", async (_event, token, request) => {
   const { profile } = getClientAccessController().requireSession(token);
   if (profile === "live") await prepareLiveProjectionRead();
   const result = await getProjectionStore(profile).read(request);
@@ -3817,17 +3817,17 @@ ipcMain.handle("octopus:projection-read", async (_event, token, request) => {
 
 const SETUP_FILE_MAX_BYTES = 256 * 1024;
 
-ipcMain.handle("octopus:setup-file-save", async (event, token, request) => {
+ipcMain.handle("phobos:setup-file-save", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   if (!request || typeof request.text !== "string" || typeof request.suggestedName !== "string") {
     throw new Error("Exporting a setup needs the file text and a name.");
   }
-  if (Buffer.byteLength(request.text, "utf8") > SETUP_FILE_MAX_BYTES) throw new Error("This setup is larger than Octopus writes.");
-  const name = path.basename(request.suggestedName).replace(/[^A-Za-z0-9._-]+/g, "-") || "octopus.octopus-setup.json";
+  if (Buffer.byteLength(request.text, "utf8") > SETUP_FILE_MAX_BYTES) throw new Error("This setup is larger than Phobos writes.");
+  const name = path.basename(request.suggestedName).replace(/[^A-Za-z0-9._-]+/g, "-") || "phobos.phobos-setup.json";
   const selected = await dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender) ?? undefined, {
     title: "Export setup",
     defaultPath: path.join(app.getPath("documents"), name),
-    filters: [{ name: "Octopus setup", extensions: ["json"] }],
+    filters: [{ name: "Phobos setup", extensions: ["json"] }],
   });
   if (selected.canceled || !selected.filePath) return { saved: false };
   const file = await fs.promises.open(
@@ -3843,12 +3843,12 @@ ipcMain.handle("octopus:setup-file-save", async (event, token, request) => {
   return { saved: true, name: path.basename(selected.filePath) };
 });
 
-ipcMain.handle("octopus:setup-file-open", async (event, token) => {
+ipcMain.handle("phobos:setup-file-open", async (event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   const selected = await dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender) ?? undefined, {
     title: "Import setup",
     properties: ["openFile"],
-    filters: [{ name: "Octopus setup", extensions: ["json"] }],
+    filters: [{ name: "Phobos setup", extensions: ["json"] }],
   });
   if (selected.canceled || !selected.filePaths.length) return { opened: false };
   const filePath = selected.filePaths[0];
@@ -3856,18 +3856,18 @@ ipcMain.handle("octopus:setup-file-open", async (event, token) => {
   try {
     const stat = await handle.stat();
     if (!stat.isFile()) throw new Error("Choose a setup file, not a folder.");
-    if (stat.size > SETUP_FILE_MAX_BYTES) throw new Error("This setup file is larger than Octopus accepts.");
+    if (stat.size > SETUP_FILE_MAX_BYTES) throw new Error("This setup file is larger than Phobos accepts.");
     return { opened: true, name: path.basename(filePath), text: await handle.readFile("utf8") };
   } finally {
     await handle.close();
   }
 });
 
-ipcMain.handle("octopus:workspace-setup-state", async (_event, token) => {
+ipcMain.handle("phobos:workspace-setup-state", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   const state = await inspectWorkspaceSetupState({
-    octopusHomeRoot: resolveOctopusHome(),
-    registryRoot: path.join(resolveOctopusHome(), "registry"),
+    phobosHomeRoot: resolvePhobosHome(),
+    registryRoot: path.join(resolvePhobosHome(), "registry"),
   });
   return {
     status: state.status,
@@ -3887,30 +3887,30 @@ ipcMain.handle("octopus:workspace-setup-state", async (_event, token) => {
   };
 });
 
-ipcMain.handle("octopus:client-setup-read", async (_event, token, request) => {
+ipcMain.handle("phobos:client-setup-read", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientSetupStore().read(request);
 });
 
-ipcMain.handle("octopus:client-setup-read-current", async (_event, token) => {
+ipcMain.handle("phobos:client-setup-read-current", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientSetupStore().readCurrent();
 });
 
-ipcMain.handle("octopus:client-setup-begin", async (_event, token, request) => {
+ipcMain.handle("phobos:client-setup-begin", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   await validateClientSetupPlan(request?.plan);
   return getClientSetupStore().begin(request);
 });
 
-ipcMain.handle("octopus:client-setup-resume", async (event, token, request) => {
+ipcMain.handle("phobos:client-setup-resume", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   try {
     const result = await getClientSetupStore().resume(request, {
       onProgress: (progress) => {
         latestSetupProgress = { ...progress, state: "running", at: new Date().toISOString() };
         void appendClientLog("info", "setup.progress", progress).catch(() => {});
-        if (!event.sender.isDestroyed()) event.sender.send("octopus:client-setup-progress", progress);
+        if (!event.sender.isDestroyed()) event.sender.send("phobos:client-setup-progress", progress);
       },
     });
     if (latestSetupProgress) latestSetupProgress = { ...latestSetupProgress, state: result.status === "complete" ? "complete" : "paused" };
@@ -3922,19 +3922,19 @@ ipcMain.handle("octopus:client-setup-resume", async (event, token, request) => {
   }
 });
 
-ipcMain.handle("octopus:scheduled-interface-mutate", async (_event, token, request) => {
+ipcMain.handle("phobos:scheduled-interface-mutate", async (_event, token, request) => {
   const { profile } = getClientAccessController().requireSession(token);
   if (profile === "lab") return getProjectionStore("lab").mutateScheduledInterface(request);
   getClientAccessController().requireSession(token, ["live"]);
   await prepareLiveProjectionRead();
   const outcome = await mutateScheduledInterface(
-    path.join(resolveOctopusHome(), "registry"),
-    resolveOctopusHome(),
+    path.join(resolvePhobosHome(), "registry"),
+    resolvePhobosHome(),
     request,
     {
       commitClientAuthoring: (authoringRequest) => commitProjectionClientAuthoring(
-        resolveOctopusHome(),
-        path.join(resolveOctopusHome(), "registry"),
+        resolvePhobosHome(),
+        path.join(resolvePhobosHome(), "registry"),
         authoringRequest,
       ),
     },
@@ -3943,15 +3943,15 @@ ipcMain.handle("octopus:scheduled-interface-mutate", async (_event, token, reque
   return outcome;
 });
 
-ipcMain.handle("octopus:application-private-configuration-mutate", async (_event, token, request) => {
+ipcMain.handle("phobos:application-private-configuration-mutate", async (_event, token, request) => {
   const { profile } = getClientAccessController().requireSession(token);
   if (profile === "lab") return getProjectionStore("lab").mutateApplicationPrivateConfiguration(request);
   getClientAccessController().requireSession(token, ["live"]);
   await initializeRuntimeHost();
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   const outcome = await mutateApplicationPrivateConfiguration(
-    path.join(octopusHome, "registry"),
-    octopusHome,
+    path.join(phobosHome, "registry"),
+    phobosHome,
     request,
   );
   getProjectionStore("live").invalidate(false);
@@ -3961,12 +3961,12 @@ ipcMain.handle("octopus:application-private-configuration-mutate", async (_event
 function getApplicationConnectionHost() {
   applicationConnectionHost ??= createApplicationConnectionHost({
     resolveTargets: createRegistryConnectionTargets({
-      registryRoot: () => path.join(resolveOctopusHome(), "registry"),
-      octopusHome: resolveOctopusHome,
+      registryRoot: () => path.join(resolvePhobosHome(), "registry"),
+      phobosHome: resolvePhobosHome,
       launchEnvironment: () => ({ ...process.env, ...resolveRuntimeLaunchEnv() }),
       openExternal: (url) => shell.openExternal(url),
     }),
-    scope: resolveOctopusHome,
+    scope: resolvePhobosHome,
   });
   return applicationConnectionHost;
 }
@@ -3980,13 +3980,13 @@ async function applicationConnectionOperation(token, operation, { writes = false
       await initializeRuntimeHost();
       live = true;
     }
-    return { contract: "octopus.application-connection.v1", ok: true, value: await operation(live ? null : getProjectionStore("lab")) };
+    return { contract: "phobos.application-connection.v1", ok: true, value: await operation(live ? null : getProjectionStore("lab")) };
   } catch (error) {
     return {
-      contract: "octopus.application-connection.v1",
+      contract: "phobos.application-connection.v1",
       ok: false,
       error: {
-        message: error instanceof Error && error.message ? error.message : "Octopus couldn't finish the connection.",
+        message: error instanceof Error && error.message ? error.message : "Phobos couldn't finish the connection.",
         code: error?.code === "cancelled" ? "cancelled" : "failed",
       },
     };
@@ -3995,11 +3995,11 @@ async function applicationConnectionOperation(token, operation, { writes = false
   }
 }
 
-ipcMain.handle("octopus:application-connection-probe", (_event, token, request) => applicationConnectionOperation(token, (lab) => (
+ipcMain.handle("phobos:application-connection-probe", (_event, token, request) => applicationConnectionOperation(token, (lab) => (
   lab ? lab.applicationConnectionProbe(request) : getApplicationConnectionHost().probe(request)
 )));
 
-ipcMain.handle("octopus:application-connection-connect", (event, token, request) => applicationConnectionOperation(token, async (lab) => {
+ipcMain.handle("phobos:application-connection-connect", (event, token, request) => applicationConnectionOperation(token, async (lab) => {
   const sender = event.sender;
   const cancel = () => {
     const operationId = { operationId: request?.operationId };
@@ -4014,7 +4014,7 @@ ipcMain.handle("octopus:application-connection-connect", (event, token, request)
   sender.on("did-start-navigation", navigation);
   const options = {
     onProgress: (progress) => {
-      if (!sender.isDestroyed()) sender.send("octopus:application-connection-progress", progress);
+      if (!sender.isDestroyed()) sender.send("phobos:application-connection-progress", progress);
     },
   };
   try {
@@ -4026,15 +4026,15 @@ ipcMain.handle("octopus:application-connection-connect", (event, token, request)
   }
 }, { writes: true }));
 
-ipcMain.handle("octopus:application-connection-cancel", (_event, token, request) => applicationConnectionOperation(token, (lab) => (
+ipcMain.handle("phobos:application-connection-cancel", (_event, token, request) => applicationConnectionOperation(token, (lab) => (
   lab ? lab.applicationConnectionCancel(request) : getApplicationConnectionHost().cancel(request)
 )));
 
-ipcMain.handle("octopus:application-connection-disconnect", (_event, token, request) => applicationConnectionOperation(token, (lab) => (
+ipcMain.handle("phobos:application-connection-disconnect", (_event, token, request) => applicationConnectionOperation(token, (lab) => (
   lab ? lab.applicationConnectionDisconnect(request) : getApplicationConnectionHost().disconnect(request)
 ), { writes: true }));
 
-ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
+ipcMain.handle("phobos:os-workspace-mutate", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   await prepareLiveProjectionRead();
   const store = getProjectionStore("live");
@@ -4047,28 +4047,28 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
   const chatContexts = agentTemplateMutation
     ? await store.read(projectionReadRequest("projection.operator.chat.contexts"))
     : null;
-  const octopusHome = resolveOctopusHome();
-  const registryRoot = path.join(octopusHome, "registry");
+  const phobosHome = resolvePhobosHome();
+  const registryRoot = path.join(phobosHome, "registry");
   let outcome;
   if (["create_agent_template", "configure_agent_template"].includes(request?.action)) {
     const declared = await store.read(projectionReadRequest("projection.operator.providers.list"));
     const providers = await getClientProviderMetadata().catalog(declared.providers.filter((provider) => provider.id === request.providerInterfaceId));
     getClientAccessController().requireSession(token, ["live"]);
-    if (resolveOctopusHome() !== octopusHome) throw new Error("Home changed during Agent model validation.");
+    if (resolvePhobosHome() !== phobosHome) throw new Error("Home changed during Agent model validation.");
     validateProviderModelSelection(providers, request);
   }
   if (request?.action === "initialize_workspace") {
     if (scope?.status !== "unbound") {
-      throw new Error(`Workspace setup requires an unbound Octopus OS scope, found '${stringValue(scope?.status) || "unknown"}'`);
+      throw new Error(`Workspace setup requires an unbound Phobos OS scope, found '${stringValue(scope?.status) || "unknown"}'`);
     }
     const { withOperatorWorkspaceTopologyLock } = await loadOperatorChatClient();
-    outcome = await withOperatorWorkspaceTopologyLock(octopusHome, () => initializeWorkspace({
-        octopusHomeRoot: octopusHome,
+    outcome = await withOperatorWorkspaceTopologyLock(phobosHome, () => initializeWorkspace({
+        phobosHomeRoot: phobosHome,
         registryRoot,
-        publication: workspaceStorage(octopusHome),
+        publication: workspaceStorage(phobosHome),
         retirementBarrier: {
-          verifyBefore: (context) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.verifyBefore(context)),
-          withHeldProof: (context, operation) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.withHeldProof(context, operation)),
+          verifyBefore: (context) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.verifyBefore(context)),
+          withHeldProof: (context, operation) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.withHeldProof(context, operation)),
         },
         request,
         planOperatorSurface: planWorkspaceHomeSurface,
@@ -4076,7 +4076,7 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
         planDesktopApplicationPreferences,
         planAgentPreset: planWorkspaceAgentPreset,
         onProgress: (progress) => {
-          if (!event.sender.isDestroyed()) event.sender.send("octopus:workspace-setup-progress", progress);
+          if (!event.sender.isDestroyed()) event.sender.send("phobos:workspace-setup-progress", progress);
         },
       }));
     await retryNativeBrowserAfterSetup();
@@ -4084,9 +4084,9 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
     const taskLifecycle = (await (await loadOperatorChatClient()).loadOperatorTaskLifecycle({
       registryRoot: () => registryRoot, installationRoot: resolveInstallationRoot,
     })).taskLifecycle;
-    outcome = await mutateOctopusOsWorkspace(
+    outcome = await mutatePhobosOsWorkspace(
       registryRoot,
-      octopusHome,
+      phobosHome,
       scope,
       request,
       {
@@ -4094,19 +4094,19 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
         sourceRegistryRoot: resolveSourceRegistry(),
         localPackageRegistryRoot: resolveLocalPackageRegistry(),
         localPackageLibraryRoot: resolveLocalPackageLibrary(),
-        localPackagePublication: workspaceStorage(octopusHome),
+        localPackagePublication: workspaceStorage(phobosHome),
         assertLocalPackageMutation: (packageIds) => getOperatorChatClientLoader().assertMutationAllowed(packageIds),
         chatContexts,
-        withAgentPreset: (choice, operation) => withWorkspaceAgentPreset(choice, path.join(octopusHome, "state", "ee_instances"), operation),
+        withAgentPreset: (choice, operation) => withWorkspaceAgentPreset(choice, path.join(phobosHome, "state", "ee_instances"), operation),
         mutateWorkspaceProject: async (projectScope, projectRequest) => {
           const { withOperatorWorkspaceTopologyLock } = await loadOperatorChatClient();
-          return withOperatorWorkspaceTopologyLock(octopusHome, () => mutateWorkspaceProject({
-            octopusHomeRoot: octopusHome,
+          return withOperatorWorkspaceTopologyLock(phobosHome, () => mutateWorkspaceProject({
+            phobosHomeRoot: phobosHome,
             registryRoot,
-            publication: workspaceStorage(octopusHome),
+            publication: workspaceStorage(phobosHome),
             retirementBarrier: {
-              verifyBefore: (context) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.verifyBefore(context)),
-              withHeldProof: (context, operation) => taskRetirementBarrier(octopusHome).then((barrier) => barrier.withHeldProof(context, operation)),
+              verifyBefore: (context) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.verifyBefore(context)),
+              withHeldProof: (context, operation) => taskRetirementBarrier(phobosHome).then((barrier) => barrier.withHeldProof(context, operation)),
             },
             scope: projectScope,
             request: projectRequest,
@@ -4114,19 +4114,19 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
           }));
         },
         onApplicationProgress: (progress) => {
-          if (!event.sender.isDestroyed()) event.sender.send("octopus:application-lifecycle-progress", progress);
+          if (!event.sender.isDestroyed()) event.sender.send("phobos:application-lifecycle-progress", progress);
         },
         releaseTaskWorkerEnvironments: async (releaseRequest) => {
           const { releaseOperatorTaskWorkerEnvironments } = await loadOperatorChatClient();
           return releaseOperatorTaskWorkerEnvironments({
             clientArtifactsRoot: (interfaceId) => path.join(
-              octopusHome,
+              phobosHome,
               "interface-hand-in",
               interfaceId,
               "client",
             ),
-            octopusHome: () => octopusHome,
-            handInArtifact: (input) => handInArtifact({ ...input, octopusHome }),
+            phobosHome: () => phobosHome,
+            handInArtifact: (input) => handInArtifact({ ...input, phobosHome }),
           }, releaseRequest);
         },
         withTaskAuthoringLock: async (runId, operation) => {
@@ -4134,7 +4134,7 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
           return withOperatorRunAuthoringLock(runId, operation);
         },
         readTaskStatus: async (runId) => {
-          if (resolveOctopusHome() !== octopusHome) throw new Error("Runtime Home changed before the task could be archived");
+          if (resolvePhobosHome() !== phobosHome) throw new Error("Runtime Home changed before the task could be archived");
           store.invalidate(false, "runs");
           const status = await store.read(projectionReadRequest("projection.operator.chats.status", { run_ids: [runId] }));
           return status.chats.find((row) => row.run_id === runId);
@@ -4142,13 +4142,13 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
         planTaskApplicationAmendment: async (amendmentRequest) => {
           const { planOperatorChatTaskAmendment } = await loadOperatorChatClient();
           return planOperatorChatTaskAmendment({
-            octopusHome: () => octopusHome,
+            phobosHome: () => phobosHome,
             installationRoot: resolveInstallationRoot,
             registryRoot: () => registryRoot,
           }, amendmentRequest);
         },
         commitClientAuthoring: (authoringRequest) => commitProjectionClientAuthoring(
-          octopusHome,
+          phobosHome,
           registryRoot,
           authoringRequest,
         ),
@@ -4160,20 +4160,20 @@ ipcMain.handle("octopus:os-workspace-mutate", async (event, token, request) => {
 });
 
 let clientBrowserManager;
-ipcMain.handle("octopus:client-browser", (event, token, request) => {
+ipcMain.handle("phobos:client-browser", (event, token, request) => {
   if (event.senderFrame !== event.sender.mainFrame) throw new Error("Browser requires the owning client frame.");
   clientBrowserManager ??= require("./clientBrowser.cjs").createClientBrowser({ electron: require("electron"),
-    getHome: resolveOctopusHome, requireAccess: value => getClientAccessController().requireSession(value, ["live"]) });
+    getHome: resolvePhobosHome, requireAccess: value => getClientAccessController().requireSession(value, ["live"]) });
   return clientBrowserManager.handle(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:cdp-viewer-open", async (event, token, request) => {
+ipcMain.handle("phobos:cdp-viewer-open", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getCdpViewerManager().open(token, event.sender, request);
 });
 
 for (const [channel, method] of [["prepare", "prepare"], ["ack", "acknowledge"], ["sync", "sync"], ["cursor-arrived", "cursorArrived"], ["action", "action"], ["downloads", "downloads"], ["close", "close"]]) {
-  ipcMain.handle(`octopus:native-browser-viewer-${channel}`, async (event, token, request) => {
+  ipcMain.handle(`phobos:native-browser-viewer-${channel}`, async (event, token, request) => {
     getClientAccessController().requireSession(token, ["live"]);
     if (event.senderFrame !== event.sender.mainFrame) throw new Error("Native browser presentation requires the owning client frame.");
     await initializeRuntimeHost();
@@ -4181,7 +4181,7 @@ for (const [channel, method] of [["prepare", "prepare"], ["ack", "acknowledge"],
   });
 }
 
-ipcMain.handle("octopus:native-browser-page-close", async (event, token, request) => {
+ipcMain.handle("phobos:native-browser-page-close", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   if (event.senderFrame !== event.sender.mainFrame) throw new Error("Native browser page close requires the owning client frame.");
   requireNativeBrowserHome(request?.home);
@@ -4189,33 +4189,33 @@ ipcMain.handle("octopus:native-browser-page-close", async (event, token, request
   return getNativeBrowserSurface().closePage(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:browser-saved-permissions", async (event, token, request) => {
+ipcMain.handle("phobos:browser-saved-permissions", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   if (event.senderFrame !== event.sender.mainFrame) throw new Error("Browser Settings require the owning client frame.");
   return getNativeBrowserSurface().permissions(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:desktop-saved-application-permissions", async (event, token, request) => {
-  const win = BrowserWindow.fromWebContents(event.sender), home = resolveOctopusHome();
+ipcMain.handle("phobos:desktop-saved-application-permissions", async (event, token, request) => {
+  const win = BrowserWindow.fromWebContents(event.sender), home = resolvePhobosHome();
   const current = () => {
     getClientAccessController().requireSession(token, ["live"]);
     if (!win || win.isDestroyed() || event.sender.isDestroyed() || win.webContents !== event.sender
-      || event.senderFrame !== event.sender.mainFrame || resolveOctopusHome() !== home) throw new Error("Application Settings lost their exact live client window and Home.");
+      || event.senderFrame !== event.sender.mainFrame || resolvePhobosHome() !== home) throw new Error("Application Settings lost their exact live client window and Home.");
   };
   current(); getDesktopSurfaceHost(event.sender);
   return getNativeDesktopSettings().applicationPermissions(request, { id: event.sender.id, current,
     identity: createHash("sha256").update(token).digest("hex") });
 });
 
-ipcMain.handle("octopus:desktop-computer-use-settings", async (event, token, request) => {
+ipcMain.handle("phobos:desktop-computer-use-settings", async (event, token, request) => {
   if (!request || typeof request !== "object" || Array.isArray(request) || !["status", "setup", "set_enabled"].includes(request.operation)
     || Object.keys(request).some(key => !["operation", "enabled"].includes(key))
     || (request.operation === "set_enabled" ? typeof request.enabled !== "boolean" || Object.keys(request).length !== 2 : Object.keys(request).length !== 1)) throw new Error("Invalid Computer Use Settings request.");
-  const win = BrowserWindow.fromWebContents(event.sender), home = resolveOctopusHome();
+  const win = BrowserWindow.fromWebContents(event.sender), home = resolvePhobosHome();
   const current = () => {
     getClientAccessController().requireSession(token, ["live"]);
     if (!win || win.isDestroyed() || event.sender.isDestroyed() || win.webContents !== event.sender
-      || event.senderFrame !== event.sender.mainFrame || resolveOctopusHome() !== home) throw new Error("Computer Use Settings lost its current window or Home.");
+      || event.senderFrame !== event.sender.mainFrame || resolvePhobosHome() !== home) throw new Error("Computer Use Settings lost its current window or Home.");
   };
   current(); getDesktopSurfaceHost(event.sender);
   const owner = { id: event.sender.id, current, windowHandle: () => { current(); return win.getNativeWindowHandle(); } };
@@ -4232,30 +4232,30 @@ ipcMain.handle("octopus:desktop-computer-use-settings", async (event, token, req
     permissions: snapshot.permissions.map(({ kind, status }) => ({ kind, status })) };
 });
 
-ipcMain.handle("octopus:desktop-permissions-open", async (event, token, request) => {
-  const win = BrowserWindow.fromWebContents(event.sender), capturedHome = resolveOctopusHome();
+ipcMain.handle("phobos:desktop-permissions-open", async (event, token, request) => {
+  const win = BrowserWindow.fromWebContents(event.sender), capturedHome = resolvePhobosHome();
   const current = () => {
     getClientAccessController().requireSession(token, ["live"]);
     if (!win || win.isDestroyed() || event.sender.isDestroyed() || win.webContents !== event.sender
-      || event.senderFrame !== event.sender.mainFrame || resolveOctopusHome() !== capturedHome) throw new Error("Native permissions require the exact live client window and Home.");
+      || event.senderFrame !== event.sender.mainFrame || resolvePhobosHome() !== capturedHome) throw new Error("Native permissions require the exact live client window and Home.");
   };
   current(); getDesktopSurfaceHost(event.sender);
   return getNativeDesktopPermissions().open(request, { id: event.sender.id, current, windowHandle: () => { current(); return win.getNativeWindowHandle(); } });
 });
 
-ipcMain.handle("octopus:desktop-surface-request", async (event, token, request) => {
+ipcMain.handle("phobos:desktop-surface-request", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win || win.isDestroyed()) throw new Error("Desktop viewing requires an active window.");
   return getDesktopSurfaceHost(event.sender).request(request, event.sender.id);
 });
 
-ipcMain.handle("octopus:desktop-application-view", async (event, token, request) => {
-  const win = BrowserWindow.fromWebContents(event.sender), home = resolveOctopusHome();
+ipcMain.handle("phobos:desktop-application-view", async (event, token, request) => {
+  const win = BrowserWindow.fromWebContents(event.sender), home = resolvePhobosHome();
   const current = () => {
     getClientAccessController().requireSession(token, ["live"]);
     if (!win || win.isDestroyed() || event.sender.isDestroyed() || win.webContents !== event.sender
-      || event.senderFrame !== event.sender.mainFrame || resolveOctopusHome() !== home) throw new Error("Application view lost its owning client window or Home.");
+      || event.senderFrame !== event.sender.mainFrame || resolvePhobosHome() !== home) throw new Error("Application view lost its owning client window or Home.");
   };
   current(); getDesktopSurfaceHost(event.sender);
   let input = request;
@@ -4271,57 +4271,57 @@ ipcMain.handle("octopus:desktop-application-view", async (event, token, request)
     hostIdentity: () => { current(); const owner = nativeDesktopWindowHosts.get(event.sender.id); if (!owner) throw new Error("Application view has no registered native window."); return owner; } });
 });
 
-ipcMain.handle("octopus:cdp-viewer-action", async (event, token, request) => {
+ipcMain.handle("phobos:cdp-viewer-action", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getCdpViewerManager().action(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:cdp-viewer-close", async (event, token, request) => {
+ipcMain.handle("phobos:cdp-viewer-close", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getCdpViewerManager().close(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:process-viewer-open", async (event, token, request) => {
+ipcMain.handle("phobos:process-viewer-open", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getProcessViewerManager().open(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:process-viewer-action", async (event, token, request) => {
+ipcMain.handle("phobos:process-viewer-action", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getProcessViewerManager().action(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:process-viewer-close", async (event, token, request) => {
+ipcMain.handle("phobos:process-viewer-close", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getProcessViewerManager().close(token, event.sender, request);
 });
 
-ipcMain.handle("octopus:worker-environment-files-list", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-files-list", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentFileReader().list(request);
 });
 
-ipcMain.handle("octopus:worker-environment-file-read", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-file-read", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentFileReader().read(request);
 });
 
-ipcMain.handle("octopus:worker-environment-file-preview", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-file-preview", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentFileReader().readPreview(request);
 });
 
-ipcMain.handle("octopus:worker-environment-file-attachment", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-file-attachment", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentFileReader().readAttachment(request);
 });
 
-ipcMain.handle("octopus:worker-environment-file-write", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-file-write", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentFileReader().write(request);
 });
 
-ipcMain.handle("octopus:worker-environment-file-system-action", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-file-system-action", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   const action = String(request?.action || "");
   if (!["resolve", "reveal", "open"].includes(action)) throw new Error("Worker Environment file system action is invalid");
@@ -4334,23 +4334,23 @@ ipcMain.handle("octopus:worker-environment-file-system-action", async (_event, t
   return { ...resolved, action };
 });
 
-ipcMain.handle("octopus:os-files-roots", async (_event, token) => {
+ipcMain.handle("phobos:os-files-roots", async (_event, token) => {
   return osFileStoreFor(token).roots();
 });
 
-ipcMain.handle("octopus:os-files-list", async (_event, token, request) => {
+ipcMain.handle("phobos:os-files-list", async (_event, token, request) => {
   return osFileStoreFor(token).list(request);
 });
 
-ipcMain.handle("octopus:os-file-read", async (_event, token, request) => {
+ipcMain.handle("phobos:os-file-read", async (_event, token, request) => {
   return osFileStoreFor(token).read(request);
 });
 
-ipcMain.handle("octopus:os-file-write", async (_event, token, request) => {
+ipcMain.handle("phobos:os-file-write", async (_event, token, request) => {
   return osFileStoreFor(token).write(request);
 });
 
-ipcMain.handle("octopus:os-file-system-action", async (_event, token, request) => {
+ipcMain.handle("phobos:os-file-system-action", async (_event, token, request) => {
   const store = osFileStoreFor(token);
   const action = String(request?.action || "");
   if (!["resolve", "reveal", "open"].includes(action)) throw new Error("OS file system action is invalid");
@@ -4363,39 +4363,39 @@ ipcMain.handle("octopus:os-file-system-action", async (_event, token, request) =
   return { ...resolved, action };
 });
 
-ipcMain.handle("octopus:worker-environment-git-inspect", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-git-inspect", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentOperatorActions().inspect(request);
 });
 
-ipcMain.handle("octopus:worker-environment-operator-action", async (_event, token, request) => {
+ipcMain.handle("phobos:worker-environment-operator-action", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getWorkerEnvironmentOperatorActions().perform(request);
 });
 
-ipcMain.handle("octopus:client-surface-documents", async (_event, token) => {
+ipcMain.handle("phobos:client-surface-documents", async (_event, token) => {
   const { profile } = getClientAccessController().requireSession(token);
   return filterClientSurfaceSnapshot(await getClientSurfaceDocumentStore().snapshot(), profile);
 });
 
-ipcMain.handle("octopus:client-extensions", async (_event, token) => {
+ipcMain.handle("phobos:client-extensions", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   return clientExtensionSnapshot();
 });
 
-ipcMain.handle("octopus:client-extension-mutate", async (_event, token, request) => {
+ipcMain.handle("phobos:client-extension-mutate", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   await getClientExtensionStore().mutate(request);
   return clientExtensionSnapshot();
 });
 
-ipcMain.handle("octopus:client-extension-credential", async (_event, token, request) => {
+ipcMain.handle("phobos:client-extension-credential", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   await getClientExtensionStore().setCredential(request);
   return clientExtensionSnapshot();
 });
 
-ipcMain.handle("octopus:client-extension-credential-check", async (_event, token, request) => {
+ipcMain.handle("phobos:client-extension-credential-check", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   const { origin, checkPath, secret } = await getClientExtensionStore().credential(request?.id, request?.sourceId);
   if (!checkPath) return { checked: false, ok: false, status: 0 };
@@ -4406,13 +4406,13 @@ ipcMain.handle("octopus:client-extension-credential-check", async (_event, token
   return { checked: true, ok: response.ok, status: response.status };
 });
 
-ipcMain.handle("octopus:client-extension-lifecycle", async (_event, token, request) => {
+ipcMain.handle("phobos:client-extension-lifecycle", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   const outcome = await getClientExtensionStore().applyLifecycle(request);
   return { ...outcome, snapshot: await clientExtensionSnapshot() };
 });
 
-ipcMain.handle("octopus:client-extensions-reveal", async (_event, token) => {
+ipcMain.handle("phobos:client-extensions-reveal", async (_event, token) => {
   getClientAccessController().requireSession(token, ["live"]);
   const store = getClientExtensionStore();
   await store.ensureRoot();
@@ -4421,19 +4421,19 @@ ipcMain.handle("octopus:client-extensions-reveal", async (_event, token) => {
   return { opened: true, path: store.root };
 });
 
-ipcMain.handle("octopus:client-extension-filesystem-read", async (_event, token, request) => {
+ipcMain.handle("phobos:client-extension-filesystem-read", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return readClientExtensionFilesystemSource(request);
 });
 
-ipcMain.handle("octopus:client-extension-action", async (event, token, request) => {
+ipcMain.handle("phobos:client-extension-action", async (event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   launchTerminalOwner(event, token);
   try {
     const store = getClientExtensionStore();
     const result = await store.withVerifiedLifecycleSnapshot(({ installedExtensionIds }) => (
       executeClientExtensionAction({
-        octopusHome: resolveOctopusHome(),
+        phobosHome: resolvePhobosHome(),
         codexHome: resolveOperatorCodexHome(),
         installedExtensionIds,
       }, request)
@@ -4465,21 +4465,21 @@ ipcMain.handle("octopus:client-extension-action", async (event, token, request) 
   }
 });
 
-ipcMain.handle("octopus:client-codex-usage-read", async (_event, token, request) => {
+ipcMain.handle("phobos:client-codex-usage-read", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getCodexUsageReader().readUsage(request);
 });
 
-ipcMain.handle("octopus:provider-models-refresh", async (_event, token, request) => {
+ipcMain.handle("phobos:provider-models-refresh", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientProviderMetadata().models(request);
 });
 
-ipcMain.handle("octopus:composer-prediction", async (event, token, request) => {
-  const home = resolveOctopusHome();
+ipcMain.handle("phobos:composer-prediction", async (event, token, request) => {
+  const home = resolvePhobosHome();
   const current = () => {
     getClientAccessController().requireSession(token, ["live"]);
-    if (resolveOctopusHome() !== home || event.sender.isDestroyed()) throw new Error("Client suggestion lost its current Home or window");
+    if (resolvePhobosHome() !== home || event.sender.isDestroyed()) throw new Error("Client suggestion lost its current Home or window");
   };
   current();
   const read = (method, params) => getProjectionStore("live").read(projectionReadRequest(method, params));
@@ -4497,10 +4497,10 @@ ipcMain.handle("octopus:composer-prediction", async (event, token, request) => {
   const { requestComposerPrediction } = await loadOperatorChatClient();
   try {
     const result = await requestComposerPrediction({
-      octopusHome: () => home, readSource, assertCurrent: current,
+      phobosHome: () => home, readSource, assertCurrent: current,
       readArtifacts: async (params) => (await read("projection.interface_artifacts.list", params)).artifacts,
       commit: (plan) => { current(); return commitProjectionClientAuthoring(home, path.join(home, "registry"), plan); },
-      handInArtifact: (input) => { current(); return handInArtifact({ ...input, octopusHome: home }); },
+      handInArtifact: (input) => { current(); return handInArtifact({ ...input, phobosHome: home }); },
     }, request);
     current();
     const latest = await readSource(request.runId);
@@ -4511,11 +4511,11 @@ ipcMain.handle("octopus:composer-prediction", async (event, token, request) => {
   }
 });
 
-ipcMain.handle("octopus:task-title", async (event, token, request) => {
-  const home = resolveOctopusHome();
+ipcMain.handle("phobos:task-title", async (event, token, request) => {
+  const home = resolvePhobosHome();
   const current = () => {
     getClientAccessController().requireSession(token, ["live"]);
-    if (resolveOctopusHome() !== home || event.sender.isDestroyed()) throw new Error("Task title lost its current Home or window");
+    if (resolvePhobosHome() !== home || event.sender.isDestroyed()) throw new Error("Task title lost its current Home or window");
   };
   current();
   const read = (method, params) => getProjectionStore("live").read(projectionReadRequest(method, params));
@@ -4529,10 +4529,10 @@ ipcMain.handle("octopus:task-title", async (event, token, request) => {
   };
   const { requestTaskTitle } = await loadOperatorChatClient();
   try {
-    return await requestTaskTitle({ octopusHome: () => home, readSource, assertCurrent: current,
+    return await requestTaskTitle({ phobosHome: () => home, readSource, assertCurrent: current,
       readArtifacts: async (params) => (await read("projection.interface_artifacts.list", params)).artifacts,
       commit: (plan) => { current(); return commitProjectionClientAuthoring(home, path.join(home, "registry"), plan); },
-      handInArtifact: (input) => { current(); return handInArtifact({ ...input, octopusHome: home }); },
+      handInArtifact: (input) => { current(); return handInArtifact({ ...input, phobosHome: home }); },
     }, request);
   } catch (error) {
     void appendClientLog("warning", "task.title_failed", { message: String(error?.message ?? error) });
@@ -4540,7 +4540,7 @@ ipcMain.handle("octopus:task-title", async (event, token, request) => {
   }
 });
 
-ipcMain.handle("octopus:runtime-status", async (_event, token, request) => {
+ipcMain.handle("phobos:runtime-status", async (_event, token, request) => {
   const lab = labRuntimeHostState(token);
   if (lab) {
     return {
@@ -4586,7 +4586,7 @@ ipcMain.handle("octopus:runtime-status", async (_event, token, request) => {
     phase: host?.phase ?? (probe.up ? "ready" : "unmanaged"),
     ownership: host?.ownership ?? "none",
     pid: host?.pid ?? null,
-    home: host?.home ?? resolveOctopusHome(),
+    home: host?.home ?? resolvePhobosHome(),
     sourceRegistry: host?.sourceRegistry ?? resolveSourceRegistry(),
     runtimeBinary: host?.runtimeBinary ?? resolveRuntimeBinary(),
     hostError: host?.error ?? null,
@@ -4599,7 +4599,7 @@ function retainChatAttachmentsAfterStorageFailure(token, attachments, error) {
   attachments.length = 0;
 }
 
-ipcMain.handle("octopus:submit-chat-turn", async (_event, token, request) => {
+ipcMain.handle("phobos:submit-chat-turn", async (_event, token, request) => {
   let profile = "unknown";
   let stagedAttachments = [];
   let submissionStarted = false;
@@ -4611,12 +4611,12 @@ ipcMain.handle("octopus:submit-chat-turn", async (_event, token, request) => {
     }
     await ensureRuntimeHost().assertStorageWritable();
     await prepareLiveProjectionRead();
-    const octopusHome = resolveOctopusHome();
+    const phobosHome = resolvePhobosHome();
     const { submitOperatorTurn } = await loadOperatorChatClient();
     const requestedPayloads = request?.payloadArtifactBindings === undefined
       ? undefined : payloadArtifactBindings(request.payloadArtifactBindings);
     const revalidatePayloadSource = async () => {
-      if (getClientAccessController().requireSession(token).profile !== "live" || resolveOctopusHome() !== octopusHome) {
+      if (getClientAccessController().requireSession(token).profile !== "live" || resolvePhobosHome() !== phobosHome) {
         throw new Error("Selected file source lost its exact current client access or Home");
       }
     };
@@ -4629,28 +4629,28 @@ ipcMain.handle("octopus:submit-chat-turn", async (_event, token, request) => {
     const result = await submitOperatorTurn(
       {
         clientArtifactsRoot: (interfaceId) => path.join(
-          octopusHome,
+          phobosHome,
           "interface-hand-in",
           interfaceId,
           "client",
         ),
-        octopusHome: () => octopusHome,
+        phobosHome: () => phobosHome,
         installationRoot: resolveInstallationRoot,
-        registryRoot: () => path.join(octopusHome, "registry"),
+        registryRoot: () => path.join(phobosHome, "registry"),
         handInArtifact: (input) => handInArtifact({
           ...input,
           endpoint: stringValue(input.endpoint) === "unix://"
             ? defaultRuntimeEndpoint()
             : input.endpoint,
-          octopusHome,
+          phobosHome,
         }),
         readArtifactPayload: (input) => readContentAddressedArtifactPayload({
           ...input,
-          blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+          blobsRoot: path.join(phobosHome, "ledger", "blobs"),
         }),
         readProjection: (method, params) => getProjectionStore("live").read(projectionReadRequest(method, params)),
         preparePayloadArtifactBindings: ({ payloadArtifactBindings: selectedBase }) => prepareContentAddressedPayloadBindings({
-          blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+          blobsRoot: path.join(phobosHome, "ledger", "blobs"),
           attachments: stagedAttachments,
           payloadArtifactBindings: selectedBase,
           revalidate: revalidatePayloadSource,
@@ -4711,17 +4711,17 @@ ipcMain.handle("octopus:submit-chat-turn", async (_event, token, request) => {
   }
 });
 
-ipcMain.handle("octopus:operator-chat-artifacts-read", async (_event, token, request) => {
+ipcMain.handle("phobos:operator-chat-artifacts-read", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   const { readOperatorChatArtifacts } = await loadOperatorChatClient();
   const batch = await readOperatorChatArtifacts(
     {
-      octopusHome: () => octopusHome,
+      phobosHome: () => phobosHome,
       readArtifactPayload: (input) => Object.hasOwn(input, "projection")
-        ? readContentAddressedArtifactProjection({ ...input, blobsRoot: path.join(octopusHome, "ledger", "blobs") })
+        ? readContentAddressedArtifactProjection({ ...input, blobsRoot: path.join(phobosHome, "ledger", "blobs") })
         : readContentAddressedArtifactPayload({
-          ...input, blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+          ...input, blobsRoot: path.join(phobosHome, "ledger", "blobs"),
           maxPayloadBytes: input?.label === "turn.stream" ? 256 * 1024 * 1024 : undefined,
         }),
     },
@@ -4730,20 +4730,20 @@ ipcMain.handle("octopus:operator-chat-artifacts-read", async (_event, token, req
   return assertOperatorChatArtifactBatch(batch);
 });
 
-ipcMain.handle("octopus:submit-operator-turn-control", async (_event, token, request) => {
+ipcMain.handle("phobos:submit-operator-turn-control", async (_event, token, request) => {
   return captureArtifactDelivery(async (deliver) => {
     getClientAccessController().requireSession(token, ["live"]);
-    const octopusHome = resolveOctopusHome();
+    const phobosHome = resolvePhobosHome();
     const { submitOperatorTurnControl } = await loadOperatorChatClient();
     return submitOperatorTurnControl({
-      octopusHome: () => octopusHome,
-      clientArtifactsRoot: (interfaceId) => path.join(octopusHome, "interface-hand-in", interfaceId, "client"),
-      handInArtifact: (input) => deliver({ ...input, octopusHome }),
+      phobosHome: () => phobosHome,
+      clientArtifactsRoot: (interfaceId) => path.join(phobosHome, "interface-hand-in", interfaceId, "client"),
+      handInArtifact: (input) => deliver({ ...input, phobosHome }),
     }, request);
   });
 });
 
-ipcMain.handle("octopus:submit-chat-steer", async (_event, token, request) => {
+ipcMain.handle("phobos:submit-chat-steer", async (_event, token, request) => {
   let profile = "unknown";
   let submissionStarted = false;
   const stagedAttachments = [];
@@ -4752,12 +4752,12 @@ ipcMain.handle("octopus:submit-chat-steer", async (_event, token, request) => {
     if (profile === "lab") return operatorChatSubmitSuccess(await getProjectionStore("lab").submitChatSteer(request));
     await ensureRuntimeHost().assertStorageWritable();
     await prepareLiveProjectionRead();
-    const octopusHome = resolveOctopusHome();
+    const phobosHome = resolvePhobosHome();
     const { submitOperatorTurn } = await loadOperatorChatClient();
     const requestedPayloads = request?.payloadArtifactBindings === undefined
       ? undefined : payloadArtifactBindings(request.payloadArtifactBindings);
     const revalidatePayloadSource = async () => {
-      if (getClientAccessController().requireSession(token).profile !== "live" || resolveOctopusHome() !== octopusHome) {
+      if (getClientAccessController().requireSession(token).profile !== "live" || resolvePhobosHome() !== phobosHome) {
         throw new Error("Selected file source lost its exact current client access or Home");
       }
     };
@@ -4767,24 +4767,24 @@ ipcMain.handle("octopus:submit-chat-steer", async (_event, token, request) => {
     await revalidatePayloadSource();
     submissionStarted = true;
     const result = await submitOperatorTurn({
-      clientArtifactsRoot: (interfaceId) => path.join(octopusHome, "interface-hand-in", interfaceId, "client"),
-      octopusHome: () => octopusHome,
+      clientArtifactsRoot: (interfaceId) => path.join(phobosHome, "interface-hand-in", interfaceId, "client"),
+      phobosHome: () => phobosHome,
       installationRoot: resolveInstallationRoot,
-      registryRoot: () => path.join(octopusHome, "registry"),
+      registryRoot: () => path.join(phobosHome, "registry"),
       handInArtifact: (input) => handInArtifact({
         ...input,
         endpoint: stringValue(input.endpoint) === "unix://"
           ? defaultRuntimeEndpoint()
           : input.endpoint,
-        octopusHome,
+        phobosHome,
       }),
       readArtifactPayload: (input) => readContentAddressedArtifactPayload({
         ...input,
-        blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+        blobsRoot: path.join(phobosHome, "ledger", "blobs"),
       }),
       readProjection: (method) => getProjectionStore("live").read(projectionReadRequest(method)),
       preparePayloadArtifactBindings: ({ payloadArtifactBindings: selectedBase }) => prepareContentAddressedPayloadBindings({
-        blobsRoot: path.join(octopusHome, "ledger", "blobs"),
+        blobsRoot: path.join(phobosHome, "ledger", "blobs"),
         attachments: stagedAttachments,
         payloadArtifactBindings: selectedBase,
         revalidate: revalidatePayloadSource,
@@ -4827,19 +4827,19 @@ ipcMain.handle("octopus:submit-chat-steer", async (_event, token, request) => {
   }
 });
 
-ipcMain.handle("octopus:update-chat-pins", async (_event, token, request) => {
+ipcMain.handle("phobos:update-chat-pins", async (_event, token, request) => {
   const { profile } = getClientAccessController().requireSession(token);
   if (profile === "lab") return getProjectionStore("lab").updateChatPins(request);
   await prepareLiveProjectionRead();
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   const { updateOperatorChatPins } = await loadOperatorChatClient();
   return updateOperatorChatPins({
-    octopusHome: () => octopusHome,
+    phobosHome: () => phobosHome,
     installationRoot: resolveInstallationRoot,
   }, request);
 });
 
-ipcMain.handle("octopus:transcribe-dictation", async (_event, token, request) => {
+ipcMain.handle("phobos:transcribe-dictation", async (_event, token, request) => {
   const attemptId = request?.attemptId;
   const key = `${token}:${attemptId}`;
   let controller;
@@ -4871,7 +4871,7 @@ ipcMain.handle("octopus:transcribe-dictation", async (_event, token, request) =>
   }
 });
 
-ipcMain.handle("octopus:dictation-stream-start", async (event, token, request) => {
+ipcMain.handle("phobos:dictation-stream-start", async (event, token, request) => {
   const key = `${token}:${request?.attemptId}`;
   let stream;
   const release = () => {
@@ -4887,7 +4887,7 @@ ipcMain.handle("octopus:dictation-stream-start", async (event, token, request) =
       onEvent(payload) {
         try {
           getClientAccessController().requireSession(token, ["live"]);
-          if (!event.sender.isDestroyed()) event.sender.send("octopus:dictation-stream-event", { attemptId: request.attemptId, ...payload });
+          if (!event.sender.isDestroyed()) event.sender.send("phobos:dictation-stream-event", { attemptId: request.attemptId, ...payload });
         } catch { release(); }
       },
     });
@@ -4901,7 +4901,7 @@ ipcMain.handle("octopus:dictation-stream-start", async (event, token, request) =
   }
 });
 
-ipcMain.on("octopus:dictation-stream-audio", (event, token, attemptId, bytes) => {
+ipcMain.on("phobos:dictation-stream-audio", (event, token, attemptId, bytes) => {
   const entry = clientDictationStreams.get(`${token}:${attemptId}`);
   if (!entry || entry.owner !== event.sender.id) return;
   try {
@@ -4910,7 +4910,7 @@ ipcMain.on("octopus:dictation-stream-audio", (event, token, attemptId, bytes) =>
   } catch { entry.release(); }
 });
 
-ipcMain.handle("octopus:dictation-stream-finish", async (event, token, attemptId) => {
+ipcMain.handle("phobos:dictation-stream-finish", async (event, token, attemptId) => {
   const entry = clientDictationStreams.get(`${token}:${attemptId}`);
   try {
     getClientAccessController().requireSession(token, ["live"]);
@@ -4921,7 +4921,7 @@ ipcMain.handle("octopus:dictation-stream-finish", async (event, token, attemptId
   } finally { if (entry?.owner === event.sender.id) entry.release(); }
 });
 
-ipcMain.handle("octopus:cancel-dictation", (event, token, attemptId) => {
+ipcMain.handle("phobos:cancel-dictation", (event, token, attemptId) => {
   getClientAccessController().requireSession(token, ["live", "lab"]);
   clientDictationRequests.get(`${token}:${attemptId}`)?.abort();
   const stream = clientDictationStreams.get(`${token}:${attemptId}`);
@@ -4929,12 +4929,12 @@ ipcMain.handle("octopus:cancel-dictation", (event, token, attemptId) => {
 });
 
 for (const [channel, operation] of [
-  ["octopus:dictation-recordings-read", (profile) => clientDictationRecordings.state(profile)],
-  ["octopus:dictation-recordings-configure", (profile, enabled) => clientDictationRecordings.configure(profile, enabled)],
-  ["octopus:dictation-recording-save", (profile, request) => clientDictationRecordings.save(profile, { ...request, bytes: bufferFromIpcBytes(request?.bytes) })],
-  ["octopus:dictation-recording-read", (profile, id) => clientDictationRecordings.read(profile, id)],
-  ["octopus:dictation-recording-update", (profile, request) => clientDictationRecordings.update(profile, request)],
-  ["octopus:dictation-recording-delete", async (profile, id) => {
+  ["phobos:dictation-recordings-read", (profile) => clientDictationRecordings.state(profile)],
+  ["phobos:dictation-recordings-configure", (profile, enabled) => clientDictationRecordings.configure(profile, enabled)],
+  ["phobos:dictation-recording-save", (profile, request) => clientDictationRecordings.save(profile, { ...request, bytes: bufferFromIpcBytes(request?.bytes) })],
+  ["phobos:dictation-recording-read", (profile, id) => clientDictationRecordings.read(profile, id)],
+  ["phobos:dictation-recording-update", (profile, request) => clientDictationRecordings.update(profile, request)],
+  ["phobos:dictation-recording-delete", async (profile, id) => {
     if (id === null) await clientDictationRecordings.clear(profile);
     else await clientDictationRecordings.remove(profile, id);
     return null;
@@ -4950,25 +4950,25 @@ for (const [channel, operation] of [
   });
 }
 
-ipcMain.handle("octopus:submit-interface-artifact", async (_event, token, request) => {
+ipcMain.handle("phobos:submit-interface-artifact", async (_event, token, request) => {
   const { profile } = getClientAccessController().requireSession(token, ["live", "lab"]);
   if (profile === "lab") return getProjectionStore("lab").submitInterfaceArtifact(request);
   await prepareLiveProjectionRead();
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   return submitClientInterfaceArtifact({
-    clientArtifactsRoot: (interfaceId) => path.join(octopusHome, "interface-hand-in", interfaceId, "client"),
+    clientArtifactsRoot: (interfaceId) => path.join(phobosHome, "interface-hand-in", interfaceId, "client"),
     projectionStore: () => getProjectionStore("live"),
-    handInArtifact: (input) => handInArtifact({ ...input, octopusHome }),
+    handInArtifact: (input) => handInArtifact({ ...input, phobosHome }),
     authorizeSubmission: authorizeClientInterfaceArtifactSubmission,
   }, request);
 });
 
-ipcMain.handle("octopus:artifact-stream-begin", async (_event, token, request) => {
+ipcMain.handle("phobos:artifact-stream-begin", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientArtifactStreamStore().begin(token, request);
 });
 
-ipcMain.handle("octopus:artifact-stream-append", async (_event, token, request) => {
+ipcMain.handle("phobos:artifact-stream-append", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientArtifactStreamStore().append(token, {
     ...request,
@@ -4976,23 +4976,23 @@ ipcMain.handle("octopus:artifact-stream-append", async (_event, token, request) 
   });
 });
 
-ipcMain.handle("octopus:artifact-stream-finalize", async (_event, token, request) => {
+ipcMain.handle("phobos:artifact-stream-finalize", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientArtifactStreamStore().finalize(token, request);
 });
 
-ipcMain.handle("octopus:artifact-stream-abort", async (_event, token, request) => {
+ipcMain.handle("phobos:artifact-stream-abort", async (_event, token, request) => {
   getClientAccessController().requireSession(token, ["live"]);
   return getClientArtifactStreamStore().abort(token, request);
 });
 
 function setAppIdentity() {
-  app.setName("Octopus");
+  app.setName("Phobos");
   setApplicationMenu();
   const iconPath = appIconPath();
   if (iconPath) {
     app.setAboutPanelOptions({
-      applicationName: "Octopus",
+      applicationName: "Phobos",
       applicationVersion: "0.1.0",
       iconPath,
     });
@@ -5011,18 +5011,18 @@ function setApplicationMenu() {
   });
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
-      label: "Octopus",
+      label: "Phobos",
       submenu: [
-        { role: "about", label: "About Octopus" },
+        { role: "about", label: "About Phobos" },
         commandItem("Settings…", "open_settings"),
         { type: "separator" },
         { role: "services" },
         { type: "separator" },
-        { role: "hide", label: "Hide Octopus" },
+        { role: "hide", label: "Hide Phobos" },
         { role: "hideOthers" },
         { role: "unhide" },
         { type: "separator" },
-        { role: "quit", label: "Quit Octopus" },
+        { role: "quit", label: "Quit Phobos" },
       ],
     },
     {
@@ -5102,16 +5102,16 @@ function sendNativeClientCommand(command) {
   const focused = BrowserWindow.getFocusedWindow();
   const win = focused && !focused.isDestroyed() ? focused : selectedClientWindow(undefined);
   if (!win || win.isDestroyed()) return;
-  sendClientWindowEvent(win, "octopus:native-client-command", command);
+  sendClientWindowEvent(win, "phobos:native-client-command", command);
 }
 
 function appIconPath() {
   const candidates = [
-    isDev ? path.join(__dirname, "../public/octopus-dev-dock-icon.png") : "",
-    process.platform === "darwin" ? path.join(__dirname, "../dist/octopus.icns") : "",
-    process.platform === "darwin" ? path.join(__dirname, "../public/octopus.icns") : "",
-    path.join(__dirname, "../dist/octopus-app-icon.png"),
-    path.join(__dirname, "../public/octopus-app-icon.png"),
+    isDev ? path.join(__dirname, "../public/phobos-dev-dock-icon.png") : "",
+    process.platform === "darwin" ? path.join(__dirname, "../dist/phobos.icns") : "",
+    process.platform === "darwin" ? path.join(__dirname, "../public/phobos.icns") : "",
+    path.join(__dirname, "../dist/phobos-app-icon.png"),
+    path.join(__dirname, "../public/phobos-app-icon.png"),
     path.join(__dirname, "../dist/favicon.png"),
     path.join(__dirname, "../public/favicon.png"),
   ].filter(Boolean);
@@ -5125,17 +5125,17 @@ function appIconPath() {
 }
 
 function defaultRuntimeEndpoint() {
-  const configured = stringValue(process.env.OCTOPUS_APP_LISTEN);
-  if (configured) return normalizedEndpoint(configured, resolveOctopusHome(), OPERATOR_CHAT_INTERFACE);
+  const configured = stringValue(process.env.PHOBOS_APP_LISTEN);
+  if (configured) return normalizedEndpoint(configured, resolvePhobosHome(), OPERATOR_CHAT_INTERFACE);
   return `unix://${runtimeControlSocketPath()}`;
 }
 
 function runtimeControlSocketPath() {
-  return normalizedEndpoint("", resolveOctopusHome(), OPERATOR_CHAT_INTERFACE).slice("unix://".length);
+  return normalizedEndpoint("", resolvePhobosHome(), OPERATOR_CHAT_INTERFACE).slice("unix://".length);
 }
 
 function resolveSourceRegistry() {
-  const configured = stringValue(process.env.OCTOPUS_SOURCE_REGISTRY);
+  const configured = stringValue(process.env.PHOBOS_SOURCE_REGISTRY);
   if (configured) return configured;
   if (app.isPackaged) {
     const bundled = path.join(app.getAppPath(), "registry");
@@ -5150,21 +5150,21 @@ function resolveSourceRegistry() {
 }
 
 function resolveLocalPackageRegistry() {
-  const configured = stringValue(process.env.OCTOPUS_LOCAL_PACKAGE_REGISTRY);
+  const configured = stringValue(process.env.PHOBOS_LOCAL_PACKAGE_REGISTRY);
   if (configured) return configured;
   const root = app.isPackaged
     ? path.join(app.getAppPath(), "local-packages", "registry")
     : path.join(resolveRepoRoot(), "registry");
-  if (!fs.existsSync(path.join(root, ".octopus-source.json"))) {
+  if (!fs.existsSync(path.join(root, ".phobos-source.json"))) {
     throw new Error(`local package registry '${root}' is incomplete`);
   }
   return root;
 }
 
 function resolveLocalPackageLibrary() {
-  const configured = stringValue(process.env.OCTOPUS_LOCAL_PACKAGE_LIBRARY);
+  const configured = stringValue(process.env.PHOBOS_LOCAL_PACKAGE_LIBRARY);
   if (configured) {
-    if (!path.isAbsolute(configured)) throw new Error("OCTOPUS_LOCAL_PACKAGE_LIBRARY must be absolute");
+    if (!path.isAbsolute(configured)) throw new Error("PHOBOS_LOCAL_PACKAGE_LIBRARY must be absolute");
     return configured;
   }
   const root = app.isPackaged
@@ -5177,7 +5177,7 @@ function resolveLocalPackageLibrary() {
 }
 
 function resolveInstalledSourceRegistry() {
-  const manifestPath = path.join(resolveOctopusHome(), "registry", ".octopus-source-manifest.json");
+  const manifestPath = path.join(resolvePhobosHome(), "registry", ".phobos-source-manifest.json");
   if (!fs.existsSync(manifestPath)) return "";
   let manifest;
   try {
@@ -5196,9 +5196,9 @@ function resolveInstalledSourceRegistry() {
 }
 
 function resolveRuntimeBinary() {
-  const configured = stringValue(process.env.OCTOPUS_RUNTIME_BIN);
+  const configured = stringValue(process.env.PHOBOS_RUNTIME_BIN);
   if (configured) return configured;
-  const name = process.platform === "win32" ? "octopus.exe" : "octopus";
+  const name = process.platform === "win32" ? "phobos.exe" : "phobos";
   if (app.isPackaged) return path.join(app.getAppPath(), "bin", name);
   const root = resolveRepoRoot();
   const release = path.join(root, "target", "release", name);
@@ -5217,18 +5217,18 @@ function resolveRuntimeLaunchCwd() {
 
 function resolveRuntimeLaunchEnv() {
   const env = {
-    OCTOPUS_HOME: resolveOctopusHome(),
-    OCTOPUS_SOURCE_REGISTRY: resolveSourceRegistry(),
-    OCTOPUS_MACHINE_CODEX_AUTH_FILE: path.join(resolveOperatorCodexHome(), "auth.json"),
-    OCTOPUS_MACHINE_CODEX_AUTH_LOCK_FILE: path.join(resolveOperatorCodexHome(), "auth.lock"),
+    PHOBOS_HOME: resolvePhobosHome(),
+    PHOBOS_SOURCE_REGISTRY: resolveSourceRegistry(),
+    PHOBOS_MACHINE_CODEX_AUTH_FILE: path.join(resolveOperatorCodexHome(), "auth.json"),
+    PHOBOS_MACHINE_CODEX_AUTH_LOCK_FILE: path.join(resolveOperatorCodexHome(), "auth.lock"),
   };
-  if (stringValue(process.env.OCTOPUS_RUNTIME_BIN)) return env;
+  if (stringValue(process.env.PHOBOS_RUNTIME_BIN)) return env;
   const root = resolveInstallationRoot();
   if (!root) return env;
   if (app.isPackaged) {
     return {
       ...env,
-      OCTOPUS_INSTALLATION_ROOT: root,
+      PHOBOS_INSTALLATION_ROOT: root,
       PATH: [path.join(root, "bin"), process.env.PATH ?? ""].join(path.delimiter),
     };
   }
@@ -5242,12 +5242,12 @@ function shellDisplay(value) {
   return `'${value.replaceAll("'", `'\\''`)}'`;
 }
 
-function resolveOctopusHome() {
-  const configured = stringValue(process.env.OCTOPUS_HOME);
+function resolvePhobosHome() {
+  const configured = stringValue(process.env.PHOBOS_HOME);
   if (configured && !path.isAbsolute(configured)) {
-    throw new Error("OCTOPUS_HOME must be absolute");
+    throw new Error("PHOBOS_HOME must be absolute");
   }
-  return path.resolve(configured || path.join(os.homedir(), ".octopus"));
+  return path.resolve(configured || path.join(os.homedir(), ".phobos"));
 }
 
 function resolveOperatorCodexHome() {
@@ -5259,10 +5259,10 @@ function resolveOperatorCodexHome() {
 }
 
 function resolveInstallationRoot() {
-  const configured = stringValue(process.env.OCTOPUS_INSTALLATION_ROOT);
+  const configured = stringValue(process.env.PHOBOS_INSTALLATION_ROOT);
   if (configured) {
     if (!path.isAbsolute(configured)) {
-      throw new Error("OCTOPUS_INSTALLATION_ROOT must be absolute");
+      throw new Error("PHOBOS_INSTALLATION_ROOT must be absolute");
     }
     return configured;
   }
@@ -5271,7 +5271,7 @@ function resolveInstallationRoot() {
 }
 
 function resolveRepoRoot() {
-  const envRoot = stringValue(process.env.OCTOPUS_REPO_ROOT);
+  const envRoot = stringValue(process.env.PHOBOS_REPO_ROOT);
   const candidates = [
     envRoot,
     app.getAppPath(),
@@ -5291,10 +5291,10 @@ function resolveRepoRoot() {
 }
 
 function resolveClientSurfaceRoot() {
-  const configured = stringValue(process.env.OCTOPUS_CLIENT_SURFACES_DIR);
+  const configured = stringValue(process.env.PHOBOS_CLIENT_SURFACES_DIR);
   if (configured) {
     if (!path.isAbsolute(configured)) {
-      throw new Error("OCTOPUS_CLIENT_SURFACES_DIR must be absolute");
+      throw new Error("PHOBOS_CLIENT_SURFACES_DIR must be absolute");
     }
     return configured;
   }
@@ -5324,10 +5324,10 @@ function resolveClientSurfaceSourceCheckout() {
 }
 
 function parseEndpoint(endpoint) {
-  const octopusHome = resolveOctopusHome();
+  const phobosHome = resolvePhobosHome();
   const normalized = normalizedEndpoint(
     requiredString(endpoint, "endpoint"),
-    octopusHome,
+    phobosHome,
     OPERATOR_CHAT_INTERFACE,
   );
   if (normalized.startsWith("unix://")) {
@@ -5439,7 +5439,7 @@ function windowStateSnapshot(win) {
 
 function publishWindowState(win) {
   if (win.isDestroyed() || win.webContents.isDestroyed()) return;
-  win.webContents.send("octopus:window-state-changed", windowStateSnapshot(win));
+  win.webContents.send("phobos:window-state-changed", windowStateSnapshot(win));
 }
 
 function applyWindowBackdrop(win, force = false) {
@@ -5488,7 +5488,7 @@ function getOperatorChatClientLoader() {
     operatorChatClientLoader = createOperatorChatClientLoader({
       packageRoots: clientSetupPackageRoots,
       clientPath: () => path.join(
-        resolveOctopusHome(),
+        resolvePhobosHome(),
         "registry",
         "interface",
         OPERATOR_CHAT_INTERFACE,

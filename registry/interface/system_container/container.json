@@ -3,7 +3,7 @@
   "engine": "docker",
   "image": "ubuntu:24.04",
   "pull_policy": "if_missing",
-  "name_prefix": "octopus",
+  "name_prefix": "phobos",
   "workdir": "/workspace",
   "start_argv": [
     "sleep",

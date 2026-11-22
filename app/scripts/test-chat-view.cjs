@@ -36,7 +36,7 @@ const { createRoot } = require("react-dom/client");
 const stubs = {
   name: "chat-view-stubs",
   setup(bundle) {
-    bundle.onResolve({ filter: /\/(ChatComposer|MessageContent|OctopusSwarm)$/ }, (args) => ({ path: path.basename(args.path), namespace: "stub" }));
+    bundle.onResolve({ filter: /\/(ChatComposer|MessageContent|PhobosSwarm)$/ }, (args) => ({ path: path.basename(args.path), namespace: "stub" }));
     bundle.onLoad({ filter: /.*/, namespace: "stub" }, (args) => ({
       loader: "js",
       contents: {
@@ -44,7 +44,7 @@ const stubs = {
 export function ChatComposer({ turnOpen, submissionMode }) { return createElement("div", { "data-composer": "", "data-turn-open": String(turnOpen), "data-submission-mode": submissionMode }); }`,
         MessageContent: `import { createElement } from "react";
 export function MessageContent({ text, streaming }) { return createElement("span", { "data-content": "", "data-streaming": streaming ? "true" : undefined }, text); }`,
-        OctopusSwarm: "export function OctopusSwarm() { return null; }",
+        PhobosSwarm: "export function PhobosSwarm() { return null; }",
       }[args.path],
     }));
   },
@@ -210,7 +210,7 @@ test("Home activity shows the Home task read-only with its own empty state", asy
   assert.ok(!query("[data-composer]"), "Home activity has no composer");
   await showHome(workspace({ activeRun: null, renderedMessages: [], activeMessageCount: 0 }));
   assert.doesNotMatch(query('section[aria-label="Home activity"]').textContent, /No activity yet/);
-  assert.ok(!query(".octopus-chat-home"));
+  assert.ok(!query(".phobos-chat-home"));
 });
 
 test("a long message body clamps to its lines and expands to its full height without a measured animation", async () => {

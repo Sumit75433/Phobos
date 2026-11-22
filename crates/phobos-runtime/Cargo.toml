@@ -1,0 +1,28 @@
+[package]
+name = "phobos-runtime"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-marks = { path = "../phobos-marks" }
+phobos-policy = { path = "../phobos-policy" }
+phobos-run-record = { path = "../phobos-run-record" }
+phobos-interfaces = { path = "../phobos-interfaces" }
+phobos-file-storage = { path = "../phobos-file-storage" }
+# runtime IS the mechanism plane — it is the body, so tokio/async are allowed here
+# (the purity fence lives in phobos-policy (L3), which this crate calls but never
+# re-implements). spec_phobos-runtime.md §1.
+async-trait = "0.1"
+tokio = { version = "1", features = ["sync", "rt", "macros", "time"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+
+[dev-dependencies]
+proptest.workspace = true

@@ -356,7 +356,7 @@ test('voice streams answer text once and completion never repeats its prefix', a
 async function hookHarness() {
   const { JSDOM } = require('jsdom');
   const React = require('react'); const { createRoot } = require('react-dom/client');
-  const dom = new JSDOM('<body></body>', { url: 'https://octopus.test' });
+  const dom = new JSDOM('<body></body>', { url: 'https://phobos.test' });
   const globals = new Map(['window', 'document', 'navigator', 'AudioContext', 'RTCPeerConnection', 'MediaStream', 'IS_REACT_ACT_ENVIRONMENT'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   const h = { microphones: [], peers: [], offers: [], closes: [], events: [], updates: [], mediaRead: null, playCount: 0, playError: '', offerGate: null, answerGate: null, sinkGate: null, current: null, samples: {}, frames: new Map(), offerSdp: 'v=0\r\ns=offer\r\nt=0 0\r\n', answerSdp: 'v=0\r\ns=answer\r\nt=0 0\r\n' };
   class Track extends dom.window.EventTarget {

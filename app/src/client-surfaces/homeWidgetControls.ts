@@ -7,9 +7,9 @@ import { materializeRegistry } from "./documentRegistry";
 import { homeSurfaceIdentity, selectHomeSurfaceDocuments } from "./homePresentation";
 import type { AdmittedClientSurfaceDocument, ClientSurfaceDocumentSnapshot } from "./types";
 
-export const homeWidgetHiddenKey = (profile: string) => `octopus.voice.hidden-surfaces.v1.${profile}`;
+export const homeWidgetHiddenKey = (profile: string) => `phobos.voice.hidden-surfaces.v1.${profile}`;
 export const homeWidgetDismissalsKey = (profile: string, runId: string, interfaceId: string) =>
-  `octopus.home.surface-dismissals.v1:${JSON.stringify([profile, runId, interfaceId])}`;
+  `phobos.home.surface-dismissals.v1:${JSON.stringify([profile, runId, interfaceId])}`;
 export const removedHomeWidgetIdentity = (identity: string) => `removed:${identity}`;
 
 function strings(key: string): Set<string> | null {

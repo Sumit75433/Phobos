@@ -140,11 +140,11 @@ test("a settled answer carries its actions; a streaming or non-terminal reply do
 test("only the latest turn works while a response streams", async () => {
   const messages = [user("u1", "First"), tool("c1", "in_progress"), user("u2", "Second", 20), tool("c2", "in_progress")];
   await show({ messages, responseStreaming: true });
-  const states = [...container.querySelectorAll(".octopus-turn-activity")].map((element) => element.dataset.state);
+  const states = [...container.querySelectorAll(".phobos-turn-activity")].map((element) => element.dataset.state);
   assert.equal(states.at(-1), "working");
   assert.ok(states.slice(0, -1).every((state) => state !== "working"), states.join());
   await show({ messages, responseStreaming: false });
-  assert.ok([...container.querySelectorAll(".octopus-turn-activity")].every((element) => element.dataset.state !== "working"));
+  assert.ok([...container.querySelectorAll(".phobos-turn-activity")].every((element) => element.dataset.state !== "working"));
 });
 
 test("commentary and answers stream under their own identity only while they are deltas", async () => {
@@ -169,12 +169,12 @@ test("tool calls carry the mark of their surface", async () => {
 
 test("a new task shows the home surface, an empty task its label, a loading task neither", async () => {
   await show({ messages: [], emptyState: "new-task", conversationId: "" });
-  assert.ok(query(".octopus-chat-home"));
+  assert.ok(query(".phobos-chat-home"));
   absent(list());
   await show({ messages: [], emptyState: "empty-task" });
   assert.doesNotMatch(list().textContent, /No activity yet/);
   await show({ messages: [], emptyState: "empty-task", emptyLabel: "Nothing here yet" });
-  absent(query(".octopus-chat-home"));
+  absent(query(".phobos-chat-home"));
   assert.match(list().textContent, /Nothing here yet/);
   await show({ messages: [], emptyState: "loading-task" });
   assert.doesNotMatch(list().textContent, /Nothing here yet|No activity yet/);
@@ -292,7 +292,7 @@ test("opening and closing work details holds the selected header through resize 
     setBox(viewport, { clientHeight: 800, scrollHeight: count * 300 });
     const turn = query('[data-thread-turn-key="anchor-user"] > div');
     resize([[turn, 300]]);
-    const header = query('[data-thread-turn-key="anchor-user"] .octopus-worked-for-toggle');
+    const header = query('[data-thread-turn-key="anchor-user"] .phobos-worked-for-toggle');
     let growth = 0;
     header.getBoundingClientRect = () => ({ top: 140 - growth - viewport.scrollTop, height: 24, bottom: 164 - growth - viewport.scrollTop });
     header.click();
@@ -324,14 +324,14 @@ test("opening and closing work details holds the selected header through resize 
 test("work details opened by the reader stay mounted and open when the answer arrives", async () => {
   const messages = [user("read-work", "Inspect"), tool("read-tool", "completed")];
   await show({ messages, responseStreaming: true, conversationId: "read-working" });
-  const toggle = query(".octopus-agent-activity-toggle");
+  const toggle = query(".phobos-agent-activity-toggle");
   toggle.click();
   await settle();
   assert.equal(toggle.getAttribute("aria-expanded"), "true");
   await show({ messages: [...messages, answer("read-answer", "Done")], conversationId: "read-working" });
-  assert.equal(query(".octopus-agent-activity-toggle"), toggle, "the result transition must retain the activity being read");
+  assert.equal(query(".phobos-agent-activity-toggle"), toggle, "the result transition must retain the activity being read");
   assert.equal(toggle.getAttribute("aria-expanded"), "true");
-  assert.equal(query(".octopus-worked-for-toggle").getAttribute("aria-expanded"), "true");
+  assert.equal(query(".phobos-worked-for-toggle").getAttribute("aria-expanded"), "true");
 });
 
 test("returning to a long task shows the same turns at their measured heights", async () => {

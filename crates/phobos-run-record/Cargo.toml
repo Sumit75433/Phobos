@@ -1,0 +1,15 @@
+[package]
+name = "phobos-run-record"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+phobos-descriptors = { path = "../phobos-descriptors" }
+phobos-file-storage = { path = "../phobos-file-storage" }
+phobos-ledger = { path = "../phobos-ledger" }
+phobos-policy = { path = "../phobos-policy" }

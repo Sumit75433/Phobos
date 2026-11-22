@@ -151,19 +151,19 @@ assert.equal(threadVirtualizer.distanceFromBottomAnchoredToTurn({
   previousLayout: previousThreadLayout,
 }), 100);
 
-const primaryShellSelection = { runId: "", surfaceId: "voice", workspaceKey: "octopus-os" };
+const primaryShellSelection = { runId: "", surfaceId: "voice", workspaceKey: "phobos-os" };
 const secondaryChatTarget = {
   kind: "surface",
   runId: "run-secondary",
   surfaceId: "chat",
-  workspaceKey: "octopus-os",
+  workspaceKey: "phobos-os",
 };
 assert.deepEqual(
   clientWindowModel.deriveActiveClientSurfaceIdentity({
     activePane: "primary",
     primary: { target: primaryShellSelection, workspaceActiveRunId: "" },
     secondary: {
-      fallbackWorkspaceKey: "octopus-os",
+      fallbackWorkspaceKey: "phobos-os",
       open: true,
       target: secondaryChatTarget,
       workspaceActiveRunId: "run-secondary",
@@ -176,33 +176,33 @@ assert.deepEqual(
     activePane: "secondary",
     primary: { target: primaryShellSelection, workspaceActiveRunId: "" },
     secondary: {
-      fallbackWorkspaceKey: "octopus-os",
+      fallbackWorkspaceKey: "phobos-os",
       open: true,
       target: secondaryChatTarget,
       workspaceActiveRunId: "run-secondary",
     },
   }),
-  { runId: "run-secondary", surfaceId: "chat", workspaceKey: "octopus-os", pane: "secondary", ready: true },
+  { runId: "run-secondary", surfaceId: "chat", workspaceKey: "phobos-os", pane: "secondary", ready: true },
 );
 assert.deepEqual(
   clientWindowModel.deriveActiveClientSurfaceIdentity({
     activePane: "secondary",
     primary: { target: primaryShellSelection, workspaceActiveRunId: "" },
     secondary: {
-      fallbackWorkspaceKey: "octopus-os",
+      fallbackWorkspaceKey: "phobos-os",
       open: true,
       target: secondaryChatTarget,
       workspaceActiveRunId: "run-workspace-ghost",
     },
   }),
-  { runId: "", surfaceId: "chat", workspaceKey: "octopus-os", pane: "secondary", ready: false },
+  { runId: "", surfaceId: "chat", workspaceKey: "phobos-os", pane: "secondary", ready: false },
 );
 assert.deepEqual(
   clientWindowModel.deriveActiveClientSurfaceIdentity({
     activePane: "secondary",
     primary: { target: primaryShellSelection, workspaceActiveRunId: "" },
     secondary: {
-      fallbackWorkspaceKey: "octopus-os",
+      fallbackWorkspaceKey: "phobos-os",
       open: true,
       target: { kind: "files", workspaceKey: "dashboard" },
       workspaceActiveRunId: "run-ignored",
@@ -210,7 +210,7 @@ assert.deepEqual(
   }),
   { runId: "", surfaceId: "", workspaceKey: "dashboard", pane: "secondary", ready: true },
 );
-const taskSourcesTab = clientWindowModel.workspaceTaskSourcesPaneTab("octopus-os", {
+const taskSourcesTab = clientWindowModel.workspaceTaskSourcesPaneTab("phobos-os", {
   runId: "run-sources",
   schemaVersion: 1,
   sources: [],
@@ -267,9 +267,9 @@ assert.equal(paneChromeOwnership.paneChromeOwner("secondary", [{}, {}]), "pane-t
   }
 }
 assert.equal(clientWindowModel.clientWindowStateKey("main", "surface"), "surface");
-assert.equal(clientWindowModel.clientWindowStateKey("window-a", "surface"), "octopus.client-window.window-a.surface");
+assert.equal(clientWindowModel.clientWindowStateKey("window-a", "surface"), "phobos.client-window.window-a.surface");
 const paneDrag = {
-  schema: "octopus.client-pane-transfer",
+  schema: "phobos.client-pane-transfer",
   schemaVersion: 1,
   sourceWindowId: "window-a",
   transferId: "transfer-a",
@@ -289,16 +289,16 @@ const filesSnapshot = {
   version: 1, id: "editor-a", revision: 7, rootId: "", rootPath: "",
   file: null, draft: "", view: { scrollTop: 24, scrollLeft: 0 },
 };
-const transferredFiles = { kind: "files", workspaceKey: "octopus-os", snapshot: filesSnapshot };
+const transferredFiles = { kind: "files", workspaceKey: "phobos-os", snapshot: filesSnapshot };
 assert.deepEqual(clientWindowModel.normalizeTransferableWorkspacePaneTarget(transferredFiles), transferredFiles);
 assert.equal(clientWindowModel.workspacePaneTabForTarget(transferredFiles).id, "files:editor-a");
-assert.notEqual(clientWindowModel.workspacePaneTabForTarget(transferredFiles).id, clientWindowModel.workspacePaneTabForTarget({ kind: "files", workspaceKey: "octopus-os" }).id);
+assert.notEqual(clientWindowModel.workspacePaneTabForTarget(transferredFiles).id, clientWindowModel.workspacePaneTabForTarget({ kind: "files", workspaceKey: "phobos-os" }).id);
 assert.equal(clientWindowModel.normalizeTransferableWorkspacePaneTarget({ ...transferredFiles, snapshot: { ...filesSnapshot, revision: -1 } }), null);
 assert.equal(clientWindowModel.normalizeTransferableWorkspacePaneTarget({
   kind: "surface",
   runId: "ignored",
   surfaceId: "drivers",
-  workspaceKey: "octopus-os",
+  workspaceKey: "phobos-os",
 }).runId, "");
 
 const exactPackageDigest = "a".repeat(64);
@@ -473,7 +473,7 @@ const projectedNamedExec = toolPresentation.dynamicToolPresentation({
 const projectedAuthoringWrite = toolPresentation.dynamicToolPresentation({
   eventData: { arguments: { path: "run.json" }, tool: `file.write__authoring_${namedChatSuffix}` },
 }, {});
-const projectedOctopusMcp = toolPresentation.dynamicToolPresentation({
+const projectedPhobosMcp = toolPresentation.dynamicToolPresentation({
   eventData: { arguments: {}, tool: `client.mcp__${namedChatSuffix}` },
 }, {});
 const projectedIntegrationCall = toolPresentation.dynamicToolPresentation({
@@ -482,7 +482,7 @@ const projectedIntegrationCall = toolPresentation.dynamicToolPresentation({
 assert.equal(projectedNamedExec.family, "exec");
 assert.equal(projectedNamedExec.target, "git status --short");
 assert.equal(projectedAuthoringWrite.conversationVisible, false);
-assert.equal(toolPresentation.dynamicToolGlyph(projectedOctopusMcp), "plugins");
+assert.equal(toolPresentation.dynamicToolGlyph(projectedPhobosMcp), "plugins");
 assert.equal(toolPresentation.dynamicToolGlyph(projectedIntegrationCall), "plugins");
 
 const exactProviderLiveTool = chatActivityProjectionModule.liveArtifactMessage({
@@ -867,7 +867,7 @@ async function verifyTranscriptLayout() {
   const reasoning = message("reasoning", "reasoning_delta", "**Reviewing instructions and directory**", { summary_index: 0 });
   const operation = message("operation", "dynamic_tool", "", { tool: "run_list", call_id: "list", arguments: {}, body: { count: 2 }, status: "completed", _activity_origin: { interface_role: "provider" } });
   const read = message("read", "dynamic_tool", "", { ...operation.eventData, call_id: "read", tool: "workspace.read_file", arguments: { path: "src/life.rs" } });
-  const rowText = () => all(".octopus-agent-activity-row").map((row) => row.textContent);
+  const rowText = () => all(".phobos-agent-activity-row").map((row) => row.textContent);
   try {
     const thinking = message("thinking", "reasoning_delta", "**Comparing the two files**", { summary_index: 0, lifecycle: "streaming", item_id: "thinking" });
     const nextNote = message("next-note", "commentary", "Checking the totals next");
@@ -875,49 +875,49 @@ async function verifyTranscriptLayout() {
     const nativeCommand = message("build", "tool", "", { call_id: "build", status: "completed", command: "cargo build" });
     for (const [work, explores] of [[read, true], [nativeRead, true], [operation, false], [nativeCommand, false]]) {
       await render([], false); await render([work, thinking, nextNote], true);
-      assert.equal(query(".octopus-thinking-fallback") === null, explores, `${work.id}: thinking after exploration stays in its group, after other work it shows on its own`);
-      if (explores) assert.equal(query(".octopus-agent-activity-summary-value").textContent, "Comparing the two files");
-      else assert.equal(query(".octopus-thinking-fallback").textContent, "Comparing the two files");
+      assert.equal(query(".phobos-thinking-fallback") === null, explores, `${work.id}: thinking after exploration stays in its group, after other work it shows on its own`);
+      if (explores) assert.equal(query(".phobos-agent-activity-summary-value").textContent, "Comparing the two files");
+      else assert.equal(query(".phobos-thinking-fallback").textContent, "Comparing the two files");
     }
     await render([commentary, operation], true, undefined, false, "latest-context");
     assert.match(container.textContent, /Progress explained/);
-    await click(query(".octopus-agent-activity-toggle"));
+    await click(query(".phobos-agent-activity-toggle"));
     assert.deepEqual(rowText(), ["Run list"]);
     await render([commentary, operation, message("new-context", "commentary", "Checking the result")], true, undefined, false, "latest-context");
     assert.match(container.textContent, /Checking the result/);
     assert.doesNotMatch(container.textContent, /Progress explained|Run list/);
     await render([operation], true, assistantDelta, true);
-    assert.equal(query(".octopus-turn-activity").dataset.state, "working");
-    assert.match(query(".octopus-worked-for-boundary").textContent, /^Working/);
+    assert.equal(query(".phobos-turn-activity").dataset.state, "working");
+    assert.match(query(".phobos-worked-for-boundary").textContent, /^Working/);
     await render([operation], true, { ...assistantDelta, eventData: { ...assistantDelta.eventData, phase: "final_answer" } }, true);
-    assert.equal(query(".octopus-turn-activity").dataset.state, "complete");
+    assert.equal(query(".phobos-turn-activity").dataset.state, "complete");
     await render([commentary, reasoning]);
-    assert.equal(query(".octopus-turn-activity-content").children.length, 2, "commentary and Thinking have one gap owner, with no spacer child");
-    assert.equal(query(".octopus-thinking-fallback").textContent, "Reviewing instructions and directory");
-    const streamed = query(".octopus-turn-activity-content").textContent;
+    assert.equal(query(".phobos-turn-activity-content").children.length, 2, "commentary and Thinking have one gap owner, with no spacer child");
+    assert.equal(query(".phobos-thinking-fallback").textContent, "Reviewing instructions and directory");
+    const streamed = query(".phobos-turn-activity-content").textContent;
     await render([commentary, { ...reasoning, eventKind: "reasoning", eventData: { summary: [reasoning.text] } }, message("empty", "commentary_delta", " \n")]);
-    assert.equal(query(".octopus-turn-activity-content").textContent, streamed);
-    assert.equal(query(".octopus-turn-activity-content").children.length, 2, "empty stream wrappers cannot reserve a row or hide Thinking");
+    assert.equal(query(".phobos-turn-activity-content").textContent, streamed);
+    assert.equal(query(".phobos-turn-activity-content").children.length, 2, "empty stream wrappers cannot reserve a row or hide Thinking");
     await render([{ ...commentary, eventKind: "commentary_delta" }]);
-    assert.ok(query(".octopus-thinking-fallback") === null, "streamed commentary already owns progress");
+    assert.ok(query(".phobos-thinking-fallback") === null, "streamed commentary already owns progress");
     await render([operation, message("empty", "commentary", ""), read], false);
-    assert.equal(query(".octopus-turn-activity-content").children.length, 1);
-    assert.ok(query(".octopus-agent-activity-body") === null, "settled groups mount collapsed");
-    await click(query(".octopus-agent-activity-toggle"));
+    assert.equal(query(".phobos-turn-activity-content").children.length, 1);
+    assert.ok(query(".phobos-agent-activity-body") === null, "settled groups mount collapsed");
+    await click(query(".phobos-agent-activity-toggle"));
     assert.deepEqual(rowText(), ["Run list", "Read life.rs"]);
-    assert.ok(query('.structured-activity [data-glyph="plugins"]'), "Octopus interface operations carry the plugin mark");
+    assert.ok(query('.structured-activity [data-glyph="plugins"]'), "Phobos interface operations carry the plugin mark");
     assert.ok(query(".structured-activity-body") === null, "closed operation details cannot retain padding");
-    await click(query(".structured-activity .octopus-agent-activity-toggle"));
+    await click(query(".structured-activity .phobos-agent-activity-toggle"));
     assert.match(query(".structured-activity-body").textContent, /Arguments\{\}Result[\s\S]*count/);
-    await click(query(".structured-activity .octopus-agent-activity-toggle"));
+    await click(query(".structured-activity .phobos-agent-activity-toggle"));
     assert.ok(query(".structured-activity-body") === null, "closed operation content unmounts after transition");
     const settledRows = rowText();
     await render([{ ...operation, id: "start", eventData: { ...operation.eventData, status: "started" } }, operation, read]);
     assert.deepEqual(rowText(), settledRows, "streamed and settled operations retain identical rows");
-    assert.ok(query(".octopus-thinking-fallback") === null, "a trailing group owns Thinking without duplicate progress");
-    await click(query(".octopus-turn-activity-content > .octopus-agent-activity .octopus-agent-activity-toggle"));
+    assert.ok(query(".phobos-thinking-fallback") === null, "a trailing group owns Thinking without duplicate progress");
+    await click(query(".phobos-turn-activity-content > .phobos-agent-activity .phobos-agent-activity-toggle"));
     await render([], false); await render([operation, read]);
-    assert.ok(query(".octopus-agent-activity-body") === null, "streamed groups mount collapsed just like history");
+    assert.ok(query(".phobos-agent-activity-body") === null, "streamed groups mount collapsed just like history");
     const collaboration = (id, tool, status, receivers) => message(id, "collaboration", "", { tool, status, receiverThreadIds: receivers, model: "gpt-test", prompt: `Prompt ${id}` });
     const subagent = (id, thread, kind, agentPath) => message(id, "subagent_activity", "", { agentThreadId: thread, kind, agentPath });
     await render([
@@ -926,34 +926,34 @@ async function verifyTranscriptLayout() {
       subagent("sub-1", "t1", "started", "root/research_agent"), subagent("sub-2", "t2", "started", "root/writer"),
       subagent("sub-3", "t3", "started", "root/critic"), subagent("sub-4", "t4", "started", "root/editor"),
     ], false);
-    assert.deepEqual(all(".octopus-agent-activity-toggle").map((node) => node.getAttribute("aria-label")), ["Created 2 agents", "Messaged an agent"]);
-    assert.deepEqual(all(".octopus-subagent-chip-name").map((node) => node.textContent), ["Research agent", "Writer", "Critic"]);
-    assert.equal(query(".octopus-subagent-group-status").textContent, "and 1 other subagent started working");
+    assert.deepEqual(all(".phobos-agent-activity-toggle").map((node) => node.getAttribute("aria-label")), ["Created 2 agents", "Messaged an agent"]);
+    assert.deepEqual(all(".phobos-subagent-chip-name").map((node) => node.textContent), ["Research agent", "Writer", "Critic"]);
+    assert.equal(query(".phobos-subagent-group-status").textContent, "and 1 other subagent started working");
     assert.doesNotMatch(container.textContent, /Prompt wait/);
     await render([subagent("sub-1", "t1", "started", "root/a"), subagent("sub-2", "t2", "interacted", "root/b")], false);
-    assert.equal(query(".octopus-subagent-group-status").textContent, "updated");
+    assert.equal(query(".phobos-subagent-group-status").textContent, "updated");
     await render([subagent("sub-1", "t1", "interacted", "root/a"), subagent("sub-2", "t2", "interrupted", "root/b")], false);
-    assert.equal(query(".octopus-subagent-group-status").textContent, "interrupted");
+    assert.equal(query(".phobos-subagent-group-status").textContent, "interrupted");
     const privateReasoning = [message("reason", "reasoning", "", { summary: ["Checking files", "Then comparing"], content: ["RAW PRIVATE CHAIN"] }),
       message("raw-delta", "reasoning_delta", "RAW DELTA", { content_index: 0 }), message("unindexed-delta", "reasoning_delta", "RAW UNINDEXED", {})];
     await render(privateReasoning, true);
-    assert.equal(query(".octopus-thinking-fallback-label").textContent, "Then comparing");
+    assert.equal(query(".phobos-thinking-fallback-label").textContent, "Then comparing");
     assert.doesNotMatch(container.textContent, /RAW/);
     const renderLedger = (activities, turnInProgress) => React.act(async () => root.render(React.createElement(turn.TurnActivity, {
       activities, activityWindow: "all", turnInProgress, startedAtMs: 1, presentation: "ledger", statusBoundaryVisible: false, toolPresentations: {},
       renderActivity: (message) => React.createElement(events.AssistantEventContent, { message, toolPresentations: {} }),
     })));
     await renderLedger(privateReasoning, false);
-    assert.deepEqual(all(".octopus-agent-activity-toggle").map((node) => [node.getAttribute("aria-label"), node.getAttribute("aria-expanded")]), [["Thought", "false"]]);
-    await click(query(".octopus-agent-activity-toggle"));
-    assert.equal(query(".octopus-reasoning-detail").textContent, "Then comparing");
+    assert.deepEqual(all(".phobos-agent-activity-toggle").map((node) => [node.getAttribute("aria-label"), node.getAttribute("aria-expanded")]), [["Thought", "false"]]);
+    await click(query(".phobos-agent-activity-toggle"));
+    assert.equal(query(".phobos-reasoning-detail").textContent, "Then comparing");
     assert.ok(container.querySelector(".vertical-scroll-fade-mask") === null);
     assert.doesNotMatch(container.textContent, /RAW|Checking files/);
     await renderLedger([message("timed", "reasoning", "", { summary: ["Done"], started_at_ms: 1_000, completed_at_ms: 4_000 })], false);
-    assert.match(query(".octopus-agent-activity-toggle").getAttribute("aria-label"), /^Thought for \S/);
+    assert.match(query(".phobos-agent-activity-toggle").getAttribute("aria-label"), /^Thought for \S/);
     await renderLedger([message("live", "reasoning_delta", "Scanning", { summary_index: 0, lifecycle: "streaming" })], true);
-    assert.equal(query(".octopus-agent-activity-summary-value").textContent, "Thinking");
-    assert.equal(query(".octopus-reasoning-detail").textContent, "Scanning", "active reasoning opens without a click");
+    assert.equal(query(".phobos-agent-activity-summary-value").textContent, "Thinking");
+    assert.equal(query(".phobos-reasoning-detail").textContent, "Scanning", "active reasoning opens without a click");
     const failure = (id, failure_code, error_info, retry_after_seconds, terminal) => ({
       ...message(id, "error", "opaque private upstream detail", { failure_code, error_info, retry_after_seconds }),
       terminal, error: true,
@@ -971,13 +971,13 @@ async function verifyTranscriptLayout() {
     assert.doesNotMatch(container.textContent, /opaque private upstream detail/);
     await render([], false);
     await render([message("pending", "event", "", { work_status: "submitting" })], true);
-    assert.equal(query(".octopus-turn-activity").dataset.state, "starting");
+    assert.equal(query(".phobos-turn-activity").dataset.state, "starting");
     assert.equal(query('[role="status"][aria-live="polite"]').textContent, "Starting your task");
     await render([message("pending", "event", "", { work_status: "submitting" }), operation], true);
-    assert.notEqual(query(".octopus-turn-activity").dataset.state, "starting");
+    assert.notEqual(query(".phobos-turn-activity").dataset.state, "starting");
     const finalResponse = { ...assistantDelta, eventData: { ...assistantDelta.eventData, phase: "final_answer" } };
-    const historyToggle = () => query(".octopus-worked-for-toggle");
-    const history = () => query(".octopus-turn-history");
+    const historyToggle = () => query(".phobos-worked-for-toggle");
+    const history = () => query(".phobos-turn-history");
     for (const motion of [true, false]) {
       reducedMotion = motion;
       await render([], false); await render([operation], false, finalResponse, true);
@@ -1000,26 +1000,26 @@ async function verifyTranscriptLayout() {
       message("content-thought", "reasoning", "", { summary: [], content: ["**Planning the merge**\n\nThe totals differ"] })], false, finalResponse, true);
     assert.match(historyToggle().textContent, /^Worked for /, "a turn that only thought still says how long it worked");
     await click(historyToggle());
-    assert.deepEqual(all(".octopus-agent-activity-toggle").map((node) => node.getAttribute("aria-label")), ["Thought", "Thought"], "settled thoughts stay in the turn history");
-    await click(all(".octopus-agent-activity-toggle")[1]);
-    assert.equal(query(".octopus-reasoning-detail").textContent, "The totals differ", "reasoning projected only as content is shown");
+    assert.deepEqual(all(".phobos-agent-activity-toggle").map((node) => node.getAttribute("aria-label")), ["Thought", "Thought"], "settled thoughts stay in the turn history");
+    await click(all(".phobos-agent-activity-toggle")[1]);
+    assert.equal(query(".phobos-reasoning-detail").textContent, "The totals differ", "reasoning projected only as content is shown");
     await render([], false); await render([], false, finalResponse, true);
     assert.equal(container.childElementCount, 0, "a turn without work or thought renders nothing");
     await render([operation, message("interrupted", "interrupted_result", "", {})], false, undefined, true);
-    assert.equal(query(".octopus-turn-activity").dataset.state, "stopped");
-    assert.match(query(".octopus-worked-for-boundary").textContent, /^Interrupted after /);
+    assert.equal(query(".phobos-turn-activity").dataset.state, "stopped");
+    assert.match(query(".phobos-worked-for-boundary").textContent, /^Interrupted after /);
     await render([operation, message("stop", "turn_control", "", { action: "stop", status: "acknowledged" })], false, undefined, true);
-    assert.match(query(".octopus-worked-for-boundary").textContent, /^You stopped after /);
+    assert.match(query(".phobos-worked-for-boundary").textContent, /^You stopped after /);
     const buffering = (id, showBufferingUi) => message(id, "warning", "Checking response safety", { source: "model_safety_buffering", showBufferingUi });
     await render([operation, buffering("quiet", false), buffering("shown", true)], true);
     assert.equal((container.textContent.match(/Checking response safety/g) ?? []).length, 1);
-    assert.equal((container.textContent.match(/No action is required\. Octopus will keep waiting for the response\./g) ?? []).length, 1);
+    assert.equal((container.textContent.match(/No action is required\. Phobos will keep waiting for the response\./g) ?? []).length, 1);
     await render([operation, buffering("shown", true)], false, finalResponse, false);
     assert.doesNotMatch(container.textContent, /Checking response safety/);
     const callUpdate = (index, failed) => message(`flaky-${index}`, "dynamic_tool", "", { tool: "run_list", call_id: "flaky", status: failed ? "failed" : "completed",
       ok: !failed, arguments: {}, _activity_origin: { interface_role: "provider" } });
     await render([{ ...callUpdate(0, true), error: true }, callUpdate(1, false)], false);
-    assert.equal(query(".octopus-agent-activity").dataset.state, "error", "a later successful update keeps the call's failure tone");
+    assert.equal(query(".phobos-agent-activity").dataset.state, "error", "a later successful update keeps the call's failure tone");
     const updateCost = async (count) => {
       const updates = Array.from({ length: count }, (_, index) => callUpdate(index, index === 0));
       let best = Infinity;
@@ -1034,11 +1034,11 @@ async function verifyTranscriptLayout() {
     await updateCost(200);
     assert.ok(await updateCost(2_400) < await updateCost(600) * 10, "coalescing repeated updates of one call stays near-linear");
     await render([message("mcp", "mcp_tool", "", { server: "github", tool: "search", status: "completed" })], false);
-    assert.ok(query('.octopus-agent-activity-header [data-glyph="plugins"]'), "MCP calls carry the plugin mark");
+    assert.ok(query('.phobos-agent-activity-header [data-glyph="plugins"]'), "MCP calls carry the plugin mark");
     await render([message("mcp-live", "mcp_tool", "", { server: "github", tool: "search", status: "in_progress" })], true);
-    assert.ok(query('.octopus-agent-activity-header [data-glyph="plugins"]'), "an MCP call in flight carries the plugin mark");
+    assert.ok(query('.phobos-agent-activity-header [data-glyph="plugins"]'), "an MCP call in flight carries the plugin mark");
     await render([message("mcp", "mcp_tool", "", { server: "github", tool: "search", status: "completed" })], false);
-    await click(query(".octopus-agent-activity-toggle"));
+    await click(query(".phobos-agent-activity-toggle"));
     assert.ok(container.querySelector(".vertical-scroll-fade-mask") === null);
     assert.ok(query('[data-mcp-tool="search"]'), "MCP calls render through the MCP surface");
     assert.doesNotMatch(container.textContent, /Called|Calling/);
@@ -1049,9 +1049,9 @@ async function verifyTranscriptLayout() {
     }
     await React.act(async () => root.render(React.createElement(turn.TurnActivity, { activities: [{ ...operation, eventData: { ...operation.eventData, status: "started" } }],
       startedAtMs: 1, presentation: "conversation", toolPresentations: {}, renderActivity: (item) => React.createElement(events.AssistantEventContent, { message: item, toolPresentations: {} }) })));
-    assert.equal(query(".octopus-turn-activity").dataset.state, "working", "an unstated turn follows its active work");
+    assert.equal(query(".phobos-turn-activity").dataset.state, "working", "an unstated turn follows its active work");
     await render([operation], false, finalResponse, false);
-    const finalGap = query(".octopus-turn-activity").lastElementChild;
+    const finalGap = query(".phobos-turn-activity").lastElementChild;
     assert.equal(finalGap.getAttribute("aria-hidden"), "true");
     assert.match(finalGap.getAttribute("style"), /--conversation-item-gap/);
     const artifactId = `docs.guide.md:${"a".repeat(64)}`;
@@ -1059,7 +1059,7 @@ async function verifyTranscriptLayout() {
     const readResult = { tool: "artifact.read", correlation_id: "artifact", ok: true, body: { result: "artifact_read", id: artifactId, text: "Historical content", artifact_size_bytes: 18, offset_bytes: 0, bytes_read: 18, truncated: false } };
     artifactResponse = { artifact_id: artifactMessage.artifactId, run_id: artifactMessage.runId, interface_id: artifactMessage.interfaceId, base64: Buffer.from(JSON.stringify(readResult)).toString("base64") };
     await render([artifactMessage], false);
-    await click(query(".octopus-agent-activity-toggle"));
+    await click(query(".phobos-agent-activity-toggle"));
     assert.deepEqual(rowText(), ["Read artifact docs.guide.md"]);
     assert.equal(query("[data-tooltip-target]").getAttribute("data-tooltip-target"), artifactId);
     assert.equal(query("[data-tooltip-target]").getAttribute("data-activates-file"), "true");
@@ -1091,11 +1091,11 @@ async function verifyTranscriptLayout() {
     });
     await render([], false);
     await render([navigation], false);
-    assert.ok(query('.octopus-agent-activity-header [data-glyph="browserUse"]'));
-    await click(query(".octopus-agent-activity-toggle"));
+    assert.ok(query('.phobos-agent-activity-header [data-glyph="browserUse"]'));
+    await click(query(".phobos-agent-activity-toggle"));
     assert.deepEqual(rowText(), ["Used the browser"]);
     assert.ok(query('.structured-activity [data-glyph="browserUse"]'));
-    await click(query(".structured-activity .octopus-agent-activity-toggle"));
+    await click(query(".structured-activity .phobos-agent-activity-toggle"));
     assert.match(query(".structured-activity-body").textContent, /https:\/\/example.org\/path/);
     assert.match(query(".structured-activity-body").textContent, /native host rendezvous/);
     for (const [receipt, expected] of [

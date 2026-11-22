@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { OcIconButton, OcMenuItem, OcStatus } from "../../design-system/components";
 import { OcDropdown } from "../../design-system/OcDropdown";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import { useGestureDevices, type GestureRecognitionPhase } from "../../gestureRecognition";
 import { useGestureShortcutPreferences, useSetGestureShortcutPreferences } from "../../gestureShortcuts";
 import { MessageTooltip } from "../chat/MessageTooltip";
 import { claimGesturePreview, GestureLiveStatus, gesturePreviewNote, gestureRecognitionLabel } from "./GestureLivePreview";
 
 export function GestureRailIndicator({ accessProfile, onOpenSettings }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   onOpenSettings: () => void;
 }) {
   const preferences = useGestureShortcutPreferences(accessProfile);

@@ -2,7 +2,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
-const CLIENT_AGENT_CATALOG_SCHEMA = "octopus.client.agent_catalog";
+const CLIENT_AGENT_CATALOG_SCHEMA = "phobos.client.agent_catalog";
 const CLIENT_AGENT_CATALOG_ICONS = new Set([
   "default",
   "strict",
@@ -18,8 +18,8 @@ const CLIENT_AGENT_CATALOG_ICONS = new Set([
   "hardhat",
 ]);
 
-function clientAgentCatalogPath(octopusHomeRoot) {
-  return path.join(path.resolve(octopusHomeRoot), "client", "agents", "catalog.json");
+function clientAgentCatalogPath(phobosHomeRoot) {
+  return path.join(path.resolve(phobosHomeRoot), "client", "agents", "catalog.json");
 }
 
 function emptyClientAgentCatalog() {
@@ -76,8 +76,8 @@ function requireAgentSourceAdmission(document, field, sourceWorkerInterfaceId, l
   }
 }
 
-async function readClientAgentCatalog(octopusHomeRoot) {
-  const file = clientAgentCatalogPath(octopusHomeRoot);
+async function readClientAgentCatalog(phobosHomeRoot) {
+  const file = clientAgentCatalogPath(phobosHomeRoot);
   let stat;
   try {
     stat = await fs.lstat(file);

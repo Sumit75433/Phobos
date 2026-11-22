@@ -1,6 +1,6 @@
 # Terminal client
 
-Octopus CLI is another client of the same system. It uses the same Home,
+Phobos CLI is another client of the same system. It uses the same Home,
 Projects, Agents, tasks, model settings, and recorded results as the desktop
 client. You can start a task in either client and continue it in the other.
 The terminal does not need Computer Use to send work or read its results.
@@ -16,14 +16,14 @@ From the checkout:
 ```sh
 npm ci --prefix app
 npm --prefix app run build:cli
-./octopus
+./phobos
 ```
 
 This builds the terminal modules and release runtime/capability distribution
 under `app/build/cli`. It does not build or open the desktop app. For a terminal
 presentation change, `npm --prefix app run build:cli-client` rebuilds only the
-shared client modules. If Node 24 is not on your `PATH`, set `OCTOPUS_NODE` to
-its executable when launching `./octopus`.
+shared client modules. If Node 24 is not on your `PATH`, set `PHOBOS_NODE` to
+its executable when launching `./phobos`.
 
 The build ends with a notice of the space its output takes and the space left on
 the volume; `target/` and `app/build/` can be deleted when you need it back.
@@ -42,10 +42,10 @@ up separately, see [Linux](linux.md).
 To use an existing desktop Home, select that exact directory:
 
 ```sh
-./octopus --home "$HOME/.octopus"
+./phobos --home "$HOME/.phobos"
 ```
 
-The default follows the desktop convention: `OCTOPUS_HOME`, or `~/.octopus`,
+The default follows the desktop convention: `PHOBOS_HOME`, or `~/.phobos`,
 with that Home's `.env` file. An explicit `--home` pins the selection. There is
 no separate terminal task store. The runtime is shared; exiting the CLI leaves
 it and admitted work running.
@@ -54,7 +54,7 @@ An empty Home opens setup. Choose an application pack, workspace name, optional
 first Project, model, and reasoning level. Existing machine provider sign-in
 can be reused; otherwise setup prints the native sign-in address to open in
 your browser. Once configured, normal startup opens Home. Setup can also be
-started explicitly with `./octopus setup`. An explicit `--service-tier <id>`
+started explicitly with `./phobos setup`. An explicit `--service-tier <id>`
 selects a tier from the model catalogue and preserves it in Home and setup
 Agent presets.
 
@@ -112,18 +112,18 @@ JSON when waiting, including the admission receipt, activity, and final result.
 They use the same user-facing operations as interactive chat.
 
 ```sh
-./octopus up
-./octopus projects --json
-./octopus project create "Research" --json
-./octopus project folders <project-id> ~/work/research --json
-./octopus models --agent <agent-id> --json
-./octopus exec --agent <agent-id> --json "Summarize the attached notes" \
+./phobos up
+./phobos projects --json
+./phobos project create "Research" --json
+./phobos project folders <project-id> ~/work/research --json
+./phobos models --agent <agent-id> --json
+./phobos exec --agent <agent-id> --json "Summarize the attached notes" \
   --attach ./notes.txt
-./octopus send <task-id> --json "Expand the second point"
-./octopus watch <task-id> --json
-./octopus history <task-id> --json
-./octopus inspect <run-id> --json
-./octopus stop <task-id>
+./phobos send <task-id> --json "Expand the second point"
+./phobos watch <task-id> --json
+./phobos history <task-id> --json
+./phobos inspect <run-id> --json
+./phobos stop <task-id>
 ```
 
 `exec --access project_access|full_access` chooses the new task's access; the
@@ -174,4 +174,4 @@ startup logs are under the selected Home's `client/logs/runtime-terminal.log`.
 
 The first terminal version omits voice, gesture controls, scheduled-task
 editing, graphical widgets, and extension downloads. Those configured
-capabilities remain part of the same Octopus installation.
+capabilities remain part of the same Phobos installation.

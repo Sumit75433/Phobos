@@ -4,7 +4,7 @@
   "name": "Gmail",
   "description": "Search, read, draft and send email with the Gmail app connected to your ChatGPT account.",
   "category": "plugin",
-  "developer": "Octopus",
+  "developer": "Phobos",
   "version": "1.0.0",
   "icon": "mail",
   "logo": "application-logo.svg",
@@ -28,10 +28,10 @@
   },
   "connection": {
     "disclosure": [
-      "Connect uses the Gmail account linked to your ChatGPT account, or opens ChatGPT to link one. Octopus reads your ChatGPT sign-in and keeps no Google token.",
+      "Connect uses the Gmail account linked to your ChatGPT account, or opens ChatGPT to link one. Phobos reads your ChatGPT sign-in and keeps no Google token.",
       "Tasks you connect to Gmail can search and read your email, threads, labels, drafts and attachments, and pass what they read to their model.",
       "Those tasks can also draft, send, forward, label, archive and delete email when their work calls for it.",
-      "Gmail stays linked in ChatGPT: Disconnect in Octopus cannot unlink it. Choose, add or unlink Gmail accounts with Manage in ChatGPT."
+      "Gmail stays linked in ChatGPT: Disconnect in Phobos cannot unlink it. Choose, add or unlink Gmail accounts with Manage in ChatGPT."
     ]
   }
 }

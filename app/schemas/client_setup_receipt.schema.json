@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://octopus.local/schemas/client_setup_receipt.schema.json",
-  "title": "Octopus Client Setup Receipt",
+  "$id": "https://phobos.local/schemas/client_setup_receipt.schema.json",
+  "title": "Phobos Client Setup Receipt",
   "type": "object",
   "required": [
     "schema",
@@ -14,16 +14,16 @@
     "completed_at"
   ],
   "properties": {
-    "schema": { "const": "octopus.client_setup_receipt" },
+    "schema": { "const": "phobos.client_setup_receipt" },
     "schema_version": { "const": 1 },
     "operation_id": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/operationId"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/operationId"
     },
     "plan_digest": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/digest"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/digest"
     },
     "plan": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/plan"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/plan"
     },
     "proof_semantics": { "const": "sequential_owner_observations" },
     "proofs": {
@@ -31,11 +31,11 @@
       "minItems": 4,
       "maxItems": 4,
       "items": {
-        "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/proof"
+        "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/proof"
       }
     },
     "completed_at": {
-      "$ref": "https://octopus.local/schemas/client_setup_operation.schema.json#/$defs/timestamp"
+      "$ref": "https://phobos.local/schemas/client_setup_operation.schema.json#/$defs/timestamp"
     }
   },
   "additionalProperties": false

@@ -25,16 +25,16 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Policy formation and exact authored grants
-        run: cargo test -p octopus-policy --lib
+        run: cargo test -p phobos-policy --lib
 
       - name: Runtime checkpoint coordination and replay
-        run: cargo test -p octopus-runtime --lib
+        run: cargo test -p phobos-runtime --lib
 
       - name: Ledger proof, deduplication and cache reconstruction
-        run: cargo test -p octopus-ledger-index --lib
+        run: cargo test -p phobos-ledger-index --lib
 
       - name: App-server artifact, worker binding and verifier integration
-        run: cargo test -p octopus-app-server
+        run: cargo test -p phobos-app-server
 
       - name: Framework round-trip latency with a durable ledger
-        run: cargo test --release -p octopus-app-server --test doomsday -- --ignored --nocapture
+        run: cargo test --release -p phobos-app-server --test doomsday -- --ignored --nocapture

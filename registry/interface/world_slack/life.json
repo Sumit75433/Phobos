@@ -17,13 +17,13 @@
         "registry/interface/world_slack/slack_life.py",
         "registry/interface/world_slack/slack_contract.py",
         "registry/interface/world_slack/slack_wire.py",
-        "registry/interface/world_slack/octopus_operation_catalog.py",
-        "registry/interface/world_slack/octopus_content_hash.py"
+        "registry/interface/world_slack/phobos_operation_catalog.py",
+        "registry/interface/world_slack/phobos_content_hash.py"
       ],
       "inherit_env": [
-        "OCTOPUS_SLACK_API_BASE",
-        "OCTOPUS_SLACK_PROXY",
-        "OCTOPUS_SLACK_SOCKET_URL",
+        "PHOBOS_SLACK_API_BASE",
+        "PHOBOS_SLACK_PROXY",
+        "PHOBOS_SLACK_SOCKET_URL",
         "PATH",
         "SLACK_ALLOWED_TEAMS",
         "SLACK_ALLOW_ALL_USERS",

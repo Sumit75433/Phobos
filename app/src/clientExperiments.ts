@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 
 export type ClientExperimentId = "gesture_feedback" | "shortcut_coach";
 
@@ -35,16 +35,16 @@ export type ClientExperimentState = Readonly<{
 }>;
 
 const EMPTY_STATE: ClientExperimentState = Object.freeze({ disabled: [], signals: {}, menuCommandUses: {} });
-const STORAGE_KEY = "octopus.client-experiments.v1";
-const stores = new Map<OctopusClientAccessProfile, ExperimentStore>();
+const STORAGE_KEY = "phobos.client-experiments.v1";
+const stores = new Map<PhobosClientAccessProfile, ExperimentStore>();
 
 type ExperimentStore = {
   current: ClientExperimentState;
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
   subscribers: Set<() => void>;
 };
 
-export function useClientExperimentState(profile: OctopusClientAccessProfile): ClientExperimentState {
+export function useClientExperimentState(profile: PhobosClientAccessProfile): ClientExperimentState {
   const store = experimentStore(profile);
   return useSyncExternalStore(
     (subscriber) => {
@@ -58,15 +58,15 @@ export function useClientExperimentState(profile: OctopusClientAccessProfile): C
   );
 }
 
-export function useClientExperiment(profile: OctopusClientAccessProfile, id: ClientExperimentId): boolean {
+export function useClientExperiment(profile: PhobosClientAccessProfile, id: ClientExperimentId): boolean {
   return !useClientExperimentState(profile).disabled.includes(id);
 }
 
-export function clientExperimentEnabled(profile: OctopusClientAccessProfile, id: ClientExperimentId): boolean {
+export function clientExperimentEnabled(profile: PhobosClientAccessProfile, id: ClientExperimentId): boolean {
   return !experimentStore(profile).current.disabled.includes(id);
 }
 
-export function useSetClientExperiment(profile: OctopusClientAccessProfile) {
+export function useSetClientExperiment(profile: PhobosClientAccessProfile) {
   return useCallback((id: ClientExperimentId, enabled: boolean) => {
     const store = experimentStore(profile);
     updateStore(store, {
@@ -75,19 +75,19 @@ export function useSetClientExperiment(profile: OctopusClientAccessProfile) {
   }, [profile]);
 }
 
-export function recordClientExperimentSignal(profile: OctopusClientAccessProfile, id: ClientExperimentId): void {
+export function recordClientExperimentSignal(profile: PhobosClientAccessProfile, id: ClientExperimentId): void {
   const store = experimentStore(profile);
   updateStore(store, { signals: { ...store.current.signals, [id]: (store.current.signals[id] ?? 0) + 1 } });
 }
 
-export function recordMenuCommandUse(profile: OctopusClientAccessProfile, commandId: string): number {
+export function recordMenuCommandUse(profile: PhobosClientAccessProfile, commandId: string): number {
   const store = experimentStore(profile);
   const uses = (store.current.menuCommandUses[commandId] ?? 0) + 1;
   updateStore(store, { menuCommandUses: { ...store.current.menuCommandUses, [commandId]: uses } });
   return uses;
 }
 
-function experimentStore(profile: OctopusClientAccessProfile): ExperimentStore {
+function experimentStore(profile: PhobosClientAccessProfile): ExperimentStore {
   const existing = stores.get(profile);
   if (existing) return existing;
   const created: ExperimentStore = { current: readState(profile), profile, subscribers: new Set() };
@@ -105,7 +105,7 @@ function updateStore(store: ExperimentStore, partial: Partial<ClientExperimentSt
   for (const subscriber of [...store.subscribers]) subscriber();
 }
 
-function readState(profile: OctopusClientAccessProfile): ClientExperimentState {
+function readState(profile: PhobosClientAccessProfile): ClientExperimentState {
   try {
     const raw = window.localStorage.getItem(`${STORAGE_KEY}:${profile}`);
     if (!raw) return EMPTY_STATE;

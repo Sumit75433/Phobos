@@ -1,13 +1,13 @@
-module.exports = { normalizeRuntimeLaunchEnvironment, parseApplicationManifest, parseApplicationSetup, parseApplicationTaskCapabilities, parseClientWorkerTemplate, parseOctopusOsSidecar, parseUniqueRegistryIds, resolveAuthoredApplicationSetupFields };
+module.exports = { normalizeRuntimeLaunchEnvironment, parseApplicationManifest, parseApplicationSetup, parseApplicationTaskCapabilities, parseClientWorkerTemplate, parsePhobosOsSidecar, parseUniqueRegistryIds, resolveAuthoredApplicationSetupFields };
 
 const { parseHomeVoiceContext } = require("../homeVoiceProjection.cjs");
 const { requiredAgentModel } = require("./agentTemplates.cjs");
-const { parseOctopusOsAuthoringProfile, parseOctopusOsPresentation, parseOctopusOsTaskAuthoringProfiles } = require("./authoringProfiles.cjs");
+const { parsePhobosOsAuthoringProfile, parsePhobosOsPresentation, parsePhobosOsTaskAuthoringProfiles } = require("./authoringProfiles.cjs");
 const { applicationLogoFileName } = require("./privateConfiguration.cjs");
 const { arrayValue, exactObjectKeys, isPlainRecord, requiredBoolean, requiredContractToken, requiredSafeRegistryId, requiredString, safeInterfacePathSegment, stringValue, validJsonPointer } = require("./values.cjs");
 
-function parseOctopusOsSidecar(value, interfaceId, file) {
-  if (!isPlainRecord(value)) throw new Error(`Octopus OS sidecar is not an object: ${file}`);
+function parsePhobosOsSidecar(value, interfaceId, file) {
+  if (!isPlainRecord(value)) throw new Error(`Phobos OS sidecar is not an object: ${file}`);
   const allowedKeys = new Set([
     "schema_version",
     "workspace",
@@ -28,45 +28,45 @@ function parseOctopusOsSidecar(value, interfaceId, file) {
   if (
     unknown.length
     || value.schema_version !== 1
-    || value.workspace !== "octopus_os"
+    || value.workspace !== "phobos_os"
     || value.interface !== interfaceId
     || !safeInterfacePathSegment(stringValue(value.owner_interface))
     || !["home", "task"].includes(surfaceRole)
     || !["client", "provider", "worker", "worker_environment_door", "authoring_source", "authoring_environment", "voice_control", "artifact_return"].includes(component)
   ) {
-    throw new Error(`Octopus OS sidecar does not satisfy schema v1: ${file}`);
+    throw new Error(`Phobos OS sidecar does not satisfy schema v1: ${file}`);
   }
   const providerChoice = stringValue(value.provider_choice_interface);
   const workerChoice = stringValue(value.worker_choice_interface);
   const authoringProfile = value.authoring_profile === undefined
     ? null
-    : parseOctopusOsAuthoringProfile(value.authoring_profile, workerChoice, file);
+    : parsePhobosOsAuthoringProfile(value.authoring_profile, workerChoice, file);
   const taskAuthoringProfiles = value.task_authoring_profiles === undefined
     ? []
-    : parseOctopusOsTaskAuthoringProfiles(value.task_authoring_profiles, file);
+    : parsePhobosOsTaskAuthoringProfiles(value.task_authoring_profiles, file);
   const presentation = value.presentation === undefined
     ? null
-    : parseOctopusOsPresentation(value.presentation, file);
+    : parsePhobosOsPresentation(value.presentation, file);
   const voiceContext = value.voice_context == null ? null : parseHomeVoiceContext(value.voice_context);
   if (voiceContext && (component !== "client" || surfaceRole !== "home")) {
-    throw new Error(`Octopus OS voice context must belong to the Home client: ${file}`);
+    throw new Error(`Phobos OS voice context must belong to the Home client: ${file}`);
   }
   if (component === "client") {
     if (value.owner_interface !== interfaceId || !safeInterfacePathSegment(providerChoice) || !safeInterfacePathSegment(workerChoice)) {
-      throw new Error(`Octopus OS client sidecar has incomplete choice provenance: ${file}`);
+      throw new Error(`Phobos OS client sidecar has incomplete choice provenance: ${file}`);
     }
     if (!authoringProfile && (taskAuthoringProfiles.length || presentation)) {
-      throw new Error(`Octopus OS client configuration has no authoring profile of its own: ${file}`);
+      throw new Error(`Phobos OS client configuration has no authoring profile of its own: ${file}`);
     }
     if (presentation && surfaceRole === "task"
       && (!presentation.name || presentation.projects.length || /[\u0000-\u001f\u007f]/u.test(presentation.name))) {
-      throw new Error(`Octopus OS task presentation must contain a name and no project presentations: ${file}`);
+      throw new Error(`Phobos OS task presentation must contain a name and no project presentations: ${file}`);
     }
     if (taskAuthoringProfiles.length && surfaceRole !== "home") {
-      throw new Error(`Octopus OS task authoring profiles must belong to the Home client interface: ${file}`);
+      throw new Error(`Phobos OS task authoring profiles must belong to the Home client interface: ${file}`);
     }
   } else if (providerChoice || workerChoice || authoringProfile || taskAuthoringProfiles.length || presentation) {
-    throw new Error(`Octopus OS non-client sidecar carries client choice fields: ${file}`);
+    throw new Error(`Phobos OS non-client sidecar carries client choice fields: ${file}`);
   }
   return {
     ...value,

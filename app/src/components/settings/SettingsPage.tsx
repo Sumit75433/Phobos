@@ -15,7 +15,7 @@ import { clientDialogOwnsCommands } from "../../keyboardShortcuts";
 import type { ClientExtensionRegistryState } from "../../extensions/types";
 import type { ClientSurfaceDescriptor } from "../../shell/surfaceTypes";
 import type { AdmittedClientSurfaceDocument, ClientSurfaceAdmissionVerdict } from "../../client-surfaces/types";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { ClientExtensionDestination } from "./ExtensionsSection";
 import { SettingsSectionContent } from "./SettingsSectionContent";
 import {
@@ -43,7 +43,7 @@ export function SettingsPage({
   surfaceErrors,
   surfaces,
 }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   documentRoot: string;
   documentVerdicts: ClientSurfaceAdmissionVerdict[];
   documents: AdmittedClientSurfaceDocument[];

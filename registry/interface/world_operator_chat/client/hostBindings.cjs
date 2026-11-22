@@ -17,8 +17,8 @@ const privateHostSlots = new Set([
 const requiredAuthorityFields = ["read_root_slots", "write_root_slots", "executable_root_slots"];
 const optionalAuthorityFields = ["optional_read_root_slots", "optional_write_root_slots", "optional_executable_root_slots"];
 
-async function validatePlannedHostBindings({ octopusHome, registryRoot, plan }) {
-  const host = requiredObject(JSON.parse(await fs.readFile(path.join(octopusHome, "host.json"), "utf8")), "host manifest");
+async function validatePlannedHostBindings({ phobosHome, registryRoot, plan }) {
+  const host = requiredObject(JSON.parse(await fs.readFile(path.join(phobosHome, "host.json"), "utf8")), "host manifest");
   if (host.host_manifest_version !== 1) throw new Error("Unsupported host manifest version");
   const defaults = requiredObject(host.root_refs, "host.root_refs");
   for (const [slot, root] of Object.entries(defaults)) {

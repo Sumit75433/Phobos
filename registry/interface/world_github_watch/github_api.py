@@ -84,7 +84,7 @@ class API:
             headers={"Authorization": "Bearer " + self.token,
                      "Accept": "application/vnd.github+json",
                      "Content-Type": "application/json",
-                     "User-Agent": "octopus-github-watch",
+                     "User-Agent": "phobos-github-watch",
                      "X-GitHub-Api-Version": "2022-11-28"})
         try:
             with self.opener.open(request, timeout=self.c["timeout_seconds"]) as response:

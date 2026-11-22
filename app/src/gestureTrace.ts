@@ -1,7 +1,7 @@
 import type { AirHandFrame, GestureInteraction, HandLandmark, HandObservation, HandPose, HandSide } from "./airHandEngine";
 import type { AirHandGestureId, GestureSensitivity } from "./gestureShortcuts";
 
-export const GESTURE_TRACE_FORMAT = "octopus.gesture-trace";
+export const GESTURE_TRACE_FORMAT = "phobos.gesture-trace";
 export const GESTURE_TRACE_VERSION = 1;
 
 export type TraceHand = Readonly<{ label: string; score: number; image: readonly (readonly number[])[]; world: readonly (readonly number[])[] }>;

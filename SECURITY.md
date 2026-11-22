@@ -1,10 +1,10 @@
 # Security policy
 
-Do not open public issues containing an Octopus Home, ledger rows, interface
+Do not open public issues containing a Phobos Home, ledger rows, interface
 state, provider sign-in files, API keys, prompts, tool results, or local
 filesystem paths. Redact diagnostics before sharing them.
 
-Octopus runs a model with tools on your machine. Tools, verifiers, and
+Phobos runs a model with tools on your machine. Tools, verifiers, and
 interface processes are sandboxed to the authority their descriptors declare,
 and every refusal is recorded - but a run that holds write or execute tools can
 still be steered by untrusted content it reads. Read the complete

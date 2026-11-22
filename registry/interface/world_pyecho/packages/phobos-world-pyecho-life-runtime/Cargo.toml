@@ -1,0 +1,30 @@
+[package]
+name = "phobos-world-pyecho-life-runtime"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+blake3.workspace = true
+libc = "0.2.182"
+notify.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["rt", "macros", "sync", "io-std", "io-util", "time"] }
+tokio-util.workspace = true
+tracing = "0.1.44"
+phobos-descriptors = { path = "../../../../../crates/phobos-descriptors" }
+phobos-interface-projection = { path = "../../../../../crates/phobos-interface-projection" }
+phobos-interface-transport = { path = "../../../../../crates/phobos-interface-transport" }
+phobos-interfaces = { path = "../../../../../crates/phobos-interfaces" }
+phobos-ledger = { path = "../../../../../crates/phobos-ledger" }
+phobos-ledger-index = { path = "../../../../../crates/phobos-ledger-index" }
+phobos-ledger-store = { path = "../../../../../crates/phobos-ledger-store" }
+
+[lints.rust]
+unsafe_code = "allow"
+
+[dev-dependencies]
+tempfile = "3.23.0"

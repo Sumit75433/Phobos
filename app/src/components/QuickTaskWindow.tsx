@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { OctopusClientAccessProfile } from "../electron";
+import type { PhobosClientAccessProfile } from "../electron";
 import { dispatchClientCommand } from "../clientActions";
 import {
   clientOsRootEeId,
@@ -17,7 +17,7 @@ import { Glyph } from "./IconGlyphs";
 import "./chat/chat.css";
 
 export function QuickTaskWindow({ accessProfile, runtimeReady, runtimeHome }: {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   runtimeReady: boolean;
   runtimeHome: string;
 }) {
@@ -47,7 +47,7 @@ export function QuickTaskWindow({ accessProfile, runtimeReady, runtimeHome }: {
     if (osRootEeId) chat.setEeId(osRootEeId);
   };
 
-  useEffect(() => window.octopusTransport?.onNativeClientCommand?.((command) => {
+  useEffect(() => window.phobosTransport?.onNativeClientCommand?.((command) => {
     if (command === "new_chat") {
       startNewTask();
       return;
@@ -82,10 +82,10 @@ export function QuickTaskWindow({ accessProfile, runtimeReady, runtimeHome }: {
     <main className="quick-task-window">
       <header className="quick-task-titlebar">
         <div className="quick-task-brand">
-          <img alt="" src="./octopus-logo.png" />
+          <img alt="" src="./phobos-logo.png" />
           <span className="quick-task-title-copy">
             <strong>{activeTitle}</strong>
-            <small>{chat.activeRun ? "Octopus OS task" : "New Octopus OS task"}</small>
+            <small>{chat.activeRun ? "Phobos OS task" : "New Phobos OS task"}</small>
           </span>
         </div>
         <div className="quick-task-title-actions">
@@ -103,15 +103,15 @@ export function QuickTaskWindow({ accessProfile, runtimeReady, runtimeHome }: {
           <button aria-label="Start another quick task" onClick={startNewTask} title="New task" type="button"><Glyph name="newTask" size={15} /></button>
           {chat.activeRunId ? (
             <button
-              aria-label="Open task in main Octopus window"
-              onClick={() => void window.octopusTransport?.openRunInMain?.(chat.activeRunId).catch((failure) => appToast.danger(formatFailure(failure)))}
-              title="Open in Octopus"
+              aria-label="Open task in main Phobos window"
+              onClick={() => void window.phobosTransport?.openRunInMain?.(chat.activeRunId).catch((failure) => appToast.danger(formatFailure(failure)))}
+              title="Open in Phobos"
               type="button"
             >
               <Glyph name="openExternal" size={15} />
             </button>
           ) : null}
-          <button aria-label="Close quick task" onClick={() => window.octopusTransport?.windowControl("close")} title="Close" type="button"><Glyph name="close" size={15} /></button>
+          <button aria-label="Close quick task" onClick={() => window.phobosTransport?.windowControl("close")} title="Close" type="button"><Glyph name="close" size={15} /></button>
         </div>
         {historyOpen ? (
           <div aria-label="Recent tasks" className="quick-task-history" ref={historyRef} role="menu">
@@ -141,7 +141,7 @@ export function QuickTaskWindow({ accessProfile, runtimeReady, runtimeHome }: {
         {!visibleMessages.length ? (
           <motion.div animate={{ opacity: 1, y: 0 }} className="quick-task-empty" initial={{ opacity: 0, y: 4 }}>
             <Glyph name="chat" size={19} />
-            <div><strong>What should Octopus work on?</strong><span>This opens a normal task through the declared operator interface.</span></div>
+            <div><strong>What should Phobos work on?</strong><span>This opens a normal task through the declared operator interface.</span></div>
           </motion.div>
         ) : (
           <AnimatePresence initial={false}>
@@ -256,8 +256,8 @@ export function QuickTaskWindow({ accessProfile, runtimeReady, runtimeHome }: {
 export function QuickTaskAccessUnavailable() {
   return (
     <main className="quick-task-window is-unavailable">
-      <header className="quick-task-titlebar"><div className="quick-task-brand"><img alt="" src="./octopus-logo.png" /><span>Quick task</span></div><button aria-label="Close quick task" onClick={() => window.octopusTransport?.windowControl("close")} type="button"><Glyph name="close" size={15} /></button></header>
-      <div className="quick-task-empty"><Glyph name="lock" size={19} /><div><strong>Octopus is locked</strong><span>Unlock the main application before opening Quick task.</span></div></div>
+      <header className="quick-task-titlebar"><div className="quick-task-brand"><img alt="" src="./phobos-logo.png" /><span>Quick task</span></div><button aria-label="Close quick task" onClick={() => window.phobosTransport?.windowControl("close")} type="button"><Glyph name="close" size={15} /></button></header>
+      <div className="quick-task-empty"><Glyph name="lock" size={19} /><div><strong>Phobos is locked</strong><span>Unlock the main application before opening Quick task.</span></div></div>
     </main>
   );
 }

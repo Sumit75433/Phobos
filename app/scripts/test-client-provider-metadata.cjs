@@ -8,7 +8,7 @@ const { createChatgptSignIn } = require("../electron/chatgptSignIn.cjs");
 const { createClientProviderMetadata, validateProviderModelSelection } = require("../electron/clientProviderMetadata.cjs");
 
 test("desktop setup and paginated model discovery work without a Home, socket, or ledger", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-client-provider-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-client-provider-"));
   const binary = path.join(root, "codex-fixture.cjs");
   const methods = path.join(root, "methods.jsonl");
   let opened = 0, accountHome = root;
@@ -72,7 +72,7 @@ readline.createInterface({input:process.stdin}).on('line', line => {
 });
 
 test("account failures remain explicit and unsupported providers never reach Codex", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-client-provider-failure-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-client-provider-failure-"));
   try {
     const folder = path.join(root, "interface", "provider");
     await fs.mkdir(folder, { recursive: true });
@@ -96,7 +96,7 @@ test("account failures remain explicit and unsupported providers never reach Cod
 });
 
 function nativeConfig() {
-  return { residual_ambient: { private_auth_store: { auth_file_env: "OCTOPUS_MACHINE_CODEX_AUTH_FILE" } }, private_config: {
+  return { residual_ambient: { private_auth_store: { auth_file_env: "PHOBOS_MACHINE_CODEX_AUTH_FILE" } }, private_config: {
     client_metadata: { schema_version: 1, module: "interface://native-metadata/packages/client.cjs" },
   } };
 }
@@ -105,7 +105,7 @@ async function installNativeMetadata(registry) {
   const folder = path.join(registry, "interface/native-metadata/packages");
   await fs.mkdir(folder, { recursive: true });
   await fs.writeFile(path.join(folder, "../interface.json"), JSON.stringify({ id: "native-metadata", interface_type: "world", role: "provider", interface_driver_config: nativeConfig() }));
-  await fs.copyFile(path.resolve(__dirname, "../../registry/interface/world_provider_codex/packages/octopus-provider-codex/client-metadata.cjs"), path.join(folder, "client.cjs"));
+  await fs.copyFile(path.resolve(__dirname, "../../registry/interface/world_provider_codex/packages/phobos-provider-codex/client-metadata.cjs"), path.join(folder, "client.cjs"));
 }
 
 test("Claude Code exposes its declared model catalogue without consulting the Codex account", async () => {
@@ -120,7 +120,7 @@ test("Claude Code exposes its declared model catalogue without consulting the Co
 });
 
 test("catalogue uses declared data or owner modules independently of provider and adapter names", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "octopus-catalogue-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "phobos-catalogue-"));
   let selectedRoot = root, calls = 0;
   const row = model => ({ model, displayName: model, supportedReasoningEfforts: ["high"], defaultReasoningEffort: "high", showInPicker: true });
   const declared = model => ({ model, display_name: model, supported_reasoning_efforts: ["high"], default_reasoning_effort: "high", show_in_picker: true });

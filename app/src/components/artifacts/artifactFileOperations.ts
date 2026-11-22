@@ -31,7 +31,7 @@ export async function resolveArtifactFile(reference: ArtifactReference): Promise
 }
 
 export async function openArtifactFile(file: ArtifactFile, action: "open" | "reveal") {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.openClientFile) throw new Error("Native file opening is unavailable.");
   await transport.openClientFile({
     action,
@@ -41,7 +41,7 @@ export async function openArtifactFile(file: ArtifactFile, action: "open" | "rev
 }
 
 export async function listArtifactFileOpenTargets(file: ArtifactFile) {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.listClientFileOpenTargets) throw new Error("Native application discovery is unavailable.");
   return transport.listClientFileOpenTargets({
     bytes: file.bytes,
@@ -50,7 +50,7 @@ export async function listArtifactFileOpenTargets(file: ArtifactFile) {
 }
 
 export async function openArtifactFileWithApplication(file: ArtifactFile, applicationId: string) {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.openClientFileWithApplication) throw new Error("Native application opening is unavailable.");
   await transport.openClientFileWithApplication({
     applicationId,
@@ -60,7 +60,7 @@ export async function openArtifactFileWithApplication(file: ArtifactFile, applic
 }
 
 export async function downloadArtifactFileCopy(file: ArtifactFile) {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.downloadClientFileCopy) throw new Error("The Downloads folder is unavailable.");
   return transport.downloadClientFileCopy({
     bytes: file.bytes,
@@ -69,7 +69,7 @@ export async function downloadArtifactFileCopy(file: ArtifactFile) {
 }
 
 export function startArtifactFileDrag(file: ArtifactFile) {
-  const transport = window.octopusTransport;
+  const transport = window.phobosTransport;
   if (!transport?.startClientFileDrag) return false;
   transport.startClientFileDrag({
     bytes: file.bytes,

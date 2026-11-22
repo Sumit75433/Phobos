@@ -9,7 +9,7 @@ export type ClientBrowserRequest =
   | { action: "navigate"; id: string; url: string }
   | { action: "layout"; id: string; visible: boolean; bounds?: { x: number; y: number; width: number; height: number } }
   | { action: "state" | "close" | "back" | "forward" | "reload" | "stop"; id: string };
-export const OPEN_WEB_LINK_EVENT = "octopus:open-web-link";
+export const OPEN_WEB_LINK_EVENT = "phobos:open-web-link";
 
 export function openWebLink(url: string) {
   const event = new CustomEvent(OPEN_WEB_LINK_EVENT, { cancelable: true, detail: { url } });

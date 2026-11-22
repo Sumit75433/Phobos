@@ -72,7 +72,7 @@ async function cachedOperatorChatArtifactText({ home, entry, row, protocol, dire
 async function cachedOperatorChatTurnState({ projection, entry, protocol, reduce, resolve }) {
   const initial = { open: false, state: "idle", lastMovementSeq: -1, updatedAtMs: 0 };
   const rows = [...entry.activity].sort((left, right) => left.seq - right.seq);
-  const ledgerPath = path.join(projection.octopusHome, "ledger", "movements.jsonl");
+  const ledgerPath = path.join(projection.phobosHome, "ledger", "movements.jsonl");
   if (!rows.length || rows.some(row => row.source_file !== ledgerPath)) return reduce(initial, rows, resolve);
   const ledgerStat = await fs.stat(ledgerPath);
   const scope = operatorChatExecutionScope(entry);
@@ -81,7 +81,7 @@ async function cachedOperatorChatTurnState({ projection, entry, protocol, reduce
     entry.runId, entry.chatInterfaceId, operatorChatRuntimeProviderId(entry), entry.externalInputs,
     scope && [[...scope.checkpoints].sort(), scope.sourceMovementSeq],
     client?.client_surface_role, client?.voice_context?.delegation_interface_id, protocol]);
-  const directory = path.join(projection.octopusHome, "client", "projection-cache", "turns");
+  const directory = path.join(projection.phobosHome, "client", "projection-cache", "turns");
   const file = path.join(directory, `${digest([entry.runId, entry.chatInterfaceId])}.json`);
   const warn = (error) => projection.warnings?.push(`Task status cache ${entry.runId}: ${String(error?.message ?? error)}`);
   let checkpoint;
@@ -92,7 +92,7 @@ async function cachedOperatorChatTurnState({ projection, entry, protocol, reduce
       && value.rowsDigest === rowDigest(rows, value.count)
       && value.state.lastMovementSeq === rows[value.count - 1].seq
       && typeof value.state.open === "boolean" && ["idle", "waiting", "working", "failed"].includes(value.state.state)
-      && await verifiedArtifactFilesUnchanged(value.files, path.join(projection.octopusHome, "ledger", "blobs"))) {
+      && await verifiedArtifactFilesUnchanged(value.files, path.join(projection.phobosHome, "ledger", "blobs"))) {
       const state = { ...value.state, nativeTurns: new Map(value.state.nativeTurns),
         recordedInputs: new Map(value.state.recordedInputs.map(([key, ids]) => [key, new Set(ids)])) };
       checkpoint = { ...value, state };

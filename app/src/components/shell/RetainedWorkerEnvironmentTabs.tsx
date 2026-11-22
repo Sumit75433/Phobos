@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import type { AdmittedClientSurfaceDocument } from "../../client-surfaces/types";
 import type { TopologySnapshot } from "../../data/topology";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { WorkspacePaneTabState } from "../../shell/clientWindowModel";
 import type { ProjectedAssistantCodeComment } from "../chat/assistantDirectives";
 import type { WorkerEnvironmentPaneTarget } from "../worker-environment/workerEnvironmentPane";
@@ -10,7 +10,7 @@ import { SurfaceLoadingState, SurfaceRenderBoundary } from "./SurfaceBoundary";
 const WorkerEnvironmentPaneTab = lazy(() => import("../worker-environment/WorkerEnvironmentPaneTab").then((module) => ({ default: module.WorkerEnvironmentPaneTab })));
 
 type Props = {
-  accessProfile: OctopusClientAccessProfile;
+  accessProfile: PhobosClientAccessProfile;
   active: boolean;
   activeTabId: string;
   assistantCodeComments?: ProjectedAssistantCodeComment[];

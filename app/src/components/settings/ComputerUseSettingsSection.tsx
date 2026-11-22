@@ -16,8 +16,8 @@ export function ComputerUseSettingsSection() {
     let cancelled = false;
     const read = async () => {
       try {
-        if (!window.octopusTransport?.desktopComputerUseSettings) throw new Error("Computer Use Settings is unavailable.");
-        const value = await window.octopusTransport.desktopComputerUseSettings({ operation: "status" });
+        if (!window.phobosTransport?.desktopComputerUseSettings) throw new Error("Computer Use Settings is unavailable.");
+        const value = await window.phobosTransport.desktopComputerUseSettings({ operation: "status" });
         if (!cancelled) { setStatus(value); setError(""); }
       } catch (failure) { if (!cancelled) { setStatus(null); setError(failure instanceof Error ? failure.message : String(failure)); } }
     };
@@ -31,8 +31,8 @@ export function ComputerUseSettingsSection() {
     if (busy) return;
     setBusy(true); setError("");
     try {
-      if (!window.octopusTransport?.desktopComputerUseSettings) throw new Error("Computer Use Settings is unavailable.");
-      await window.octopusTransport.desktopComputerUseSettings({ operation: "setup" });
+      if (!window.phobosTransport?.desktopComputerUseSettings) throw new Error("Computer Use Settings is unavailable.");
+      await window.phobosTransport.desktopComputerUseSettings({ operation: "setup" });
     } catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
     finally { setBusy(false); setRevision(value => value + 1); }
   }
@@ -40,20 +40,20 @@ export function ComputerUseSettingsSection() {
     if (busy) return;
     setBusy(true); setError("");
     try {
-      if (!window.octopusTransport?.desktopComputerUseSettings) throw new Error("Computer Use Settings is unavailable.");
-      const value = await window.octopusTransport.desktopComputerUseSettings({ operation: "set_enabled", enabled });
+      if (!window.phobosTransport?.desktopComputerUseSettings) throw new Error("Computer Use Settings is unavailable.");
+      const value = await window.phobosTransport.desktopComputerUseSettings({ operation: "set_enabled", enabled });
       setStatus(value);
-      if (value.enabled && !value.ready) await window.octopusTransport.desktopComputerUseSettings({ operation: "setup" });
+      if (value.enabled && !value.ready) await window.phobosTransport.desktopComputerUseSettings({ operation: "setup" });
     } catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
     finally { setBusy(false); setRevision(value => value + 1); }
   }
 
   return <section className="settings-section">
-    <SettingsHeading title="Computer use" description="Manage how Octopus uses other applications on your computer." />
+    <SettingsHeading title="Computer use" description="Manage how Phobos uses other applications on your computer." />
     <OcGroup title="Control">
       <OcCard {...settingsTargetProps("computer-use.setup")}>
         <OcSettingsRow label={<span className="flex items-center gap-3"><Glyph name="desktop" size={20} />Any App</span>}
-          description="Let Octopus use apps on your computer. You choose which apps it can access."
+          description="Let Phobos use apps on your computer. You choose which apps it can access."
           control={<div className="settings-inline-actions">
             <OcSwitch label="Enable Computer use" checked={status?.enabled ?? false} disabled={busy || !status} onCheckedChange={enabled => void toggle(enabled)} />
           </div>} />

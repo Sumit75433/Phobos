@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "../icon-glyphs/chat";
 import { loadChatRunMessages, loadChatRuns, type ChatRun, type ChatRunMessage } from "../../chatRuns";
-import type { OctopusClientAccessProfile } from "../../electron";
+import type { PhobosClientAccessProfile } from "../../electron";
 import type { RunProjection, WorkerEnvironmentProjection } from "../../data/topology";
 import { useProjectionGeneration } from "../../projectionLive";
 import { useRuntimeTopology } from "../../runtimeTopology";
@@ -13,7 +13,7 @@ import { defaultWorkerEnvironmentPaneTarget } from "../worker-environment/worker
 import { MessageContent } from "./MessageContent";
 import "./chat.css";
 
-export function TaskMonitorWindow({ accessProfile }: { accessProfile: OctopusClientAccessProfile }) {
+export function TaskMonitorWindow({ accessProfile }: { accessProfile: PhobosClientAccessProfile }) {
   const runId = useMemo(() => new URLSearchParams(window.location.search).get("runId")?.trim() ?? "", []);
   const generation = useProjectionGeneration();
   const topology = useRuntimeTopology(Boolean(runId), runId ? [runId] : []);
@@ -78,7 +78,7 @@ export function TaskMonitorWindow({ accessProfile }: { accessProfile: OctopusCli
   }, [generation, runId]);
 
   useEffect(() => {
-    document.title = `${run?.title || "Task Monitor"} — Octopus`;
+    document.title = `${run?.title || "Task Monitor"} — Phobos`;
   }, [run?.title]);
 
   useEffect(() => {
@@ -88,11 +88,11 @@ export function TaskMonitorWindow({ accessProfile }: { accessProfile: OctopusCli
 
   const openMain = () => {
     if (!runId) return;
-    void window.octopusTransport?.openRunInMain?.(runId).catch((failure) => appToast.danger(formatFailure(failure)));
+    void window.phobosTransport?.openRunInMain?.(runId).catch((failure) => appToast.danger(formatFailure(failure)));
   };
 
   const togglePinned = () => {
-    void window.octopusTransport?.setTaskMonitorWindowPinned?.(!pinned)
+    void window.phobosTransport?.setTaskMonitorWindowPinned?.(!pinned)
       .then((outcome) => setPinned(outcome.pinned))
       .catch((failure) => appToast.danger(formatFailure(failure)));
   };
@@ -179,7 +179,7 @@ function openWorkerEnvironment(
   surfaces: ReturnType<typeof useClientSurfaceDocuments>["workerEnvironmentSurfaces"],
 ) {
   const target = defaultWorkerEnvironmentPaneTarget(environment, surfaces);
-  void window.octopusTransport?.openWorkerEnvironmentWindow?.({
+  void window.phobosTransport?.openWorkerEnvironmentWindow?.({
     runId,
     workerEnvironmentId: environment.id,
     panelKind: target.panelKind === "file" ? "files" : target.panelKind ?? "overview",
@@ -194,7 +194,7 @@ function messageTitle(message: ChatRunMessage): string {
   if (message.eventKind === "plan") return "Plan";
   if (message.eventKind === "web_search") return "Web search";
   if (message.eventKind === "approval" || message.eventKind === "elicitation" || message.eventKind === "user_input") return "Operator request";
-  return message.role === "user" ? "Operator" : message.error ? "Error" : "Octopus";
+  return message.role === "user" ? "Operator" : message.error ? "Error" : "Phobos";
 }
 
 function formatTime(value: number): string {
@@ -203,7 +203,7 @@ function formatTime(value: number): string {
 }
 
 function closeWindow() {
-  window.octopusTransport?.windowControl("close");
+  window.phobosTransport?.windowControl("close");
 }
 
 function formatFailure(value: unknown): string {

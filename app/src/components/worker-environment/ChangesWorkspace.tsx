@@ -5,12 +5,12 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEve
 import { OcMenuItem, OcMenuMessage, OcMenuSurface } from "../../design-system/components";
 import { useAppearance } from "../../appearance";
 import type { WorkerEnvironmentSurfaceProjection } from "../../data/topology";
-import type { OctopusWorkerEnvironmentGitSnapshot, OctopusWorkerEnvironmentOperatorAction } from "../../electron";
+import type { PhobosWorkerEnvironmentGitSnapshot, PhobosWorkerEnvironmentOperatorAction } from "../../electron";
 import { copyText } from "../../runtimeFormat";
 import { appToast } from "../../toasts";
 import { Glyph } from "../IconGlyphs";
-import { octopusDiffRawUnsafeCss } from "../settings/octopusDiffUnsafeCss";
-import { octopusDiffThemeName, registerOctopusDiffThemes } from "../settings/octopusDiffThemes";
+import { phobosDiffRawUnsafeCss } from "../settings/phobosDiffUnsafeCss";
+import { phobosDiffThemeName, registerPhobosDiffThemes } from "../settings/phobosDiffThemes";
 import {
   OperatorDiffReviewAnnotation,
   OperatorDiffReviewBar,
@@ -24,7 +24,7 @@ import {
 } from "./OperatorDiffReview";
 import { directivePathWithinRoot, normalizeDirectivePath, type ProjectedAssistantCodeComment } from "../chat/assistantDirectives";
 import { WorktreeOperatorConfirm, type WorktreeOperatorConfirmation } from "./WorktreeOperatorActions";
-import { OctopusFileTree, OctopusFilterField, octopusTreeAncestors } from "../OctopusSurface";
+import { PhobosFileTree, PhobosFilterField, phobosTreeAncestors } from "../PhobosSurface";
 import {
   dispatchWorkerEnvironmentLocalMutation,
   subscribeWorkerEnvironmentLocalMutations,
@@ -71,14 +71,14 @@ type ReviewFileMenu = {
 const MAX_REVIEW_EXCERPT_LINES = 20;
 const MAX_REVIEW_EXCERPT_CHARS = 2_400;
 
-const diffThemeRegistrationKey = Symbol.for("octopus.diff-themes.registered");
+const diffThemeRegistrationKey = Symbol.for("phobos.diff-themes.registered");
 const diffThemeRegistry = globalThis as typeof globalThis & { [diffThemeRegistrationKey]?: boolean };
 if (!diffThemeRegistry[diffThemeRegistrationKey]) {
-  registerOctopusDiffThemes();
+  registerPhobosDiffThemes();
   diffThemeRegistry[diffThemeRegistrationKey] = true;
 }
 
-const changesUnsafeCss = `${octopusDiffRawUnsafeCss}
+const changesUnsafeCss = `${phobosDiffRawUnsafeCss}
 [data-file] {
   --diffs-font-family: var(--font-mono);
   --diffs-font-size: var(--code-font-size, 12px);
@@ -93,11 +93,11 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
   const [wrap, setWrap] = useState(() => readReviewBoolean("wrap", false));
   const [wordDiffs, setWordDiffs] = useState(() => readReviewBoolean("word-diffs", true));
   const [hideWhitespace, setHideWhitespace] = useState(() => readReviewBoolean("hide-whitespace", false));
-  const [gitSnapshot, setGitSnapshot] = useState<OctopusWorkerEnvironmentGitSnapshot | null>(null);
+  const [gitSnapshot, setGitSnapshot] = useState<PhobosWorkerEnvironmentGitSnapshot | null>(null);
   const [gitSnapshotError, setGitSnapshotError] = useState("");
   const [gitSnapshotLoading, setGitSnapshotLoading] = useState(directGit);
   const [gitReloadTick, setGitReloadTick] = useState(0);
-  const gitSnapshotRef = useRef<OctopusWorkerEnvironmentGitSnapshot | null>(null);
+  const gitSnapshotRef = useRef<PhobosWorkerEnvironmentGitSnapshot | null>(null);
   const gitInspectInFlightRef = useRef(false);
   const operatorOriginIdRef = useRef(crypto.randomUUID());
   const effectiveSurface = useMemo<WorkerEnvironmentSurfaceProjection>(() => directGit && gitSnapshot
@@ -185,7 +185,7 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
   const [reviewSelection, setReviewSelection] = useState<OperatorDiffReviewSelection | null>(null);
   const [pendingReview, setPendingReview] = useState<OperatorDiffReviewSelection | null>(null);
   const [operatorChanges, setOperatorChanges] = useState<Record<string, OperatorChangeState>>({});
-  const [pendingOperatorAction, setPendingOperatorAction] = useState<OctopusWorkerEnvironmentOperatorAction | null>(null);
+  const [pendingOperatorAction, setPendingOperatorAction] = useState<PhobosWorkerEnvironmentOperatorAction | null>(null);
   const [operatorConfirmation, setOperatorConfirmation] = useState<WorktreeOperatorConfirmation | null>(null);
   const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(() => initialCollapsedPaths(changes));
   const [viewedPaths, setViewedPaths] = useState<Set<string>>(() => readViewedPaths(surface.id, projectionRevision));
@@ -205,7 +205,7 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
     }
     if (!active) return;
     if (gitInspectInFlightRef.current) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.inspectWorkerEnvironmentGit) {
       setGitSnapshot(null);
       setGitSnapshotError("Git review requires the desktop client.");
@@ -335,8 +335,8 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
     };
   }, [fileMenu, jumpMenuOpen, optionsMenuOpen, scopeMenuOpen]);
 
-  const darkTheme = octopusDiffThemeName("dark", appearance.darkCodeTheme);
-  const lightTheme = octopusDiffThemeName("light", appearance.lightCodeTheme);
+  const darkTheme = phobosDiffThemeName("dark", appearance.darkCodeTheme);
+  const lightTheme = phobosDiffThemeName("light", appearance.lightCodeTheme);
   useEffect(() => {
     let active = true;
     setHighlightReady(false);
@@ -469,8 +469,8 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
     setReviewSelection(null);
   }
 
-  async function performOperatorAction(action: OctopusWorkerEnvironmentOperatorAction, paths: string[]) {
-    const transport = window.octopusTransport;
+  async function performOperatorAction(action: PhobosWorkerEnvironmentOperatorAction, paths: string[]) {
+    const transport = window.phobosTransport;
     if (!transport?.performWorkerEnvironmentOperatorAction) {
       appToast.danger("Worker Environment operator actions require the desktop client.");
       return;
@@ -486,7 +486,7 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
         workerEnvironmentId,
       });
       if (
-        !outcome.outsideOctopusEvidence
+        !outcome.outsidePhobosEvidence
         || outcome.action !== action
         || outcome.projectionRevision !== effectiveRevision
         || outcome.runId !== runId
@@ -516,12 +516,12 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
         workerEnvironmentId,
       });
       appToast.success(action === "revert"
-        ? `${paths.length} ${paths.length === 1 ? "change" : "changes"} reverted outside Octopus evidence.`
+        ? `${paths.length} ${paths.length === 1 ? "change" : "changes"} reverted outside Phobos evidence.`
         : action === "apply"
-          ? `${paths.length} ${paths.length === 1 ? "change" : "changes"} applied outside Octopus evidence.`
+          ? `${paths.length} ${paths.length === 1 ? "change" : "changes"} applied outside Phobos evidence.`
           : action === "stage"
-            ? `${paths.length} ${paths.length === 1 ? "file" : "files"} staged outside Octopus evidence.`
-            : `${paths.length} ${paths.length === 1 ? "file" : "files"} unstaged outside Octopus evidence.`);
+            ? `${paths.length} ${paths.length === 1 ? "file" : "files"} staged outside Phobos evidence.`
+            : `${paths.length} ${paths.length === 1 ? "file" : "files"} unstaged outside Phobos evidence.`);
       if (directGit && (action === "stage" || action === "unstage")) {
         setGitReloadTick((value) => value + 1);
       }
@@ -618,7 +618,7 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
 
   async function revealChangeInFileManager(path: string) {
     if (!fileSurface) return;
-    const transport = window.octopusTransport;
+    const transport = window.phobosTransport;
     if (!transport?.performWorkerEnvironmentFileSystemAction) {
       appToast.danger("File reveal requires the desktop client.");
       return;
@@ -714,7 +714,7 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
             }} type="button"><Glyph name="search" size={14} /></button>
             {jumpMenuOpen ? (
               <div className="we-review-jump-popover">
-                <OctopusFilterField autoFocus inputId="review-jump-file" inputRef={jumpSearchRef} label="Jump to file" onQueryChange={setQuery} placeholder="Search files" searchQuery={query} />
+                <PhobosFilterField autoFocus inputId="review-jump-file" inputRef={jumpSearchRef} label="Jump to file" onQueryChange={setQuery} placeholder="Search files" searchQuery={query} />
                 <div className="we-review-jump-results">
                   {visibleChanges.map((change) => (
                     <button key={change.path} onClick={() => { revealChange(change.path); setJumpMenuOpen(false); }} type="button">
@@ -896,11 +896,11 @@ export function ChangesWorkspace({ active, assistantCodeComments = [], emptyIllu
 
       {filesOpen ? (
         <aside className="we-review-files">
-          <OctopusFilterField inputId="review-file-tree-search" inputRef={fileSearchRef} label="Filter files" onQueryChange={setQuery} placeholder="Filter files…" searchQuery={query} />
-          <div className="we-review-octopus-tree">
+          <PhobosFilterField inputId="review-file-tree-search" inputRef={fileSearchRef} label="Filter files" onQueryChange={setQuery} placeholder="Filter files…" searchQuery={query} />
+          <div className="we-review-phobos-tree">
             {visibleChanges.length ? (
-              <OctopusFileTree
-                initialExpandedPaths={octopusTreeAncestors(visibleChanges.map((change) => change.path))}
+              <PhobosFileTree
+                initialExpandedPaths={phobosTreeAncestors(visibleChanges.map((change) => change.path))}
                 initialSelectedPaths={activePath ? [activePath] : []}
                 onOpenPath={(path) => openChange(path)}
                 onSelectPath={revealChange}
@@ -1019,7 +1019,7 @@ function initialCollapsedPaths(changes: ProjectedChange[]): Set<string> {
 
 function readLayout(surfaceId: string): DiffLayout {
   try {
-    return localStorage.getItem(`octopus.we.changes.layout:${surfaceId}`) === "split" ? "split" : "unified";
+    return localStorage.getItem(`phobos.we.changes.layout:${surfaceId}`) === "split" ? "split" : "unified";
   } catch {
     return "unified";
   }
@@ -1027,12 +1027,12 @@ function readLayout(surfaceId: string): DiffLayout {
 
 function persistLayout(surfaceId: string, layout: DiffLayout) {
   try {
-    localStorage.setItem(`octopus.we.changes.layout:${surfaceId}`, layout);
+    localStorage.setItem(`phobos.we.changes.layout:${surfaceId}`, layout);
   } catch {}
 }
 
 function reviewPreferenceKey(name: string): string {
-  return `octopus.we.review.${name}.v1`;
+  return `phobos.we.review.${name}.v1`;
 }
 
 function readReviewBoolean(name: string, fallback: boolean): boolean {
@@ -1051,7 +1051,7 @@ function persistReviewBoolean(name: string, value: boolean) {
 }
 
 function viewedPathsKey(surfaceId: string, revision: string): string {
-  return `octopus.we.review.viewed.v1:${surfaceId}:${revision}`;
+  return `phobos.we.review.viewed.v1:${surfaceId}:${revision}`;
 }
 
 function readViewedPaths(surfaceId: string, revision: string): Set<string> {

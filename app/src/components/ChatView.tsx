@@ -46,7 +46,7 @@ import {
 } from "./worker-environment/workerEnvironmentPane";
 import "./chat/chat.css";
 import { useAppearance } from "../appearance";
-import { OctopusSwarm } from "./voice/OctopusSwarm";
+import { PhobosSwarm } from "./voice/PhobosSwarm";
 
 export function ChatView({
   workspace: chat,
@@ -71,7 +71,7 @@ export function ChatView({
 }) {
   const headerActionsHost = useWorkspacePaneHeaderActionsHost();
   const clientPreferences = useClientPreferences();
-  const { octopuses } = useAppearance();
+  const { phoboses } = useAppearance();
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [headerEdgeScrolled, setHeaderEdgeScrolled] = useState(false);
   const [summaryDisplayMode, setSummaryDisplayMode] = useState<"overlay" | "shift" | "gutter">(() => taskSummaryDisplayMode(window.innerWidth));
@@ -111,7 +111,7 @@ export function ChatView({
     return activeRunProjection.workerEnvironment.id ? [activeRunProjection.workerEnvironment] : [];
   }, [activeRunProjection]);
   const projectedFileSources = useMemo<ProjectedFileSource[]>(() => {
-    if (chat.accessProfile !== "live" || !window.octopusTransport?.readWorkerEnvironmentFileAttachment || !activeRunProjection) return [];
+    if (chat.accessProfile !== "live" || !window.phobosTransport?.readWorkerEnvironmentFileAttachment || !activeRunProjection) return [];
     const environments = activeRunProjection.workerEnvironments.length
       ? activeRunProjection.workerEnvironments
       : activeRunProjection.workerEnvironment.id
@@ -201,10 +201,10 @@ export function ChatView({
           .find((element) => element.dataset.messageId === request.messageId);
         if (!target) return;
         target.scrollIntoView({ behavior: "smooth", block: "center" });
-        target.classList.remove("octopus-message-search-reveal");
+        target.classList.remove("phobos-message-search-reveal");
         void target.offsetWidth;
-        target.classList.add("octopus-message-search-reveal");
-        window.setTimeout(() => target.classList.remove("octopus-message-search-reveal"), 1_600);
+        target.classList.add("phobos-message-search-reveal");
+        window.setTimeout(() => target.classList.remove("phobos-message-search-reveal"), 1_600);
       });
     };
     reveal();
@@ -325,10 +325,10 @@ export function ChatView({
       .find((element) => element.dataset.messageId === messageId);
     if (!target) return;
     target.scrollIntoView({ behavior: "smooth", block: "center" });
-    target.classList.remove("octopus-message-search-reveal");
+    target.classList.remove("phobos-message-search-reveal");
     void target.offsetWidth;
-    target.classList.add("octopus-message-search-reveal");
-    window.setTimeout(() => target.classList.remove("octopus-message-search-reveal"), 1_600);
+    target.classList.add("phobos-message-search-reveal");
+    window.setTimeout(() => target.classList.remove("phobos-message-search-reveal"), 1_600);
   }
 
   function moveFindResult(direction: -1 | 1) {
@@ -596,7 +596,7 @@ export function ChatView({
               dropEnabled={composerVisible}
               emptyLabel={chat.activeRun?.archived ? "No messages in this archived task" : undefined}
               emptyState={chat.loadingMessages ? "loading-task" : chat.activeRunId || !composerVisible ? "empty-task" : "new-task"}
-              backdrop={octopuses ? <OctopusSwarm runs={chat.runs} /> : undefined}
+              backdrop={phoboses ? <PhobosSwarm runs={chat.runs} /> : undefined}
               findActiveIndex={activeFindIndex}
               findQuery={findOpen ? chat.messageQuery : ""}
               messages={chat.loadingMessages ? [] : chat.renderedMessages}

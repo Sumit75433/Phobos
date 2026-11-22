@@ -14,7 +14,7 @@ const { absolutePath, assertAdmitted, isObject, numberValue, optionalServiceTier
 
 async function submitOperatorTurnControl(options, request) {
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const interfaceId = safeSegment(request?.interfaceId, "interfaceId");
   const runId = safeSegment(request?.runId, "runId");
   const controlId = safeContractToken(request?.controlId, "controlId");
@@ -23,15 +23,15 @@ async function submitOperatorTurnControl(options, request) {
     throw new Error("operator turn control action must be 'interrupt', 'resume', or 'stop'");
   }
   const timeoutMs = numberValue(request?.timeoutMs, 45_000);
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
   const runDocument = await readJsonDocumentIfPresent(path.join(runsDir, `${runId}.json`));
   if (!runDocument) throw new Error(`operator chat run '${runId}' does not exist`);
   const identity = chatIdentityFromRunRecord(config, runId, runDocument.value);
   if (identity.interfaceId !== interfaceId) {
     throw new Error(`operator chat run '${runId}' is not owned by interface '${interfaceId}'`);
   }
-  await assertExactOperatorClientInterface(octopusHome, interfaceId);
-  await waitForInterfaceSocket(octopusHome, interfaceId, timeoutMs);
+  await assertExactOperatorClientInterface(phobosHome, interfaceId);
+  await waitForInterfaceSocket(phobosHome, interfaceId, timeoutMs);
   const artifactRoot = path.join(
     absolutePath(options.clientArtifactsRoot(interfaceId), "clientArtifactsRoot"),
     "operator-chat",
@@ -46,7 +46,7 @@ async function submitOperatorTurnControl(options, request) {
     Buffer.from(JSON.stringify(payload)),
   );
   const verdict = await requiredFunction(options.handInArtifact, "handInArtifact")({
-    endpoint: interfaceEndpoint(octopusHome, interfaceId),
+    endpoint: interfaceEndpoint(phobosHome, interfaceId),
     interfaceId,
     manifest: { label, payload_path: payloadPath },
     timeoutMs,
@@ -106,10 +106,10 @@ async function planOperatorChatSurface(options, request) {
     throw new Error(`operator chat surface plan contains unknown fields: ${unknownFields.join(", ")}`);
   }
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const registryRoot = resolveRegistryRoot(options);
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
-  const eeInstancesRoot = await resolveEeInstancesRoot(octopusHome, options);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
+  const eeInstancesRoot = await resolveEeInstancesRoot(phobosHome, options);
   const chatId = safeSegment(request.chatId, "chatId");
   const cycle = safeSegment(request.cycle, "cycle");
   const providerInterfaceId = safeSegment(
@@ -136,12 +136,12 @@ async function planOperatorChatSurface(options, request) {
   }
   const continuation = await resolveContinuationState({
     config,
-    octopusHome,
+    phobosHome,
     requestedRunId: "",
     request: request.continuation,
   });
   const conversationState = await readConversationState({
-    octopusHome,
+    phobosHome,
     existing: null,
     runId,
     interfaceId: chatInterfaceId,
@@ -163,7 +163,7 @@ async function planOperatorChatSurface(options, request) {
   );
   const selectedTools = operatorSelectedTools(request.selectedTools);
   const topologyPlan = await planOperatorChatTopology({
-    octopusHome,
+    phobosHome,
     topologyPlanner: resolvePackageExecutable(
       config,
       resolveInstallationRoot(options),
@@ -295,10 +295,10 @@ async function planOperatorChatSurface(options, request) {
 
 async function planOperatorChatTaskAmendment(options, request) {
   const config = await readConfig();
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const registryRoot = resolveRegistryRoot(options);
-  const runsDir = await resolveRunRecordsRoot(octopusHome);
-  const eeInstancesRoot = await resolveEeInstancesRoot(octopusHome, options);
+  const runsDir = await resolveRunRecordsRoot(phobosHome);
+  const eeInstancesRoot = await resolveEeInstancesRoot(phobosHome, options);
   const runId = safeSegment(request?.runId, "runId");
   const expectedRunHash = safeSha256(request?.expectedRunHash, "expectedRunHash");
   const runPath = path.join(runsDir, `${runId}.json`);
@@ -356,7 +356,7 @@ async function planOperatorChatTaskAmendment(options, request) {
   const reasoningEffort = stringValue(providerPrivateConfig.reasoning_effort);
   const serviceTier = optionalServiceTier(providerPrivateConfig.service_tier);
   const conversationState = await readConversationState({
-    octopusHome,
+    phobosHome,
     existing: current.value,
     runId,
     interfaceId: identity.interfaceId,
@@ -366,7 +366,7 @@ async function planOperatorChatTaskAmendment(options, request) {
     continuation: null,
   });
   const topologyPlan = await planOperatorChatTopology({
-    octopusHome,
+    phobosHome,
     topologyPlanner: resolvePackageExecutable(
       config,
       resolveInstallationRoot(options),
@@ -435,7 +435,7 @@ async function planOperatorChatTaskAmendment(options, request) {
     tag: `run:${runId}`,
     expectedBeforeHash: expectedRunHash,
   });
-  await validatePlannedHostBindings({ octopusHome, registryRoot, plan: { writes, requiredToolIds: topologyPlan.required_tool_ids } });
+  await validatePlannedHostBindings({ phobosHome, registryRoot, plan: { writes, requiredToolIds: topologyPlan.required_tool_ids } });
   return {
     runId,
     writes,

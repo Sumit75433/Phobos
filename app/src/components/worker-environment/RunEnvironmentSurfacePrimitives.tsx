@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import { OcButton, OcDialog, OcDialogFooter, OcDialogHeader, OcEmptyState } from "../../design-system/components";
 import type { GlyphName } from "../IconGlyphs";
 import { Glyph } from "../IconGlyphs";
-import { OctopusEmptyState } from "../OctopusSurface";
+import { PhobosEmptyState } from "../PhobosSurface";
 
 export function ManualRoomControlWarning({ glyph, onCancel, onContinue, open, title }: {
   glyph: GlyphName;
@@ -22,7 +22,7 @@ export function ManualRoomControlWarning({ glyph, onCancel, onContinue, open, ti
         <div className="we-manual-control-dialog__icon"><Glyph name={glyph} size={20} /></div>
         <OcDialogHeader
           className="we-manual-control-dialog__copy p-0"
-          description={<><span className="block">Your clicks, typing, navigation, and scrolling in this room viewer are not recorded in Octopus evidence.</span><span className="block">The agent may observe the resulting page state, but your actions will not appear in Movements.</span></>}
+          description={<><span className="block">Your clicks, typing, navigation, and scrolling in this room viewer are not recorded in Phobos evidence.</span><span className="block">The agent may observe the resulting page state, but your actions will not appear in Movements.</span></>}
           title={title}
           titleId="we-manual-control-title"
         />
@@ -51,7 +51,7 @@ export function LiveSurfaceEmpty({ detail, glyph, illustration, title }: {
     );
   }
   return (
-    <OctopusEmptyState
+    <PhobosEmptyState
       className="h-full min-h-0 flex-1 select-none"
       description={detail}
       icon={illustration ?? <Glyph name={glyph ?? "ee"} size={32} />}

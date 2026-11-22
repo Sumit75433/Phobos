@@ -9,7 +9,7 @@ import threading
 import time
 import urllib.parse
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 from telegram_contract import require_int
 from telegram_contract import require_keys
@@ -17,12 +17,12 @@ from telegram_contract import require_object
 from telegram_contract import require_string
 
 
-INTERFACE_ID = os.environ["OCTOPUS_INTERFACE_ID"]
-INTERFACE_DIR = os.environ["OCTOPUS_INTERFACE_DIR"]
-VAR_DIR = os.environ["OCTOPUS_VAR_DIR"]
-MOVEMENTS_JSONL = os.environ["OCTOPUS_MOVEMENTS_JSONL"]
-BLOBS_DIR = os.environ["OCTOPUS_BLOBS_DIR"]
-LEDGER_INDEX_SQLITE = os.environ["OCTOPUS_LEDGER_INDEX_SQLITE"]
+INTERFACE_ID = os.environ["PHOBOS_INTERFACE_ID"]
+INTERFACE_DIR = os.environ["PHOBOS_INTERFACE_DIR"]
+VAR_DIR = os.environ["PHOBOS_VAR_DIR"]
+MOVEMENTS_JSONL = os.environ["PHOBOS_MOVEMENTS_JSONL"]
+BLOBS_DIR = os.environ["PHOBOS_BLOBS_DIR"]
+LEDGER_INDEX_SQLITE = os.environ["PHOBOS_LEDGER_INDEX_SQLITE"]
 PAYLOAD_DIR = os.path.join(VAR_DIR, "payloads")
 REQUEST_DIR = os.path.join(VAR_DIR, "operation-requests")
 CURSOR_PATH = os.path.join(VAR_DIR, "ledger-cursor.json")
@@ -227,8 +227,8 @@ def encode(value):
 def materialized_artifact_id(manifest_path, maximum):
     manifest = require_keys(json.loads(read_bounded_regular(manifest_path, 1048576, "materialized artifact manifest")), {"label", "payload_path"}, {"payload_content_hash"}, "Telegram materialized artifact manifest")
     payload = read_bounded_regular(manifest["payload_path"], maximum, "materialized artifact payload")
-    pinned = {"label": manifest["label"], "payload_path": manifest["payload_path"], "payload_content_hash": octopus_content_hash(payload)}
-    return f"{manifest['label']}:{octopus_content_hash(json.dumps(pinned, ensure_ascii=False, separators=(',', ':')).encode('utf-8'))}"
+    pinned = {"label": manifest["label"], "payload_path": manifest["payload_path"], "payload_content_hash": phobos_content_hash(payload)}
+    return f"{manifest['label']}:{phobos_content_hash(json.dumps(pinned, ensure_ascii=False, separators=(',', ':')).encode('utf-8'))}"
 
 
 def find_admitted_arrival_seq(artifact_id, max_row_bytes):
@@ -364,7 +364,7 @@ def content_hexdigest(content):
 def materialize_movement_payload(content, config):
     digest = content_hexdigest(content)
     manifest_bytes = read_bounded_regular(os.path.join(BLOBS_DIR, digest), config["outbound"]["max_manifest_bytes"], "cached artifact manifest")
-    if octopus_content_hash(manifest_bytes) != digest:
+    if phobos_content_hash(manifest_bytes) != digest:
         raise ValueError("Telegram cached artifact manifest failed content-address verification")
     manifest = require_object(json.loads(manifest_bytes), "Telegram cached artifact manifest")
     label = require_string(manifest.get("label"), "Telegram cached artifact label")
@@ -372,7 +372,7 @@ def materialize_movement_payload(content, config):
     if not isinstance(payload_digest, str) or not re.fullmatch(r"[0-9a-f]{64}", payload_digest):
         raise ValueError("Telegram cached artifact manifest has no payload hash")
     payload = read_bounded_regular(os.path.join(BLOBS_DIR, payload_digest), config["outbound"]["max_payload_bytes"], "cached artifact payload")
-    if octopus_content_hash(payload) != payload_digest:
+    if phobos_content_hash(payload) != payload_digest:
         raise ValueError("Telegram cached artifact payload failed content-address verification")
     return label, payload, digest
 
@@ -381,7 +381,7 @@ def artifact_blob(blob_id, maximum):
     if not isinstance(blob_id, str) or not re.fullmatch(r"[0-9a-f]{64}", blob_id):
         raise ValueError("Telegram file blob_id must be a content hash")
     content = read_bounded_regular(os.path.join(BLOBS_DIR, blob_id), maximum, "file upload blob")
-    if octopus_content_hash(content) != blob_id:
+    if phobos_content_hash(content) != blob_id:
         raise ValueError("Telegram file upload blob failed content-address verification")
     return content
 

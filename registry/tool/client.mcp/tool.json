@@ -2,7 +2,7 @@
   "id": "client.mcp",
   "interface": "system_context",
   "process": {
-    "bin": "target/debug/octopus-artifact-bound-tool",
+    "bin": "target/debug/phobos-artifact-bound-tool",
     "authority": {
       "read_root_slots": [],
       "write_root_slots": [],
@@ -25,7 +25,7 @@
     "operation": "mcp",
     "mcp": {
       "protocol_version": "2025-11-25",
-      "server_name": "octopus",
+      "server_name": "phobos",
       "server_version": "1",
       "tools": [
         {
@@ -122,7 +122,7 @@
         },
         {
           "name": "publish_widget",
-          "description": "Create or update an Octopus client widget or document. The complete input schema is the client renderer contract and is validated before emission; use its exact glyphs, targets and render nodes. Use the exact System presentation interface from the bound Home delivery artifact. The result proves artifact admission, not rendering or extension installation. Same document id with a larger revision replaces an earlier valid or rejected revision. Read the bound artifact-home-widget-authoring contract for delivery and native/sandbox documents.",
+          "description": "Create or update a Phobos client widget or document. The complete input schema is the client renderer contract and is validated before emission; use its exact glyphs, targets and render nodes. Use the exact System presentation interface from the bound Home delivery artifact. The result proves artifact admission, not rendering or extension installation. Same document id with a larger revision replaces an earlier valid or rejected revision. Read the bound artifact-home-widget-authoring contract for delivery and native/sandbox documents.",
           "input_schema": {
             "type": "object",
             "properties": {
@@ -133,7 +133,7 @@
               },
               "document": {
                 "type": "object",
-                "$ref": "https://octopus.local/schemas/client_surface_document.schema.json",
+                "$ref": "https://phobos.local/schemas/client_surface_document.schema.json",
                 "properties": {
                   "release_channel": {
                     "const": "stable"
@@ -150,8 +150,8 @@
             "$defs": {
               "client_surface": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "https://octopus.local/schemas/client_surface_document.schema.json",
-                "title": "Octopus Client Surface Document",
+                "$id": "https://phobos.local/schemas/client_surface_document.schema.json",
+                "title": "Phobos Client Surface Document",
                 "type": "object",
                 "required": [
                   "schema",
@@ -166,7 +166,7 @@
                 ],
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_surface"
+                    "const": "phobos.client_surface"
                   },
                   "schema_version": {
                     "const": 1
@@ -249,7 +249,7 @@
                   },
                   "glyph": {
                     "enum": [
-                      "octopus",
+                      "phobos",
                       "dashboard",
                       "registry",
                       "metrics",
@@ -536,7 +536,7 @@
                         "const": "projection"
                       },
                       "method": {
-                        "$ref": "https://octopus.local/schemas/projection_read_contract.schema.json#/$defs/clientSurfaceProjectionReadMethod"
+                        "$ref": "https://phobos.local/schemas/projection_read_contract.schema.json#/$defs/clientSurfaceProjectionReadMethod"
                       },
                       "params": {
                         "type": "object",
@@ -1381,8 +1381,8 @@
               },
               "projection_read": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "https://octopus.local/schemas/projection_read_contract.schema.json",
-                "title": "Octopus Client Projection Read Request",
+                "$id": "https://phobos.local/schemas/projection_read_contract.schema.json",
+                "title": "Phobos Client Projection Read Request",
                 "type": "object",
                 "required": [
                   "contract_version",
@@ -1537,7 +1537,7 @@
         },
         {
           "name": "open_client_surface",
-          "description": "Request navigation to an existing visible Octopus client surface using its exact surface_id. Use the bound Home delivery System presentation interface. Only the receiving Home client can apply this presentation action. Admission is not proof that a client has rendered it; unavailable or hidden surfaces refuse visibly. Does not execute external URLs, files, commands, or task mutations.",
+          "description": "Request navigation to an existing visible Phobos client surface using its exact surface_id. Use the bound Home delivery System presentation interface. Only the receiving Home client can apply this presentation action. Admission is not proof that a client has rendered it; unavailable or hidden surfaces refuse visibly. Does not execute external URLs, files, commands, or task mutations.",
           "input_schema": {
             "type": "object",
             "properties": {
@@ -1549,7 +1549,7 @@
                 "type": "object",
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_action"
+                    "const": "phobos.client_action"
                   },
                   "schema_version": {
                     "const": 1
@@ -1597,7 +1597,7 @@
                 "type": "object",
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_action"
+                    "const": "phobos.client_action"
                   },
                   "schema_version": {
                     "const": 1
@@ -1641,7 +1641,7 @@
         },
         {
           "name": "inspect_client",
-          "description": "Inspect the running Octopus client before writing an Extension or its data source. Read-only. The client returns client.action.result with request_id and client: the Extensions root, packages_root and package layout, contract schema files written by this client build, host vocabulary (categories, targets, slots, native nodes, glyphs, projection sources with params, host sources, client actions, limits), visible surfaces, every Extension with admission (pending/reviewed/dismissed/builtin), installation, setup and runtime issues, and refused packages with exact issues. extension_id narrows the Extension rows to one package. source previews what one client surface projection returns, bounded, so bindings can be written against real rows. Use client_action.interface from the bound Home delivery context and a unique request_id.  This call waits for the running client and returns the actual saved state or an explicit failure. Continue dependent work from this result in the same turn. Do not end the turn to wait, poll, repeat an admitted request, or use Computer Use for these controls.",
+          "description": "Inspect the running Phobos client before writing an Extension or its data source. Read-only. The client returns client.action.result with request_id and client: the Extensions root, packages_root and package layout, contract schema files written by this client build, host vocabulary (categories, targets, slots, native nodes, glyphs, projection sources with params, host sources, client actions, limits), visible surfaces, every Extension with admission (pending/reviewed/dismissed/builtin), installation, setup and runtime issues, and refused packages with exact issues. extension_id narrows the Extension rows to one package. source previews what one client surface projection returns, bounded, so bindings can be written against real rows. Use client_action.interface from the bound Home delivery context and a unique request_id.  This call waits for the running client and returns the actual saved state or an explicit failure. Continue dependent work from this result in the same turn. Do not end the turn to wait, poll, repeat an admitted request, or use Computer Use for these controls.",
           "input_schema": {
             "type": "object",
             "properties": {
@@ -1653,7 +1653,7 @@
                 "type": "object",
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_action"
+                    "const": "phobos.client_action"
                   },
                   "schema_version": {
                     "const": 1
@@ -1728,7 +1728,7 @@
                 "type": "object",
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_action"
+                    "const": "phobos.client_action"
                   },
                   "schema_version": {
                     "const": 1
@@ -1766,7 +1766,7 @@
         },
         {
           "name": "relaunch_client",
-          "description": "Restart the running Octopus client after you rebuilt it, so the operator sees your client change. The system and every run keep running while the client restarts, including this one; the operator signs in again. Use client_action.interface from the bound Home delivery context and a unique request_id.  This call waits for the running client and returns the actual saved state or an explicit failure. Continue dependent work from this result in the same turn. Do not end the turn to wait, poll, repeat an admitted request, or use Computer Use for these controls.",
+          "description": "Restart the running Phobos client after you rebuilt it, so the operator sees your client change. The system and every run keep running while the client restarts, including this one; the operator signs in again. Use client_action.interface from the bound Home delivery context and a unique request_id.  This call waits for the running client and returns the actual saved state or an explicit failure. Continue dependent work from this result in the same turn. Do not end the turn to wait, poll, repeat an admitted request, or use Computer Use for these controls.",
           "input_schema": {
             "type": "object",
             "properties": {
@@ -1778,7 +1778,7 @@
                 "type": "object",
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_action"
+                    "const": "phobos.client_action"
                   },
                   "schema_version": {
                     "const": 1
@@ -1828,7 +1828,7 @@
                 "type": "object",
                 "properties": {
                   "schema": {
-                    "const": "octopus.client_action"
+                    "const": "phobos.client_action"
                   },
                   "schema_version": {
                     "const": 1
@@ -1901,7 +1901,7 @@
       ]
     }
   },
-  "description": "Octopus client MCP. Call with method tools/call and params {name, arguments}. For existing widgets, the complete arguments are {interface, action:{schema:\"octopus.client_action\",schema_version:1,action:\"list_widgets\",request_id:\"new unique id\"}}. Copy interface from client_action.interface in the bound Home delivery artifact. To change the returned inventory, use name:\"set_widget\" and action:\"set_widget\" with changes:[{widget_id,source_digest,state:\"visible\"|\"hidden\"|\"removed\"}]; copy exact widget ids and digests from list_widgets. Both calls return actual saved client state in this tool call. No document-authoring guide or full catalogue read is needed for these controls. Use tools/list for other operations: inspect_client reports client/Extension contracts, publish_widget creates a document, open_client_surface opens an existing view, open_file opens a text document in the right Files pane, and artifact operations inspect only bound artifacts. Effects cross artifact.send under the current grant. No ambient host configuration or global client access.",
+  "description": "Phobos client MCP. Call with method tools/call and params {name, arguments}. For existing widgets, the complete arguments are {interface, action:{schema:\"phobos.client_action\",schema_version:1,action:\"list_widgets\",request_id:\"new unique id\"}}. Copy interface from client_action.interface in the bound Home delivery artifact. To change the returned inventory, use name:\"set_widget\" and action:\"set_widget\" with changes:[{widget_id,source_digest,state:\"visible\"|\"hidden\"|\"removed\"}]; copy exact widget ids and digests from list_widgets. Both calls return actual saved client state in this tool call. No document-authoring guide or full catalogue read is needed for these controls. Use tools/list for other operations: inspect_client reports client/Extension contracts, publish_widget creates a document, open_client_surface opens an existing view, open_file opens a text document in the right Files pane, and artifact operations inspect only bound artifacts. Effects cross artifact.send under the current grant. No ambient host configuration or global client access.",
   "args_schema": {
     "type": "object",
     "properties": {

@@ -17,18 +17,18 @@ async function verifyProviderAccount(options, request) {
     options?.readArtifactPayload,
     "readArtifactPayload",
   );
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   return withRunAuthoringLock(input.runId, async () => {
     const context = await resolveProviderAccountContext(
-      octopusHome,
+      phobosHome,
       input.runId,
       input.interfaceId,
       input.providerInterfaceId,
       true,
     );
-    const cursorKey = `${octopusHome}\0${input.interfaceId}`;
+    const cursorKey = `${phobosHome}\0${input.interfaceId}`;
     const startCursor = liveLedgerCursors.get(cursorKey)
-      ?? await readPersistedLiveCursor(octopusHome, input.interfaceId)
+      ?? await readPersistedLiveCursor(phobosHome, input.interfaceId)
       ?? { offset: 0, seq: null };
     const payload = { refresh_token: true };
     const submission = await submitArtifact({
@@ -43,7 +43,7 @@ async function verifyProviderAccount(options, request) {
       throw new Error("provider account request admission is not after the required ledger sequence");
     }
     const requestMovement = await readLedgerMovementAtSeq(
-      path.join(octopusHome, "ledger", "movements.jsonl"),
+      path.join(phobosHome, "ledger", "movements.jsonl"),
       requestSeq,
     );
     const requestCoordinates = await providerAccountRequestCoordinates(
@@ -58,19 +58,19 @@ async function verifyProviderAccount(options, request) {
         ...input,
         context,
         cursor: startCursor,
-        movementsPath: path.join(octopusHome, "ledger", "movements.jsonl"),
+        movementsPath: path.join(phobosHome, "ledger", "movements.jsonl"),
         readArtifactPayload,
         requestCoordinates,
       });
     } catch (error) {
       if (isObject(error?.providerAccountCursor)) {
         rememberLiveCursor(cursorKey, error.providerAccountCursor);
-        await persistLiveCursor(octopusHome, input.interfaceId, error.providerAccountCursor);
+        await persistLiveCursor(phobosHome, input.interfaceId, error.providerAccountCursor);
       }
       throw error;
     }
     rememberLiveCursor(cursorKey, observed.cursor);
-    await persistLiveCursor(octopusHome, input.interfaceId, observed.cursor);
+    await persistLiveCursor(phobosHome, input.interfaceId, observed.cursor);
     return observed.evidence;
   });
 }
@@ -82,15 +82,15 @@ async function refreshProviderModels(options, request) {
     options?.readArtifactPayload,
     "readArtifactPayload",
   );
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   return withRunAuthoringLock(input.runId, async () => {
     let context = await resolveProviderModelCatalogContext(
-      octopusHome,
+      phobosHome,
       input.runId,
       input.interfaceId,
       input.providerInterfaceId,
     );
-    const movementsPath = path.join(octopusHome, "ledger", "movements.jsonl");
+    const movementsPath = path.join(phobosHome, "ledger", "movements.jsonl");
     const deadline = Date.now() + input.timeoutMs;
     const models = new Map();
     const cursors = new Set();
@@ -137,7 +137,7 @@ async function refreshProviderModels(options, request) {
         }
         models.set(model.model, model);
       }
-      context = await waitForProviderModelCatalogRearm(octopusHome, input, context,
+      context = await waitForProviderModelCatalogRearm(phobosHome, input, context,
         invocationRuntime(requestMovement), deadline);
       if (observation.nextCursor === null) break;
       if (!cursors.add(observation.nextCursor)) {
@@ -188,11 +188,11 @@ async function findProviderModelCatalogAdmission(movementsPath, input, context) 
   return pending;
 }
 
-async function waitForProviderModelCatalogRearm(octopusHome, input, context, admitted, deadline) {
+async function waitForProviderModelCatalogRearm(phobosHome, input, context, admitted, deadline) {
   for (;;) {
     const change = watchLedgerChange(context.runPath, providerModelCatalogRemainingMs(deadline));
     try {
-      const next = await resolveProviderModelCatalogContext(octopusHome, input.runId,
+      const next = await resolveProviderModelCatalogContext(phobosHome, input.runId,
         input.interfaceId, input.providerInterfaceId);
       if (next.inputCheckpoint.id !== admitted.checkpoint || next.inputCheckpoint.epoch !== admitted.epoch) {
         return next;
@@ -214,26 +214,26 @@ async function loginProviderAccount(options, request) {
     "readArtifactPayload",
   );
   const openExternalUrl = requiredFunction(options?.openExternalUrl, "openExternalUrl");
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   return withRunAuthoringLock(input.runId, async () => {
     const context = await resolveProviderAccountContext(
-      octopusHome,
+      phobosHome,
       input.runId,
       input.interfaceId,
       input.providerInterfaceId,
       true,
       true,
     );
-    const cursorKey = `${octopusHome}\0${input.interfaceId}`;
+    const cursorKey = `${phobosHome}\0${input.interfaceId}`;
     let cursor = liveLedgerCursors.get(cursorKey)
-      ?? await readPersistedLiveCursor(octopusHome, input.interfaceId)
+      ?? await readPersistedLiveCursor(phobosHome, input.interfaceId)
       ?? { offset: 0, seq: null };
-    const movementsPath = path.join(octopusHome, "ledger", "movements.jsonl");
+    const movementsPath = path.join(phobosHome, "ledger", "movements.jsonl");
     const deadline = Date.now() + input.timeoutMs;
     const rememberCursor = async (nextCursor) => {
       cursor = normalizeLiveCursor(nextCursor);
       rememberLiveCursor(cursorKey, cursor);
-      await persistLiveCursor(octopusHome, input.interfaceId, cursor);
+      await persistLiveCursor(phobosHome, input.interfaceId, cursor);
     };
     const wait = async (operation) => {
       try {
@@ -341,9 +341,9 @@ async function validateProviderAccountObservation(options, request) {
     options?.readArtifactPayload,
     "readArtifactPayload",
   );
-  const octopusHome = absolutePath(options.octopusHome(), "octopusHome");
+  const phobosHome = absolutePath(options.phobosHome(), "phobosHome");
   const context = await resolveProviderAccountContext(
-    octopusHome,
+    phobosHome,
     input.runId,
     input.interfaceId,
     input.providerInterfaceId,
@@ -360,7 +360,7 @@ async function validateProviderAccountObservation(options, request) {
     throw new Error("provider account evidence does not match its expected setup coordinates");
   }
   const movements = await readLedgerMovementsAtSeqs(
-    path.join(octopusHome, "ledger", "movements.jsonl"),
+    path.join(phobosHome, "ledger", "movements.jsonl"),
     [evidence.request_movement_seq, evidence.snapshot_movement_seq],
   );
   const requestCoordinates = await providerAccountRequestCoordinates(

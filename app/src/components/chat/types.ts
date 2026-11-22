@@ -1,7 +1,7 @@
 export type ChatAttachment = {
   id: string;
   file?: File;
-  stage?: import("../../electron").OctopusClientAttachmentStageHandle;
+  stage?: import("../../electron").PhobosClientAttachmentStageHandle;
   name: string;
   size: number;
   type: string;

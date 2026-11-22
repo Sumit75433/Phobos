@@ -15,7 +15,7 @@ KIT_DIR = os.path.dirname(os.path.abspath(__file__))
 KIT_INTERFACES = os.path.dirname(KIT_DIR)
 sys.path.insert(0, KIT_DIR)
 
-from octopus_content_hash import octopus_content_hash
+from phobos_content_hash import phobos_content_hash
 
 SENSOR_ID = "world_legacy_watch"
 RELAY_WORKER_ID = "system_worker_legacy_relay"
@@ -30,12 +30,12 @@ ARMED_FILE = "armed.json"
 STAGING_PREFIX = ".legacy-watch-staging-"
 CHAIN_INTERFACES = (EMAIL_ID, SENSOR_ID, RELAY_WORKER_ID)
 KIT_FILES = {
-    SENSOR_ID: ["interface.json", "life.json", "legacy_watch_life.py", "octopus_content_hash.py", "watch.json"],
+    SENSOR_ID: ["interface.json", "life.json", "legacy_watch_life.py", "phobos_content_hash.py", "watch.json"],
     RELAY_WORKER_ID: ["interface.json", "policy.json"],
 }
 APP_BIN = os.path.join("Contents", "Resources", "app", "bin")
-PLANNER_NAME = "octopus-operator-chat-topology"
-RUNTIME_NAME = "octopus"
+PLANNER_NAME = "phobos-operator-chat-topology"
+RUNTIME_NAME = "phobos"
 APPLICATION_CATEGORIES = ("connector", "plugin", "artifact")
 HOST_FILESYSTEM_ROOT = "host_filesystem_root"
 WORKSPACE_ROOT = "workspace_root"
@@ -147,7 +147,7 @@ def restore_replaced(path, previous, written):
     with open(path, "rb") as handle:
         if handle.read() != written:
             raise Refusal(f"{path} changed after it was written; it is left in place")
-    replace_file(path, previous, octopus_content_hash(written))
+    replace_file(path, previous, phobos_content_hash(written))
 
 
 def create_file(path, content, undo, mode=0o644):
@@ -167,7 +167,7 @@ def create_file(path, content, undo, mode=0o644):
 def replace_file(path, content, expected_hash):
     with open(path, "rb") as handle:
         current = handle.read()
-    if octopus_content_hash(current) != expected_hash:
+    if phobos_content_hash(current) != expected_hash:
         raise Refusal(f"{path} changed after it was planned; nothing was overwritten")
     mode = os.stat(path).st_mode & 0o777
     temporary = write_temporary(path, content, mode)
@@ -229,11 +229,11 @@ def home_run(layout, records):
     require(found, "this Home has no Home run (no run's client interface state has client_surface_role home)")
     require(len(found) == 1, f"this Home has more than one Home run: {', '.join(row[0] for row in found)}")
     run_id, chat_interface, state = found[0]
-    sidecar_path = os.path.join(layout["interfaces"], chat_interface, "octopus_os.json")
+    sidecar_path = os.path.join(layout["interfaces"], chat_interface, "phobos_os.json")
     sidecar = read_json(sidecar_path, "Home client sidecar")
     require(
         isinstance(sidecar, dict)
-        and sidecar.get("workspace") == "octopus_os"
+        and sidecar.get("workspace") == "phobos_os"
         and sidecar.get("component") == "client"
         and sidecar.get("surface_role") == "home"
         and sidecar.get("interface") == chat_interface,
@@ -255,8 +255,8 @@ def home_run(layout, records):
     require(isinstance(runtime, str) and runtime, f"Home run {run_id} records no provider_runtime_interface")
     private = (interface_json(layout["registry"], runtime).get("interface_driver_config") or {}).get("private_config") or {}
     config = instance.get("config") or {}
-    octopus_os = (config.get("octopus_os") if isinstance(config, dict) else None) or {}
-    require(isinstance(config, dict) and isinstance(octopus_os, dict), f"root EE {ee_id} has a malformed config.octopus_os")
+    phobos_os = (config.get("phobos_os") if isinstance(config, dict) else None) or {}
+    require(isinstance(config, dict) and isinstance(phobos_os, dict), f"root EE {ee_id} has a malformed config.phobos_os")
     return {
         "run_id": run_id,
         "ee_id": ee_id,
@@ -266,7 +266,7 @@ def home_run(layout, records):
         "service_tier": private.get("service_tier"),
         "sidecar": sidecar,
         "sidecar_path": sidecar_path,
-        "octopus_os": octopus_os,
+        "phobos_os": phobos_os,
     }
 
 
@@ -305,7 +305,7 @@ def task_profile(home):
 def formed_policy(runtime, layout, ee_id, provider, model):
     completed = subprocess.run(
         [runtime, "project-ee-policies"],
-        env={**os.environ, "OCTOPUS_HOME": layout["home"]},
+        env={**os.environ, "PHOBOS_HOME": layout["home"]},
         capture_output=True, timeout=120, check=False,
     )
     if completed.returncode != 0:
@@ -363,10 +363,10 @@ def registry_tools(layout):
     return tools
 
 
-def offered_drivers(layout, policy, ceiling, tools, octopus_os):
+def offered_drivers(layout, policy, ceiling, tools, phobos_os):
     root = os.path.join(layout["registry"], "worker_environment_kind")
-    host_slots = octopus_os.get("driver_host_slots") or {}
-    require(isinstance(host_slots, dict), "the root EE config.octopus_os.driver_host_slots is not an object")
+    host_slots = phobos_os.get("driver_host_slots") or {}
+    require(isinstance(host_slots, dict), "the root EE config.phobos_os.driver_host_slots is not an object")
     drivers = []
     for name in sorted(os.listdir(root)):
         path = os.path.join(root, name, "worker_environment_kind.json")
@@ -486,8 +486,8 @@ def application_checkpoint(application_id, index):
 
 
 def working_folder_drivers(layout, home, profile, drivers, full_access):
-    source_folders = home["octopus_os"].get("source_folders") or []
-    require(isinstance(source_folders, list), "the root EE config.octopus_os.source_folders is not a list")
+    source_folders = home["phobos_os"].get("source_folders") or []
+    require(isinstance(source_folders, list), "the root EE config.phobos_os.source_folders is not a list")
     host_path = os.path.join(layout["home"], "host.json")
     host = read_json(host_path, "host manifest") if os.path.isfile(host_path) else {}
     host_workspace = (host.get("root_refs") or {}).get(WORKSPACE_ROOT) if isinstance(host, dict) else None
@@ -813,7 +813,7 @@ def open_email(config_path, undo):
         intended["authz"]["ignore_automated"] = False
         require(json.loads(text) == intended, f"editing the two authz flags of {config_path} would change more than them")
         written = text.encode("utf-8")
-        replace_file(config_path, written, octopus_content_hash(current))
+        replace_file(config_path, written, phobos_content_hash(current))
         undo.add(f"opened {config_path}", lambda: restore_replaced(config_path, current, written))
         say(f"wrote {config_path}")
     say("NOTE: this Home's Email now admits every sender, automated and bulk mail included.")
@@ -926,7 +926,7 @@ def validate_plan(plan, layout, home, request, notice_label, protected):
 
 
 def titled(plan, layout, title):
-    sidecar_path = os.path.join(layout["interfaces"], plan["chat_interface_id"], "octopus_os.json")
+    sidecar_path = os.path.join(layout["interfaces"], plan["chat_interface_id"], "phobos_os.json")
     rows = [write for write in plan["interface_writes"] if write["path"] == sidecar_path]
     require(len(rows) == 1, f"the task plan writes no client sidecar at {sidecar_path}")
     sidecar = json.loads(rows[0]["content"])
@@ -949,7 +949,7 @@ def precheck_writes(writes):
         else:
             with open(write["path"], "rb") as handle:
                 current = handle.read()
-            require(octopus_content_hash(current) == write["expected_before_hash"], f"{write['path']} changed after it was planned")
+            require(phobos_content_hash(current) == write["expected_before_hash"], f"{write['path']} changed after it was planned")
 
 
 def apply_writes(writes, undo):
@@ -970,7 +970,7 @@ def bundled_binaries(arguments):
     app = os.path.abspath(arguments.app) if arguments.app else None
     binaries = []
     for flag, given, name in (("--planner", arguments.planner, PLANNER_NAME), ("--runtime", arguments.runtime, RUNTIME_NAME)):
-        require(given or app, f"name the installed Octopus.app with --app, or pass {flag}")
+        require(given or app, f"name the installed Phobos.app with --app, or pass {flag}")
         path = os.path.abspath(given) if given else os.path.join(app, APP_BIN, name)
         require(os.path.isfile(path) and os.access(path, os.X_OK), f"{flag} is not an executable file: {path}")
         binaries.append(path)
@@ -1007,7 +1007,7 @@ def author(arguments):
         policy = formed_policy(runtime, layout, home["ee_id"], provider, model)
         ceiling = worker_ceiling(layout)
         tools = registry_tools(layout)
-        drivers = offered_drivers(layout, policy, ceiling, tools, home["octopus_os"])
+        drivers = offered_drivers(layout, policy, ceiling, tools, home["phobos_os"])
         applications, left_out = offered_applications(layout, policy, ceiling, tools)
         connected, unavailable, capabilities = task_capabilities(layout, home, profile, drivers, applications, notice_label, not arguments.project_access)
     sensor_folder = os.path.join(layout["interfaces"], SENSOR_ID)
@@ -1141,7 +1141,7 @@ def binds_email(record):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Author the legacy watch trigger into an Octopus Home.")
+    parser = argparse.ArgumentParser(description="Author the legacy watch trigger into a Phobos Home.")
     parser.add_argument("--home", required=True)
     parser.add_argument("--provider")
     parser.add_argument("--model")
@@ -1149,9 +1149,9 @@ def main():
     parser.add_argument("--title", default=DEFAULT_TITLE)
     parser.add_argument("--replace", action="store_true", help="replace the kit's folders, keeping the receiving task with its arming and fired state; a new receiving task is armed from now")
     parser.add_argument("--rearm", action="store_true", help="replace the kit's folders, arm from now and clear the fired state")
-    parser.add_argument("--app", help="the installed Octopus.app whose bundled planner and runtime are used, e.g. /Applications/Octopus.app")
+    parser.add_argument("--app", help="the installed Phobos.app whose bundled planner and runtime are used, e.g. /Applications/Phobos.app")
     parser.add_argument("--planner", help="the task topology planner; overrides the one in --app")
-    parser.add_argument("--runtime", help="the octopus binary whose project-ee-policies forms the root EE policy; overrides the one in --app")
+    parser.add_argument("--runtime", help="the phobos binary whose project-ee-policies forms the root EE policy; overrides the one in --app")
     parser.add_argument("--project-access", action="store_true", help="give the woken task the root task profile's own door slots instead of the whole machine")
     parser.add_argument("--any-sender", action="store_true", help="open this Home's Email to every sender, automated mail included, so a matching letter from anyone fires the trigger")
     arguments = parser.parse_args()

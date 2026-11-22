@@ -112,7 +112,7 @@ const control = (runId, action, controlId) => ({ role: "assistant", event_kind: 
 
 const projectionListeners = new Set();
 let currentHost = null;
-w.octopusTransport = new Proxy({}, { get: (_, name) => name === "onProjectionChanged"
+w.phobosTransport = new Proxy({}, { get: (_, name) => name === "onProjectionChanged"
   ? (listener) => { projectionListeners.add(listener); return () => projectionListeners.delete(listener); }
   : currentHost?.transport[name] });
 
@@ -899,7 +899,7 @@ function capableHost(contexts = [rootContext([{ id: "worker.test" }]), projectCo
   if (home) host.runs.push(runRow("home", { client_surface_role: "home", title: "Home", os_root_ee_id: "ee.root" }));
   host.mutations = [];
   host.transport.providerInterfaces = async () => ({ repoRoot: "/repo", providers: structuredClone([capableProvider, otherProvider]) });
-  host.transport.mutateOctopusOsWorkspace = async (request) => { host.mutations.push(structuredClone(request)); return { ok: true }; };
+  host.transport.mutatePhobosOsWorkspace = async (request) => { host.mutations.push(structuredClone(request)); return { ok: true }; };
   const read = host.transport.projectionRead;
   host.transport.projectionRead = async (request) => request.method === "projection.operator.chat.contexts"
     ? (host.reads.push(request.method), { contexts: structuredClone(contexts) }) : read(request);

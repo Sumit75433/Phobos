@@ -126,7 +126,7 @@ function createApplicationConnectionHost({ resolveTargets, scope = () => "" }) {
 
   function dispose() {
     for (const controller of operations.values()) {
-      controller.abort(new ApplicationConnectionStopped("Connection was cancelled because Octopus is closing.", "cancelled"));
+      controller.abort(new ApplicationConnectionStopped("Connection was cancelled because Phobos is closing.", "cancelled"));
     }
   }
 
@@ -137,10 +137,10 @@ function createApplicationConnectionHost({ resolveTargets, scope = () => "" }) {
   return { probe, connect, cancel, disconnect, dispose };
 }
 
-function createRegistryConnectionTargets({ registryRoot, octopusHome, launchEnvironment, openExternal }) {
+function createRegistryConnectionTargets({ registryRoot, phobosHome, launchEnvironment, openExternal }) {
   return async function resolveTargets(applicationId, interfaceId) {
     const registry = path.resolve(registryRoot());
-    const home = path.resolve(octopusHome());
+    const home = path.resolve(phobosHome());
     const applicationDirectory = path.join(registry, "interface", applicationId);
     await requirePlainDirectory(applicationDirectory, `Application '${applicationId}'`);
     const manifestFile = path.join(applicationDirectory, "application.json");

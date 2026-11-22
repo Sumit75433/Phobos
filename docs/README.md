@@ -1,6 +1,6 @@
-# Octopus docs
+# Phobos docs
 
-## Using Octopus
+## Using Phobos
 
 - [Getting started](getting-started.md) - install or build the macOS app,
   first setup, the bundled Codex CLI, where your data lives.
@@ -13,7 +13,7 @@
 - [Security model](security-model.md) - what stands between a model's output
   and an effect.
 
-## Understanding Octopus
+## Understanding Phobos
 
 - [UX](UX.md) - what the experience is built around, and where each part of
   it is served.
@@ -29,7 +29,7 @@
 
 ---
 
-## Working on Octopus
+## Working on Phobos
 
 Start with [Development](development.md) and the
 [contribution policy](../CONTRIBUTING.md). Coding agents start at
@@ -47,7 +47,7 @@ The contracts record decisions and constraints that the source alone does not ex
 - [The ledger and its indexes](contracts/LEDGER_INDEX.md)
 - [Registry descriptors](contracts/REGISTRY_DESCRIPTORS.md)
 - [Memory, skills, and persona](contracts/MEMORY_AND_SKILLS.md)
-- [Extending Octopus](contracts/EXTENSION_SURFACES.md) - the cookbook.
+- [Extending Phobos](contracts/EXTENSION_SURFACES.md) - the cookbook.
 
 Authoring guides live beside the descriptors they describe:
 [interface](../registry/interface/GUIDE.md) ·

@@ -1,6 +1,6 @@
 # Registry descriptors
 
-Octopus runs every dynamic registry through the same shape:
+Phobos runs every dynamic registry through the same shape:
 
 > A registry entry is a JSON descriptor in a folder named for its id, read by
 > one fail-closed loader for its kind.

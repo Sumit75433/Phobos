@@ -37,7 +37,7 @@ export function useClientPaneWindowDrag(options: Options) {
   const active = useRef<Session | null>(null);
 
   useEffect(() => {
-    const unsubscribe = window.octopusTransport?.onClientPaneDragState((state) => {
+    const unsubscribe = window.phobosTransport?.onClientPaneDragState((state) => {
       const session = active.current;
       if (session?.transferId === state.transferId) session.phase(state.phase);
     });
@@ -46,7 +46,7 @@ export function useClientPaneWindowDrag(options: Options) {
 
   return useCallback((tabId: string, event: ReactPointerEvent<HTMLElement>) => {
     if (event.button !== 0 || event.ctrlKey && /Mac/.test(navigator.platform)) return;
-    const bridge = window.octopusTransport;
+    const bridge = window.phobosTransport;
     if (!bridge?.beginClientPaneDrag) { latest.current.onError(new Error("Native pane preview is unavailable.")); return; }
     active.current?.cancel();
     const activator = event.currentTarget;
@@ -249,7 +249,7 @@ export function useClientPaneWindowDrag(options: Options) {
 }
 
 export async function anchorClientPaneDrop(transferId: string, tabId: string) {
-  const anchor = window.octopusTransport?.anchorClientPaneDrop;
+  const anchor = window.phobosTransport?.anchorClientPaneDrop;
   if (!anchor) return;
   const find = () => Array.from(document.querySelectorAll<HTMLElement>('[data-pane-role="secondary"] [data-pane-tab-id]'))
     .find((element) => element.dataset.paneTabId === tabId)?.querySelector<HTMLElement>(".pane-tab") ?? null;

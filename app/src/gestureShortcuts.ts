@@ -1,7 +1,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import type { GestureInteraction } from "./airHandEngine";
 import { clientCommands, type ClientCommandId } from "./clientActions";
-import type { OctopusClientAccessProfile } from "./electron";
+import type { PhobosClientAccessProfile } from "./electron";
 
 export type AirHandGestureId = "swipe_left" | "swipe_right" | "fist";
 export type GestureEventSource = "camera" | "test";
@@ -40,19 +40,19 @@ const DEFAULT_PREFERENCES: GestureShortcutPreferences = Object.freeze({
   removedBuiltins: Object.freeze([]),
 });
 
-const STORAGE_KEY = "octopus.gesture-shortcuts.v1";
-const GESTURE_EVENT = "octopus:airhand-gesture";
-const INTERACTION_EVENT = "octopus:airhand-interaction";
+const STORAGE_KEY = "phobos.gesture-shortcuts.v1";
+const GESTURE_EVENT = "phobos:airhand-gesture";
+const INTERACTION_EVENT = "phobos:airhand-interaction";
 const INTERACTION_TYPES: Readonly<Record<GestureInteraction["type"], true>> = { point: true, navigate: true, press: true, grab: true, release: true, cancel: true, transform: true };
-const stores = new Map<OctopusClientAccessProfile, GestureStore>();
+const stores = new Map<PhobosClientAccessProfile, GestureStore>();
 
 type GestureStore = {
   current: GestureShortcutPreferences;
-  profile: OctopusClientAccessProfile;
+  profile: PhobosClientAccessProfile;
   subscribers: Set<() => void>;
 };
 
-export function useGestureShortcutPreferences(profile: OctopusClientAccessProfile): GestureShortcutPreferences {
+export function useGestureShortcutPreferences(profile: PhobosClientAccessProfile): GestureShortcutPreferences {
   const store = gestureStore(profile);
   return useSyncExternalStore(
     (subscriber) => subscribeStore(store, subscriber),
@@ -61,7 +61,7 @@ export function useGestureShortcutPreferences(profile: OctopusClientAccessProfil
   );
 }
 
-export function useSetGestureShortcutPreferences(profile: OctopusClientAccessProfile) {
+export function useSetGestureShortcutPreferences(profile: PhobosClientAccessProfile) {
   const store = gestureStore(profile);
   return useCallback((update: Partial<GestureShortcutPreferences> | ((current: GestureShortcutPreferences) => Partial<GestureShortcutPreferences>)) => (
     updateStore(store, typeof update === "function" ? update(store.current) : update)
@@ -106,7 +106,7 @@ export function subscribeAirHandGestures(listener: (gesture: AirHandGestureId, s
   return () => window.removeEventListener(GESTURE_EVENT, handle);
 }
 
-function gestureStore(profile: OctopusClientAccessProfile): GestureStore {
+function gestureStore(profile: PhobosClientAccessProfile): GestureStore {
   const existing = stores.get(profile);
   if (existing) return existing;
   const created = { current: readPreferences(profile), profile, subscribers: new Set<() => void>() };
@@ -142,7 +142,7 @@ function updateStore(store: GestureStore, partial: Partial<GestureShortcutPrefer
   return store.current;
 }
 
-function readPreferences(profile: OctopusClientAccessProfile): GestureShortcutPreferences {
+function readPreferences(profile: PhobosClientAccessProfile): GestureShortcutPreferences {
   try {
     const raw = window.localStorage.getItem(storageKey(profile));
     if (!raw) return DEFAULT_PREFERENCES;
@@ -183,6 +183,6 @@ function normalizeMappings(value: unknown): GestureShortcutPreferences["mappings
   })) as Record<AirHandGestureId, GestureCommandId>);
 }
 
-function storageKey(profile: OctopusClientAccessProfile): string {
+function storageKey(profile: PhobosClientAccessProfile): string {
   return profile === "live" ? STORAGE_KEY : `${STORAGE_KEY}.test`;
 }

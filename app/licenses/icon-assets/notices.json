@@ -1,5 +1,5 @@
 {
-  "schema": "octopus.client_icon_notices.v1",
+  "schema": "phobos.client_icon_notices.v1",
   "upstreams": {
     "lucide-2023": {
       "repository": "https://github.com/lucide-icons/lucide",

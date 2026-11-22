@@ -1,11 +1,11 @@
-import type { OctopusProviderInterface } from "../../electron";
+import type { PhobosProviderInterface } from "../../electron";
 
 type Props = {
   endpoint: string;
   token: string;
   providerInterfaceId: string;
-  providerInterfaces: OctopusProviderInterface[];
-  activeProvider?: OctopusProviderInterface;
+  providerInterfaces: PhobosProviderInterface[];
+  activeProvider?: PhobosProviderInterface;
   artifactTransfer: {
     status: string;
     reason: string;

@@ -1,4 +1,4 @@
-module.exports = { mutateLocalPackageInventory, reportLocalPackageProgress, requireOctopusOsScope, workspaceProjectMutationScope };
+module.exports = { mutateLocalPackageInventory, reportLocalPackageProgress, requirePhobosOsScope, workspaceProjectMutationScope };
 
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -8,7 +8,7 @@ const { arrayValue, isPlainRecord, objectOrEmpty, requiredAbsolutePath, required
 
 async function mutateLocalPackageInventory(
   registryRoot,
-  octopusHomeRoot,
+  phobosHomeRoot,
   _scope,
   request,
   hooks,
@@ -24,7 +24,7 @@ async function mutateLocalPackageInventory(
       hooks.localPackageLibraryRoot,
       "local package library",
     ),
-    stateRoot: path.join(octopusHomeRoot, "client", "package-state"),
+    stateRoot: path.join(phobosHomeRoot, "client", "package-state"),
     publication: hooks.localPackagePublication,
   };
   const operationId = requiredApplicationOperationId(request?.operationId);
@@ -112,7 +112,7 @@ async function mutateLocalPackageInventory(
           )));
           await assertApplicationPackageUnreferenced(
             await fs.realpath(registryRoot),
-            octopusHomeRoot,
+            phobosHomeRoot,
             excludedDirectories,
             new Set(manifest.members.map((member) => member.owner)),
             manifest.id,
@@ -134,19 +134,19 @@ function reportLocalPackageProgress(onProgress, progress) {
   });
 }
 
-function requireOctopusOsScope(scope) {
+function requirePhobosOsScope(scope) {
   if (!isPlainRecord(scope) || !["ready", "awaiting_home"].includes(stringValue(scope.status))) {
-    throw new Error("Octopus OS scope is not writable");
+    throw new Error("Phobos OS scope is not writable");
   }
-  const rootEeId = requiredSafeRegistryId(scope.root_ee_id, "Octopus OS root EE");
+  const rootEeId = requiredSafeRegistryId(scope.root_ee_id, "Phobos OS root EE");
   const environments = arrayValue(scope.environments);
   const byId = new Map();
   for (const environment of environments) {
     const eeId = requiredSafeRegistryId(environment?.ee_id, "scope EE id");
-    if (byId.has(eeId)) throw new Error(`Octopus OS scope repeats EE '${eeId}'`);
+    if (byId.has(eeId)) throw new Error(`Phobos OS scope repeats EE '${eeId}'`);
     byId.set(eeId, environment);
   }
-  if (!byId.has(rootEeId)) throw new Error("Octopus OS root EE is absent from its scope");
+  if (!byId.has(rootEeId)) throw new Error("Phobos OS root EE is absent from its scope");
   return {
     status: stringValue(scope.status),
     rootEeId,

@@ -25,7 +25,7 @@
           "registry/interface/world_file_observer/file_observer_life.py",
           "registry/interface/world_file_observer/file_observer.py",
           "registry/interface/world_pyecho/pyecho_life.py",
-          "registry/interface/world_pyecho/octopus_content_hash.py"
+          "registry/interface/world_pyecho/phobos_content_hash.py"
         ],
         "env": {
           "PYTHONDONTWRITEBYTECODE": "1"
@@ -44,7 +44,7 @@
           "write_root_slots": [],
           "executable_root_slots": [],
           "read_paths": [
-            "/private/tmp/octopus-file-observer-example"
+            "/private/tmp/phobos-file-observer-example"
           ],
           "write_paths": [],
           "executable_paths": [],
@@ -68,18 +68,18 @@
     "interface": "world_file_observer_example",
     "poll_interval_ms": 500,
     "read_roots": [
-      "/private/tmp/octopus-file-observer-example"
+      "/private/tmp/phobos-file-observer-example"
     ],
     "files": [
       {
         "id": "first",
-        "path": "/private/tmp/octopus-file-observer-example/first.txt",
+        "path": "/private/tmp/phobos-file-observer-example/first.txt",
         "label": "file.first.observed",
         "max_bytes": 65536
       },
       {
         "id": "second",
-        "path": "/private/tmp/octopus-file-observer-example/second.txt",
+        "path": "/private/tmp/phobos-file-observer-example/second.txt",
         "label": "file.second.observed",
         "max_bytes": 65536
       }

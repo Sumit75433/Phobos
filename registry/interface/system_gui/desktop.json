@@ -8,14 +8,14 @@
   "request_timeout_ms": 30000,
   "max_response_bytes": 97871192,
   "host": {
-    "native_program": "desktop_session/packages/octopus-system-gui-env/native/bin/octopus-desktop-native",
+    "native_program": "desktop_session/packages/phobos-system-gui-env/native/bin/phobos-desktop-native",
     "state_directory": "desktop-host",
     "device_lock": {
       "root_slot": "desktop_device_lock_root",
       "file_name": "desktop-device.lock"
     },
     "connection_file": "desktop-host/connection.json",
-    "native_sandbox_profile": "desktop_session/packages/octopus-system-gui-env/native/desktop.sb",
+    "native_sandbox_profile": "desktop_session/packages/phobos-system-gui-env/native/desktop.sb",
     "application_behavior": {
       "schema_version": 1,
       "defaults": {
@@ -603,7 +603,7 @@
         }
       ],
       "instruction_resource": {
-        "path": "desktop_session/packages/octopus-system-gui-env/native/resources/application-instructions.json",
+        "path": "desktop_session/packages/phobos-system-gui-env/native/resources/application-instructions.json",
         "content_sha256": "e16d63c913d7dc0771b203b55cb9787dad9f712fdc4f6ed0177de8131d9af3f3"
       }
     },
@@ -631,7 +631,7 @@
         "com.mitchellh.ghostty",
         "com.raphaelamorim.rio",
         "dev.commandline.waveterm",
-        "com.octopus.desktop",
+        "com.phobos.desktop",
         "com.openai.codex",
         "com.openai.codex.alpha",
         "com.openai.codex.beta",
@@ -671,7 +671,7 @@
       "high_risk_url_schemes": [
         "http"
       ],
-      "high_risk_warning_subtitle": "Allowing Octopus to use this app introduces new risks, including those related to prompt injection attacks, such as data theft or loss. Carefully monitor Octopus while it uses this app."
+      "high_risk_warning_subtitle": "Allowing Phobos to use this app introduces new risks, including those related to prompt injection attacks, such as data theft or loss. Carefully monitor Phobos while it uses this app."
     },
     "application_preferences": {
       "root_slot": "desktop_app_preferences_root"

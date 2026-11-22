@@ -7,7 +7,7 @@ import { StateMorphDotCloud } from "./components/onboarding/MorphVideoDotCloud";
 import { LaunchTerminal } from "./components/onboarding/LaunchTerminal";
 import { WorkspaceSetupGate } from "./components/onboarding/WorkspaceSetupGate";
 import { TrafficLights } from "./components/shell/TrafficLights";
-import { OctopusLoadingState } from "./components/OctopusLoadingLogo";
+import { PhobosLoadingState } from "./components/PhobosLoadingLogo";
 import {
   completeOnboarding,
   recordOnboardingVisit,
@@ -16,7 +16,7 @@ import {
 } from "./onboarding/onboardingStorage";
 import { lockClientAccess, readTouchIdStatus, setTouchIdEnabled, unlockWithTouchId } from "./clientAccess";
 import { useClientAccess } from "./useClientAccess";
-import type { OctopusClientAccessStatus, OctopusTouchIdStatus } from "./electron";
+import type { PhobosClientAccessStatus, PhobosTouchIdStatus } from "./electron";
 import { appToast, AppToastViewport } from "./toasts";
 import { ClientPreferencesProvider } from "./clientPreferences";
 import { useRuntimeHost } from "./runtimeHost";
@@ -30,7 +30,7 @@ const TaskMonitorAccessUnavailable = lazy(() => import("./components/chat/TaskMo
 const TaskMonitorWindow = lazy(() => import("./components/chat/TaskMonitorWindow").then((module) => ({ default: module.TaskMonitorWindow })));
 
 let recordedOnboardingVisit: OnboardingState | null = null;
-const LOCK_TOUCH_ID_FRAMES = ["./octopus-lock.png", "./octopus-fingerprint.png"];
+const LOCK_TOUCH_ID_FRAMES = ["./phobos-lock.png", "./phobos-fingerprint.png"];
 const LOCK_TOUCH_ID_FRAME_SCALES = [1, 2 / 3];
 
 export function App() {
@@ -40,7 +40,7 @@ export function App() {
   const runtimeHost = useRuntimeHost();
   const windowMode = useMemo(() => new URLSearchParams(window.location.search).get("window"), []);
   const clientWindow = useMemo(
-    () => window.octopusTransport?.clientWindowBootstrap?.() ?? MAIN_CLIENT_WINDOW_BOOTSTRAP,
+    () => window.phobosTransport?.clientWindowBootstrap?.() ?? MAIN_CLIENT_WINDOW_BOOTSTRAP,
     [],
   );
   const primaryWindowControls = windowMode ? null : <TrafficLights />;
@@ -78,7 +78,7 @@ export function App() {
                 <button onClick={() => window.location.reload()} type="button">Reload</button>
               </>
             ) : (
-              <OctopusLoadingState className="app-loading-state" label="Connecting to the local client host" />
+              <PhobosLoadingState className="app-loading-state" label="Connecting to the local client host" />
             )}
           </div>
         </main>
@@ -150,7 +150,7 @@ export function App() {
   }
 
   if (access.profile !== "lab" && runtimeHost.available && runtimeHost.phase === "probing" && !runtimeHasBeenReady) {
-    return <>{primaryWindowControls}<OctopusLoadingState className="app-loading-state" label="Opening Octopus" /><AppToastViewport /></>;
+    return <>{primaryWindowControls}<PhobosLoadingState className="app-loading-state" label="Opening Phobos" /><AppToastViewport /></>;
   }
 
   const launchOverlay = launchGate || launchVisible
@@ -196,9 +196,9 @@ export function App() {
   );
 }
 
-function LockScreen({ mode, onUnlock }: { mode: "set" | "unlock"; onUnlock: (status: OctopusClientAccessStatus) => void }) {
-  const [touchId, setTouchId] = useState<OctopusTouchIdStatus | null>(null);
-  const [pendingPasswordAccess, setPendingPasswordAccess] = useState<OctopusClientAccessStatus | null>(null);
+function LockScreen({ mode, onUnlock }: { mode: "set" | "unlock"; onUnlock: (status: PhobosClientAccessStatus) => void }) {
+  const [touchId, setTouchId] = useState<PhobosTouchIdStatus | null>(null);
+  const [pendingPasswordAccess, setPendingPasswordAccess] = useState<PhobosClientAccessStatus | null>(null);
   const [touchIdBusy, setTouchIdBusy] = useState(false);
 
   useEffect(() => {
@@ -214,7 +214,7 @@ function LockScreen({ mode, onUnlock }: { mode: "set" | "unlock"; onUnlock: (sta
     return () => { active = false; };
   }, []);
 
-  async function handlePasswordAccess(status: OctopusClientAccessStatus) {
+  async function handlePasswordAccess(status: PhobosClientAccessStatus) {
     let current = touchId;
     try {
       current = await readTouchIdStatus();
@@ -281,8 +281,8 @@ function LockScreen({ mode, onUnlock }: { mode: "set" | "unlock"; onUnlock: (sta
     <main className="welcome" aria-labelledby="welcome-title">
       <header className="welcome-top">
         <div className="welcome-brand">
-          <img className="welcome-brand-mark" src="./octopus-logo.png" alt="" />
-          <span className="welcome-brand-name">Octopus&nbsp;OS</span>
+          <img className="welcome-brand-mark" src="./phobos-logo.png" alt="" />
+          <span className="welcome-brand-name">Phobos&nbsp;OS</span>
         </div>
       </header>
       <div className="welcome-stage">
@@ -292,7 +292,7 @@ function LockScreen({ mode, onUnlock }: { mode: "set" | "unlock"; onUnlock: (sta
               <span className="welcome-tag">Touch ID</span>
               <h1 id="welcome-title" className="welcome-title">Use Touch ID next time?</h1>
               <p className="welcome-body">
-                Keep the Administrator password as the fallback, and allow this Mac to unlock Octopus after a Touch ID check.
+                Keep the Administrator password as the fallback, and allow this Mac to unlock Phobos after a Touch ID check.
               </p>
               <div className="welcome-lock-actions welcome-lock-choice-actions">
                 <button className="welcome-lock-primary welcome-touch-id-enable" type="button" onClick={() => void enableTouchId()} disabled={touchIdBusy}>

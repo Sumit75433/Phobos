@@ -11,7 +11,7 @@ const PRESENTATIONS: Record<string, { label: string; description: string }> = {
   project: { label: "Project preset", description: "Use the installed project policy." },
   operator_space: { label: "General work", description: "Organize everyday work and nested projects." },
   operator_interaction: { label: "Focused task", description: "Complete a specific request with the permitted tools." },
-  self_improvement: { label: "Framework development", description: "Work on Octopus configuration or source within the parent’s permissions." },
+  self_improvement: { label: "Framework development", description: "Work on Phobos configuration or source within the parent’s permissions." },
   startup_management: { label: "Startup and setup", description: "Manage startup and configuration work." },
   memory_maintenance: { label: "Knowledge maintenance", description: "Maintain the context artifacts available to this project." },
   context_maintenance: { label: "Context maintenance", description: "Prepare and maintain context for ongoing work." },

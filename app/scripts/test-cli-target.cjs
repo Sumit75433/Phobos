@@ -48,7 +48,7 @@ test("the target argument is read once and leaves the other arguments", () => {
 });
 
 test("a package tree is copied without clone support, keeping modes, times and links", () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "octopus-package-copy-test-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "phobos-package-copy-test-"));
   try {
     const source = path.join(root, "source"), destination = path.join(root, "destination");
     fs.mkdirSync(path.join(source, "bin"), { recursive: true });
