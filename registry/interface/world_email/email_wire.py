@@ -162,11 +162,15 @@ class LineReader:
 
 
 class ReaderMixin:
+    octopus_literal_limit = MAX_LINE
+
     def open(self, host="", port=None, timeout=None):
         super().open(host, port, timeout)
         self.octopus_reader = LineReader(self.sock)
 
     def read(self, size):
+        if size > self.octopus_literal_limit:
+            raise self.error(f"got a {size}-byte literal above the {self.octopus_literal_limit}-byte limit")
         return self.octopus_reader.read(size)
 
     def readline(self):
@@ -397,10 +401,17 @@ class ImapSession:
             result = found if result is None else result & found
         return result
 
+    def limited_uid(self, literal_limit, *args):
+        self.imap.octopus_literal_limit = max(MAX_LINE, literal_limit)
+        try:
+            return self.uid(*args)
+        finally:
+            self.imap.octopus_literal_limit = MAX_LINE
+
     def fetch_summary(self, uid, header_fields, header_limit):
         labels = " X-GM-LABELS" if self.has("X-GM-EXT-1") else ""
         items = f"(UID FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER.FIELDS ({' '.join(header_fields).upper()})]<0.{header_limit + 1}>{labels})"
-        for response in fetch_responses(self.uid("FETCH", str(uid), items)):
+        for response in fetch_responses(self.limited_uid(header_limit + 1, "FETCH", str(uid), items)):
             if response.number(b"UID") == uid:
                 headers = response.body()
                 if headers is None or len(headers) > header_limit:
@@ -416,7 +427,7 @@ class ImapSession:
         return None
 
     def fetch_raw(self, uid, max_bytes):
-        for response in fetch_responses(self.uid("FETCH", str(uid), f"(UID BODY.PEEK[]<0.{max_bytes + 1}>)")):
+        for response in fetch_responses(self.limited_uid(max_bytes + 1, "FETCH", str(uid), f"(UID BODY.PEEK[]<0.{max_bytes + 1}>)")):
             if response.number(b"UID") == uid:
                 raw = response.body()
                 if raw is None:

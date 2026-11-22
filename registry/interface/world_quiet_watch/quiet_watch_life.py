@@ -257,7 +257,7 @@ def load_stars_watch(raw):
     watch = require_keys(raw, {"github_stars", "instructions", "notice_label"}, {"event"}, "watch.json")
     stars = require_keys(watch["github_stars"], {"repository", "at_least"}, {"poll_seconds"}, "watch.json github_stars")
     repository = require_string(stars["repository"], "watch.json github_stars.repository", 200)
-    if not re.fullmatch(r"[A-Za-z0-9-]+/[A-Za-z0-9._-]+", repository):
+    if not re.fullmatch(r"[A-Za-z0-9-]+/(?!\.{1,2}$)[A-Za-z0-9._-]+", repository):
         raise ValueError("watch.json github_stars.repository must be OWNER/NAME")
     require_int(stars["at_least"], "watch.json github_stars.at_least", 1)
     require_int(stars.setdefault("poll_seconds", STARS_POLL_SECONDS), "watch.json github_stars.poll_seconds", 30)
@@ -272,7 +272,7 @@ def load_quiet_watch(raw):
     watch = require_keys(raw, {"github_quiet", "instructions", "notice_label"}, {"event"}, "watch.json")
     quiet = require_keys(watch["github_quiet"], {"repository", "hours"}, {"poll_seconds"}, "watch.json github_quiet")
     repository = require_string(quiet["repository"], "watch.json github_quiet.repository", 200)
-    if not re.fullmatch(r"[A-Za-z0-9-]+/[A-Za-z0-9._-]+", repository):
+    if not re.fullmatch(r"[A-Za-z0-9-]+/(?!\.{1,2}$)[A-Za-z0-9._-]+", repository):
         raise ValueError("watch.json github_quiet.repository must be OWNER/NAME")
     require_int(quiet["hours"], "watch.json github_quiet.hours", 1)
     require_int(quiet.setdefault("poll_seconds", STARS_POLL_SECONDS), "watch.json github_quiet.poll_seconds", 30)

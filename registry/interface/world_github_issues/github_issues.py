@@ -8,10 +8,12 @@ import secrets
 import sqlite3
 import threading
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 LABEL = "github.issue.opened"
+BODY_DEADLINE_SECONDS = 10
+DELIVERED_RETENTION = 10000
 
 
 def validate_config(c):
@@ -19,7 +21,7 @@ def validate_config(c):
     optional = {"max_body_bytes", "max_pending", "retry_seconds", "tunnel", "relay"}
     if not isinstance(c, dict) or required - c.keys() or c.keys() - required - optional:
         raise ValueError("invalid private_config keys")
-    if c["schema_version"] != 1 or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", c["repository"]):
+    if c["schema_version"] != 1 or not re.fullmatch(r"(?!\.{1,2}/)[A-Za-z0-9_.-]+/(?!\.{1,2}$)[A-Za-z0-9_.-]+", c["repository"]):
         raise ValueError("invalid schema_version or repository")
     if not isinstance(c["path"], str) or not re.fullmatch(r"/[A-Za-z0-9/_-]{16,200}", c["path"]):
         raise ValueError("path must be an exact private route, at least 16 characters")
@@ -168,6 +170,8 @@ class Receiver:
         with self.lock, self.db:
             self.db.execute("""UPDATE deliveries SET state='delivered',seq=?,attempts=attempts+1,
                 error=NULL WHERE delivery=?""", (seq, delivery))
+            self.db.execute("""DELETE FROM deliveries WHERE state='delivered' AND rowid <=
+                (SELECT max(rowid) FROM deliveries WHERE state='delivered') - ?""", (DELIVERED_RETENTION,))
         self.b.atomic_json(str(Path(self.b.VAR_DIR) / "last-admission.json"),
                            {"delivery_id": delivery, "admitted_seq": seq,
                             "artifact_hash": artifact_hash})
@@ -214,7 +218,7 @@ def make_server(receiver):
             if length > receiver.config["max_body_bytes"]:
                 return self.reply(413, "body_too_large")
             try:
-                raw = self.rfile.read(length)
+                raw = self.read_body(length)
                 if len(raw) != length:
                     return self.reply(400, "incomplete_body")
                 code, message = receiver.receive(self.headers, raw)
@@ -223,6 +227,18 @@ def make_server(receiver):
             except Exception:
                 return self.reply(503, "acceptance_failed")
             self.reply(code, message)
+
+        def read_body(self, length):
+            deadline = time.monotonic() + BODY_DEADLINE_SECONDS
+            raw = bytearray()
+            while len(raw) < length:
+                if time.monotonic() >= deadline:
+                    raise TimeoutError()
+                chunk = self.rfile.read1(min(65536, length - len(raw)))
+                if not chunk:
+                    break
+                raw.extend(chunk)
+            return bytes(raw)
 
         def reply(self, code, message):
             self.close_connection = True
@@ -237,6 +253,10 @@ def make_server(receiver):
             except OSError:
                 pass
 
-    server = HTTPServer(("127.0.0.1", receiver.config["port"]), Handler)
+    class Server(ThreadingHTTPServer):
+        daemon_threads = True
+        request_queue_size = 64
+
+    server = Server(("127.0.0.1", receiver.config["port"]), Handler)
     server.timeout = 0.5
     return server
